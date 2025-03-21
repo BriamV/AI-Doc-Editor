@@ -39,7 +39,7 @@ export const getChatCompletion = async (
     body: JSON.stringify({
       messages,
       ...config,
-      max_tokens: undefined,
+      max_completion_tokens: undefined,
     }),
   });
   if (!response.ok) throw new Error(await response.text());

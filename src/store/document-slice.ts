@@ -29,7 +29,7 @@ export const createDocumentSlice: StoreSlice<DocumentSlice> = (set, get) => ({
     messages: [],
     config: {
       model: 'gpt-4',
-      max_tokens: 150,
+      max_completion_tokens: 150,
       temperature: 0.9,
       presence_penalty: 0.6,
       top_p: 1,

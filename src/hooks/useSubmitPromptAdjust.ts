@@ -117,7 +117,7 @@ const useSubmitPromptAdjust = () => {
 
       const messages = limitMessageTokens(
         chats[currentChatIndex].messageCurrent.messages,
-        modifiedConfig.max_tokens ? modifiedConfig.max_tokens : defaultChatConfig.max_tokens,
+        modifiedConfig.max_completion_tokens ? modifiedConfig.max_completion_tokens : defaultChatConfig.max_completion_tokens,
         modifiedConfig.model ? modifiedConfig.model : defaultChatConfig.model
       );
       if (messages.length === 0) throw new Error('Message exceed max token!');

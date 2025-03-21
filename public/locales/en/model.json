@@ -2,7 +2,7 @@
   "configuration": "Configuration",
   "model": "Model",
   "token": {
-    "label": "Max Token",
+    "label": "Max Completion Token",
     "description": "The number of tokens that will be used to generate the chat completion."
   },
   "default": "Default",

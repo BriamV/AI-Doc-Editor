@@ -63,7 +63,7 @@ import defaultPrompts from '@constants/prompt';
 //   persistedState.chats.forEach((chat) => {
 //     chat.config = {
 //       ...chat.config,
-//       max_tokens: defaultUserMaxToken,
+//       max_completion_tokens: defaultUserMaxToken,
 //     };
 //   });
 // };

@@ -209,7 +209,7 @@ const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 
 export const PromptIndividualConfig = ({prompt, index}:{prompt: any; index: number}) => {
     const [_model, _setModel] = useState<string>(prompt.config.model);
-    const [_maxToken, _setMaxToken] = useState<number>(prompt.config.max_tokens);
+    const [_maxToken, _setMaxToken] = useState<number>(prompt.config.max_completion_tokens);
     const [_temperature, _setTemperature] = useState<number>(prompt.config.temperature);
     const [_presencePenalty, _setPresencePenalty] = useState<number>(
       prompt.config.presence_penalty
@@ -227,7 +227,7 @@ export const PromptIndividualConfig = ({prompt, index}:{prompt: any; index: numb
          useEffect(() => {
              prompts[index].config = {
                     model: _model,
-                    max_tokens: _maxToken,
+                    max_completion_tokens: _maxToken,
                     temperature: _temperature,
                     presence_penalty: _presencePenalty,
                     top_p: _topP,

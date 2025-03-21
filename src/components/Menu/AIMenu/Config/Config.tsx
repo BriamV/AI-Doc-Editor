@@ -9,7 +9,7 @@ import { PromptDropdownItem } from '@type/prompt';
 const ConfigMenu = () => {
   const config = useStore((state) => state.defaultChatConfig);
   const setConfig = useStore((state) => state.setDefaultChatConfig);
-  const [_maxToken, _setMaxToken] = useState<number>(config.max_tokens);
+  const [_maxToken, _setMaxToken] = useState<number>(config.max_completion_tokens);
   const [_model, _setModel] = useState<ModelOptions>(config.model);
   const [_temperature, _setTemperature] = useState<number>(config.temperature);
   const [_presencePenalty, _setPresencePenalty] = useState<number>(
@@ -25,7 +25,7 @@ const ConfigMenu = () => {
   // update config when config is changed
   useEffect(() => {
     setConfig({
-      max_tokens: _maxToken,
+      max_completion_tokens: _maxToken,
       model: _model,
       temperature: _temperature,
       presence_penalty: _presencePenalty,
@@ -45,7 +45,7 @@ const ConfigMenu = () => {
 
   // const handleConfirm = () => {
   //   setConfig({
-  //     max_tokens: _maxToken,
+  //     max_completion_tokens: _maxToken,
   //     model: _model,
   //     temperature: _temperature,
   //     presence_penalty: _presencePenalty,

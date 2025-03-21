@@ -17,6 +17,7 @@
 ## **Key Features:**
 
 - **Document Management System:** Easily create, edit, organize and export your writings.
+- **Easy access to latest OpenAI Models:** Models enabled include GPT-4.5, o1, o3-mini
 - **AI Integration:** Direct interaction with AI model providers, enhancing your writing with suggestions, edits, and creative ideas.
 - **Privacy First:** Your documents and API key are stored locally on your device, ensuring your data remains yours.
 - **Instant Macros & Selection Sending:** Improve your workflow with customizable prompts and the ability to query the AI about specific text selections.

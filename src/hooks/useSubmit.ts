@@ -73,7 +73,7 @@ const useSubmit = () => {
 //       const messages = limitMessageTokens(
 //         chats[currentChatIndex].messageCurrent.messages,
 // //        undefined,
-//         config? config.max_tokens : defaultChatConfig.max_tokens,
+//         config? config.max_completion_tokens : defaultChatConfig.max_completion_tokens,
 //         config? config.model : defaultChatConfig.model,
 //       );
 

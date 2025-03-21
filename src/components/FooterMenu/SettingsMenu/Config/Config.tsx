@@ -45,7 +45,7 @@ const ChatConfigPopup = ({
     useStore.getState().defaultSystemMessage
   );
   const [_model, _setModel] = useState<ModelOptions>(config.model);
-  const [_maxToken, _setMaxToken] = useState<number>(config.max_tokens);
+  const [_maxToken, _setMaxToken] = useState<number>(config.max_completion_tokens);
   const [_temperature, _setTemperature] = useState<number>(config.temperature);
   const [_topP, _setTopP] = useState<number>(config.top_p);
   const [_presencePenalty, _setPresencePenalty] = useState<number>(
@@ -60,7 +60,7 @@ const ChatConfigPopup = ({
   const handleSave = () => {
     setDefaultChatConfig({
       model: _model,
-      max_tokens: _maxToken,
+      max_completion_tokens: _maxToken,
       temperature: _temperature,
       top_p: _topP,
       presence_penalty: _presencePenalty,
@@ -72,7 +72,7 @@ const ChatConfigPopup = ({
 
   const handleReset = () => {
     _setModel(_defaultChatConfig.model);
-    _setMaxToken(_defaultChatConfig.max_tokens);
+    _setMaxToken(_defaultChatConfig.max_completion_tokens);
     _setTemperature(_defaultChatConfig.temperature);
     _setTopP(_defaultChatConfig.top_p);
     _setPresencePenalty(_defaultChatConfig.presence_penalty);
