@@ -6,11 +6,19 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+dev-debug.log
 
-node_modules
+# Dependency directories
+node_modules/
+
+# Build outputs
 dist
 dist-ssr
-*.local
+
+# Environment files
+.env
+.env.*
+!.env.example
 
 # Editor directories and files
 .vscode/*
@@ -23,6 +31,12 @@ dist-ssr
 *.sln
 *.sw?
 
+# OS specific
+*.local
+
+# Release and build
 release/
 
-.env
+# Task files
+tasks.json
+tasks/
