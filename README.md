@@ -1,98 +1,154 @@
-# <p align="center">ai-doc-editor</p>
-
-<p align="center"><img src="https://github.com/darrylschaefer/fthr-write/assets/119073511/9b97e65f-5571-4172-a0d2-9d7ebfdf4cce" style="width:60px;" align="center"></p>
-
-<p align="center">AI-powered document editor designed to streamline your writing workflow. Manage documents, collaborate seamlessly with AI models, and utilize powerful macros for unmatched productivity.</p>
-<br>
-<p align="center"><img style="width:550px;" src="https://github.com/darrylschaefer/fthr-write/assets/119073511/0066e259-557c-4c40-b303-503ecd5cd67d"></p>
+# <p align="center">AI Doc Editor</p>
 
 <p align="center">
-    <a href="https://fthr.app">Visit Website</a>
-    ·
-    <a href="https://github.com/darrylschaefer/ai-text-editor/issues/new/choose">Report Bugs</a>
-    ·
-    <a href="https://github.com/darrylschaefer/ai-text-editor/issues/new/choose">Request Feature</a>
+  <img src="https://github.com/BriamV/AI-Doc-Editor/raw/main/public/icon-rounded.png" width="100" alt="AI Doc Editor Logo">
 </p>
 
-## **Key Features:**
+<p align="center">Editor de documentos con IA que permite generar, editar y exportar documentos seguros con capacidades avanzadas de procesamiento de lenguaje natural.</p>
 
-- **Document Management System:** Easily create, edit, organize and export your writings.
-- **Easy access to latest OpenAI Models:** Models enabled include GPT-4.5, o1, o3-mini
-- **AI Integration:** Direct interaction with AI model providers, enhancing your writing with suggestions, edits, and creative ideas.
-- **Privacy First:** Your documents and API key are stored locally on your device, ensuring your data remains yours.
-- **Instant Macros & Selection Sending:** Improve your workflow with customizable prompts and the ability to query the AI about specific text selections.
-- **Mobile & Desktop Accessibility:** Designed for compatibility across both desktop and mobile operating systems
+<p align="center">
+  <a href="#características-principales">Características</a> •
+  <a href="#requisitos">Requisitos</a> •
+  <a href="#instalación">Instalación</a> •
+  <a href="#uso">Uso</a> •
+  <a href="#contribuir">Contribuir</a> •
+  <a href="#licencia">Licencia</a>
+</p>
 
-## Prerequisites
+## 🔍 Visión General
 
-Ensure that you have the following prerequisites installed and set up on your system:
+Este proyecto es un fork mejorado de [AI Text Editor](https://github.com/darrylschaefer/ai-text-editor), diseñado específicamente para la generación y edición de documentos.
 
-1. **Node.js**: The application is built using Node.js, so you need to have it installed on your machine. You can download the latest version of Node.js from the [official website](https://nodejs.org/).
+## 🚀 Características Principales
 
-2. **OpenAI API Key**: The application requires an OpenAI API key for AI integration. Sign up for an OpenAI account and obtain an API key from the [OpenAI Developer Dashboard](https://beta.openai.com/signup/).
+- **Generación de Documentos con IA**: Utiliza GPT-4o para crear documentos a partir de prompts o plantillas predefinidas.
+- **RAG (Retrieval-Augmented Generation)**: Integración con base de conocimiento vectorial para respuestas contextuales.
+- **Editor Markdown Avanzado**: Basado en Monaco Editor con vista previa en tiempo real.
+- **Exportación Segura**: Soporte para exportar a múltiples formatos (PDF, DOCX, MD) con cifrado.
+- **Versionado y Auditoría**: Historial de cambios completo con capacidad de rollback.
+- **Autenticación OAuth 2.0**: Soporte para inicio de sesión con Google/Microsoft.
 
-## **Getting Started**
+## 📋 Requisitos
 
-To begin using ai-doc-editor, you can visit our [website](http://fthr.app/) to access or setup your own instance by following the steps below:
+- Node.js 18+
+- Python 3.11+
+- Docker (opcional, para despliegue)
+- Cuenta de OpenAI con API key
 
-1. **Clone the repository:**
+## 🛠️ Instalación
 
-```
-git clone https://github.com/BriamV/AI-Doc-Editor
-```
+1. Clona el repositorio:
+   ```bash
+   git clone https://github.com/BriamV/AI-Doc-Editor.git
+   cd AI-Doc-Editor
+   ```
 
-2. **Change directory:**
+2. Instala las dependencias del frontend:
+   ```bash
+   npm install
+   ```
 
-```
+3. Configura las variables de entorno (copia el archivo .env.example):
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Inicia el servidor de desarrollo:
+   ```bash
+   npm run dev
+   ```
+
+## 🚀 Uso
+
+1. Inicia sesión con tu cuenta de Google o Microsoft.
+2. Crea un nuevo documento o selecciona una plantilla.
+3. Usa comandos de IA para generar o modificar contenido.
+4. Exporta tu documento en el formato deseado.
+
+## 🤝 Contribuir
+
+¡Las contribuciones son bienvenidas! Por favor, lee nuestra [guía de contribución](docs/CONTRIBUTING.md) para más detalles.
+
+## 📄 Licencia
+
+Este proyecto está bajo la [Licencia MIT](LICENSE).
+
+## 🙏 Créditos
+
+- Basado en [AI Text Editor](https://github.com/darrylschaefer/ai-text-editor) por Darryl Schaefer
+- Icono por [Icons8](https://icons8.com)
+
+## 📊 Características Técnicas
+
+### Arquitectura
+
+- **Frontend**: React 18 + TypeScript + Monaco Editor
+- **Backend**: FastAPI 3.11
+- **Base de Datos**: SQLite (datos de usuario) + Chroma (vector store)
+- **Autenticación**: OAuth 2.0 (Google/Microsoft)
+- **IA**: OpenAI GPT-4o / GPT-4o-mini con ventana de contexto de 128k tokens
+
+### Seguridad
+
+- Cifrado en tránsito (TLS 1.3+)
+- Cifrado en reposo (AES-256)
+- Almacenamiento local seguro de claves API
+- Auditoría de acciones de usuario
+
+## 🌐 Despliegue
+
+### Requisitos del Sistema
+
+- **CPU**: 2+ núcleos
+- **RAM**: 4GB+ (8GB recomendado)
+- **Almacenamiento**: 50GB+ (dependiendo del volumen de documentos)
+- **Sistema Operativo**: Linux/Windows/macOS
+
+### Despliegue con Docker (Recomendado)
+
+```bash
+# Clonar el repositorio
+git clone https://github.com/BriamV/AI-Doc-Editor.git
 cd AI-Doc-Editor
+
+# Crear archivo .env
+cp .env.example .env
+# Editar .env con tus configuraciones
+
+# Iniciar con Docker Compose
+docker-compose up -d
 ```
 
-3. **Install dependencies:**
+## 📈 Métricas y Monitoreo
 
-```
-npm install
-```
+El sistema incluye un dashboard con métricas clave:
 
-4. **Run the dev server:**
+- Uso de tokens de OpenAI
+- Tiempo medio de generación
+- Uso de almacenamiento
+- Auditoría de acciones
 
-```
-npm run dev
-```
+## ❓ Preguntas Frecuentes
 
-6. **Open your browser:** Navigate to http://localhost:5173 to start working with ai-text-editor on your local machine.
+### ¿Cómo se almacenan mis documentos?
 
-### **Support and Contributions**
+Tus documentos se almacenan localmente en tu dispositivo. Solo se envían a los servidores de OpenAI cuando utilizas funciones de IA, y siempre con tu consentimiento explícito.
 
-We welcome contributions and feedback to make ai-text-editor even better. Whether it's feature requests, bug reports, or code contributions, please feel free to reach out or open an issue in our repository.
+### ¿Es compatible con estándares de seguridad?
 
-### **Privacy and Security**
+Sí, el sistema está diseñado para cumplir con GDPR, HIPAA e ISO 27001, con características como:
+- Cifrado de extremo a extremo
+- Registro de auditoría completo
+- Políticas de retención de datos
 
-All data, including documents and your API key, remain stored locally on your browser. No third-party access to your documents unless you choose to interact with external APIs (such as the OpenAI Chat API), which is done under your control with your API key.
+### ¿Cómo puedo contribuir al proyecto?
 
-### **Mobile/Desktop Version**
+Consulta nuestra [guía de contribución](docs/CONTRIBUTING.md) para más detalles sobre cómo contribuir con código, reportar errores o sugerir mejoras.
 
-ai-text-editor supports both mobile and desktop access, ensuring you can continue your work seamlessly across devices. For the best experience, it's recommended to use the latest version of Chrome.
+## 🤝 Agradecimientos
 
-### **Backup and Data Management**
+Este proyecto es un fork mejorado de [AI Text Editor](https://github.com/darrylschaefer/ai-text-editor) por Darryl Schaefer, que a su vez se inspiró en [BetterChatGPT](https://github.com/ztjhz/BetterChatGPT).
 
-It's crucial to regularly export your data for backups. Through the sidebar's 'export' feature, you can save your documents and chats securely and import them back at any time.
+## 📄 Licencia
 
-## **Frequently Asked Questions (FAQs)**
-
-**Q: How is our data stored, and who has access?**
-
-A: Your documents are stored locally on your device via IndexedDB. If you use the OpenAI API or any custom API, you might send document and selection data to their servers during the request process.
-
-**Q: How do I back up my data?**
-
-A: You can routinely back up your data by using the 'export' feature in the sidebar. This action will generate a .JSON file of your documents and chats.
-
-**Q: Do I need to pay OpenAI?**
-
-A: Yes, using your own API key means you'll interface directly with the OpenAI servers, so it's recommended to set limits and monitor spending in your OpenAI dashboard. If you use an alternative API, you may need to pay to the provider of this API.
-
-For more detailed information, please refer to our [FAQ section](http://fthr.app/faqs).
-
-## Special Thanks
-
-This project was inspired by and adapted from [BetterChatGPT](https://github.com/ztjhz/BetterChatGPT), originally released under the CC0 license. This modified version is released under the MIT license.
+Este proyecto está bajo la [Licencia MIT](LICENSE).

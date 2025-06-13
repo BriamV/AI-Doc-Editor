@@ -16,8 +16,8 @@ La arquitectura ligera elegida (**React 18 + Monaco + FastAPI 3.11 + Chr
 | ID PRD      | Descripción                          | Estado base          | Gap / Acción                        | Est. d/h |
 | ----------- | ------------------------------------ | -------------------- | ----------------------------------- | -------- |
 | USR‑001     | OAuth2 Google/MS + JWT               | Parcial              | Falta refresh-token, roles          | 4 d      |
-| GEN‑001     | Prompt libre                         | ✔️ `/draft` MVP      | —                                   | —        |
-| GEN‑002     | Plantillas INCOSE                    | Parcial              | JSON + Jinja templates              | 3 d      |
+| GEN‑001     | Prompt libre                         | Parcial solo prompt libre`/draft` MVP      | —                                   | —        |
+| GEN‑002     | solo genera a traves de prompt libre | Parcial              | JSON + Jinja templates              | 3 d      |
 | PLN‑001     | Planner por secciones                | Nuevo | Ajustar límite chunk (≤ 800 tokens) | 2 d      |
 | EDT‑001/002 | Editor MD + comandos IA              | Parcial              | Palette & ROUGE-L tests             | 2 d      |
 | VER‑001/002 | Versionado + rollback                | Gap                  | SQLite snapshots + Diff             | 5 d      |
