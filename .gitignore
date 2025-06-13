@@ -38,5 +38,5 @@ dist-ssr
 release/
 
 # Task files
-tasks.json
-tasks/
+# tasks.json
+# tasks/
