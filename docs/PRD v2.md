@@ -182,7 +182,7 @@ Modo claro/oscuro automático; navegación 100 % teclado; sin requisitos A11y ad
 
 ---
 
-#### 4.4.x Planner por secciones  
+#### 4.4.9 Planner por secciones  
 
 Se implementa un _pipeline_ de generación jerárquica:
 
@@ -195,7 +195,7 @@ Este pipeline garantiza coherencia en documentos largos sin sobrepasar la ventan
 
 ---
 
-### 4.4.9 Métricas de UX (OKRs)
+### 4.4.10 Métricas de UX (OKRs)
 
 | Métrica | Target |
 |---------|--------|

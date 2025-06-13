@@ -40,3 +40,9 @@ release/
 # Task files
 # tasks.json
 # tasks/
+
+# Added by Task Master AI
+# Environment variables
+.vscode
+tasks.json
+tasks/ 
