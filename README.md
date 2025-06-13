@@ -1,8 +1,8 @@
-# <p align="center">ai-text-editor</p>
+# <p align="center">ai-doc-editor</p>
 
 <p align="center"><img src="https://github.com/darrylschaefer/fthr-write/assets/119073511/9b97e65f-5571-4172-a0d2-9d7ebfdf4cce" style="width:60px;" align="center"></p>
 
-<p align="center">AI-powered text editor designed to streamline your writing workflow. Manage documents, collaborate seamlessly with AI models, and utilize powerful macros for unmatched productivity.</p>
+<p align="center">AI-powered document editor designed to streamline your writing workflow. Manage documents, collaborate seamlessly with AI models, and utilize powerful macros for unmatched productivity.</p>
 <br>
 <p align="center"><img style="width:550px;" src="https://github.com/darrylschaefer/fthr-write/assets/119073511/0066e259-557c-4c40-b303-503ecd5cd67d"></p>
 
@@ -33,18 +33,18 @@ Ensure that you have the following prerequisites installed and set up on your sy
 
 ## **Getting Started**
 
-To begin using ai-text-editor, you can visit our [website](http://fthr.app/) to access or setup your own instance by following the steps below:
+To begin using ai-doc-editor, you can visit our [website](http://fthr.app/) to access or setup your own instance by following the steps below:
 
 1. **Clone the repository:**
 
 ```
-git clone https://github.com/darrylschaefer/ai-text-editor
+git clone https://github.com/BriamV/AI-Doc-Editor
 ```
 
 2. **Change directory:**
 
 ```
-cd ai-text-editor
+cd AI-Doc-Editor
 ```
 
 3. **Install dependencies:**
