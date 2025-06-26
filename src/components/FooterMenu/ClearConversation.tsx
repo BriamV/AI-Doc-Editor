@@ -9,7 +9,7 @@ const ClearConversation = () => {
   const { t } = useTranslation();
 
   const initialiseNewChat = useInitialiseNewDocument();
-  const setFolders = useStore((state) => state.setFolders);
+  const setFolders = useStore(state => state.setFolders);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const handleConfirm = () => {
@@ -20,11 +20,13 @@ const ClearConversation = () => {
 
   return (
     <>
-      <button className='btn btn-neutral w-48 justify-center'
+      <button
+        className="btn btn-neutral w-48 justify-center"
         onClick={() => {
           setIsModalOpen(true);
         }}
-      >Delete History
+      >
+        Delete History
       </button>
       {isModalOpen && (
         <PopupModal

@@ -6,22 +6,16 @@ import Toggle from '@components/Toggle';
 const InlineLatexToggle = () => {
   const { t } = useTranslation();
 
-  const setInlineLatex = useStore((state) => state.setInlineLatex);
+  const setInlineLatex = useStore(state => state.setInlineLatex);
 
-  const [isChecked, setIsChecked] = useState<boolean>(
-    useStore.getState().inlineLatex
-  );
+  const [isChecked, setIsChecked] = useState<boolean>(useStore.getState().inlineLatex);
 
   useEffect(() => {
     setInlineLatex(isChecked);
   }, [isChecked]);
 
   return (
-    <Toggle
-      label={t('inlineLatex') as string}
-      isChecked={isChecked}
-      setIsChecked={setIsChecked}
-    />
+    <Toggle label={t('inlineLatex') as string} isChecked={isChecked} setIsChecked={setIsChecked} />
   );
 };
 

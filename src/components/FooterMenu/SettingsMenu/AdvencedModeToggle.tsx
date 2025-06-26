@@ -6,22 +6,16 @@ import Toggle from '@components/Toggle';
 const AdvancedModeToggle = () => {
   const { t } = useTranslation();
 
-  const setAdvancedMode = useStore((state) => state.setAdvancedMode);
+  const setAdvancedMode = useStore(state => state.setAdvancedMode);
 
-  const [isChecked, setIsChecked] = useState<boolean>(
-    useStore.getState().advancedMode
-  );
+  const [isChecked, setIsChecked] = useState<boolean>(useStore.getState().advancedMode);
 
   useEffect(() => {
     setAdvancedMode(isChecked);
   }, [isChecked]);
 
   return (
-    <Toggle
-      label={t('advancedMode') as string}
-      isChecked={isChecked}
-      setIsChecked={setIsChecked}
-    />
+    <Toggle label={t('advancedMode') as string} isChecked={isChecked} setIsChecked={setIsChecked} />
   );
 };
 

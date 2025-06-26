@@ -4,12 +4,12 @@ import useStore from '@store/store';
 
 import { FolderAdd } from '@carbon/icons-react';
 import { Folder, FolderCollection } from '@type/document';
-import defaultStyles from '@components/style'
+import defaultStyles from '@components/style';
 
 const NewFolder = () => {
   const { t } = useTranslation();
-  const generating = useStore((state) => state.generating);
-  const setFolders = useStore((state) => state.setFolders);
+  const generating = useStore(state => state.generating);
+  const setFolders = useStore(state => state.setFolders);
 
   const addFolder = () => {
     let folderIndex = 1;
@@ -17,14 +17,12 @@ const NewFolder = () => {
 
     const folders = useStore.getState().folders;
 
-    while (Object.values(folders).some((folder) => folder.name === name)) {
+    while (Object.values(folders).some(folder => folder.name === name)) {
       folderIndex += 1;
       name = `New Folder ${folderIndex}`;
     }
 
-    const updatedFolders: FolderCollection = JSON.parse(
-      JSON.stringify(folders)
-    );
+    const updatedFolders: FolderCollection = JSON.parse(JSON.stringify(folders));
 
     const id = uuidv4();
     const newFolder: Folder = {
@@ -34,7 +32,7 @@ const NewFolder = () => {
       order: 0,
     };
 
-    Object.values(updatedFolders).forEach((folder) => {
+    Object.values(updatedFolders).forEach(folder => {
       folder.order += 1;
     });
 
@@ -43,7 +41,10 @@ const NewFolder = () => {
 
   return (
     <a
-    className={defaultStyles.buttonStyle + (generating ? " cursor-not-allowed opacity-40" : " cursor-pointer opacity-100")}
+      className={
+        defaultStyles.buttonStyle +
+        (generating ? ' cursor-not-allowed opacity-40' : ' cursor-pointer opacity-100')
+      }
       onClick={() => {
         if (!generating) addFolder();
       }}

@@ -6,22 +6,16 @@ import Toggle from '@components/Toggle';
 const AutoTitleToggle = () => {
   const { t } = useTranslation();
 
-  const setAutoTitle = useStore((state) => state.setAutoTitle);
+  const setAutoTitle = useStore(state => state.setAutoTitle);
 
-  const [isChecked, setIsChecked] = useState<boolean>(
-    useStore.getState().autoTitle
-  );
+  const [isChecked, setIsChecked] = useState<boolean>(useStore.getState().autoTitle);
 
   useEffect(() => {
     setAutoTitle(isChecked);
   }, [isChecked]);
 
   return (
-    <Toggle
-      label={t('autoTitle') as string}
-      isChecked={isChecked}
-      setIsChecked={setIsChecked}
-    />
+    <Toggle label={t('autoTitle') as string} isChecked={isChecked} setIsChecked={setIsChecked} />
   );
 };
 

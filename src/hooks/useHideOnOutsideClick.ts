@@ -3,16 +3,13 @@ import React, { useEffect, useRef, useState } from 'react';
 const useHideOnOutsideClick = (): [
   boolean,
   React.Dispatch<React.SetStateAction<boolean>>,
-  React.RefObject<HTMLDivElement>
+  React.RefObject<HTMLDivElement>,
 ] => {
   const elementRef = useRef<HTMLDivElement>(null);
   const [showElement, setShowElement] = useState<boolean>(false);
 
   const handleClickOutside = (event: MouseEvent) => {
-    if (
-      elementRef.current &&
-      !elementRef.current.contains(event.target as Node)
-    ) {
+    if (elementRef.current && !elementRef.current.contains(event.target as Node)) {
       setShowElement(false);
     }
   };

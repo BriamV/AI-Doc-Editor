@@ -12,11 +12,7 @@ import {
   LocalStorageInterfaceV6ToV7,
   LocalStorageInterfaceV7oV8,
 } from '@type/document';
-import {
-  _defaultChatConfig,
-  defaultModel,
-  defaultUserMaxToken,
-} from '@constants/chat';
+import { _defaultChatConfig, defaultModel, defaultUserMaxToken } from '@constants/chat';
 import { officialAPIEndpoint } from '@constants/auth';
 import defaultPrompts from '@constants/prompt';
 

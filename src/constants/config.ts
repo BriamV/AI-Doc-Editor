@@ -9,8 +9,8 @@ const dateString =
   ('0' + date.getDate()).slice(-2);
 
 export const generateDefaultFineTuneModel = (): FineTuneModel => {
-    return {
-        name: 'Default',
-        model: 'ft:gpt-3.5-turbo:my-org:custom_suffix:id',
-    };
-}
+  return {
+    name: 'Default',
+    model: 'ft:gpt-3.5-turbo:my-org:custom_suffix:id',
+  };
+};

@@ -1,13 +1,13 @@
-import { $getListDepth, $isListItemNode, $isListNode } from "@lexical/list";
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { $getListDepth, $isListItemNode, $isListNode } from '@lexical/list';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
   $getSelection,
   $isElementNode,
   $isRangeSelection,
   INDENT_CONTENT_COMMAND,
-  COMMAND_PRIORITY_HIGH
-} from "lexical";
-import { useEffect } from "react";
+  COMMAND_PRIORITY_HIGH,
+} from 'lexical';
+import { useEffect } from 'react';
 
 function getElementNodesInSelection(selection: any) {
   const nodesInSelection = selection.getNodes();
@@ -15,13 +15,11 @@ function getElementNodesInSelection(selection: any) {
   if (nodesInSelection.length === 0) {
     return new Set([
       selection.anchor.getNode().getParentOrThrow(),
-      selection.focus.getNode().getParentOrThrow()
+      selection.focus.getNode().getParentOrThrow(),
     ]);
   }
 
-  return new Set(
-    nodesInSelection.map((n: any) => ($isElementNode(n) ? n : n.getParentOrThrow()))
-  );
+  return new Set(nodesInSelection.map((n: any) => ($isElementNode(n) ? n : n.getParentOrThrow())));
 }
 
 function isIndentPermitted(maxDepth: any) {
@@ -42,7 +40,7 @@ function isIndentPermitted(maxDepth: any) {
       const parent = elementNode.getParent();
       if (!$isListNode(parent)) {
         throw new Error(
-          "ListMaxIndentLevelPlugin: A ListItemNode must have a ListNode for a parent."
+          'ListMaxIndentLevelPlugin: A ListItemNode must have a ListNode for a parent.'
         );
       }
 

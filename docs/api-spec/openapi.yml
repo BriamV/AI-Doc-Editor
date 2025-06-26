@@ -1,0 +1,415 @@
+openapi: 3.1.0
+info:
+  title: AI-Doc-Editor API
+  description: |
+    AI-powered document generation and editing platform with RAG capabilities.
+    
+    **Current Phase**: R0.WP2 - User Management & API Security  
+    **Architecture**: React + Electron frontend with FastAPI backend
+    
+    **Implementation Status**:
+    - ✅ Health monitoring (T-23)
+    - ✅ OAuth 2.0 + JWT authentication (T-02)
+    - 🚧 User API key management (T-41) - planned
+    - 🚧 Admin panel & config store (T-44) - planned
+  version: 0.1.0-preview
+  contact:
+    name: AI-Doc-Editor Team
+    email: velasquezbriam@gmail.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.aidoceditor.app
+    description: Production server
+  - url: https://staging-api.aidoceditor.app
+    description: Staging server
+  - url: http://localhost:8000
+    description: Development server (for local development only)
+
+paths:
+  /healthz:
+    get:
+      summary: Health check endpoint
+      description: |
+        Returns the health status of the API and its dependencies.
+        Implementation planned for T-23.
+      operationId: getHealth
+      tags:
+        - Health
+      security: []  # Health endpoint is public
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /auth/login:
+    post:
+      summary: OAuth 2.0 authentication initiation
+      description: |
+        Initiate OAuth 2.0 authentication flow with Google/Microsoft.
+        **Status**: ✅ IMPLEMENTED (T-02)
+        Returns authorization URL for provider OAuth flow.
+      operationId: login
+      tags:
+        - Authentication
+      security: []  # Login endpoint is public
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: OAuth URL generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthUrlResponse'
+        '400':
+          description: Invalid provider
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/callback:
+    post:
+      summary: OAuth 2.0 callback handler
+      description: |
+        Handle OAuth callback and exchange authorization code for JWT tokens.
+        **Status**: ✅ IMPLEMENTED (T-02)
+      operationId: oauthCallback
+      tags:
+        - Authentication
+      security: []  # Callback endpoint is public
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallbackRequest'
+      responses:
+        '200':
+          description: Authentication successful, JWT tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid authorization code or state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: OAuth authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      summary: Refresh JWT token
+      description: |
+        Refresh expired JWT access token using refresh token.
+        **Status**: ✅ IMPLEMENTED (T-02)
+      operationId: refreshToken
+      tags:
+        - Authentication
+      security: []  # Uses refresh token in body
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/me:
+    get:
+      summary: Get current user profile
+      description: |
+        Retrieve authenticated user profile and permissions.
+        **Status**: ✅ IMPLEMENTED (T-02)
+      operationId: getCurrentUser
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Invalid or expired access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded, error]
+          description: Overall health status
+        timestamp:
+          type: string
+          format: date-time
+          description: Health check timestamp
+        version:
+          type: string
+          description: API version
+        dependencies:
+          type: object
+          properties:
+            database:
+              $ref: '#/components/schemas/DependencyStatus'
+            vectordb:
+              $ref: '#/components/schemas/DependencyStatus'
+            openai:
+              $ref: '#/components/schemas/DependencyStatus'
+      required:
+        - status
+        - timestamp
+        - version
+
+    DependencyStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded, error]
+        responseTime:
+          type: number
+          description: Response time in milliseconds
+        error:
+          type: string
+          description: Error message if status is error
+      required:
+        - status
+
+    LoginRequest:
+      type: object
+      properties:
+        provider:
+          type: string
+          enum: [google, microsoft]
+          description: OAuth provider
+      required:
+        - provider
+
+    OAuthUrlResponse:
+      type: object
+      properties:
+        authUrl:
+          type: string
+          format: uri
+          description: OAuth authorization URL to redirect user
+        state:
+          type: string
+          description: OAuth state parameter for CSRF protection
+      required:
+        - authUrl
+        - state
+
+    CallbackRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Authorization code from OAuth provider
+        state:
+          type: string
+          description: OAuth state parameter for validation
+        provider:
+          type: string
+          enum: [google, microsoft]
+          description: OAuth provider
+      required:
+        - code
+        - state
+        - provider
+
+    RefreshRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          description: Refresh token for renewing access token
+      required:
+        - refreshToken
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token
+        refreshToken:
+          type: string
+          description: Refresh token for token renewal
+        expiresIn:
+          type: integer
+          description: Token expiration time in seconds
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+        - accessToken
+        - refreshToken
+        - expiresIn
+        - user
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique user identifier
+        email:
+          type: string
+          format: email
+          description: User email address
+        name:
+          type: string
+          description: User display name
+        role:
+          type: string
+          enum: [editor, admin]
+          description: User role in the system
+        provider:
+          type: string
+          enum: [google, microsoft]
+          description: OAuth provider used for authentication
+        avatar:
+          type: string
+          format: uri
+          description: User avatar URL
+      required:
+        - id
+        - email
+        - name
+        - role
+        - provider
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique user identifier
+        email:
+          type: string
+          format: email
+          description: User email address
+        name:
+          type: string
+          description: User display name
+        role:
+          type: string
+          enum: [editor, admin]
+          description: User role in the system
+        provider:
+          type: string
+          enum: [google, microsoft]
+          description: OAuth provider used for authentication
+        avatar:
+          type: string
+          format: uri
+          description: User avatar URL
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+        lastLoginAt:
+          type: string
+          format: date-time
+          description: Last login timestamp
+      required:
+        - id
+        - email
+        - name
+        - role
+        - provider
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Additional error details
+        timestamp:
+          type: string
+          format: date-time
+          description: Error timestamp
+        traceId:
+          type: string
+          description: Request trace ID for debugging
+      required:
+        - error
+        - message
+        - timestamp
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/login
+
+tags:
+  - name: Health
+    description: Health check and monitoring endpoints
+  - name: Authentication
+    description: User authentication and session management
+
+# Future endpoints (planned for R1-R6)
+# /upload - File ingesta RAG (T-04)
+# /plan - Planner service (T-05) 
+# /draft_section - WebSocket streaming (T-06)
+# /rewrite - Action palette commands (T-08)
+# /export - Document export (T-10)
+# /context - Context flags & templates (T-18)

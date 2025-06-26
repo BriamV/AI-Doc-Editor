@@ -1,0 +1,15 @@
+node_modules
+dist
+coverage
+build
+release
+cypress/downloads
+cypress/screenshots
+cypress/videos
+*.min.js
+*.min.css
+electron/index.cjs
+vite.config.ts
+jest.config.js
+eslint.config.js
+tailwind.config.cjs

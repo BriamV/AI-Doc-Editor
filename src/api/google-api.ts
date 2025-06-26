@@ -2,11 +2,7 @@ import { debounce } from 'lodash';
 import { StorageValue } from 'zustand/middleware';
 import useStore from '@store/store';
 import useCloudAuthStore from '@store/cloud-auth-store';
-import {
-  GoogleTokenInfo,
-  GoogleFileResource,
-  GoogleFileList,
-} from '@type/google-api';
+import { GoogleTokenInfo, GoogleFileResource, GoogleFileList } from '@type/google-api';
 import PersistStorageState from '@type/persist';
 
 import { createMultipartRelatedBody } from './helper';
@@ -39,9 +35,7 @@ export const createDriveFile = async (
     const result: GoogleFileResource = await response.json();
     return result;
   } else {
-    throw new Error(
-      `Error uploading file: ${response.status} ${response.statusText}`
-    );
+    throw new Error(`Error uploading file: ${response.status} ${response.statusText}`);
   }
 };
 
@@ -70,9 +64,7 @@ export const getDriveFileTyped = async (
   return await getDriveFile(fileId, accessToken);
 };
 
-export const listDriveFiles = async (
-  accessToken: string
-): Promise<GoogleFileList> => {
+export const listDriveFiles = async (accessToken: string): Promise<GoogleFileList> => {
   const response = await fetch(
     'https://www.googleapis.com/drive/v3/files?orderBy=createdTime desc',
     {
@@ -85,9 +77,7 @@ export const listDriveFiles = async (
   );
 
   if (!response.ok) {
-    throw new Error(
-      `Error listing google drive files: ${response.status} ${response.statusText}`
-    );
+    throw new Error(`Error listing google drive files: ${response.status} ${response.statusText}`);
   }
 
   const result: GoogleFileList = await response.json();
@@ -99,23 +89,18 @@ export const updateDriveFile = async (
   fileId: string,
   accessToken: string
 ): Promise<GoogleFileResource> => {
-  const response = await fetch(
-    `https://www.googleapis.com/upload/drive/v3/files/${fileId}`,
-    {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: file,
-    }
-  );
+  const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: file,
+  });
   if (response.ok) {
     const result: GoogleFileResource = await response.json();
     return result;
   } else {
-    throw new Error(
-      `Error uploading file: ${response.status} ${response.statusText}`
-    );
+    throw new Error(`Error uploading file: ${response.status} ${response.statusText}`);
   }
 };
 
@@ -124,44 +109,34 @@ export const updateDriveFileName = async (
   fileId: string,
   accessToken: string
 ) => {
-  const response = await fetch(
-    `https://www.googleapis.com/drive/v3/files/${fileId}`,
-    {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({ name: fileName }),
-    }
-  );
+  const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ name: fileName }),
+  });
   if (response.ok) {
     const result: GoogleFileResource = await response.json();
     return result;
   } else {
-    throw new Error(
-      `Error updating file name: ${response.status} ${response.statusText}`
-    );
+    throw new Error(`Error updating file name: ${response.status} ${response.statusText}`);
   }
 };
 
 export const deleteDriveFile = async (fileId: string, accessToken: string) => {
-  const response = await fetch(
-    `https://www.googleapis.com/drive/v3/files/${fileId}`,
-    {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
+  const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
 
   if (response.ok) {
     return true;
   } else {
-    throw new Error(
-      `Error deleting file name: ${response.status} ${response.statusText}`
-    );
+    throw new Error(`Error deleting file name: ${response.status} ${response.statusText}`);
   }
 };
 

@@ -2,8 +2,8 @@ import { ArrowDown as ArrowBottom } from '@carbon/icons-react';
 import useStore from '@store/store';
 
 const CollapseOptions = () => {
-  const setHideMenuOptions = useStore((state) => state.setHideMenuOptions);
-  const hideMenuOptions = useStore((state) => state.hideMenuOptions);
+  const setHideMenuOptions = useStore(state => state.setHideMenuOptions);
+  const hideMenuOptions = useStore(state => state.hideMenuOptions);
 
   return (
     <div
@@ -11,9 +11,7 @@ const CollapseOptions = () => {
       onClick={() => setHideMenuOptions(!hideMenuOptions)}
     >
       <ArrowBottom
-        className={`h-3 w-3 transition-all duration-100 ${
-          hideMenuOptions ? 'rotate-180' : ''
-        }`}
+        className={`h-3 w-3 transition-all duration-100 ${hideMenuOptions ? 'rotate-180' : ''}`}
       />
     </div>
   );

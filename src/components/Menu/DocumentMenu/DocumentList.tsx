@@ -13,21 +13,14 @@ import {
 } from '@type/document';
 
 const DocumentList = () => {
-  const currentDocumentIndex = useStore((state) => state.currentChatIndex);
-  const setChats = useStore((state) => state.setChats);
-  const setFolders = useStore((state) => state.setFolders);
-  const documentTitles = useStore(
-    (state) => state.chats?.map((document) => document.title),
-    shallow
-  );
+  const currentDocumentIndex = useStore(state => state.currentChatIndex);
+  const setChats = useStore(state => state.setChats);
+  const setFolders = useStore(state => state.setFolders);
+  const documentTitles = useStore(state => state.chats?.map(document => document.title), shallow);
 
   const [isHover, setIsHover] = useState<boolean>(false);
-  const [documentFolders, setDocumentFolders] = useState<DocumentHistoryFolderInterface>(
-    {}
-  );
-  const [noDocumentFolders, setNoDocumentFolders] = useState<DocumentHistoryInterface[]>(
-    []
-  );
+  const [documentFolders, setDocumentFolders] = useState<DocumentHistoryFolderInterface>({});
+  const [noDocumentFolders, setNoDocumentFolders] = useState<DocumentHistoryInterface[]>([]);
   const [filter, setFilter] = useState<string>('');
 
   const chatsRef = useRef<DocumentInterface[]>(useStore.getState().chats || []);
@@ -42,7 +35,7 @@ const DocumentList = () => {
 
     Object.values(folders)
       .sort((a, b) => a.order - b.order)
-      .forEach((f) => (_folders[f.id] = []));
+      .forEach(f => (_folders[f.id] = []));
 
     if (documents) {
       documents.forEach((document, index) => {
@@ -79,12 +72,8 @@ const DocumentList = () => {
   useEffect(() => {
     updateFolders();
 
-    useStore.subscribe((state) => {
-      if (
-        !state.generating &&
-        state.chats &&
-        state.chats !== chatsRef.current
-      ) {
+    useStore.subscribe(state => {
+      if (!state.generating && state.chats && state.chats !== chatsRef.current) {
         updateFolders();
         chatsRef.current = state.chats;
       } else if (state.folders !== foldersRef.current) {
@@ -165,8 +154,8 @@ const DocumentList = () => {
       {/* <div className="pt-2 px-2">
       <ChatSearch filter={filter} setFilter={setFilter} />
       </div> */}
-      <div className='flex flex-col gap-2 text-gray-100 text-sm overflow-scroll h-full p-1 pt-2'>
-        {Object.keys(documentFolders).map((folderId) => (
+      <div className="flex flex-col gap-2 text-gray-100 text-sm overflow-scroll h-full p-1 pt-2">
+        {Object.keys(documentFolders).map(folderId => (
           <DocumentFolder
             folderDocuments={documentFolders[folderId]}
             folderId={folderId}
@@ -177,7 +166,7 @@ const DocumentList = () => {
           <DocumentButton title={title} key={`${title}-${id}`} chatIndex={index} />
         ))}
       </div>
-      <div className='w-full h-10' />
+      <div className="w-full h-10" />
     </div>
   );
 };

@@ -8,28 +8,25 @@ import { _defaultChatConfig } from '@constants/chat';
 import { officialAPIEndpoint } from '@constants/auth';
 import { generateDefaultMessage } from '@constants/chat';
 
-const useSubmitPromptAdjust = () => {  
-
+const useSubmitPromptAdjust = () => {
   const { t, i18n } = useTranslation('api');
-  const error = useStore((state) => state.error);
-  const setError = useStore((state) => state.setError);
-  const apiEndpoint = useStore((state) => state.apiEndpoint);
-  const apiKey = useStore((state) => state.apiKey);
-  const setGenerating = useStore((state) => state.setGenerating);
-  const generating = useStore((state) => state.generating);
-  const currentChatIndex = useStore((state) => state.currentChatIndex);
-  const setChats = useStore((state) => state.setChats);
+  const error = useStore(state => state.error);
+  const setError = useStore(state => state.setError);
+  const apiEndpoint = useStore(state => state.apiEndpoint);
+  const apiKey = useStore(state => state.apiKey);
+  const setGenerating = useStore(state => state.setGenerating);
+  const generating = useStore(state => state.generating);
+  const currentChatIndex = useStore(state => state.currentChatIndex);
+  const setChats = useStore(state => state.setChats);
 
-//   const chatMessages: MessageInterface[] = [
-//     {
-//         role: 'system',
-//         content: prompt,
-//     },
-// ];
+  //   const chatMessages: MessageInterface[] = [
+  //     {
+  //         role: 'system',
+  //         content: prompt,
+  //     },
+  // ];
 
-  const generateTitle = async (
-    message: MessageInterface[]
-  ): Promise<string> => {
+  const generateTitle = async (message: MessageInterface[]): Promise<string> => {
     let data;
     if (!apiKey || apiKey.length === 0) {
       // official endpoint
@@ -38,11 +35,7 @@ const useSubmitPromptAdjust = () => {
       }
 
       // other endpoints
-      data = await getChatCompletion(
-        useStore.getState().apiEndpoint,
-        message,
-        _defaultChatConfig
-      );
+      data = await getChatCompletion(useStore.getState().apiEndpoint, message, _defaultChatConfig);
     } else if (apiKey) {
       // own apikey
       data = await getChatCompletion(
@@ -55,44 +48,55 @@ const useSubmitPromptAdjust = () => {
     return data.choices[0].message.content;
   };
 
-  const handleSubmit = async ({prompt, includeSelection, modifiedConfig}:{prompt: string, includeSelection: boolean, modifiedConfig?: ConfigInterface}) => {
+  const handleSubmit = async ({
+    prompt,
+    includeSelection,
+    modifiedConfig,
+  }: {
+    prompt: string;
+    includeSelection: boolean;
+    modifiedConfig?: ConfigInterface;
+  }) => {
     const chats = useStore.getState().chats;
     const currentSelection = useStore.getState().currentSelection;
     const defaultChatConfig = useStore.getState().defaultChatConfig;
-    if(modifiedConfig == null || modifiedConfig == undefined){
+    if (modifiedConfig == null || modifiedConfig == undefined) {
       modifiedConfig = defaultChatConfig;
     }
 
-    if (includeSelection){
+    if (includeSelection) {
       let tempSelection = currentSelection;
       // clear newLine from the beginning of the selection
-      if (currentSelection.startsWith('\n')){
+      if (currentSelection.startsWith('\n')) {
         tempSelection = currentSelection.substring(1);
       }
 
       // clear newLine from the end of the selection
 
-      if (currentSelection.endsWith('\n')){
+      if (currentSelection.endsWith('\n')) {
         tempSelection = currentSelection.substring(0, currentSelection.length - 1);
       }
-      
-      prompt = prompt + '\n\n' + tempSelection + '\n\n'
+
+      prompt = prompt + '\n\n' + tempSelection + '\n\n';
     }
 
     const chatMessages: MessageInterface[] = [
-        {
-            role: 'system',
-            content: prompt,
-        },
-        {
-            role: 'assistant',
-            content: '',
-        }
+      {
+        role: 'system',
+        content: prompt,
+      },
+      {
+        role: 'assistant',
+        content: '',
+      },
     ];
 
     let resetChats = useStore.getState().chats;
-    if(resetChats){
-      resetChats[currentChatIndex].messageCurrent = generateDefaultMessage(modifiedConfig, chatMessages);
+    if (resetChats) {
+      resetChats[currentChatIndex].messageCurrent = generateDefaultMessage(
+        modifiedConfig,
+        chatMessages
+      );
       setChats(resetChats);
     }
 
@@ -112,12 +116,13 @@ const useSubmitPromptAdjust = () => {
       let stream;
       if (chats[currentChatIndex].messageCurrent.messages.length === 0)
         throw new Error('No messages submitted!');
-        chats[0].messageCurrent.messages[0].content = prompt;
-
+      chats[0].messageCurrent.messages[0].content = prompt;
 
       const messages = limitMessageTokens(
         chats[currentChatIndex].messageCurrent.messages,
-        modifiedConfig.max_completion_tokens ? modifiedConfig.max_completion_tokens : defaultChatConfig.max_completion_tokens,
+        modifiedConfig.max_completion_tokens
+          ? modifiedConfig.max_completion_tokens
+          : defaultChatConfig.max_completion_tokens,
         modifiedConfig.model ? modifiedConfig.model : defaultChatConfig.model
       );
       if (messages.length === 0) throw new Error('Message exceed max token!');
@@ -139,7 +144,7 @@ const useSubmitPromptAdjust = () => {
       } else if (apiKey) {
         // own apikey
 
-        if(modifiedConfig.model == null) {
+        if (modifiedConfig.model == null) {
           modifiedConfig.model = defaultChatConfig.model;
         }
 
@@ -153,17 +158,13 @@ const useSubmitPromptAdjust = () => {
 
       if (stream) {
         if (stream.locked)
-          throw new Error(
-            'Oops, the stream is locked right now. Please try again'
-          );
+          throw new Error('Oops, the stream is locked right now. Please try again');
         const reader = stream.getReader();
         let reading = true;
         let partial = '';
         while (reading && useStore.getState().generating) {
           const { done, value } = await reader.read();
-          const result = parseEventSource(
-            partial + new TextDecoder().decode(value)
-          );
+          const result = parseEventSource(partial + new TextDecoder().decode(value));
           partial = '';
 
           if (result === '[DONE]' || done) {
@@ -188,22 +189,21 @@ const useSubmitPromptAdjust = () => {
 
             updatedChats[currentChatIndex].messageCurrent.messages = updatedMessages;
             let matchFound = false;
-           let messageHistory = updatedChats[currentChatIndex].messageHistory;
+            let messageHistory = updatedChats[currentChatIndex].messageHistory;
 
+            for (let i = 0; i < messageHistory.length; i++) {
+              if (messageHistory[i].id == updatedChats[currentChatIndex].messageCurrent.id) {
+                messageHistory[i] = updatedChats[currentChatIndex].messageCurrent;
+                matchFound = true;
+              }
+            }
 
-           for(let i = 0; i < messageHistory.length; i++) {
-             if (messageHistory[i].id == updatedChats[currentChatIndex].messageCurrent.id) {
-               messageHistory[i] = updatedChats[currentChatIndex].messageCurrent;
-               matchFound = true;
-             }
-           }
+            if (!matchFound) {
+              messageHistory.push(updatedChats[currentChatIndex].messageCurrent);
+            }
 
-           if (!matchFound) {
-             messageHistory.push(updatedChats[currentChatIndex].messageCurrent);
-           }
-          
-           updatedChats[currentChatIndex].messageHistory = messageHistory;
-            
+            updatedChats[currentChatIndex].messageHistory = messageHistory;
+
             setChats(updatedChats);
           }
         }
@@ -223,19 +223,11 @@ const useSubmitPromptAdjust = () => {
       if (currChats && countTotalTokens) {
         const model = modifiedConfig.model;
         const messages = currChats[currentChatIndex].messageCurrent.messages;
-        updateTotalTokenUsed(
-          model,
-          messages.slice(0, -1),
-          messages[messages.length - 1]
-        );
+        updateTotalTokenUsed(model, messages.slice(0, -1), messages[messages.length - 1]);
       }
 
       // generate title for new chats
-      if (
-        useStore.getState().autoTitle &&
-        currChats &&
-        !currChats[currentChatIndex]?.titleSet
-      ) {
+      if (useStore.getState().autoTitle && currChats && !currChats[currentChatIndex]?.titleSet) {
         const messages_length = currChats[currentChatIndex].messageCurrent.messages.length;
         const assistant_message =
           currChats[currentChatIndex].messageCurrent.messages[messages_length - 1].content;

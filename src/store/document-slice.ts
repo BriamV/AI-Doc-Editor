@@ -1,5 +1,10 @@
 import { StoreSlice } from './store';
-import { DocumentInterface, FolderCollection, DocumentCurrent, EditorSettings } from '@type/document';
+import {
+  DocumentInterface,
+  FolderCollection,
+  DocumentCurrent,
+  EditorSettings,
+} from '@type/document';
 
 export interface DocumentSlice {
   documentCurrent: DocumentCurrent;
@@ -48,7 +53,7 @@ export const createDocumentSlice: StoreSlice<DocumentSlice> = (set, get) => ({
   error: '',
   folders: {},
   editorState: [],
-  currentSelection: '', 
+  currentSelection: '',
   editorSettings: {
     includeSelection: true,
     includeSelectionMenu: true,

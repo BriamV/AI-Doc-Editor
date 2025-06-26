@@ -73,7 +73,17 @@ export interface Folder {
   color?: string;
 }
 
-export type ModelOptions = 'gpt-3.5-turbo' | 'gpt-3.5-turbo-16k' | 'gpt-4' | 'gpt-4-32k' | 'gpt-4-turbo' | 'gpt-4o' | 'gpt-4.5-preview' | 'o1' | 'o3-mini' | string;
+export type ModelOptions =
+  | 'gpt-3.5-turbo'
+  | 'gpt-3.5-turbo-16k'
+  | 'gpt-4'
+  | 'gpt-4-32k'
+  | 'gpt-4-turbo'
+  | 'gpt-4o'
+  | 'gpt-4.5-preview'
+  | 'o1'
+  | 'o3-mini'
+  | string;
 // | 'gpt-3.5-turbo-0301';
 // | 'gpt-4-0314'
 // | 'gpt-4-32k-0314'
@@ -165,8 +175,7 @@ export interface LocalStorageInterfaceV6ToV7 {
   hideSideMenu: boolean;
 }
 
-export interface LocalStorageInterfaceV7oV8
-  extends LocalStorageInterfaceV6ToV7 {
+export interface LocalStorageInterfaceV7oV8 extends LocalStorageInterfaceV6ToV7 {
   foldersName: string[];
   foldersExpanded: boolean[];
   folders: FolderCollection;

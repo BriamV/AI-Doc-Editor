@@ -1,9 +1,9 @@
 # Product Requirements Document
 
 **Proyecto:** Generador de Documentos con IA + RAG
-**Versión:** v0.2
+**Versión:** 2
 **Autor:** BriamV
-**Fecha:** 13 jun 2025
+**Fecha:** 24 jun 2025
 
 ---
 
@@ -38,7 +38,7 @@ Crear una aplicación **on-prem**, con UI web (**React 18 + TypeScript + Monaco 
 
 * Autenticación OAuth 2.0.
 * Carga manual de archivos (PDF, DOCX, MD, TXT) con metadatos mínimos.
-* Vector store embebido (Chroma o Qdrant) con **OpenAI embeddings**.
+* Vector store embebido (**Chroma**) con **OpenAI embeddings**. **Validación y serialización con Pydantic v2**, integrada en FastAPI 3.11. **Despachador multivendor (LiteLLM/SDK nativo)** → se evita cualquier orquestador externo en R0-R3.
 * Editor Markdown con vista previa y barra de comandos IA (`/resume`, `/formal`, etc.).
 * Generación inicial por prompt + (opcional) selección de base de conocimiento y/o web search¹.
 * Historial de versiones con diff y rollback.
@@ -77,18 +77,18 @@ Crear una aplicación **on-prem**, con UI web (**React 18 + TypeScript + Monaco 
 | ----------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --- | --------------------------------------------------------------------------------------------- | ------------------- |
 | **USR-001** | Inicio de sesión      | El sistema **shall** autenticar al usuario mediante OAuth 2.0 de Google o Microsoft y emitir un JWT con vigencia configurable (por defecto 24 h).            | M   | 1) Inicio de sesión válido entrega JWT. 2) Solicitud con token caducado devuelve HTTP 401.    | Prueba integración  |
 | **ADM-001** | Límites de ingesta    | El administrador **shall** poder definir *N* (1–30) documentos y *T* MB (1–200) por archivo en la consola de ajustes.                                        | M   | Cambiar valores ⇒ próxima carga respeta nuevos límites; intento que excede muestra error 400. | Inspección + prueba |
-| **KB-001**  | Ingesta RAG           | Al cargar un archivo, el sistema **shall** ① extraer texto completo, ② generar embeddings con OpenAI `text-embedding-3-small`, ③ indexar en Chroma o Qdrant. | M   | Tras la carga, búsqueda de prueba devuelve ≥1 pasaje relevante con score ≥0.75.               | Test funcional      |
+| **KB-001**  | Ingesta RAG           | Al cargar un archivo, el sistema **shall** ① extraer texto completo, ② generar embeddings con OpenAI `text-embedding-3-small`, ③ indexar en Chroma. | M   | Tras la carga, búsqueda de prueba devuelve ≥1 pasaje relevante con score ≥0.75.               | Test funcional      |
 | **KB-002**  | Metadatos             | El sistema **shall** registrar *autor, fecha de carga (UTC) y ≥1 etiqueta* por documento y exponerlos vía UI y API REST.                                     | M   | Metadatos visibles en tabla y endpoint `/docs/{id}`.                                          | Inspección          |
 | **KB-003**  | Re-ingesta y upsert        | Cuando el usuario sustituya un archivo existente, el sistema **shall** eliminar los embeddings antiguos del vector-store y crear nuevos en la misma operación (“upsert”).   | M   | Re-subir archivo ⇒ embeddings antiguos no se recuperan en búsqueda; nuevos pasajes sí (score ≥ 0.75); (requiere KB-001 implementado).             | Test funcional                      |
 | **GEN-001** | Selección de contexto | El editor **shall** poder marcar cualquier combinación de: **(a)** Base de Conocimiento, **(b)** Web search, **(c)** Libre (sin contexto).     | M   | Flags aparecen en formulario; prompt “Base=off” no usa vector store (latencia < 3 s).         | Demostración        |
-| **GEN-002** | Borrador inicial      | El sistema **shall** generar el borrador de “Versión 1” a partir de ① prompt libre y/o ② plantilla seleccionada, mostrando progreso en UI.                   | M   | Para un documento de 1 000 palabras se recibe respuesta completa ≤10 min.                     | Prueba rendimiento  |
+| **GEN-002** | Borrador inicial | El sistema **shall** generar el borrador de “Versión 1” a partir de ① prompt libre y/o ② plantilla seleccionada, mostrando progreso en UI. | M | Para un documento de 1 000 palabras se recibe respuesta completa ≤8 min. | Prueba rendimiento |
 | **EDT-001** | Editor Markdown       | La UI **shall** ofrecer editor de texto plano con preview Markdown en tiempo real (<200 ms retraso) y atajos (`Ctrl+B`, `Ctrl+I`).                           | M   | Escribir “\*\*bold\*\*” ⇒ vista previa actualiza ≤0.2 s.                                      | Prueba UI           |
 | **EDT-002** | Comandos IA           | El editor **shall** aceptar comandos prefijados (`/resume`, `/formal`, `/simplify`) que modifican el bloque de texto seleccionado.                           | M   | `/resume` reduce extensión ≥20 % manteniendo sentido (ROUGE-L ≥0.7).                          | Demo + métrica      |
 | **VER-001** | Versionado            | Cada guardado **shall** crear versión incremental con hash SHA-256 y diff línea-a-línea; máximo 500 versiones por documento.                                 | M   | Historial muestra hash único; diff resalta cambios; rollback disponible.                      | Inspec. código      |
 | **VER-002** | Rollback              | El sistema **shall** permitir revertir a cualquier versión anterior sin perder el historial, dejando trazabilidad de la acción.                              | M   | Seleccionar v3 ⇒ contenido idéntico a v3, registro en log de auditoría.                       | Prueba              |
 | **EXP-001** | Exportación           | El sistema **shall** exportar el documento a **.md, .pdf, .docx** conservando títulos, listas y tablas.                                                      | M   | Dif hash Markdown = vista; PDF abre sin advertencias; DOCX pasa validador OpenXML.            | Prueba archivo      |
 | **SEC-001** | Cifrado               | El sistema **shall** cifrar datos en tránsito (TLS 1.2+ únicamente) y en reposo (AES-256, claves rotables cada 90 d).                                        | M   | Escaneo SSLlabs ≥A; script de auditoría verifica disco cifrado LUKS.                          | Auditoría           |
-| **SEC-002** | Gestión de API Keys        | El sistema **shall** almacenar las API Keys del usuario cifradas con AES-256 y rotarlas cuando la vigencia supere 90 días.                                                   | M   | 1) Keys se guardan sólo en tabla encriptada. 2) Key con “age > 90 d” provoca aviso de rotación al iniciar sesión. | Auditoría de código + prueba |
+| **SEC-002** | Gestión de API Keys | El sistema **shall** almacenar las API Keys del usuario cifradas con AES-256 y **shall** forzar su rotación automática cuando la vigencia supere los 90 días. | M | 1) Keys se guardan sólo en tabla encriptada. 2) Key con "age > 90 d" provoca una rotación forzada y se registra en el log de auditoría. | Auditoría de código + prueba. |
 | **AUD-001** | Log inmutable         | El sistema **shall** registrar *usuario, acción, timestamp, IP, doc-ID, versión* en un log WORM; retención mínima 1 año.                                     | M   | Entrada aparece ≤5 s; log protegido contra ALTER/DELETE en base de datos.                     | Inspección          |
 | **DEL-001** | Borrado y restore     | El editor **shall** poder realizar borrado lógico y restaurar documentos/embeddings ≤30 d posteriores.                                                       | S   | Documento marcado “Deleted”; botón “Restore” disponible dentro de ventana.                    | Prueba              |
 | **DEL-002** | Derecho de supresión       | El sistema **shall** ofrecer, bajo solicitud del usuario, la eliminación definitiva e irreversible de documentos y datos personales en ≤30 d (“right to erasure”).           | M   | Solicitud crea ticket; al día 30 los datos desaparecen de BD y backups; registro de cumplimiento en log WORM.     | Revisión de proceso + auditoría      |
@@ -97,6 +97,9 @@ Crear una aplicación **on-prem**, con UI web (**React 18 + TypeScript + Monaco 
 | **MON-001** | Health-check API           | El sistema **shall** exponer el endpoint `/healthz` que verifique base de datos, vector-store y OpenAI; devolverá JSON `{status:"ok"}` en <200 ms si todos los checks pasan. | M   | Llamada directa devuelve HTTP 200 y latencia < 0.2 s; fallo en dependencia cambia `"ok"`→ `"degraded"`.           | Prueba monitorización               |
 | **RLM-001** | Rate-limiting              | El sistema **shall** limitar a 30 solicitudes de generación/edición por minuto por usuario y devolver HTTP 429 en exceso.                                                    | M   | Disparar 40 peticiones en una ventana de 60 s ⇒ ≤30 aceptadas, resto 429; cabecera `Retry-After: 30`.                                     | Prueba carga            |
 | **INF-001** | Backup cifrado y retención | El sistema **shall** realizar copias de seguridad cifradas (AES-256) diarias con retención de 30 d para documentos y vectores.                                               | S   | Restaurar backup del día 15 recupera datos; archivo backup cifrado verificado con `openssl`.                      | Auditoría                         |
+|**COM-001**|Anotaciones en línea|El sistema **shall** permitir al editor añadir, ver y eliminar anotaciones (tags) en líneas específicas del documento, y estas **shall** ser visibles en el editor.|S|1) API CRUD para /comment funciona. 2) Anotación creada aparece en la UI ≤ 200 ms. 3) Anotaciones persisten entre sesiones.|Prueba API + UI|
+|**UX-001**|Fijar Documentos|El editor **shall** poder marcar documentos como "favoritos" para que aparezcan en una sección dedicada y de fácil acceso en la interfaz.|S|1) Click en "pin" mueve el documento a la sección "Favoritos". 2) El estado de favorito persiste por usuario entre sesiones.|Inspección + Prueba UI|
+
 
 Pri = Prioridad (MoSCoW).
 
@@ -218,9 +221,13 @@ Este pipeline garantiza coherencia en documentos largos sin sobrepasar la ventan
 | **PERF-002** | Rendimiento – UI         | El sistema **shall** renderizar la vista previa Markdown en ≤ 200 ms (mediana) tras cada pulsación de tecla.                                                                                       | M   | Registro Lighthouse: p50 ≤ 0.2 s.                                    | Test UI          |
 | **PERF-003** | Rendimiento – Ingesta    | El sistema **shall** procesar e indexar un archivo de 10 MB en ≤ 120 s.                                                                                                                            | S   | Cronómetro API `/upload` ⇒ `status=ready` ≤ 120 s.                   | Prueba carga     |
 | **PERF-004** | Rendimiento – Búsqueda   | La consulta RAG **shall** devolver el primer pasaje relevante en < 1 s (p95) para base de 15 docs.                                                                                                 | S   | 20 consultas ⇒ 95 % latencia < 1 000 ms.                             | Bench.           |
+| **PERF-005** | Rendimiento – Edición    | El sistema **shall** completar una operación de reescritura (/rewrite) para un bloque de 100 tokens en ≤ 2 segundos para el P95 de las peticiones.                                                    | M   | Prueba de carga con 50 usuarios concurrentes muestra p95 de latencia en /rewrite ≤ 2 s. | Bench. JMeter    |
+| **PERF-006** | Rendimiento – Contexto   | El sistema **shall** validar que la suma de tokens de prompt + contexto no exceda los 9,000 tokens y **shall** advertir al usuario cuando se acerque al 90% de dicho límite. | M   | 1) Petición que excede 9,000 tokens devuelve HTTP 413. 2) UI muestra una advertencia visual al superar los 8,100 tokens. | Prueba API + UI  |
+
 | **SCA-001**  | Escalabilidad            | El sistema **shall** operar con 10 usuarios concurrentes y 100 docs/día manteniendo PERF-001 … 004; y **shall** escalar horizontalmente a ≥ 3 instancias de vector-store sin downtime planificado. | M   | Prueba carga con HPA ⇒ métricas dentro de SLA, 0 errores 5xx.        | Chaos test       |
 | **SEC-003**  | Cifrado integral         | El sistema **shall** usar TLS 1.2+ en tránsito y cifrado AES-256 (LUKS o equivalente) en reposo para BD, backups y embeddings.                                                                     | M   | Escaneo SSLabs ≥ A; verificación de discos cifrados.                 | Auditoría        |
-| **SEC-004**  | Gestión de claves        | El sistema **shall** rotar API Keys cifradas cada ≤ 90 d y limitar su visibilidad sólo a procesos autorizados (principio de mínimo privilegio).                                                    | M   | Key > 90 d genera alerta; revisión IAM muestra rol con scope mínimo. | Inspección       |
+| **SEC-004** | Gestión de claves | El sistema **shall** rotar API Keys cifradas cada ≤ 90 d y limitar su visibilidad sólo a procesos autorizados (principio de mínimo privilegio). | M | Key > 90 d es rotada automáticamente; revisión IAM muestra rol con scope mínimo. | Inspección |
+| **SEC-005**  | Huella de dependencias   | El sistema **shall** mantener ≤ 25 dependencias de producción y reportar CVEs críticas = 0 en el pipeline CI.                                                                                      | M   | Informe SCA sin CVEs críticas; contador deps ≤ 25.                   | Pipeline CI      |
 | **PRI-001**  | Derecho de supresión     | El sistema **shall** eliminar de forma irreversible documentos y PII dentro de ≤ 30 d tras petición (GDPR Art. 17).                                                                                | M   | Ticket “erase” cerrado ≤ 30 d; entrada WORM de cumplimiento.         | Auditoría        |
 | **PRI-002**  | Consentimiento explícito | El sistema **shall** requerir aceptación explícita antes de almacenar datos en modelos de terceros; registro del consentimiento en log inmutable.                                                  | M   | Checkbox “Acepto” obligatorio; log registra `consent:true`.          | Test flujo       |
 | **AVL-001**  | Disponibilidad           | El sistema **shall** mantener ≥ 99 % de uptime mensual y alcanzar **MTTR ≤ 2 h** para incidentes críticos.                                                                                         | M   | Monitoreo Uptime >= 99 %; incidentes cerrados MTTR ≤ 2 h.            | Análisis SRE     |
@@ -236,28 +243,29 @@ Este pipeline garantiza coherencia en documentos largos sin sobrepasar la ventan
 * El usuario aporta su propia **OpenAI API Key**.
 * Infraestructura on-prem con Docker-compose o Kubernetes mínimo.
 * Acceso outbound a api.openai.com permitido.
-* Chroma/Qdrant contenedor con persistencia local cifrada.
+* Chroma contenedor con persistencia local cifrada.
 * Dispositivo de almacenamiento ≥ 75 GB disponibles para datos de aplicación.
 
 ---
 
-## 7. Roadmap Iterativo (actualizado)
+## 7. Roadmap Iterativo
 
-| Hito                            | Entregables clave (IDs asociados)                                                                                                                                         | Valor al usuario                   | Plazo |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ----- |
-| **R0 – Setup**                  | Docker baseline, OAuth login (USR-001), UI skeleton Markdown (EDT-001), health-check API `/healthz` (MON-001)                                                                                                   | Acceso y monitoreo inicial         | +2 sem |
-| **R1 – Ingesta & RAG**          | Carga archivos, embeddings, vector search (KB-001/002/003), límites de ingesta (ADM-001)                                                                                                                        | Contexto disponible                | +4 sem |
-| **R2 – Planner & Generación**   | End-points **`/plan`** (outline) y **`/draft_section`** (WebSocket); generación paralela por secciones; resumen global incremental; alertas SLA > 10 min (SLA-001)                                                | Borrador 80 % coherente            | +6 sem |
-| **R3 – Editor & Export**        | Markdown editor final (EDT-001), Action Palette (EDT-002), Outline Pane, barra de progreso, PDF/DOCX export (EXP-001), rate-limiting (RLM-001)                                                                   | Edición segura y guiada            | +8 sem |
-| **R4 – Versionado & Auditoría** | Diff Viewer + rollback (VER-001/002), comment tags, audit log WORM (AUD-001), borrado lógico + restore (DEL-001)                                                                                                 | Trazabilidad completa              | +10 sem |
-| **R5 – Seguridad & Compliance** | Cifrado en reposo (SEC-001/003), rotación API Keys (SEC-002/004), derecho supresión (DEL-002, PRI-001), consentimiento (PRI-002)                                                                                 | Cumplimiento normativo             | +12 sem |
-| **R6 – Operación & Backup**     | Backup cifrado + restore (INF-001, STO-002), panel métricas + costes (MET-001/002, OBS-001/002), disp. 99 % (AVL-001), escalado HPA (SCA-001)                                                                    | Fiabilidad y visibilidad           | +14 sem |
+|   |   |   |   |
+|---|---|---|---|
+|Hito|Entregables clave (IDs asociados)|Valor al usuario|Plazo|
+|**R0 – Core Backend & Security Foundation**|CI/CD (T-01), Gobernanza (T-17), Health-check (T-23), Escaneo de dependencias (T-43), Autenticación OAuth (T-02), Gestión de claves (T-41), Logs WORM (T-13), Criptografía (T-12).|Cimientos técnicos y de seguridad robustos para toda la aplicación.|+2 sem|
+|**R1 – Ingesta & Generación Inicial**|Ingesta RAG (T-04), Límites de uso (T-03), Consentimiento (T-24), Planner Service (T-05), Generación de secciones (T-06).|Flujo completo de ingesta de documentos y pipeline de generación de borradores.|+4 sem|
+|**R2 – Editor Funcional y Calidad**|UI del Editor (T-07), Paleta de acciones IA (T-08), Control de flujo (T-31), Checker de coherencia (T-11), Test de calidad de borrador (T-33).|Experiencia de edición interactiva y validación de la calidad del contenido.|+6 sem|
+|**R3 – Productividad y Navegación**|Navegación y accesibilidad (T-21), Comentarios (T-19), Favoritos (T-39), Gestión de plantillas (T-32), Context Flags (T-18), Guardrails (T-45), Benchmarks (T-46).|Mejoras en la productividad y gestión avanzada del contexto de trabajo.|+8 sem|
+|**R4 – Ciclo de Vida del Documento y Admin**|Versionado y diff (T-09), Exportación (T-10), Borrado lógico (T-22), Panel de administración (T-37), Gate de decisión de orquestador (T-47).|Gestión completa del ciclo de vida del documento y capacidades de administración.|+10 sem|
+|**R5 – Operaciones y Compliance**|Observabilidad y dashboards (T-14), Control de costes (T-25), Borrado GDPR (T-35), Backups (T-15), Cuotas de almacenamiento (T-26).|Aseguramiento de la observabilidad, gestión de costes y cumplimiento normativo.|+12 sem|
+|**R6 – Fiabilidad, Escalado y Validación Final**|Resiliencia operativa (T-36, T-29, T-27), Escalabilidad (T-16, T-38), Pruebas E2E y de usabilidad (T-20, T-30, T-34, T-40).|Garantía de resiliencia, escalabilidad y calidad final del producto.|+15 sem (3 semanas)|
 
-> *Tiempos orientativos; cada iteración cierra con los criterios de la sección 8. T0 = aprobación v0.1.*
+> Tiempos orientativos; cada iteración cierra con los criterios de la sección 8. T0 = aprobación del plan de trabajo.
 
 ---
 
-## 8. Criterios de Verificación & Validación (actualizado)
+## 8. Criterios de Verificación & Validación
 
 | Nivel             | Método                                          | Criterio de aceptación                                                                                   |
 | ----------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -276,7 +284,7 @@ Este pipeline garantiza coherencia en documentos largos sin sobrepasar la ventan
 
 ---
 
-## 9. KPIs & Analítica – Versión Completa (actualizado)
+## 9. KPIs & Analítica – Versión Completa
 
 | KPI ID     | Métrica                                    | Definición / Fórmula                                    | Objetivo ➡ Alerta      | Relación |
 | ---------- | ------------------------------------------ | ------------------------------------------------------- | ---------------------- | -------- |
@@ -299,7 +307,7 @@ Este pipeline garantiza coherencia en documentos largos sin sobrepasar la ventan
 
 ---
 
-## 10. Riesgos Principales – Matriz Actualizada
+## 10. Riesgos Principales
 
 | ID   | Riesgo                                       | Prob. | Impacto | Sev.* | Mitigación                                                     | Contingencia |
 | ---- | -------------------------------------------- | ----- | ------- | ----- | -------------------------------------------------------------- | ------------ |
@@ -313,6 +321,7 @@ Este pipeline garantiza coherencia en documentos largos sin sobrepasar la ventan
 | R-08 | Incumplimiento derecho supresión             | L     | H       | **H** | Automatizar “erase” job                                        | Purga manual |
 | R-09 | Abuso / DDOS                                 | L     | M       | **M** | RLM-001 + WAF                                                  | Block IP |
 | R-10 | Rotación de API Keys no atendida             | M     | L       | **M** | SEC-004 alertas                                               | Forzar renovación |
+| R-11 | Framework-bloat (orquestadores) | M | M | **M** | ADR-002 + auditoría deps (T-43) | Refactor modular |
 
 *Sev. = Prob. × Impacto (L/M/H).
 
@@ -325,6 +334,7 @@ Este pipeline garantiza coherencia en documentos largos sin sobrepasar la ventan
 3. Branding corporativo y plantillas avanzadas.  
 4. Integraciones (Slack, Zapier).  
 5. Model-marketplace y planes *paid* por suscripción.
+6. **Evaluar agentes/orquestadores (LangChain, Haystack, etc.)** únicamente después de R4, cuando los KPIs estén estabilizados.
 
 ---
 

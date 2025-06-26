@@ -13,8 +13,8 @@ const getOppositeTheme = (theme: Theme): Theme => {
 };
 const ThemeSwitcher = () => {
   const { t } = useTranslation();
-  const theme = useStore((state) => state.theme);
-  const setTheme = useStore((state) => state.setTheme);
+  const theme = useStore(state => state.theme);
+  const setTheme = useStore(state => state.setTheme);
 
   const switchTheme = () => {
     setTheme(getOppositeTheme(theme!));
@@ -25,10 +25,7 @@ const ThemeSwitcher = () => {
   }, [theme]);
 
   return theme ? (
-    <button
-      className='items-center gap-3 btn btn-neutral'
-      onClick={switchTheme}
-    >
+    <button className="items-center gap-3 btn btn-neutral" onClick={switchTheme}>
       {theme === 'dark' ? <Sun /> : <Moon />}
       {t(getOppositeTheme(theme) + 'Mode')}
     </button>

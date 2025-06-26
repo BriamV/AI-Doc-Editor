@@ -1,9 +1,4 @@
-import React, {
-  DetailedHTMLProps,
-  HTMLAttributes,
-  memo,
-  useState,
-} from 'react';
+import React, { DetailedHTMLProps, HTMLAttributes, memo, useState } from 'react';
 
 import ReactMarkdown from 'react-markdown';
 import { CodeProps, ReactMarkdownProps } from 'react-markdown/lib/ast-to-react';
@@ -49,15 +44,13 @@ const ContentView = memo(
 
     const [isDelete, setIsDelete] = useState<boolean>(false);
 
-    
-
-    const currentChatIndex = useStore((state) => state.currentChatIndex);
-    const setChats = useStore((state) => state.setChats);
-    const lastMessageIndex = useStore((state) =>
+    const currentChatIndex = useStore(state => state.currentChatIndex);
+    const setChats = useStore(state => state.setChats);
+    const lastMessageIndex = useStore(state =>
       state.chats ? state.chats[state.currentChatIndex].messageCurrent.messages.length - 1 : 0
     );
-    const inlineLatex = useStore((state) => state.inlineLatex);
-    const markdownMode = useStore((state) => state.markdownMode);
+    const inlineLatex = useStore(state => state.inlineLatex);
+    const markdownMode = useStore(state => state.markdownMode);
 
     const handleDelete = () => {
       const updatedChats: DocumentInterface[] = JSON.parse(
@@ -107,13 +100,10 @@ const ContentView = memo(
 
     return (
       <>
-        <div className='markdown prose w-full md:max-w-full break-words dark:prose-invert dark share-gpt-message'>
+        <div className="markdown prose w-full md:max-w-full break-words dark:prose-invert dark share-gpt-message">
           {markdownMode ? (
             <ReactMarkdown
-              remarkPlugins={[
-                remarkGfm,
-                [remarkMath, { singleDollarTextMath: inlineLatex }],
-              ]}
+              remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: inlineLatex }]]}
               rehypePlugins={[
                 rehypeKatex,
                 [
@@ -125,7 +115,7 @@ const ContentView = memo(
                   },
                 ],
               ]}
-              linkTarget='_new'
+              linkTarget="_new"
               components={{
                 code,
                 p,
@@ -134,21 +124,17 @@ const ContentView = memo(
               {content}
             </ReactMarkdown>
           ) : (
-            <span className='whitespace-pre-wrap'>{content}</span>
+            <span className="whitespace-pre-wrap">{content}</span>
           )}
         </div>
-        <div className='flex justify-end gap-2 w-full mt-2'>
+        <div className="flex justify-end gap-2 w-full mt-2">
           {isDelete || (
             <>
               {!useStore.getState().generating &&
                 role === 'assistant' &&
-                messageIndex === lastMessageIndex && (
-                  <RefreshButton onClick={handleRefresh} />
-                )}
+                messageIndex === lastMessageIndex && <RefreshButton onClick={handleRefresh} />}
               {messageIndex !== 0 && <UpButton onClick={handleMoveUp} />}
-              {messageIndex !== lastMessageIndex && (
-                <DownButton onClick={handleMoveDown} />
-              )}
+              {messageIndex !== lastMessageIndex && <DownButton onClick={handleMoveDown} />}
 
               {/* <MarkdownModeButton /> */}
               <CopyButton onClick={handleCopy} />
@@ -158,13 +144,10 @@ const ContentView = memo(
           )}
           {isDelete && (
             <>
-              <button
-                className='p-1 hover:text-white'
-                onClick={() => setIsDelete(false)}
-              >
+              <button className="p-1 hover:text-white" onClick={() => setIsDelete(false)}>
                 <Close />
               </button>
-              <button className='p-1 hover:text-white' onClick={handleDelete}>
+              <button className="p-1 hover:text-white" onClick={handleDelete}>
                 <Checkmark />
               </button>
             </>
@@ -190,16 +173,12 @@ const code = memo((props: CodeProps) => {
 const p = memo(
   (
     props?: Omit<
-      DetailedHTMLProps<
-        HTMLAttributes<HTMLParagraphElement>,
-        HTMLParagraphElement
-      >,
+      DetailedHTMLProps<HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>,
       'ref'
     > &
       ReactMarkdownProps
   ) => {
-    return <p className='whitespace-pre-wrap text-sm'>
-      {props?.children}</p>;
+    return <p className="whitespace-pre-wrap text-sm">{props?.children}</p>;
   }
 );
 

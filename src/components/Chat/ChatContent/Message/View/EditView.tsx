@@ -8,8 +8,8 @@ import { DocumentInterface } from '@type/document';
 
 import PopupModal from '@components/PopupModal';
 //import TokenCount from '@components/TokenCount';
-import IncludeSelectionSend from '@components/Chat/IncludeSelectionSend'
-import ClearPromptConfig from '@components/Chat/ClearPromptConfig'
+import IncludeSelectionSend from '@components/Chat/IncludeSelectionSend';
+import ClearPromptConfig from '@components/Chat/ClearPromptConfig';
 
 const EditView = ({
   content,
@@ -22,10 +22,10 @@ const EditView = ({
   messageIndex: number;
   sticky?: boolean;
 }) => {
-  const inputRole = useStore((state) => state.inputRole);
-  const chats = useStore((state) => state.chats);
-  const setChats = useStore((state) => state.setChats);
-  const currentChatIndex = useStore((state) => state.currentChatIndex);
+  const inputRole = useStore(state => state.inputRole);
+  const chats = useStore(state => state.chats);
+  const setChats = useStore(state => state.setChats);
+  const currentChatIndex = useStore(state => state.currentChatIndex);
   const [_content, _setContent] = useState<string>(content);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const textareaRef = React.createRef<HTMLTextAreaElement>();
@@ -45,10 +45,7 @@ const EditView = ({
     if (e.key === 'Enter' && !isMobile && !e.nativeEvent.isComposing) {
       const enterToSubmit = useStore.getState().enterToSubmit;
       if (sticky) {
-        if (
-          (enterToSubmit && !e.shiftKey) ||
-          (!enterToSubmit && (e.ctrlKey || e.shiftKey))
-        ) {
+        if ((enterToSubmit && !e.shiftKey) || (!enterToSubmit && (e.ctrlKey || e.shiftKey))) {
           e.preventDefault();
           handleSaveAndSubmit();
           resetTextAreaHeight();
@@ -65,9 +62,7 @@ const EditView = ({
 
   const handleSave = () => {
     if (sticky && (_content === '' || useStore.getState().generating)) return;
-    const updatedChats: DocumentInterface[] = JSON.parse(
-      JSON.stringify(useStore.getState().chats)
-    );
+    const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(useStore.getState().chats));
     const updatedMessages = updatedChats[currentChatIndex].messageCurrent.messages;
     if (sticky) {
       updatedMessages.push({ role: inputRole, content: _content });
@@ -83,9 +78,7 @@ const EditView = ({
   const { handleSubmit } = useSubmit();
   const handleSaveAndSubmit = () => {
     if (useStore.getState().generating) return;
-    const updatedChats: DocumentInterface[] = JSON.parse(
-      JSON.stringify(useStore.getState().chats)
-    );
+    const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(useStore.getState().chats));
 
     const editorSettings = useStore.getState().editorSettings;
     const setEditorSettings = useStore.getState().setEditorSettings;
@@ -94,32 +87,31 @@ const EditView = ({
     const updatedMessages = updatedChats[currentChatIndex].messageCurrent.messages;
     if (sticky) {
       let tempContent = _content;
-      let tempSelection = currentSelection
+      let tempSelection = currentSelection;
       if (editorSettings.includeSelection) {
+        if (_content.length != 0) {
+          // remove newline from start of currentSelection
+          if (currentSelection[0] == '\n') {
+            tempSelection = currentSelection.substring(1);
+          }
+          // remove newline from end of currentSelection
+          if (currentSelection[currentSelection.length - 1] == '\n') {
+            tempSelection = currentSelection.substring(0, currentSelection.length - 1);
+          }
 
-      if (_content.length != 0) {
-        // remove newline from start of currentSelection
-        if (currentSelection[0] == '\n') {
-          tempSelection = currentSelection.substring(1);
+          tempContent = _content + '\n\n' + tempSelection + '\n\n';
+        } else {
+          tempContent = tempSelection;
         }
-        // remove newline from end of currentSelection
-        if (currentSelection[currentSelection.length - 1] == '\n') {
-          tempSelection = currentSelection.substring(0, currentSelection.length - 1);
-        }
-
-        tempContent = (_content  + '\n\n' + tempSelection + '\n\n');
-      } else {
-        tempContent = tempSelection;
       }
-    }
-        updatedMessages.push({ role: inputRole, content: tempContent });
+      updatedMessages.push({ role: inputRole, content: tempContent });
       _setContent('');
       resetTextAreaHeight();
     } else {
       let tempContent = _content;
       if (editorSettings.includeSelection) {
-        tempContent = (_content  + '\n\n' + "{ " + currentSelection + " }" + '\n\n');
-     }
+        tempContent = _content + '\n\n' + '{ ' + currentSelection + ' }' + '\n\n';
+      }
       updatedMessages[messageIndex].content = tempContent;
       updatedChats[currentChatIndex].messageCurrent.messages = updatedMessages.slice(
         0,
@@ -131,7 +123,6 @@ const EditView = ({
     setChats(updatedChats);
     handleSubmit();
   };
-
 
   // const updateChatMessage = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
   //   if (sticky && (_content === '' || useStore.getState().generating)) return;
@@ -166,14 +157,12 @@ const EditView = ({
 
   return (
     <>
-    {sticky && (
-    <div className="flex w-full">
-    <IncludeSelectionSend />
-    {chats && chats[currentChatIndex].messageCurrent.config != null && (
-    <ClearPromptConfig />
-    )}
-    </div>
-    )}
+      {sticky && (
+        <div className="flex w-full">
+          <IncludeSelectionSend />
+          {chats && chats[currentChatIndex].messageCurrent.config != null && <ClearPromptConfig />}
+        </div>
+      )}
       <div
         className={`w-full ${
           sticky
@@ -186,7 +175,7 @@ const EditView = ({
           className={`m-0 text-grey-300 resize-none bg-transparent overflow-y-hidden focus:ring-0 focus-visible:ring-0 flex w-full placeholder:text-gray-300
           ${sticky ? 'pr-10 p-1' : 'text-sm'}
           `}
-          onChange={(e) => {
+          onChange={e => {
             _setContent(e.target.value);
           }}
           value={_content}
@@ -194,25 +183,25 @@ const EditView = ({
           onKeyDown={handleKeyDown}
           rows={1}
         ></textarea>
-       {sticky && (
-         <EditViewSubmitButton
-        handleSaveAndSubmit={handleSaveAndSubmit}
-        handleSave={handleSave}
-        setIsModalOpen={setIsModalOpen}
-        setIsEdit={setIsEdit}
-        _setContent={_setContent}
-         />
-       )}
+        {sticky && (
+          <EditViewSubmitButton
+            handleSaveAndSubmit={handleSaveAndSubmit}
+            handleSave={handleSave}
+            setIsModalOpen={setIsModalOpen}
+            setIsEdit={setIsEdit}
+            _setContent={_setContent}
+          />
+        )}
       </div>
       {sticky || (
-      <EditViewButtons
-        sticky={sticky}
-        handleSaveAndSubmit={handleSaveAndSubmit}
-        handleSave={handleSave}
-        setIsModalOpen={setIsModalOpen}
-        setIsEdit={setIsEdit}
-        _setContent={_setContent}
-      />
+        <EditViewButtons
+          sticky={sticky}
+          handleSaveAndSubmit={handleSaveAndSubmit}
+          handleSave={handleSave}
+          setIsModalOpen={setIsModalOpen}
+          setIsEdit={setIsEdit}
+          _setContent={_setContent}
+        />
       )}
       {isModalOpen && (
         <PopupModal
@@ -225,7 +214,6 @@ const EditView = ({
     </>
   );
 };
-
 
 const EditViewSubmitButton = memo(
   ({
@@ -247,26 +235,35 @@ const EditViewSubmitButton = memo(
 
     const handleCancel = () => {
       setGenerating(false);
-    };  
+    };
 
     return (
       <>
-      {!generating? (
-      <div className="absolute right-2 bottom-2 py-2 pl-2 pr-1 cursor-pointer" onClick={handleSaveAndSubmit} onMouseDown={(e) => { e.preventDefault(); }}>
-        <SendFilled size={16} />
-      </div>)
-      :
-      (
-      <div className="absolute right-2 bottom-2 py-2 pl-2 pr-1 cursor-pointer" onClick={handleCancel} onMouseDown={(e) => { e.preventDefault(); }}>
-        <StopFilledAlt size={16} />
-      </div>
-      )}
+        {!generating ? (
+          <div
+            className="absolute right-2 bottom-2 py-2 pl-2 pr-1 cursor-pointer"
+            onClick={handleSaveAndSubmit}
+            onMouseDown={e => {
+              e.preventDefault();
+            }}
+          >
+            <SendFilled size={16} />
+          </div>
+        ) : (
+          <div
+            className="absolute right-2 bottom-2 py-2 pl-2 pr-1 cursor-pointer"
+            onClick={handleCancel}
+            onMouseDown={e => {
+              e.preventDefault();
+            }}
+          >
+            <StopFilledAlt size={16} />
+          </div>
+        )}
       </>
-    )
+    );
   }
 );
-
-
 
 const EditViewButtons = memo(
   ({
@@ -288,8 +285,8 @@ const EditViewButtons = memo(
     const generating = useStore.getState().generating;
 
     return (
-      <div className='flex'>
-        <div className='flex-1 text-center mt-4 flex justify-center'>
+      <div className="flex">
+        <div className="flex-1 text-center mt-4 flex justify-center">
           {sticky && (
             <button
               className={`btn relative mr-2 btn-neutral ${
@@ -297,48 +294,35 @@ const EditViewButtons = memo(
               }`}
               onClick={handleSaveAndSubmit}
             >
-              <div className='flex items-center justify-center gap-2'>
-                {t('saveAndSubmit')}
-              </div>
+              <div className="flex items-center justify-center gap-2">{t('saveAndSubmit')}</div>
             </button>
           )}
 
           <button
             className={`btn relative mr-2 ${
               sticky
-                ? `btn-neutral ${
-                    generating ? 'cursor-not-allowed opacity-40' : ''
-                  }`
+                ? `btn-neutral ${generating ? 'cursor-not-allowed opacity-40' : ''}`
                 : 'btn-neutral'
             }`}
             onClick={handleSave}
           >
-            <div className='flex items-center justify-center gap-2'>
-              {t('save')}
-            </div>
+            <div className="flex items-center justify-center gap-2">{t('save')}</div>
           </button>
 
           {sticky || (
             <button
-              className='btn relative mr-2 btn-neutral'
+              className="btn relative mr-2 btn-neutral"
               onClick={() => {
                 !generating && setIsModalOpen(true);
               }}
             >
-              <div className='flex items-center justify-center gap-2'>
-                {t('saveAndSubmit')}
-              </div>
+              <div className="flex items-center justify-center gap-2">{t('saveAndSubmit')}</div>
             </button>
           )}
 
           {sticky || (
-            <button
-              className='btn relative btn-neutral'
-              onClick={() => setIsEdit(false)}
-            >
-              <div className='flex items-center justify-center gap-2'>
-                {t('cancel')}
-              </div>
+            <button className="btn relative btn-neutral" onClick={() => setIsEdit(false)}>
+              <div className="flex items-center justify-center gap-2">{t('cancel')}</div>
             </button>
           )}
         </div>

@@ -6,11 +6,9 @@ import Toggle from '@components/Toggle';
 const EnterToSubmitToggle = () => {
   const { t } = useTranslation();
 
-  const setEnterToSubmit = useStore((state) => state.setEnterToSubmit);
+  const setEnterToSubmit = useStore(state => state.setEnterToSubmit);
 
-  const [isChecked, setIsChecked] = useState<boolean>(
-    useStore.getState().enterToSubmit
-  );
+  const [isChecked, setIsChecked] = useState<boolean>(useStore.getState().enterToSubmit);
 
   useEffect(() => {
     setEnterToSubmit(isChecked);

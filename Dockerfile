@@ -1,19 +1,54 @@
-FROM node:alpine
+# Dockerfile for AI-Doc-Editor
+# Task T-01.5: Docker-compose setup
 
-RUN addgroup -S appgroup && \
-  adduser -S appuser -G appgroup && \
-  mkdir -p /home/appuser/app && \
-  chown appuser:appgroup /home/appuser/app
-USER appuser
+# Stage 1: Build stage
+FROM node:20-alpine AS builder
 
-RUN yarn config set prefix ~/.yarn && \
-  yarn global add serve
+WORKDIR /app
 
-WORKDIR /home/appuser/app
-COPY --chown=appuser:appgroup package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
-COPY --chown=appuser:appgroup . .
-RUN yarn build
+# Copy package files
+COPY package*.json ./
 
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy source code
+COPY . .
+
+# Build application
+RUN npm run build
+
+# Stage 2: Production stage  
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+# Install serve for hosting static files
+RUN npm install -g serve@14
+
+# Copy built application from builder stage
+COPY --from=builder /app/dist ./dist
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
+
+# Change ownership of app directory
+RUN chown -R nextjs:nodejs /app
+USER nextjs
+
+# Expose port
 EXPOSE 3000
-CMD ["/home/appuser/.yarn/bin/serve", "-s", "dist", "-l", "3000"]
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/ || exit 1
+
+# Start application
+CMD ["serve", "-s", "dist", "-l", "3000"]
+
+# Metadata
+LABEL maintainer="BriamV <velasquezbriam@gmail.com>"
+LABEL description="AI-powered document editor with RAG capabilities"
+LABEL version="1.0.0"
+EOF < /dev/null

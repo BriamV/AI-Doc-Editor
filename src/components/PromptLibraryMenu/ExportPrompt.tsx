@@ -8,12 +8,12 @@ const ExportPrompt = () => {
   const prompts = useStore.getState().prompts;
 
   return (
-    <div className='mt-4'>
-      <div className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300'>
+    <div className="mt-4">
+      <div className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">
         {t('export')} (CSV)
       </div>
       <button
-        className='btn btn-small btn-primary'
+        className="btn btn-small btn-primary"
         onClick={() => {
           exportPrompts(prompts);
         }}

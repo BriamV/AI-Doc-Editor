@@ -6,7 +6,7 @@ import { AuthSlice, createAuthSlice } from './auth-slice';
 import { ConfigSlice, createConfigSlice } from './config-slice';
 import { PromptSlice, createPromptSlice } from './prompt-slice';
 import { ToastSlice, createToastSlice } from './toast-slice';
-import { get, set } from "idb-keyval";
+import { get, set } from 'idb-keyval';
 // import {
 //   LocalStorageInterfaceV0ToV1,
 //   LocalStorageInterfaceV1ToV2,
@@ -66,7 +66,7 @@ export const createPartializedState = (state: StoreState) => ({
 export const IDBStorage = {
   getItem: async (name: any) => {
     // Exit early on server
-    if (typeof indexedDB === "undefined") {
+    if (typeof indexedDB === 'undefined') {
       return null;
     }
 
@@ -75,16 +75,15 @@ export const IDBStorage = {
   },
   setItem: async (name: any, value: any) => {
     // Exit early on server
-    if (typeof indexedDB === "undefined") {
+    if (typeof indexedDB === 'undefined') {
       return;
     }
     set(name, value);
   },
   removeItem: async (name: any) => {
     // No code here
-  }
+  },
 };
-
 
 const useStore = create<StoreState>()(
   persist(
@@ -98,7 +97,7 @@ const useStore = create<StoreState>()(
     }),
     {
       name: 'fthr-write',
-      partialize: (state) => createPartializedState(state),
+      partialize: state => createPartializedState(state),
       version: 0,
       storage: createJSONStorage(() => IDBStorage),
       // migrate: (persistedState, version) => {

@@ -12,14 +12,14 @@ const DocumentSearch = ({
   setFilter: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const [_filter, _setFilter] = useState<string>(filter);
-  const generating = useStore((state) => state.generating);
+  const generating = useStore(state => state.generating);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     _setFilter(e.target.value);
   };
 
   const debouncedUpdateFilter = useRef(
-    debounce((f) => {
+    debounce(f => {
       setFilter(f);
     }, 500)
   ).current;
@@ -32,7 +32,7 @@ const DocumentSearch = ({
     <SearchBar
       value={_filter}
       handleChange={handleChange}
-      className='h-10 mb-2'
+      className="h-10 mb-2"
       disabled={generating}
     />
   );

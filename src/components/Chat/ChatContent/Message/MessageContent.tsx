@@ -3,8 +3,6 @@ import useStore from '@store/store';
 import ContentView from './View/ContentView';
 import EditView from './View/EditView';
 
-
-
 const MessageContent = ({
   role,
   content,
@@ -17,28 +15,28 @@ const MessageContent = ({
   sticky?: boolean;
 }) => {
   const [isEdit, setIsEdit] = useState<boolean>(sticky);
-  const advancedMode = useStore((state) => state.advancedMode);
+  const advancedMode = useStore(state => state.advancedMode);
 
   return (
     <div className={`relative flex flex-col`}>
-      {advancedMode && <div className='flex flex-grow flex-col'></div>}
-            {isEdit ? (
-              <EditView
-                content={content}
-                setIsEdit={setIsEdit}
-                messageIndex={messageIndex}
-                sticky={sticky}
-              />
-            ) : (
-                <ContentView
-                  role={role}
-                  content={content}
-                  setIsEdit={setIsEdit}
-                  messageIndex={messageIndex}
-                 />
-            )}
-          </div>
-        );
-      };
+      {advancedMode && <div className="flex flex-grow flex-col"></div>}
+      {isEdit ? (
+        <EditView
+          content={content}
+          setIsEdit={setIsEdit}
+          messageIndex={messageIndex}
+          sticky={sticky}
+        />
+      ) : (
+        <ContentView
+          role={role}
+          content={content}
+          setIsEdit={setIsEdit}
+          messageIndex={messageIndex}
+        />
+      )}
+    </div>
+  );
+};
 
-      export default MessageContent;
+export default MessageContent;

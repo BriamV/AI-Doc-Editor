@@ -1,14 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import useStore from '@store/store';
 
-import { ChevronDown as DownChevronArrow} from '@carbon/icons-react';
-import { Folder, Renew, ColorPalette, TrashCan, Edit, Close, Checkmark, DocumentAdd } from '@carbon/icons-react';
-
+import { ChevronDown as DownChevronArrow } from '@carbon/icons-react';
 import {
-  DocumentHistoryInterface,
-  DocumentInterface,
-  FolderCollection,
-} from '@type/document';
+  Folder,
+  Renew,
+  ColorPalette,
+  TrashCan,
+  Edit,
+  Close,
+  Checkmark,
+  DocumentAdd,
+} from '@carbon/icons-react';
+
+import { DocumentHistoryInterface, DocumentInterface, FolderCollection } from '@type/document';
 
 import DocumentButton from './DocumentButton';
 import useAddDocument from '@hooks/useAddDocument';
@@ -22,12 +27,12 @@ const DocumentFolder = ({
   folderDocuments: DocumentHistoryInterface[];
   folderId: string;
 }) => {
-  const folderName = useStore((state) => state.folders[folderId]?.name);
-  const isExpanded = useStore((state) => state.folders[folderId]?.expanded);
-  const color = useStore((state) => state.folders[folderId]?.color);
+  const folderName = useStore(state => state.folders[folderId]?.name);
+  const isExpanded = useStore(state => state.folders[folderId]?.expanded);
+  const color = useStore(state => state.folders[folderId]?.color);
 
-  const setChats = useStore((state) => state.setChats);
-  const setFolders = useStore((state) => state.setFolders);
+  const setChats = useStore(state => state.setChats);
+  const setFolders = useStore(state => state.setFolders);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const folderRef = useRef<HTMLDivElement>(null);
@@ -50,10 +55,8 @@ const DocumentFolder = ({
   };
 
   const deleteFolder = () => {
-    const updatedChats: DocumentInterface[] = JSON.parse(
-      JSON.stringify(useStore.getState().chats)
-    );
-    updatedChats.forEach((chat) => {
+    const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(useStore.getState().chats));
+    updatedChats.forEach(chat => {
       if (chat.folder === folderId) delete chat.folder;
     });
     setChats(updatedChats);
@@ -142,9 +145,7 @@ const DocumentFolder = ({
 
   return (
     <div
-      className={`w-full transition-colors group/folder ${
-        isHover ? 'bg-gray-800/40' : ''
-      }`}
+      className={`w-full transition-colors group/folder ${isHover ? 'bg-gray-800/40' : ''}`}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -157,27 +158,25 @@ const DocumentFolder = ({
         onClick={toggleExpanded}
         ref={folderRef}
         onMouseEnter={() => {
-          if (color && folderRef.current)
-            folderRef.current.style.background = `${color}dd`;
+          if (color && folderRef.current) folderRef.current.style.background = `${color}dd`;
           if (gradientRef.current) gradientRef.current.style.width = '0px';
         }}
         onMouseLeave={() => {
-          if (color && folderRef.current)
-            folderRef.current.style.background = color;
+          if (color && folderRef.current) folderRef.current.style.background = color;
           if (gradientRef.current) gradientRef.current.style.width = '1rem';
         }}
       >
         <Folder size={16} />
-        <div className='flex-1 text-ellipsis max-h-5 overflow-hidden break-all relative'>
+        <div className="flex-1 text-ellipsis max-h-5 overflow-hidden break-all relative">
           {isEdit ? (
             <input
-              type='text'
-              className='focus:outline-blue-600 text-sm border-none bg-transparent p-0 m-0 w-full'
+              type="text"
+              className="focus:outline-blue-600 text-sm border-none bg-transparent p-0 m-0 w-full"
               value={_folderName}
-              onChange={(e) => {
+              onChange={e => {
                 _setFolderName(e.target.value);
               }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
               onKeyDown={handleKeyDown}
               ref={inputRef}
             />
@@ -187,48 +186,40 @@ const DocumentFolder = ({
           {isEdit || (
             <div
               ref={gradientRef}
-              className='absolute inset-y-0 right-0 w-4 z-10 transition-all'
+              className="absolute inset-y-0 right-0 w-4 z-10 transition-all"
               style={{
                 background:
                   color &&
-                  `linear-gradient(to left, ${
-                    color || 'var(--color-900)'
-                  }, rgb(32 33 35 / 0))`,
+                  `linear-gradient(to left, ${color || 'var(--color-900)'}, rgb(32 33 35 / 0))`,
               }}
             />
           )}
         </div>
-        <div
-          className='flex text-gray-300 h-4'
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="flex text-gray-300 h-4" onClick={e => e.stopPropagation()}>
           {isDelete || isEdit ? (
             <>
-              <button className='px-1 hover:text-white' onClick={handleTick}>
+              <button className="px-1 hover:text-white" onClick={handleTick}>
                 <Checkmark size={16} />
               </button>
-              <button className='px-1 hover:text-white' onClick={handleCross}>
+              <button className="px-1 hover:text-white" onClick={handleCross}>
                 <Close size={16} />
               </button>
             </>
           ) : (
             <>
-              <div
-                className='relative md:hidden group-hover/folder:md:inline h-4'
-                ref={paletteRef}
-              >
+              <div className="relative md:hidden group-hover/folder:md:inline h-4" ref={paletteRef}>
                 <button
-                  className='px-1 hover:text-white'
+                  className="px-1 hover:text-white"
                   onClick={() => {
-                    setShowPalette((prev) => !prev);
+                    setShowPalette(prev => !prev);
                   }}
                 >
                   <ColorPalette size={16} />
                 </button>
                 {showPalette && (
-                  <div className='absolute left-0 bottom-0 translate-y-full p-2 z-20 bg-gray-900 border border-gray-600 flex flex-col gap-2 items-center'>
+                  <div className="absolute left-0 bottom-0 translate-y-full p-2 z-20 bg-gray-900 border border-gray-600 flex flex-col gap-2 items-center">
                     <>
-                      {folderColorOptions.map((c) => (
+                      {folderColorOptions.map(c => (
                         <button
                           key={c}
                           style={{ background: c }}
@@ -251,7 +242,7 @@ const DocumentFolder = ({
               </div>
 
               <button
-                className='px-1 hover:text-white md:hidden group-hover/folder:md:inline'
+                className="px-1 hover:text-white md:hidden group-hover/folder:md:inline"
                 onClick={() => {
                   addChat(folderId);
                 }}
@@ -259,23 +250,22 @@ const DocumentFolder = ({
                 <DocumentAdd size={16} />
               </button>
               <button
-                className='px-1 hover:text-white md:hidden group-hover/folder:md:inline'
+                className="px-1 hover:text-white md:hidden group-hover/folder:md:inline"
                 onClick={() => setIsEdit(true)}
               >
                 <Edit size={16} />
               </button>
               <button
-                className='px-1 hover:text-white md:hidden group-hover/folder:md:inline'
+                className="px-1 hover:text-white md:hidden group-hover/folder:md:inline"
                 onClick={() => setIsDelete(true)}
               >
                 <TrashCan size={16} />
               </button>
 
-              <button className='px-1 hover:text-white' onClick={toggleExpanded}>
-                <DownChevronArrow size={16}
-                  className={`${
-                    isExpanded ? 'rotate-180' : ''
-                  } transition-transform`}
+              <button className="px-1 hover:text-white" onClick={toggleExpanded}>
+                <DownChevronArrow
+                  size={16}
+                  className={`${isExpanded ? 'rotate-180' : ''} transition-transform`}
                 />
               </button>
             </>
@@ -283,17 +273,17 @@ const DocumentFolder = ({
         </div>
       </div>
       {isExpanded && (
-      <div className='ml-3 pl-1 mt-1 border-l-2 border-gray-700 flex flex-col gap-1 parent'>
-        {/* {isExpanded && <NewChat folder={folderId} />} */}
-        {isExpanded &&
-          folderDocuments.map((chat) => (
-            <DocumentButton
-              title={chat.title}
-              chatIndex={chat.index}
-              key={`${chat.title}-${chat.index}`}
-            />
-          ))}
-      </div>
+        <div className="ml-3 pl-1 mt-1 border-l-2 border-gray-700 flex flex-col gap-1 parent">
+          {/* {isExpanded && <NewChat folder={folderId} />} */}
+          {isExpanded &&
+            folderDocuments.map(chat => (
+              <DocumentButton
+                title={chat.title}
+                chatIndex={chat.index}
+                key={`${chat.title}-${chat.index}`}
+              />
+            ))}
+        </div>
       )}
     </div>
   );

@@ -21,7 +21,7 @@ const createGoogleCloudStorage = <S>(): PersistStorage<S> | undefined => {
     return;
   }
   const persistStorage: PersistStorage<S> = {
-    getItem: async (name) => {
+    getItem: async name => {
       useCloudAuthStore.getState().setSyncStatus('syncing');
       try {
         const accessToken = useCloudAuthStore.getState().googleAccessToken;
