@@ -21,6 +21,8 @@
     "test:e2e:open": "cypress open",
     "lint": "eslint src --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "lint:t02-only": "eslint src/components/Auth src/api/auth-api.ts src/hooks/useAuth.ts src/store/auth-slice.ts src/types/auth.ts --ext .ts,.tsx",
+    "lint:gradual": "eslint src --ext .ts,.tsx --report-unused-disable-directives --max-warnings 50",
     "format": "prettier --write src/**/*.{ts,tsx,js,jsx,json,css,md}",
     "format:check": "prettier --check src/**/*.{ts,tsx,js,jsx,json,css,md}",
     "traceability": "node scripts/generate-traceability.cjs",

@@ -89,7 +89,12 @@ const ApiMenu = ({
         <div className="min-w-fit text-gray-900 dark:text-gray-300 text-sm flex flex-col gap-3 leading-relaxed">
           <p className="mt-4">
             You can access your OpenAI API keys by clicking{' '}
-            <a href="https://platform.openai.com/account/api-keys" className="link" target="_blank">
+            <a
+              href="https://platform.openai.com/account/api-keys"
+              className="link"
+              target="_blank"
+              rel="noreferrer"
+            >
               here.
             </a>
           </p>

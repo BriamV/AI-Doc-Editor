@@ -1,5 +1,6 @@
 import { defaultAPIEndpoint } from '@constants/auth';
 import { StoreSlice } from './store';
+import { User } from '../types/auth';
 
 export interface AuthSlice {
   apiKey?: string;
@@ -11,13 +12,7 @@ export interface AuthSlice {
   isAuthenticated: boolean;
   accessToken?: string;
   refreshToken?: string;
-  user?: {
-    id: string;
-    email: string;
-    name: string;
-    role: 'editor' | 'admin';
-    provider: 'google' | 'microsoft';
-  };
+  user?: User;
   setApiKey: (apiKey: string) => void;
   setApiEndpoint: (apiEndpoint: string) => void;
   setFirstVisit: (firstVisit: boolean) => void;
@@ -25,7 +20,7 @@ export interface AuthSlice {
   setApiPopupTotal: (apiPopupTotal: number) => void;
   // T-02: JWT token management
   setTokens: (accessToken: string, refreshToken: string) => void;
-  setUser: (user: any) => void;
+  setUser: (user: User) => void;
   logout: () => void;
 }
 
@@ -79,7 +74,7 @@ export const createAuthSlice: StoreSlice<AuthSlice> = (set, get) => ({
       isAuthenticated: true,
     }));
   },
-  setUser: (user: any) => {
+  setUser: (user: User) => {
     set((prev: AuthSlice) => ({
       ...prev,
       user,
