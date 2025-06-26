@@ -13,15 +13,15 @@
 
 ### Option 1: Automated Docker Build (Recommended)
 ```bash
-# 1. Run setup validation
+# 1. Run setup validation (auto-configura .env)
 ./setup-docker-build.sh
 
-# 2. Configure OAuth credentials in .env (see section below)
-nano .env
-
-# 3. Execute full build (5-10 minutes)
+# 2. Execute full build (5-10 minutes) - ¡Ya listo para funcionar!
 ./docker-build-execute.sh
 ```
+
+**✅ No necesitas configurar OAuth ahora** - el build incluye configuración demo segura.  
+**🎛️ OAuth real:** Se configura después desde el Admin Panel UI (T-44)
 
 ### Option 2: Manual Docker Commands
 ```bash

@@ -39,15 +39,16 @@ echo "2/5 ⚙️  Checking environment configuration..."
 if [ ! -f ".env" ]; then
     echo "⚠️  .env file not found, creating from template..."
     cp .env.example .env
-    echo "📝 Please configure OAuth credentials in .env file:"
-    echo "   - GOOGLE_CLIENT_ID=your_google_client_id"
-    echo "   - GOOGLE_CLIENT_SECRET=your_google_client_secret"
-    echo "   - MICROSOFT_CLIENT_ID=your_microsoft_client_id"
-    echo "   - MICROSOFT_CLIENT_SECRET=your_microsoft_client_secret"
-    echo "   - JWT_SECRET_KEY=your_jwt_secret_key"
+    echo "✅ .env created with development defaults"
+    echo "📝 OAuth providers can be configured later via Admin UI"
 else
     echo "✅ .env file exists"
 fi
+
+echo "📋 Current OAuth configuration:"
+echo "   - Build includes demo OAuth configs (safe for testing)"
+echo "   - Real OAuth setup: Configure via Admin Panel UI (T-44)"
+echo "   - Direct testing: Update GOOGLE_CLIENT_ID/SECRET in .env"
 
 # Verify backend requirements
 echo ""
