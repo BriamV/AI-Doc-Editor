@@ -49,12 +49,16 @@
 
 ---
 
-## R0.WP2: User Management & API Security 🔄 **NEXT PHASE**
+## R0.WP2: User Management & API Security 🔄 **IN PROGRESS**
+
+### Completed Tasks
+| Task ID | Title | Status | Progress | Key Deliverables |
+|---------|-------|--------|----------|------------------|
+| **T-02** | OAuth Integration | ✅ Completed | 100% | OAuth 2.0 (Google/MS), JWT Roles, Secure Endpoints |
 
 ### Upcoming Tasks
 | Task ID | Title | Priority | Complexity | Dependencies |
 |---------|-------|----------|------------|--------------|
-| **T-02** | OAuth Integration | Critical | 12 points | T-01 |
 | **T-41** | User API Keys Management | High | 8 points | T-02 |
 | **T-44** | Admin Panel | Medium | 11 points | T-02, T-41 |
 
@@ -147,5 +151,5 @@
 
 ---
 
-*Last Updated: 2025-06-25 - R0.WP1 Completion*  
+*Last Updated: 2025-06-26 - T-02 Completion (R0.WP2 In Progress)*  
 *Next Update: Post R0.WP2 completion*
