@@ -24,7 +24,7 @@ export interface AuthSlice {
   logout: () => void;
 }
 
-export const createAuthSlice: StoreSlice<AuthSlice> = (set, get) => ({
+export const createAuthSlice: StoreSlice<AuthSlice> = (set) => ({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY || undefined,
   apiEndpoint: defaultAPIEndpoint,
   apiCalls: 0,
