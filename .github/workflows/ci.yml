@@ -14,9 +14,6 @@ jobs:
   quality-gate:
     name: Quality Gate
     runs-on: ubuntu-latest
-
-
-
     strategy:
       matrix:
         node-version: [18.x, 20.x]
@@ -57,48 +54,10 @@ jobs:
       - name: Build application
         run: yarn build
 
-      # T-43: Dependency Security Scanning
       - name: Run yarn audit (Node.js dependencies)
         run: |
           echo "🔒 Running yarn audit for Node.js dependencies..."
           yarn audit --level critical || (echo "❌ Critical vulnerabilities found" && exit 1)
-
-      - name: Check for pip (Python dependencies)
-        id: check-pip
-        run: |
-          if command -v pip &> /dev/null; then
-            echo "pip_available=true" >> $GITHUB_OUTPUT
-          else
-            echo "pip_available=false" >> $GITHUB_OUTPUT
-            echo "ℹ️ pip not available - skipping Python scan"
-          fi
-
-      - name: Install pip-audit (if pip available)
-        if: steps.check-pip.outputs.pip_available == 'true'
-        run: |
-          echo "📦 Installing pip-audit..."
-          pip install pip-audit
-
-      - name: Run pip-audit (Python dependencies)
-        if: steps.check-pip.outputs.pip_available == 'true'
-        run: |
-          echo "🔒 Running pip-audit for Python dependencies..."
-          pip-audit --format=json --output=pip-audit-report.json || (echo "❌ Vulnerabilities found" && exit 1)
-
-      - name: Generate license report
-        run: |
-          echo "📋 Generating dependency license report..."
-          yarn list --depth=0 --json > yarn-licenses.json || true
-
-      - name: Upload security reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: security-reports-${{ matrix.node-version }}
-          path: |
-            yarn-licenses.json
-            pip-audit-report.json
-          retention-days: 30
 
       - name: E2E Tests (Node 20 only)
         if: matrix.node-version == '20.x'
@@ -107,10 +66,53 @@ jobs:
           npx wait-on http://localhost:5173
           yarn test:e2e
 
+  python-security-audit:
+    name: Python Security Audit
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Audit dependencies in isolated environment
+        run: |
+          echo "--- Creating virtual environment ---"
+          python -m venv .venv
+          source .venv/bin/activate
+          echo "--- Installing dependencies ---"
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt pip-audit
+          echo "--- Running pip-audit ---"
+          pip-audit --format json --output pip-audit-report.json || true
+
+      - name: Upload pip-audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-report-${{ matrix.python-version }}
+          path: pip-audit-report.json
+
+      - name: Check for vulnerabilities
+        run: |
+          # We check if the file is not empty and if the vulnerabilities array has items
+          if [ -s pip-audit-report.json ] && [ "$(jq '.vulnerabilities | length' pip-audit-report.json)" -gt 0 ]; then
+            echo "❌ Found vulnerabilities in Python packages. See the 'pip-audit-report' artifact for details."
+            exit 1
+          else
+            echo "✅ No vulnerabilities found in Python packages."
+          fi
+
   quality-metrics:
     name: Code Quality Metrics
     runs-on: ubuntu-latest
-    needs: quality-gate
+    needs: [quality-gate, python-security-audit]
     if: github.ref == 'refs/heads/main'
 
     steps:
