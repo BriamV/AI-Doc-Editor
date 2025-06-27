@@ -19,10 +19,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'npm'
+          cache: 'yarn'
 
       - name: Install dependencies
-        run: npm ci
+        run: yarn install --frozen-lockfile
 
       - name: TypeScript strict compilation
         run: |
@@ -37,10 +37,10 @@ jobs:
       - name: ESLint quality gate
         run: |
           echo "Running ESLint with zero tolerance for warnings..."
-          npm run lint
+          yarn lint
           if [ $? -ne 0 ]; then
             echo "❌ ESLint failed - please fix all linting issues"
-            echo "Run 'npm run lint:fix' to auto-fix some issues"
+            echo "Run 'yarn lint:fix' to auto-fix some issues"
             exit 1
           fi
           echo "✅ ESLint passed with zero warnings"
@@ -48,10 +48,10 @@ jobs:
       - name: Prettier format check
         run: |
           echo "Checking code formatting with Prettier..."
-          npm run format:check
+          yarn format:check
           if [ $? -ne 0 ]; then
             echo "❌ Code formatting issues found"
-            echo "Run 'npm run format' to fix formatting"
+            echo "Run 'yarn format' to fix formatting"
             exit 1
           fi
           echo "✅ Code formatting is consistent"
@@ -59,7 +59,7 @@ jobs:
       - name: Unit tests with coverage
         run: |
           echo "Running unit tests with coverage reporting..."
-          npm run test:coverage
+          yarn test:coverage
           if [ $? -ne 0 ]; then
             echo "❌ Unit tests failed"
             exit 1
@@ -69,7 +69,7 @@ jobs:
       - name: Build verification
         run: |
           echo "Verifying application builds successfully..."
-          npm run build
+          yarn build
           if [ $? -ne 0 ]; then
             echo "❌ Build failed"
             exit 1
