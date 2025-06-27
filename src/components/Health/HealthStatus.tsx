@@ -3,7 +3,7 @@
  * Frontend health status display component
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   checkSystemHealth,
   formatHealthStatus,
@@ -26,7 +26,7 @@ const HealthStatus: React.FC<HealthStatusProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchHealth = async () => {
+  const fetchHealth = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -38,16 +38,22 @@ const HealthStatus: React.FC<HealthStatusProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchHealth();
 
+    let intervalId: ReturnType<typeof setInterval> | undefined;
     if (autoRefresh) {
-      const interval = setInterval(fetchHealth, refreshInterval);
-      return () => clearInterval(interval);
+      intervalId = setInterval(fetchHealth, refreshInterval);
     }
-  }, [autoRefresh, refreshInterval]);
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [autoRefresh, refreshInterval, fetchHealth]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -111,7 +117,7 @@ const HealthStatus: React.FC<HealthStatusProps> = ({
             >
               🔄
             </button>
-            {process.env.NODE_ENV === 'development' && (
+            {import.meta.env.MODE === 'development' && (
               <button
                 onClick={handleDebugClick}
                 className="text-xs px-2 py-1 rounded bg-white/50 hover:bg-white/75 transition-colors"

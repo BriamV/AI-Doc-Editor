@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import useStore from '@store/store';
 import defaultStyles from '@components/style';
@@ -17,7 +16,7 @@ const NewDocumentButton = ({ folder }: { folder?: string }) => {
       onClick={() => {
         if (!generating) addChat(folder);
       }}
-      title={folder ? String(t('newDocument')) : ''}
+      {...(folder && { title: String(t('newDocument')) })}
     >
       {folder ? (
         <div className={defaultStyles.buttonStyle}>

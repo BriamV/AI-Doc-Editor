@@ -18,7 +18,7 @@ const EditorRefresh = () => {
         editor.dispatchCommand(CLEAR_HISTORY_COMMAND, undefined);
       }
     }
-  }, [currentChatIndex, editorRefresh]);
+  }, [currentChatIndex, editorRefresh, chats, editor]);
   return null;
 };
 

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import useStore from '@store/store';
 import { ChevronDown } from '@carbon/icons-react';
@@ -6,10 +5,12 @@ import { ChevronDown } from '@carbon/icons-react';
 import { DocumentInterface, Role, roles } from '@type/document';
 
 import useHideOnOutsideClick from '@hooks/useHideOnOutsideClick';
+import React from 'react';
 
 const RoleSelector = React.memo(
   ({ role, messageIndex, sticky }: { role: Role; messageIndex: number; sticky?: boolean }) => {
     const { t } = useTranslation();
+    const chats = useStore(state => state.chats);
     const setInputRole = useStore(state => state.setInputRole);
     const setChats = useStore(state => state.setChats);
     const currentChatIndex = useStore(state => state.currentChatIndex);
@@ -42,9 +43,7 @@ const RoleSelector = React.memo(
                 className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer"
                 onClick={() => {
                   if (!sticky) {
-                    const updatedChats: DocumentInterface[] = JSON.parse(
-                      JSON.stringify(useStore.getState().chats)
-                    );
+                    const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
                     updatedChats[currentChatIndex].messageCurrent.messages[messageIndex].role = r;
                     setChats(updatedChats);
                   } else {
@@ -63,4 +62,5 @@ const RoleSelector = React.memo(
     );
   }
 );
+RoleSelector.displayName = 'RoleSelector';
 export default RoleSelector;

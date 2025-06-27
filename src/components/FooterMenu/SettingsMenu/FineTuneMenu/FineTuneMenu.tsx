@@ -3,7 +3,7 @@ import useStore from '@store/store';
 import { useTranslation } from 'react-i18next';
 import PopupModal from '@components/PopupModal';
 import { FineTuneModel } from '@type/config';
-import { v4 as uuidv4 } from 'uuid';
+
 import { Add, TrashCan } from '@carbon/icons-react';
 import { generateDefaultFineTuneModel } from '@constants/config';
 
@@ -60,8 +60,12 @@ const FineTuneMenuPopUp = ({
     _setFineTuneModels(updatedFineTuneModels);
   };
 
-  const clearFineTuneModels = () => {
-    _setFineTuneModels([]);
+  const handleFineTuneModelChange = (index: number, field: keyof FineTuneModel, value: string) => {
+    _setFineTuneModels(prev => {
+      const newFineTuneModels = [...prev];
+      newFineTuneModels[index] = { ...newFineTuneModels[index], [field]: value };
+      return newFineTuneModels;
+    });
   };
 
   return (
@@ -86,14 +90,8 @@ const FineTuneMenuPopUp = ({
             <div key={index} className="flex items-center border-b border-gray-500/50 mb-1 p-1">
               <div className="sm:w-1/4 max-sm:flex-1">
                 <textarea
-                  className="m-0 resize-none rounded-lg bg-transparent overflow-y-hidden leading-7 p-1 focus:ring-1 focus:ring-blue w-full max-h-10 transition-all"
-                  onChange={e => {
-                    _setFineTuneModels(prev => {
-                      const newFineTuneModels = [...prev];
-                      newFineTuneModels[index].name = e.target.value;
-                      return newFineTuneModels;
-                    });
-                  }}
+                  className="m-0 w-full max-h-10 resize-none overflow-y-hidden rounded-lg bg-transparent p-1 leading-7 transition-all focus:ring-1 focus:ring-blue"
+                  onChange={e => handleFineTuneModelChange(index, 'name', e.target.value)}
                   onInput={handleInput}
                   value={model.name}
                   rows={1}
@@ -102,14 +100,8 @@ const FineTuneMenuPopUp = ({
               </div>
               <div className="flex-1">
                 <textarea
-                  className="m-0 resize-none rounded-lg bg-transparent overflow-y-hidden leading-7 p-1 focus:ring-1 focus:ring-blue w-full max-h-10 transition-all"
-                  onChange={e => {
-                    _setFineTuneModels(prev => {
-                      const newFineTuneModels = [...prev];
-                      newFineTuneModels[index].model = e.target.value;
-                      return newFineTuneModels;
-                    });
-                  }}
+                  className="m-0 w-full max-h-10 resize-none overflow-y-hidden rounded-lg bg-transparent p-1 leading-7 transition-all focus:ring-1 focus:ring-blue"
+                  onChange={e => handleFineTuneModelChange(index, 'model', e.target.value)}
                   onInput={handleInput}
                   value={model.model}
                   rows={1}
@@ -133,13 +125,6 @@ const FineTuneMenuPopUp = ({
           </span>{' '}
           New Fine-Tune Model
         </button>
-        <div className="flex justify-center mt-2">
-          {/* <div
-            className='btn btn-neutral cursor-pointer text-xs'
-            onClick={clearFineTuneModels}
-          ><span className='pr-1'><TrashCan /></span>Delete all
-          </div> */}
-        </div>
       </div>
     </PopupModal>
   );

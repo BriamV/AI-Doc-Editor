@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import useStore from '@store/store';
 import { useTranslation } from 'react-i18next';
 import PopupModal from '@components/PopupModal';
@@ -7,7 +7,8 @@ import { ChevronDown } from '@carbon/icons-react';
 import { modelMaxToken, modelOptions } from '@constants/chat';
 import { Settings } from '@carbon/icons-react';
 import { _defaultChatConfig } from '@constants/chat';
-import _, { set } from 'lodash';
+
+import type { Prompt } from '@type/document';
 import { FineTuneModel } from '@type/config';
 
 export const PromptButtonConfig = ({
@@ -16,14 +17,14 @@ export const PromptButtonConfig = ({
   _promptName,
   _setPromptName,
 }: {
-  prompt: any;
+  prompt: Prompt;
   index: number;
-  _promptName: any;
-  _setPromptName: any;
+  _promptName: string;
+  _setPromptName: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const [isPromptConfigModalOpen, setIsPromptConfigModalOpen] = useState<boolean>(false);
 
-  const handleClick = (e: any) => {
+  const handleClick = () => {
     setIsPromptConfigModalOpen(true);
   };
 
@@ -40,9 +41,7 @@ export const PromptButtonConfig = ({
           _promptName={_promptName}
           _setPromptName={_setPromptName}
         />
-      ) : (
-        <></>
-      )}
+      ) : null}
     </>
   );
 };
@@ -55,51 +54,43 @@ const PromptPopup = ({
   _setPromptName,
 }: {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  prompt: any;
-  index: any;
-  _promptName: any;
-  _setPromptName: any;
+  prompt: Prompt;
+  index: number;
+  _promptName: string;
+  _setPromptName: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const prompts = useStore(state => state.prompts);
   const setPrompts = useStore(state => state.setPrompts);
-  const [_name, _setName] = useState<any>(prompt.name);
-  const [_prompt, _setPrompt] = useState<any>(prompt.prompt);
+  const [_prompt, _setPrompt] = useState<string>(prompt.prompt);
   const [isChecked, setIsChecked] = useState<boolean>(false);
   const [isSelectionChecked, setIsSelectionChecked] = useState<boolean>(prompt.includeSelection);
 
-  useEffect(() => {
-    updateChecked();
-  }, [prompts, prompt.config]);
-
-  function updateChecked() {
+  const updateChecked = useCallback(() => {
     if (prompts[index].config == null) {
       setIsChecked(true);
     } else {
       setIsChecked(false);
     }
-  }
+  }, [prompts, index]);
+
+  useEffect(() => {
+    updateChecked();
+  }, [updateChecked, prompt.config]);
 
   function handleIndividualPromptConfig() {
+    const tempPrompts = JSON.parse(JSON.stringify(prompts));
     if (prompt.config == null) {
-      let tempPrompts = prompts;
-      let tempPromptConfig = _defaultChatConfig;
-      tempPrompts[index].config = tempPromptConfig;
-      setPrompts(tempPrompts);
-      setPrompts(tempPrompts);
-      updateChecked();
+      tempPrompts[index].config = _defaultChatConfig;
     } else {
-      // set to null
-      let tempPrompts = prompts;
       tempPrompts[index].config = null;
-      setPrompts(tempPrompts);
-      setPrompts(tempPrompts);
-      updateChecked();
     }
+    setPrompts(tempPrompts);
+    updateChecked();
   }
 
   function handleSelectionChecked() {
     setIsSelectionChecked(!isSelectionChecked);
-    let tempPrompts = prompts;
+    const tempPrompts = JSON.parse(JSON.stringify(prompts));
     tempPrompts[index].includeSelection = !isSelectionChecked;
     setPrompts(tempPrompts);
   }
@@ -132,14 +123,13 @@ const PromptPopup = ({
               onFocus={handleOnFocus}
               onBlur={handleOnBlur}
               onChange={e => {
-                let tempPrompts = prompts;
-                _setName(e.target.value);
                 _setPromptName(e.target.value);
+                const tempPrompts = JSON.parse(JSON.stringify(prompts));
                 tempPrompts[index].name = e.target.value;
                 setPrompts(tempPrompts);
               }}
               onInput={handleInput}
-              value={_name}
+              value={_promptName}
               rows={1}
               maxLength={32}
             ></textarea>
@@ -189,34 +179,51 @@ const PromptPopup = ({
   );
 };
 
-export const PromptIndividualConfig = ({ prompt, index }: { prompt: any; index: number }) => {
-  const [_model, _setModel] = useState<string>(prompt.config.model);
-  const [_maxToken, _setMaxToken] = useState<number>(prompt.config.max_completion_tokens);
-  const [_temperature, _setTemperature] = useState<number>(prompt.config.temperature);
-  const [_presencePenalty, _setPresencePenalty] = useState<number>(prompt.config.presence_penalty);
-  const [_topP, _setTopP] = useState<number>(prompt.config.top_p);
-  const [_frequencyPenalty, _setFrequencyPenalty] = useState<number>(
-    prompt.config.frequency_penalty
-  );
+export const PromptIndividualConfig = ({ prompt, index }: { prompt: Prompt; index: number }) => {
+  const config = prompt.config ?? _defaultChatConfig;
+  const [_model, _setModel] = useState<ModelOptions>(config.model);
+  const [_maxToken, _setMaxToken] = useState<number>(config.max_completion_tokens);
+  const [_temperature, _setTemperature] = useState<number>(config.temperature);
+  const [_presencePenalty, _setPresencePenalty] = useState<number>(config.presence_penalty);
+  const [_topP, _setTopP] = useState<number>(config.top_p);
+  const [_frequencyPenalty, _setFrequencyPenalty] = useState<number>(config.frequency_penalty);
   const prompts = useStore(state => state.prompts);
   const setPrompts = useStore(state => state.setPrompts);
 
-  // Watch for changse in prompt config
+  useEffect(() => {
+    const tempPrompts = JSON.parse(JSON.stringify(prompts));
+    if (prompt.config) {
+      tempPrompts[index].config = {
+        ...prompt.config,
+        max_completion_tokens: _maxToken,
+        model: _model,
+        temperature: _temperature,
+        top_p: _topP,
+        presence_penalty: _presencePenalty,
+        frequency_penalty: _frequencyPenalty,
+      };
+      setPrompts(tempPrompts);
+    }
+  }, [
+    _maxToken,
+    _model,
+    _temperature,
+    _topP,
+    _presencePenalty,
+    _frequencyPenalty,
+    prompt.config,
+    prompts,
+    index,
+    setPrompts,
+  ]);
 
   useEffect(() => {
-    prompts[index].config = {
-      model: _model,
-      max_completion_tokens: _maxToken,
-      temperature: _temperature,
-      presence_penalty: _presencePenalty,
-      top_p: _topP,
-      frequency_penalty: _frequencyPenalty,
-      // apiEndpoint: prompts[index].config.apiEndpoint,
-      // apiKey: prompts[index].config.apiKey,
-      // notes: prompts[index].config.notes,
-    };
-    setPrompts(prompts);
-  }, [_model, _maxToken, _temperature, _presencePenalty, _topP, _frequencyPenalty]);
+    if (_model.includes(':')) {
+      _setMaxToken(modelMaxToken[_model.split(':')[1]]);
+    } else {
+      _setMaxToken(modelMaxToken[_model]);
+    }
+  }, [_model, _setMaxToken]);
 
   return (
     <div className="mt-4">
@@ -248,23 +255,16 @@ export const ModelSelector = ({
 
   const [defaultAndFindTuneModels, setDefaultAndFineTuneModels] = useState<FineTuneModel[]>([]);
 
-  // Set defaultAndFineTuneModels to include both the model options and the fine tune options (the fine tune options are stored in the store)
-
   useEffect(() => {
-    let tempModels = [];
-    // Iterate over models in modelOptions and turn each string into an object with it's value as both the name and model
-    for (let i = 0; i < modelOptions.length; i++) {
-      tempModels.push({ name: modelOptions[i], model: modelOptions[i] });
-    }
+    let tempModels = modelOptions.map(model => ({ name: model, model }));
 
     if (fineTuneModels) {
-      // Add the fine tune models to the tempModels array
       tempModels = [...tempModels, ...fineTuneModels];
     }
     setDefaultAndFineTuneModels(tempModels);
   }, [fineTuneModels]);
 
-  const getModelName = (modelValue: any) => {
+  const getModelName = (modelValue: string) => {
     const modelObj = defaultAndFindTuneModels.find(m => m.model === modelValue);
     return modelObj ? modelObj.name : modelValue;
   };
@@ -320,8 +320,12 @@ export const MaxTokenSlider = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    inputRef && inputRef.current && _setMaxToken(Number(inputRef.current.value));
-  }, [_model]);
+    if (_model.includes(':')) {
+      _setMaxToken(modelMaxToken[_model.split(':')[1]]);
+    } else {
+      _setMaxToken(modelMaxToken[_model]);
+    }
+  }, [_model, _setMaxToken]);
 
   return (
     <div>

@@ -1,29 +1,11 @@
-import { v4 as uuidv4 } from 'uuid';
-
-import {
-  Folder,
-  FolderCollection,
-  LocalStorageInterfaceV0ToV1,
-  LocalStorageInterfaceV1ToV2,
-  LocalStorageInterfaceV2ToV3,
-  LocalStorageInterfaceV3ToV4,
-  LocalStorageInterfaceV4ToV5,
-  LocalStorageInterfaceV5ToV6,
-  LocalStorageInterfaceV6ToV7,
-  LocalStorageInterfaceV7oV8,
-} from '@type/document';
-import { _defaultChatConfig, defaultModel, defaultUserMaxToken } from '@constants/chat';
-import { officialAPIEndpoint } from '@constants/auth';
-import defaultPrompts from '@constants/prompt';
-
-// export const migrateV0 = (persistedState: LocalStorageInterfaceV0ToV1) => {
+// export const migrateV0 = (persistedState: any) => {
 //   persistedState.chats.forEach((chat) => {
 //     chat.titleSet = false;
 //     if (!chat.config) chat.config = { ..._defaultChatConfig };
 //   });
 // };
 
-// export const migrateV1 = (persistedState: LocalStorageInterfaceV1ToV2) => {
+// export const migrateV1 = (persistedState: any) => {
 //   if (persistedState.apiFree) {
 //     persistedState.apiEndpoint = persistedState.apiFreeEndpoint;
 //   } else {
@@ -31,22 +13,21 @@ import defaultPrompts from '@constants/prompt';
 //   }
 // };
 
-// export const migrateV2 = (persistedState: LocalStorageInterfaceV2ToV3) => {
+// export const migrateV2 = (persistedState: any) => {
 //   persistedState.chats.forEach((chat) => {
 //     chat.config = {
 //       ...chat.config,
-//       top_p: _defaultChatConfig.top_p,
-//       frequency_penalty: _defaultChatConfig.frequency_penalty,
+//       max_tokens: defaultUserMaxToken,
 //     };
 //   });
 //   persistedState.autoTitle = false;
 // };
 
-// export const migrateV3 = (persistedState: LocalStorageInterfaceV3ToV4) => {
+// export const migrateV3 = (persistedState: any) => {
 //   persistedState.prompts = defaultPrompts;
 // };
 
-// export const migrateV4 = (persistedState: LocalStorageInterfaceV4ToV5) => {
+// export const migrateV4 = (persistedState: any) => {
 //   persistedState.chats.forEach((chat) => {
 //     chat.config = {
 //       ...chat.config,
@@ -55,48 +36,48 @@ import defaultPrompts from '@constants/prompt';
 //   });
 // };
 
-// export const migrateV5 = (persistedState: LocalStorageInterfaceV5ToV6) => {
+// export const migrateV5 = (persistedState: any) => {
 //   persistedState.chats.forEach((chat) => {
 //     chat.config = {
 //       ...chat.config,
-//       max_completion_tokens: defaultUserMaxToken,
+//       top_p: 1,
 //     };
 //   });
 // };
 
-// export const migrateV6 = (persistedState: LocalStorageInterfaceV6ToV7) => {
+// export const migrateV6 = (persistedState: any) => {
 //   if (
 //     persistedState.apiEndpoint ===
 //     'https://sharegpt.churchless.tech/share/v1/chat'
 //   ) {
-//     persistedState.apiEndpoint = 'https://chatgpt-api.shn.hk/v1/';
-//   }
-//   if (!persistedState.apiKey || persistedState.apiKey.length === 0)
+//     persistedState.apiEndpoint = officialAPIEndpoint;
 //     persistedState.apiKey = '';
+//   }
 // };
 
-// export const migrateV7 = (persistedState: LocalStorageInterfaceV7oV8) => {
-//   let folders: FolderCollection = {};
+// export const migrateV7 = (persistedState: any) => {
+//   let folders: any = {};
 //   const folderNameToIdMap: Record<string, string> = {};
 
 //   // convert foldersExpanded and foldersName to folders
-//   persistedState.foldersName.forEach((name, index) => {
+//   persistedState.foldersName.forEach((name: string, index: number) => {
 //     const id = uuidv4();
-//     const folder: Folder = {
+//     const folder: any = {
 //       id,
 //       name,
 //       expanded: persistedState.foldersExpanded[index],
 //       order: index,
 //     };
-
-//     folders = { [id]: folder, ...folders };
+//     folders[id] = folder;
 //     folderNameToIdMap[name] = id;
 //   });
+
 //   persistedState.folders = folders;
 
-//   // change the chat.folder from name to id
-//   persistedState.chats.forEach((chat) => {
-//     if (chat.folder) chat.folder = folderNameToIdMap[chat.folder];
-//     chat.id = uuidv4();
+//   // update chat folder
+//   persistedState.chats.forEach((chat: any) => {
+//     if (chat.folder) {
+//       chat.folder = folderNameToIdMap[chat.folder];
+//     }
 //   });
 // };

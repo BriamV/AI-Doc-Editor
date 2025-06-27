@@ -3,10 +3,10 @@ info:
   title: AI-Doc-Editor API
   description: |
     AI-powered document generation and editing platform with RAG capabilities.
-    
+
     **Current Phase**: R0.WP2 - User Management & API Security  
     **Architecture**: React + Electron frontend with FastAPI backend
-    
+
     **Implementation Status**:
     - ✅ Health monitoring (T-23)
     - ✅ OAuth 2.0 + JWT authentication (T-02)
@@ -38,7 +38,7 @@ paths:
       operationId: getHealth
       tags:
         - Health
-      security: []  # Health endpoint is public
+      security: [] # Health endpoint is public
       responses:
         '200':
           description: Service is healthy
@@ -69,7 +69,7 @@ paths:
       operationId: login
       tags:
         - Authentication
-      security: []  # Login endpoint is public
+      security: [] # Login endpoint is public
       requestBody:
         required: true
         content:
@@ -99,7 +99,7 @@ paths:
       operationId: oauthCallback
       tags:
         - Authentication
-      security: []  # Callback endpoint is public
+      security: [] # Callback endpoint is public
       requestBody:
         required: true
         content:
@@ -135,7 +135,7 @@ paths:
       operationId: refreshToken
       tags:
         - Authentication
-      security: []  # Uses refresh token in body
+      security: [] # Uses refresh token in body
       requestBody:
         required: true
         content:
@@ -405,10 +405,9 @@ tags:
     description: Health check and monitoring endpoints
   - name: Authentication
     description: User authentication and session management
-
 # Future endpoints (planned for R1-R6)
 # /upload - File ingesta RAG (T-04)
-# /plan - Planner service (T-05) 
+# /plan - Planner service (T-05)
 # /draft_section - WebSocket streaming (T-06)
 # /rewrite - Action palette commands (T-08)
 # /export - Document export (T-10)

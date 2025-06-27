@@ -21,7 +21,7 @@ import { folderColorOptions } from '@constants/color';
 import useHideOnOutsideClick from '@hooks/useHideOnOutsideClick';
 
 const DocumentFolder = ({
-  folderDocuments: folderDocuments,
+  folderDocuments,
   folderId,
 }: {
   folderDocuments: DocumentHistoryInterface[];
@@ -140,7 +140,7 @@ const DocumentFolder = ({
   };
 
   useEffect(() => {
-    if (inputRef && inputRef.current) inputRef.current.focus();
+    if (inputRef.current) inputRef.current.focus();
   }, [isEdit]);
 
   return (

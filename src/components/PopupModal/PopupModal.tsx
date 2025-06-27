@@ -28,7 +28,9 @@ const PopupModal = ({
   const { t } = useTranslation();
 
   const _handleClose = () => {
-    handleClose && handleClose();
+    if (handleClose) {
+      handleClose();
+    }
     setIsModalOpen(false);
   };
 
@@ -57,27 +59,27 @@ const PopupModal = ({
               </button>
             </div>
 
-            {message && (
+            {message ? (
               <div className="p-6 border-b border-gray-200 dark:border-gray-600">
                 <div className="min-w-fit text-gray-900 dark:text-gray-300 text-sm mt-4">
                   {message}
                 </div>
               </div>
-            )}
+            ) : null}
 
             {children}
 
             <div className="flex items-center justify-center p-6 gap-4">
-              {handleConfirm && (
+              {handleConfirm ? (
                 <button type="button" className="btn btn-primary" onClick={handleConfirm}>
                   {t('confirm')}
                 </button>
-              )}
-              {cancelButton && (
+              ) : null}
+              {cancelButton ? (
                 <button type="button" className="btn btn-neutral" onClick={_handleClose}>
                   Close
                 </button>
-              )}
+              ) : null}
             </div>
           </div>
         </div>

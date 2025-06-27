@@ -14,8 +14,9 @@ RUN apk add --no-cache \
 # Copy package files
 COPY package*.json ./
 
-# Install all dependencies (including dev)
-RUN npm ci
+# Install all dependencies (including devDependencies)
+# Using --frozen-lockfile ensures we use the exact versions from yarn.lock
+RUN yarn install --frozen-lockfile
 
 # Copy source code
 COPY . .
@@ -32,4 +33,4 @@ USER developer
 EXPOSE 5173
 
 # Start development server
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+CMD ["yarn", "dev"]

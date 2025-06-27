@@ -1,17 +1,17 @@
-import React from 'react';
 import useStore from '@store/store';
 import { Add } from '@carbon/icons-react';
 
 import { DocumentInterface } from '@type/document';
 import { generateDefaultDocument } from '@constants/chat';
+import React from 'react';
 
 const NewMessageButton = React.memo(({ messageIndex }: { messageIndex: number }) => {
+  const chats = useStore(state => state.chats);
   const setChats = useStore(state => state.setChats);
   const currentChatIndex = useStore(state => state.currentChatIndex);
   const setCurrentChatIndex = useStore(state => state.setCurrentChatIndex);
 
   const addChat = () => {
-    const chats = useStore.getState().chats;
     if (chats) {
       const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
       let titleIndex = 1;
@@ -32,9 +32,7 @@ const NewMessageButton = React.memo(({ messageIndex }: { messageIndex: number })
     if (currentChatIndex === -1) {
       addChat();
     } else {
-      const updatedChats: DocumentInterface[] = JSON.parse(
-        JSON.stringify(useStore.getState().chats)
-      );
+      const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
       updatedChats[currentChatIndex].messageCurrent.messages.splice(messageIndex + 1, 0, {
         content: '',
         role: 'user',
@@ -54,5 +52,7 @@ const NewMessageButton = React.memo(({ messageIndex }: { messageIndex: number })
     </div>
   );
 });
+
+NewMessageButton.displayName = 'NewMessageButton';
 
 export default NewMessageButton;

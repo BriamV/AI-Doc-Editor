@@ -1,5 +1,6 @@
 import { Prompt } from './prompt';
 import { Theme } from './theme';
+export type { Prompt } from './prompt';
 
 export type Role = 'user' | 'assistant' | 'system' | 'developer';
 export const roles: Role[] = ['user', 'assistant', 'system', 'developer'];

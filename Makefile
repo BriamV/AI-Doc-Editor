@@ -12,7 +12,7 @@ help: ## Show this help message
 # Development Setup
 install: ## Install all dependencies
 	@echo "📦 Installing dependencies..."
-	npm ci
+	yarn install --frozen-lockfile
 
 setup: install ## Complete project setup for new developers
 	@echo "🚀 Setting up development environment..."
@@ -24,53 +24,53 @@ setup: install ## Complete project setup for new developers
 # Development
 dev: ## Start development server
 	@echo "🚀 Starting development server..."
-	npm run dev
+	yarn dev
 
 build: ## Build application for production
 	@echo "🔨 Building application..."
-	npm run build
+	yarn build
 
 preview: build ## Preview production build
 	@echo "👀 Starting preview server..."
-	npm run preview
+	yarn preview
 
 # Testing
 test: ## Run unit tests
 	@echo "🧪 Running unit tests..."
-	npm run test
+	yarn test
 
 test-watch: ## Run tests in watch mode
 	@echo "👀 Running tests in watch mode..."
-	npm run test:watch
+	yarn test:watch
 
 test-coverage: ## Run tests with coverage
 	@echo "📊 Running tests with coverage..."
-	npm run test:coverage
+	yarn test:coverage
 
 test-e2e: ## Run E2E tests
 	@echo "🌐 Running E2E tests..."
-	npm run test:e2e
+	yarn test:e2e
 
 test-e2e-open: ## Open Cypress GUI
 	@echo "🎯 Opening Cypress GUI..."
-	npm run test:e2e:open
+	yarn test:e2e:open
 
 # Code Quality
 lint: ## Run ESLint
 	@echo "🔍 Running ESLint..."
-	npm run lint
+	yarn lint
 
 lint-fix: ## Run ESLint with auto-fix
 	@echo "🔧 Running ESLint with auto-fix..."
-	npm run lint:fix
+	yarn lint:fix
 
 format: ## Format code with Prettier
 	@echo "💅 Formatting code..."
-	npm run format
+	yarn format
 
 format-check: ## Check code formatting
 	@echo "✅ Checking code formatting..."
-	npm run format:check
+	yarn format:check
 
 # Quality Gate (T-01 requirement) + T-43 Security Scanning
 qa-gate: ## Run complete quality gate (T-01 compliance + T-43 security)
@@ -80,16 +80,16 @@ qa-gate: ## Run complete quality gate (T-01 compliance + T-43 security)
 	@npx tsc --noEmit || (echo "❌ TypeScript failed" && exit 1)
 	@echo "✅ TypeScript passed"
 	@echo "2/6 ESLint (zero warnings)..."
-	@npm run lint || (echo "❌ ESLint failed" && exit 1)
+	@yarn lint || (echo "❌ ESLint failed" && exit 1)
 	@echo "✅ ESLint passed"
 	@echo "3/6 Prettier formatting..."
-	@npm run format:check || (echo "❌ Formatting failed" && exit 1)
+	@yarn format:check || (echo "❌ Formatting failed" && exit 1)
 	@echo "✅ Formatting passed"
 	@echo "4/6 Unit tests..."
-	@npm run test || (echo "❌ Tests failed" && exit 1)
+	@yarn test || (echo "❌ Tests failed" && exit 1)
 	@echo "✅ Tests passed"
 	@echo "5/6 Build verification..."
-	@npm run build || (echo "❌ Build failed" && exit 1)
+	@yarn build || (echo "❌ Build failed" && exit 1)
 	@echo "✅ Build passed"
 	@echo "6/6 Security scanning (T-43)..."
 	@$(MAKE) security-scan
@@ -99,15 +99,15 @@ qa-gate: ## Run complete quality gate (T-01 compliance + T-43 security)
 # Electron
 electron: ## Run as Electron desktop app
 	@echo "🖥️  Starting Electron app..."
-	npm run electron
+	yarn electron
 
 pack: ## Package Electron app
 	@echo "📦 Packaging Electron app..."
-	npm run pack
+	yarn pack
 
 make-dist: ## Build and package for distribution
 	@echo "🚀 Building for distribution..."
-	npm run make
+	yarn make
 
 # Maintenance
 clean: ## Clean build artifacts and dependencies
@@ -117,11 +117,11 @@ clean: ## Clean build artifacts and dependencies
 
 audit: ## Check for security vulnerabilities
 	@echo "🔒 Running security audit..."
-	npm audit
+	yarn audit
 
 audit-fix: ## Fix security vulnerabilities
 	@echo "🔧 Fixing security vulnerabilities..."
-	npm audit fix
+	yarn audit fix
 
 # Docker Commands (T-01.5)
 docker-check: ## Check Docker availability
@@ -178,11 +178,11 @@ docker-logs: ## Show Docker logs
 # T-17: API-SPEC & ADR Governance
 api-spec: ## Validate OpenAPI 3.1 specification
 	@echo "📋 Validating OpenAPI specification..."
-	npm run api-spec
+	yarn api-spec
 
 traceability: ## Generate requirements traceability matrix
 	@echo "🔗 Generating traceability matrix..."
-	npm run traceability
+	yarn traceability
 
 governance: ## Run all governance checks (T-17)
 	@echo "📊 Running T-17 governance checks..."
@@ -194,10 +194,10 @@ governance: ## Run all governance checks (T-17)
 security-scan: ## Run dependency security scanning (T-43)
 	@echo "🔒 Running T-43 dependency security scanning..."
 	@echo "=====================================\n"
-	@echo "1/3 npm audit (Node.js dependencies)..."
-	@npm audit --audit-level=critical || (echo "❌ Critical vulnerabilities found in npm dependencies - build failing" && exit 1)
-	@echo "✅ npm audit passed (critical level)"
-	@echo "⚠️ Note: Non-critical vulnerabilities may exist - run 'npm audit' for full report"
+	@echo "1/3 yarn audit (Node.js dependencies)..."
+	@yarn audit --audit-level=critical || (echo "❌ Critical vulnerabilities found in yarn dependencies - build failing" && exit 1)
+	@echo "✅ yarn audit passed (critical level)"
+	@echo "⚠️ Note: Non-critical vulnerabilities may exist - run 'yarn audit' for full report"
 	@echo "2/3 pip-audit (Python dependencies)..."
 	@if command -v pip >/dev/null 2>&1; then \
 		pip install pip-audit >/dev/null 2>&1 && \
@@ -208,19 +208,19 @@ security-scan: ## Run dependency security scanning (T-43)
 		echo "ℹ️ pip not available - skipping Python dependency scan"; \
 	fi
 	@echo "3/3 License report generation..."
-	@npm list --depth=0 --json > npm-licenses.json || true
-	@echo "✅ License report generated: npm-licenses.json"
+	@yarn list --depth=0 --json > yarn-licenses.json || true
+	@echo "✅ License report generated: yarn-licenses.json"
 	@echo "🎉 ALL SECURITY SCANS PASSED!"
 
 security-report: ## Generate security and license reports
 	@echo "📋 Generating security reports..."
-	@npm list --depth=0 --json > npm-licenses.json || true
+	@yarn list --depth=0 --json > yarn-licenses.json || true
 	@if command -v pip >/dev/null 2>&1; then \
 		pip install pip-audit >/dev/null 2>&1 && \
 		pip-audit --format=json --output=pip-audit-report.json || true; \
 	fi
 	@echo "✅ Security reports generated"
-	@ls -la *-report.json *-licenses.json 2>/dev/null || echo "Reports: npm-licenses.json"
+	@ls -la *-report.json *-licenses.json 2>/dev/null || echo "Reports: yarn-licenses.json"
 
 # Development Tools Integration
 dev-status: ## Show development progress dashboard

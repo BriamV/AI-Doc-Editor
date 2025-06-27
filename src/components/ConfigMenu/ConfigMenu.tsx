@@ -122,8 +122,10 @@ export const MaxTokenSlider = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    inputRef && inputRef.current && _setMaxToken(Number(inputRef.current.value));
-  }, [_model]);
+    if (inputRef && inputRef.current) {
+      _setMaxToken(Number(inputRef.current.value));
+    }
+  }, [_model, _setMaxToken]);
 
   return (
     <div>

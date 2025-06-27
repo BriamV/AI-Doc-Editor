@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 import useStore from '@store/store';
 
@@ -15,14 +15,20 @@ const Menu = () => {
   useEffect(() => {
     if (window.innerWidth < 1280) setHideSideMenu(true);
     if (window.innerWidth >= 1280) setHideSideMenu(false);
-    window.addEventListener('resize', () => {
+    const handleResize = () => {
       if (windowWidthRef.current !== window.innerWidth && window.innerWidth < 1280)
         setHideSideMenu(true);
       if (windowWidthRef.current !== window.innerWidth && window.innerWidth >= 1280)
         setHideSideMenu(false);
       windowWidthRef.current = window.innerWidth;
-    });
-  }, []);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [setHideSideMenu]);
 
   return (
     <>

@@ -21,11 +21,10 @@ const DocumentList = () => {
   const [isHover, setIsHover] = useState<boolean>(false);
   const [documentFolders, setDocumentFolders] = useState<DocumentHistoryFolderInterface>({});
   const [noDocumentFolders, setNoDocumentFolders] = useState<DocumentHistoryInterface[]>([]);
-  const [filter, setFilter] = useState<string>('');
 
   const chatsRef = useRef<DocumentInterface[]>(useStore.getState().chats || []);
   const foldersRef = useRef<FolderCollection>(useStore.getState().folders);
-  const filterRef = useRef<string>(filter);
+  const filterRef = useRef<string>('');
 
   const updateFolders = useRef(() => {
     const _folders: DocumentHistoryFolderInterface = {};
@@ -72,7 +71,7 @@ const DocumentList = () => {
   useEffect(() => {
     updateFolders();
 
-    useStore.subscribe(state => {
+    const unsubscribe = useStore.subscribe(state => {
       if (!state.generating && state.chats && state.chats !== chatsRef.current) {
         updateFolders();
         chatsRef.current = state.chats;
@@ -81,7 +80,11 @@ const DocumentList = () => {
         foldersRef.current = state.folders;
       }
     });
-  }, []);
+
+    return () => {
+      unsubscribe();
+    };
+  }, [updateFolders]);
 
   useEffect(() => {
     if (
@@ -102,17 +105,14 @@ const DocumentList = () => {
             JSON.stringify(useStore.getState().folders)
           );
 
-          updatedFolders[folderId].expanded = true;
-          setFolders(updatedFolders);
+          if (updatedFolders[folderId]) {
+            updatedFolders[folderId].expanded = true;
+            setFolders(updatedFolders);
+          }
         }
       }
     }
-  }, [currentDocumentIndex, documentTitles]);
-
-  useEffect(() => {
-    filterRef.current = filter;
-    updateFolders();
-  }, [filter]);
+  }, [currentDocumentIndex, documentTitles, setFolders]);
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     if (e.dataTransfer) {

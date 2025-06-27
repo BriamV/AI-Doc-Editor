@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import useStore from '@store/store';
 import { DocumentCurrent } from '@type/document';
 import useReplaceHistory from '@hooks/useReplaceHistory';
@@ -7,14 +7,10 @@ import { TrashCan, Close, Edit, Checkmark, Star, StarFilled } from '@carbon/icon
 
 const HistoryButton = ({
   message,
-  activeMenu,
   setActiveMenu,
-  index,
 }: {
   message: DocumentCurrent;
-  activeMenu: string;
   setActiveMenu: React.Dispatch<React.SetStateAction<string>>;
-  index: number;
 }) => {
   const replaceHistory = useReplaceHistory();
   const setHideSideAIMenu = useStore(state => state.setHideSideAIMenu);
@@ -23,14 +19,13 @@ const HistoryButton = ({
   const currentChatIndex = useStore(state => state.currentChatIndex);
   const editorSettings = useStore(state => state.editorSettings);
   const setEditorSettings = useStore(state => state.setEditorSettings);
-  const generating = useStore.getState().generating;
-  const setGenerating = useStore.getState().setGenerating;
+  const generating = useStore(state => state.generating);
   const [isDelete, setIsDelete] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [_title, _setTitle] = useState<string>(message.title);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleTick = (e: any) => {
+  const handleTick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     if (isEdit) editTitle();
     else if (isDelete) deleteChat();
@@ -57,7 +52,7 @@ const HistoryButton = ({
     }
   };
 
-  const handleFavorite = (e: any) => {
+  const handleFavorite = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     if (message.messageIndex != null) {
       const updatedChats = JSON.parse(JSON.stringify(useStore.getState().chats));
@@ -79,28 +74,27 @@ const HistoryButton = ({
     setEditorRefresh(!editorRefresh);
   };
 
-  const handleClickButton = (e: any) => {
+  const handleClickButton = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     if (generating == false) {
       replaceHistory(message);
       setHideSideAIMenu(false);
       if (chats) {
-        let tempSettings = editorSettings;
-        tempSettings.activeMenu = 'chat';
+        const tempSettings = { ...editorSettings, activeMenu: 'chat' };
         setEditorSettings(tempSettings);
         setActiveMenu('chat');
       }
     }
   };
 
-  function handleEditClick(e: any) {
+  function handleEditClick(e: React.MouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
     _setTitle(message.title);
     setIsEdit(true);
     setIsDelete(false);
   }
 
-  function handleDeleteClick(e: any) {
+  function handleDeleteClick(e: React.MouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
     setIsDelete(true);
     setIsEdit(false);

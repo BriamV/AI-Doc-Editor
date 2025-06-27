@@ -1,28 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useStore from '@store/store';
 import HistoryButton from './HistoryButton';
 import { useTranslation } from 'react-i18next';
-import { matchSorter } from 'match-sorter';
-import { Prompt } from '@type/prompt';
+
 import { DocumentCurrent } from '@type/document';
 import defaultStyles from '@components/style';
 import { TrashCan } from '@carbon/icons-react';
 
 const ChatHistoryContent = ({
-  activeMenu,
   setActiveMenu,
 }: {
-  activeMenu: string;
   setActiveMenu: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const { t } = useTranslation();
-  const prompts = useStore(state => state.prompts);
-  const [_prompts, _setPrompts] = useState<Prompt[]>(prompts);
   const [input, setInput] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const [sendSelection, setSendSelection] = useState(true);
-  const [dropDown, setDropDown] = useState(false);
   const chats = useStore(state => state.chats);
   const setChats = useStore(state => state.setChats);
   const currentChatIndex = useStore(state => state.currentChatIndex);
@@ -43,19 +35,7 @@ const ChatHistoryContent = ({
 
       // Create an array of favorited messages
 
-      const favoritedMessages = tempMessages.filter(message => {
-        return message.favorited;
-      });
-
-      // Create an array of non-favorited messages
-
-      const nonFavoritedMessages = tempMessages.filter(message => {
-        return !message.favorited;
-      });
-
-      // Recombine favorited and non-favorited messages, with favorited messages at the top
-
-      tempMessages = [...favoritedMessages, ...nonFavoritedMessages];
+      tempMessages.sort((a, b) => (b.favorited ? 1 : 0) - (a.favorited ? 1 : 0));
 
       // Update state with sorted messages
 
@@ -63,36 +43,14 @@ const ChatHistoryContent = ({
     }
   }, [chats, currentChatIndex, editorRefresh]);
 
-  useEffect(() => {
-    if (dropDown && inputRef.current) {
-      // When dropdown is visible, focus the input
-      //   inputRef.current.focus();
-    }
-  }, [dropDown]);
-
-  useEffect(() => {
-    const filteredPrompts = matchSorter(useStore.getState().prompts, input, {
-      keys: ['name'],
-    });
-    _setPrompts(filteredPrompts);
-  }, [input]);
-
-  useEffect(() => {
-    _setPrompts(prompts);
-    setInput('');
-  }, [prompts]);
-
-  function handleDropdown(e: any) {
-    setDropDown(!dropDown);
-  }
-
   const deleteAll = () => {
     // Delete all messages in the messageHistory of chats that isn't favorited
-    const tempChats = chats;
+    if (!chats) return;
+    const tempChats = JSON.parse(JSON.stringify(chats));
     if (tempChats) {
       tempChats[currentChatIndex].messageHistory = tempChats[
         currentChatIndex
-      ].messageHistory.filter(message => {
+      ].messageHistory.filter((message: DocumentCurrent) => {
         return message.favorited;
       });
       setChats(tempChats);
@@ -103,12 +61,7 @@ const ChatHistoryContent = ({
 
   return (
     <div>
-      <div
-        ref={dropdownRef}
-        className={`${
-          dropDown ? '' : ''
-        } z-10 text-sm h-screen text-gray-800 dark:text-gray-100 group dark:bg-gray-900`}
-      >
+      <div className="z-10 text-sm h-screen text-gray-800 dark:text-gray-100 group dark:bg-gray-900">
         <div className="flex-col flex overflow-y-auto hide-scroll-bar border-b border-white/10 p-2 pb-4 h-full">
           <div className="h-10 mb-2">
             <input
@@ -130,13 +83,7 @@ const ChatHistoryContent = ({
             )}
 
             {_messages.map((message, index) => (
-              <HistoryButton
-                key={index}
-                index={index}
-                message={message}
-                activeMenu={activeMenu}
-                setActiveMenu={setActiveMenu}
-              />
+              <HistoryButton key={index} message={message} setActiveMenu={setActiveMenu} />
             ))}
           </div>
           <div

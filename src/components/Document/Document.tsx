@@ -18,12 +18,11 @@ import EditorSelection from './EditorComponents/EditorSelection';
 import EditorToolbar from './EditorComponents/EditorToolbar';
 import lexicalTheme from './LexicalTheme';
 
-import { $getSelection, $getRoot } from 'lexical';
+import { EditorState } from 'lexical';
 
 const Document = () => {
   const hideSideMenu = useStore(state => state.hideSideMenu);
   const hideSideAIMenu = useStore(state => state.hideSideAIMenu);
-  const editRef = useRef(null);
   const currentChatIndex = useStore(state => state.currentChatIndex);
   const chats = useStore(state => state.chats);
   const setChats = useStore(state => state.setChats);
@@ -32,23 +31,22 @@ const Document = () => {
 
   if (chats && chats[currentChatIndex]) {
     editorState = chats[currentChatIndex].editorState;
-  } else {
   }
 
   const editorRef = useRef(null);
 
-  let loadEditorState = () => {
+  const loadEditorState = () => {
     // check if the editor state of the current chat index is empty, if not, use a placeholder
     const value =
       '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}';
 
     if (editorState === undefined || editorState === null || editorState === '') {
-      let temp = chats;
+      const temp = chats;
       if (temp) {
         temp[currentChatIndex].editorState = value;
         setChats(temp);
-        return value;
       }
+      return value;
     } else {
       return editorState as InitialEditorStateType;
     }
@@ -61,7 +59,7 @@ const Document = () => {
     editorState: loadEditorState(),
     //  editorState: editorState,
     // Handling of errors during update
-    onError(error: any) {
+    onError(error: Error) {
       throw error;
     },
     // Any custom nodes go here
@@ -87,25 +85,21 @@ const Document = () => {
     // You can perform any necessary actions or updates here
     // For example, you can force a refresh of the component by updating the refresh state variable
     setRefresh(!refresh);
-  }, [currentChatIndex]);
+  }, [currentChatIndex, refresh]);
 
-  function onChange(change: any) {
+  function onChange(change: EditorState) {
     if (chats) {
       let temp = chats;
-      if (temp[currentChatIndex].editorState != JSON.stringify(change)) {
+      if (temp[currentChatIndex].editorState !== JSON.stringify(change)) {
         chats[currentChatIndex].edited = true;
       }
       chats[currentChatIndex].editorState = JSON.stringify(change);
       setChats(temp);
     }
     change.read(() => {
-      // Read the contents of the EditorState here.
-      const root = $getRoot();
-      const selection = $getSelection();
-
       if (chats) {
         let temp = chats;
-        if (temp[currentChatIndex].editorState != JSON.stringify(change)) {
+        if (temp[currentChatIndex].editorState !== JSON.stringify(change)) {
           chats[currentChatIndex].edited = true;
         }
         chats[currentChatIndex].editorState = JSON.stringify(change);
@@ -144,7 +138,7 @@ const Document = () => {
                     <EditorRefresh />
                     <OnChangePlugin onChange={onChange} />
                     <HistoryPlugin />
-                    <EditorSelection editorRef={editorRef} />
+                    <EditorSelection />
                   </div>
                 </div>
               </div>

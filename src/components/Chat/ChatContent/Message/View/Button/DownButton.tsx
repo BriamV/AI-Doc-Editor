@@ -1,11 +1,11 @@
-import React from 'react';
+import { MouseEventHandler } from 'react';
 
 import { ChevronDown } from '@carbon/icons-react';
 
 import BaseButton from './BaseButton';
 
-const DownButton = ({ onClick }: { onClick: React.MouseEventHandler<HTMLButtonElement> }) => {
+function DownButton({ onClick }: { onClick: MouseEventHandler<HTMLButtonElement> }) {
   return <BaseButton icon={<ChevronDown />} onClick={onClick} />;
-};
+}
 
 export default DownButton;

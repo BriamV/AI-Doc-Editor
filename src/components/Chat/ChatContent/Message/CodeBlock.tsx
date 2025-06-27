@@ -1,13 +1,14 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState, ReactNode, RefObject } from 'react';
 
 import { Copy, Checkmark } from '@carbon/icons-react';
+import React from 'react';
 
 const CodeBlock = ({
   lang,
   codeChildren,
 }: {
   lang: string;
-  codeChildren: React.ReactNode & React.ReactNode[];
+  codeChildren: ReactNode & ReactNode[];
 }) => {
   const codeRef = useRef<HTMLElement>(null);
 
@@ -24,7 +25,7 @@ const CodeBlock = ({
 };
 
 const CodeBar = React.memo(
-  ({ lang, codeRef }: { lang: string; codeRef: React.RefObject<HTMLElement> }) => {
+  ({ lang, codeRef }: { lang: string; codeRef: RefObject<HTMLElement> }) => {
     const [isCopied, setIsCopied] = useState<boolean>(false);
     return (
       <div className="flex items-center relative text-gray-200 bg-gray-800 px-4 py-2 text-xs font-sans">
@@ -56,4 +57,5 @@ const CodeBar = React.memo(
     );
   }
 );
+CodeBar.displayName = 'CodeBar';
 export default CodeBlock;

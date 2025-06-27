@@ -17,7 +17,7 @@ const NewDocument = ({ folder }: { folder?: string }) => {
       onClick={() => {
         if (!generating) addDocument(folder);
       }}
-      title={folder ? String(t('newDocument')) : ''}
+      {...(folder && { title: String(t('newDocument')) })}
     >
       {folder ? (
         <div className="max-h-0 parent-sibling-hover:max-h-10 hover:max-h-10 parent-sibling-hover:py-2 hover:py-2 overflow-hidden transition-all duration-200 delay-500 text-sm flex gap-3 items-center text-gray-100">

@@ -2,9 +2,10 @@
 
 **Task T-01.5**: Docker-compose setup for AI-Doc-Editor
 
-## Current Status ✅
+## Current Status 
 
 Docker is installed and configured with the following files:
+
 - `Dockerfile` - Production multi-stage build
 - `Dockerfile.dev` - Development environment
 - `docker-compose.yml` - Multi-profile orchestration
@@ -19,7 +20,7 @@ make docker-check
 # Development environment
 make docker-dev
 
-# Production environment  
+# Production environment
 make docker-prod
 
 # Full stack with backend services
@@ -29,31 +30,37 @@ make docker-backend
 ## Docker Compose Profiles
 
 ### Development (`app-dev`)
+
 ```bash
 docker-compose up app-dev
 # or
 make docker-dev
 ```
+
 - Hot reload enabled
 - Volume mounted for live code changes
 - Runs on port 5173
 
 ### Production (`app-prod`)
+
 ```bash
 docker-compose --profile production up app-prod
 # or
 make docker-prod
 ```
+
 - Optimized multi-stage build
 - Serves static files via serve@14
 - Runs on port 3000
 
 ### Backend Services (`backend`)
+
 ```bash
 docker-compose --profile backend up
 # or
 make docker-backend
 ```
+
 - Includes FastAPI placeholder (future T-01.6)
 - Chroma vector database on port 8001
 - Full development stack
@@ -61,6 +68,7 @@ make docker-backend
 ## Troubleshooting
 
 ### Permission Issues
+
 If you get "permission denied" errors:
 
 ```bash
@@ -75,6 +83,7 @@ docker ps
 ```
 
 ### WSL2 Integration
+
 If Docker not found in WSL2:
 
 1. Open Docker Desktop
@@ -87,7 +96,7 @@ If Docker not found in WSL2:
 
 ```
 ├── Dockerfile              # Production build
-├── Dockerfile.dev          # Development build  
+├── Dockerfile.dev          # Development build
 ├── docker-compose.yml      # Multi-profile orchestration
 ├── .dockerignore           # Build context optimization
 └── docs/DOCKER-SETUP.md    # This guide
@@ -96,13 +105,18 @@ If Docker not found in WSL2:
 ## Build Details
 
 ### Production Dockerfile
+
 - **Base**: node:20-alpine
 - **Multi-stage**: Builder + Production
 - **Security**: Non-root user (nextjs:1001)
 - **Health check**: HTTP endpoint monitoring
-- **Optimization**: npm ci --only=production
+- **Optimization**: `COPY package*.json ./` and `RUN yarn install --production --frozen-lockfile` are placed before `COPY . .`. This leverages Docker's layer caching, so dependencies are only re-installed if `package.json` or `yarn.lock` changes.
+- **Dependency Caching**: This approach ensures that dependencies are only re-installed when `package.json` or `yarn.lock` changes.
+- **Multi-Stage Build**: A `builder` stage is used to create the production build, and a final, smaller `production` stage copies only the necessary built assets. This results in a leaner final image.
+- **Non-Root User**: A dedicated `appuser` is created and used to run the application, enhancing security by avoiding root privileges.
 
 ### Development Dockerfile
+
 - **Base**: node:20-alpine
 - **Tools**: git, curl, bash for development
 - **User**: developer:1001 (non-root)
@@ -110,6 +124,7 @@ If Docker not found in WSL2:
 - **Port**: 5173 with host binding
 
 ### Docker Compose Features
+
 - **Profiles**: dev, production, backend
 - **Networks**: ai-doc-editor-network (bridge)
 - **Volumes**: Persistent data for Chroma
@@ -118,26 +133,27 @@ If Docker not found in WSL2:
 
 ## Commands Reference
 
-| Command | Description |
-|---------|-------------|
-| `make docker-check` | Verify Docker installation |
-| `make docker-build` | Build production image |
-| `make docker-build-dev` | Build development image |
-| `make docker-dev` | Start development environment |
-| `make docker-prod` | Start production environment |
-| `make docker-backend` | Start full stack |
-| `make docker-stop` | Stop all services |
-| `make docker-clean` | Clean images and containers |
-| `make docker-logs` | Show logs |
+| Command                 | Description                   |
+| ----------------------- | ----------------------------- |
+| `make docker-check`     | Verify Docker installation    |
+| `make docker-build`     | Build production image        |
+| `make docker-build-dev` | Build development image       |
+| `make docker-dev`       | Start development environment |
+| `make docker-prod`      | Start production environment  |
+| `make docker-backend`   | Start full stack              |
+| `make docker-stop`      | Stop all services             |
+| `make docker-clean`     | Clean images and containers   |
+| `make docker-logs`      | Show logs                     |
 
 ## Integration with CI/CD
 
 Docker builds are integrated into GitHub Actions:
+
 - Development image testing
-- Production build verification  
+- Production build verification
 - Multi-platform support preparation
 
 ---
 
-**Task T-01.5 Status**: ✅ Complete (files ready, permission fix needed)
+**Task T-01.5 Status**: Complete (files ready, permission fix needed)
 **Next**: T-01.6 Pydantic v2 migration or proceed to T-17

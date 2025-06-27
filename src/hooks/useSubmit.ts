@@ -3,10 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { DocumentInterface, MessageInterface } from '@type/document';
 import { getChatCompletion, getChatCompletionStream } from '@api/api';
 import { parseEventSource } from '@api/helper';
-import { limitMessageTokens, updateTotalTokenUsed } from '@utils/messageUtils';
+import { updateTotalTokenUsed } from '@utils/messageUtils';
 import { _defaultChatConfig } from '@constants/chat';
 import { officialAPIEndpoint } from '@constants/auth';
-import useUpdateHistory from './useUpdateHistory';
 
 const useSubmit = () => {
   const { t, i18n } = useTranslation('api');

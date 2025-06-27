@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 import useStore from '@store/store';
 
@@ -11,21 +11,28 @@ import ConfigMenu from '@components/Menu/AIMenu/Config/Config';
 const AIMenu = () => {
   const hideSideAIMenu = useStore(state => state.hideSideAIMenu);
   const setHideSideAIMenu = useStore(state => state.setHideSideAIMenu);
-  const windowWidthRef = useRef<number>(window.innerWidth);
   const [activeMenu, setActiveMenu] = useState('chat');
+  const windowWidthRef = useRef<number>(window.innerWidth);
+
+  const handleResize = useCallback(() => {
+    if (windowWidthRef.current !== window.innerWidth) {
+      if (window.innerWidth < 1280) {
+        setHideSideAIMenu(true);
+      } else {
+        setHideSideAIMenu(false);
+      }
+      windowWidthRef.current = window.innerWidth;
+    }
+  }, [setHideSideAIMenu]);
 
   useEffect(() => {
-    if (window.innerWidth < 1280) setHideSideAIMenu(true);
-    if (window.innerWidth >= 1280) setHideSideAIMenu(false);
-    window.addEventListener('resize', () => {
-      if (windowWidthRef.current !== window.innerWidth && window.innerWidth < 1280)
-        setHideSideAIMenu(true);
+    handleResize();
+    window.addEventListener('resize', handleResize);
 
-      if (windowWidthRef.current !== window.innerWidth && window.innerWidth >= 1280)
-        setHideSideAIMenu(false);
-      windowWidthRef.current = window.innerWidth;
-    });
-  }, []);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [handleResize]);
 
   return (
     <>

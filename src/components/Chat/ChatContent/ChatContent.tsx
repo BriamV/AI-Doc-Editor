@@ -10,24 +10,14 @@ import useSubmit from '@hooks/useSubmit';
 const ChatContent = () => {
   const inputRole = useStore(state => state.inputRole);
   const setError = useStore(state => state.setError);
-  const messages = useStore(state =>
-    state.chats &&
-    state.chats.length > 0 &&
-    state.currentChatIndex >= 0 &&
-    state.currentChatIndex < state.chats.length
-      ? state.chats[state.currentChatIndex].messageCurrent.messages
-      : []
+  const messages = useStore(
+    state => state.chats?.[state.currentChatIndex]?.messageCurrent?.messages ?? []
   );
-  const stickyIndex = useStore(state =>
-    state.chats &&
-    state.chats.length > 0 &&
-    state.currentChatIndex >= 0 &&
-    state.currentChatIndex < state.chats.length
-      ? state.chats[state.currentChatIndex].messageCurrent.messages.length
-      : 0
+  const stickyIndex = useStore(
+    state => state.chats?.[state.currentChatIndex]?.messageCurrent?.messages.length ?? 0
   );
   const advancedMode = useStore(state => state.advancedMode);
-  const generating = useStore.getState().generating;
+  const generating = useStore(state => state.generating);
   const aiPadding = useStore(state => state.aiPadding);
 
   const saveRef = useRef<HTMLDivElement>(null);
@@ -38,7 +28,7 @@ const ChatContent = () => {
     if (generating) {
       setError('');
     }
-  }, [generating]);
+  }, [generating, setError]);
 
   const { error } = useSubmit();
 

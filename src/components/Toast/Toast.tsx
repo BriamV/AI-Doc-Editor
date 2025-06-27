@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import useStore from '@store/store';
 
 export type ToastStatus = 'success' | 'error' | 'warning';
@@ -21,7 +21,7 @@ const Toast = () => {
 
       setTimeoutID(newTimeoutID);
     }
-  }, [toastShow, status, message]);
+  }, [toastShow, status, message, setToastShow, timeoutID]);
 
   return toastShow ? (
     <div

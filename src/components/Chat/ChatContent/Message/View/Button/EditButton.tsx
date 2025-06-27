@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 
 import { Edit } from '@carbon/icons-react';
 import BaseButton from './BaseButton';
@@ -8,5 +8,7 @@ const EditButton = memo(
     return <BaseButton icon={<Edit />} onClick={() => setIsEdit(true)} />;
   }
 );
+
+EditButton.displayName = 'EditButton';
 
 export default EditButton;

@@ -9,7 +9,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: ai-doc-editor-dev
     ports:
-      - "5173:5173"
+      - '5173:5173'
     volumes:
       - .:/app
       - /app/node_modules
@@ -28,7 +28,7 @@ services:
       dockerfile: Dockerfile
     container_name: ai-doc-editor-prod
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NODE_ENV=production
     restart: unless-stopped
@@ -45,7 +45,7 @@ services:
     volumes:
       - ./backend:/app
     ports:
-      - "8000:8000"
+      - '8000:8000'
     environment:
       - PYTHONPATH=/app
       - ENVIRONMENT=development
@@ -66,7 +66,7 @@ services:
     image: chromadb/chroma:latest
     container_name: ai-doc-editor-chroma
     ports:
-      - "8001:8000"
+      - '8001:8000'
     environment:
       - CHROMA_SERVER_HOST=0.0.0.0
       - CHROMA_SERVER_HTTP_PORT=8000
@@ -85,8 +85,7 @@ networks:
 volumes:
   chroma_data:
     name: ai-doc-editor-chroma-data
-
 # Usage:
 # Development: docker-compose up app-dev
-# Production:  docker-compose --profile production up app-prod  
+# Production:  docker-compose --profile production up app-prod
 # Full stack:  docker-compose --profile backend up

@@ -1,13 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import useStore from '@store/store';
 import { useTranslation } from 'react-i18next';
+import { Prompt } from '@type/prompt';
 import PopupModal from '@components/PopupModal';
 import { ModelOptions } from '@type/document';
 import { ChevronDown as DownChevronArrow } from '@carbon/icons-react';
 import { modelMaxToken, modelOptions } from '@constants/chat';
 import { Settings } from '@carbon/icons-react';
 import { _defaultChatConfig } from '@constants/chat';
-import _ from 'lodash';
+
 import { FineTuneModel } from '@type/config';
 
 export const PromptConfig = ({
@@ -17,11 +18,11 @@ export const PromptConfig = ({
   _prompts,
   _setPrompts,
 }: {
-  prompt: any;
+  prompt: Prompt;
   index: number;
-  _updatePrompt: any;
-  _prompts: any;
-  _setPrompts: any;
+  _updatePrompt: (index: number, prompt: Prompt) => void;
+  _prompts: Prompt[];
+  _setPrompts: React.Dispatch<React.SetStateAction<Prompt[]>>;
 }) => {
   const [isPromptConfigModalOpen, setIsPromptConfigModalOpen] = useState<boolean>(false);
 
@@ -55,30 +56,30 @@ const PromptPopup = ({
   _setPrompts,
 }: {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  prompt: any;
-  index: any;
-  _updatePrompt: any;
-  _prompts: any;
-  _setPrompts: any;
+  prompt: Prompt;
+  index: number;
+  _updatePrompt: (index: number, prompt: Prompt) => void;
+  _prompts: Prompt[];
+  _setPrompts: React.Dispatch<React.SetStateAction<Prompt[]>>;
 }) => {
   const prompts = useStore(state => state.prompts);
   const setPrompts = useStore(state => state.setPrompts);
-  const [_name, _setName] = useState<any>(prompt.name);
-  const [_prompt, _setPrompt] = useState<any>(prompt.prompt);
+  const [_name, _setName] = useState<string>(prompt.name);
+  const [_prompt, _setPrompt] = useState<string>(prompt.prompt);
   const [isChecked, setIsChecked] = useState<boolean>(false);
   const [isSelectionChecked, setIsSelectionChecked] = useState<boolean>(prompt.includeSelection);
 
-  useEffect(() => {
-    updateChecked();
-  }, [prompts, prompt.config]);
-
-  function updateChecked() {
+  const updateChecked = useCallback(() => {
     if (_prompts[index].config == null) {
       setIsChecked(true);
     } else {
       setIsChecked(false);
     }
-  }
+  }, [_prompts, index]);
+
+  useEffect(() => {
+    updateChecked();
+  }, [prompts, prompt.config, updateChecked]);
 
   function handleIndividualPromptConfig() {
     if (prompt.config == null) {
@@ -193,34 +194,47 @@ const PromptPopup = ({
   );
 };
 
-export const PromptIndividualConfig = ({ prompt, index }: { prompt: any; index: number }) => {
-  const [_model, _setModel] = useState<string>(prompt.config.model);
-  const [_maxToken, _setMaxToken] = useState<number>(prompt.config.max_completion_tokens);
-  const [_temperature, _setTemperature] = useState<number>(prompt.config.temperature);
-  const [_presencePenalty, _setPresencePenalty] = useState<number>(prompt.config.presence_penalty);
-  const [_topP, _setTopP] = useState<number>(prompt.config.top_p);
-  const [_frequencyPenalty, _setFrequencyPenalty] = useState<number>(
-    prompt.config.frequency_penalty
-  );
+export const PromptIndividualConfig = ({ prompt, index }: { prompt: Prompt; index: number }) => {
+  const config = prompt.config ?? _defaultChatConfig;
+  const [_model, _setModel] = useState<string>(config.model);
+  const [_maxToken, _setMaxToken] = useState<number>(config.max_completion_tokens);
+  const [_temperature, _setTemperature] = useState<number>(config.temperature);
+  const [_topP, _setTopP] = useState<number>(config.top_p);
+  const [_presencePenalty, _setPresencePenalty] = useState<number>(config.presence_penalty);
+  const [_frequencyPenalty, _setFrequencyPenalty] = useState<number>(config.frequency_penalty);
   const prompts = useStore(state => state.prompts);
   const setPrompts = useStore(state => state.setPrompts);
 
-  // Watch for changse in prompt config
+  useEffect(() => {
+    if (_model.includes('gpt-4') && _maxToken > 4096) {
+      _setMaxToken(4096);
+    }
+  }, [_model, _maxToken]);
 
   useEffect(() => {
-    prompts[index].config = {
-      model: _model,
-      max_completion_tokens: _maxToken,
-      temperature: _temperature,
-      presence_penalty: _presencePenalty,
-      top_p: _topP,
-      frequency_penalty: _frequencyPenalty,
-      // apiEndpoint: prompts[index].config.apiEndpoint,
-      // apiKey: prompts[index].config.apiKey,
-      // notes: prompts[index].config.notes,
-    };
-    setPrompts(prompts);
-  }, [_model, _maxToken, _temperature, _presencePenalty, _topP, _frequencyPenalty]);
+    if (prompts && index >= 0) {
+      const tempPrompts = [...prompts];
+      tempPrompts[index].config = {
+        model: _model,
+        max_completion_tokens: _maxToken,
+        temperature: _temperature,
+        top_p: _topP,
+        presence_penalty: _presencePenalty,
+        frequency_penalty: _frequencyPenalty,
+      };
+      setPrompts(tempPrompts);
+    }
+  }, [
+    _model,
+    _maxToken,
+    _temperature,
+    _topP,
+    _presencePenalty,
+    _frequencyPenalty,
+    index,
+    prompts,
+    setPrompts,
+  ]);
 
   return (
     <>
@@ -247,65 +261,59 @@ export const ModelSelector = ({
   _model: ModelOptions;
   _setModel: React.Dispatch<React.SetStateAction<ModelOptions>>;
 }) => {
+  const { t } = useTranslation('model');
   const [dropDown, setDropDown] = useState<boolean>(false);
   const fineTuneModels = useStore(state => state.fineTuneModels);
-
   const [defaultAndFindTuneModels, setDefaultAndFineTuneModels] = useState<FineTuneModel[]>([]);
 
-  // Set defaultAndFineTuneModels to include both the model options and the fine tune options (the fine tune options are stored in the store)
-
   useEffect(() => {
-    let tempModels = [];
-    // Iterate over models in modelOptions and turn each string into an object with it's value as both the name and model
-    for (let i = 0; i < modelOptions.length; i++) {
-      tempModels.push({ name: modelOptions[i], model: modelOptions[i] });
-    }
-
+    const tempModels: FineTuneModel[] = modelOptions.map(model => ({
+      name: model,
+      model,
+    }));
     if (fineTuneModels) {
-      // Add the fine tune models to the tempModels array
-      tempModels = [...tempModels, ...fineTuneModels];
+      setDefaultAndFineTuneModels([...tempModels, ...fineTuneModels]);
+    } else {
+      setDefaultAndFineTuneModels(tempModels);
     }
-    setDefaultAndFineTuneModels(tempModels);
   }, [fineTuneModels]);
 
-  const getModelName = (modelValue: any) => {
-    const modelObj = defaultAndFindTuneModels.find(m => m.model === modelValue);
+  const getModelName = (modelValue: ModelOptions) => {
+    const modelObj = defaultAndFindTuneModels.find((m: FineTuneModel) => m.model === modelValue);
     return modelObj ? modelObj.name : modelValue;
   };
 
   return (
-    <div className="mb-4">
-      <button
-        className="btn btn-neutral btn-small flex gap-1"
-        type="button"
-        onClick={() => setDropDown(prev => !prev)}
-      >
-        {getModelName(_model)}
-        <DownChevronArrow />
-      </button>
-      <div
-        id="dropdown"
-        className={`${
-          dropDown ? '' : 'hidden'
-        } absolute top-100 bottom-100 z-10 bg-white rounded-lg shadow-xl border-b border-black/10 dark:border-gray-900/50 text-gray-800 dark:text-gray-100 group dark:bg-gray-800 opacity-90`}
-      >
-        <ul
-          className="text-sm text-gray-700 dark:text-gray-200 p-0 m-0"
-          aria-labelledby="dropdownDefaultButton"
+    <div className="mt-5 pt-5 border-t border-gray-500">
+      <label className="block text-sm font-medium text-gray-900 dark:text-white">
+        {t('model.label')}
+      </label>
+      <div className="relative">
+        <button
+          className="btn btn-neutral w-full flex justify-between items-center"
+          onClick={() => {
+            setDropDown(prev => !prev);
+          }}
         >
-          {defaultAndFindTuneModels.map((model, index) => (
-            <li
-              className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer"
-              onClick={() => {
-                _setModel(model.model);
-                setDropDown(false);
-              }}
-              key={index}
-            >
-              {model.name}
-            </li>
-          ))}
-        </ul>
+          {getModelName(_model)}
+          <DownChevronArrow />
+        </button>
+        {dropDown && (
+          <div className="absolute top-full z-10 w-full bg-gray-700 rounded-md max-h-60 overflow-y-auto">
+            {defaultAndFindTuneModels.map((model, index) => (
+              <div
+                key={index}
+                className="p-2 hover:bg-gray-600 cursor-pointer"
+                onClick={() => {
+                  _setModel(model.model);
+                  setDropDown(false);
+                }}
+              >
+                {model.name}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -321,20 +329,14 @@ export const MaxTokenSlider = ({
   _model: ModelOptions;
 }) => {
   const { t } = useTranslation('model');
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    inputRef && inputRef.current && _setMaxToken(Number(inputRef.current.value));
-  }, [_model]);
 
   return (
-    <div>
+    <div className="mt-5 pt-5 border-t border-gray-500">
       <label className="block text-sm font-medium text-gray-900 dark:text-white">
         {t('token.label')}: {_maxToken}
       </label>
       <input
         type="range"
-        ref={inputRef}
         value={_maxToken}
         onChange={e => {
           _setMaxToken(Number(e.target.value));
@@ -344,9 +346,6 @@ export const MaxTokenSlider = ({
         step={1}
         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
       />
-      {/* <div className='min-w-fit text-gray-500 dark:text-gray-300 text-sm mt-2'>
-          {t('token.description')}
-        </div> */}
     </div>
   );
 };
@@ -377,9 +376,6 @@ export const TemperatureSlider = ({
         step={0.1}
         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
       />
-      {/* <div className='min-w-fit text-gray-500 dark:text-gray-300 text-sm mt-2'>
-        {t('temperature.description')}
-      </div> */}
     </div>
   );
 };
@@ -410,9 +406,6 @@ export const TopPSlider = ({
         step={0.05}
         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
       />
-      {/* <div className='min-w-fit text-gray-500 dark:text-gray-300 text-sm mt-2'>
-        {t('topP.description')}
-      </div> */}
     </div>
   );
 };
@@ -443,9 +436,6 @@ export const PresencePenaltySlider = ({
         step={0.1}
         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
       />
-      {/* <div className='min-w-fit text-gray-500 dark:text-gray-300 text-sm mt-2'>
-        {t('presencePenalty.description')}
-      </div> */}
     </div>
   );
 };
@@ -476,9 +466,6 @@ export const FrequencyPenaltySlider = ({
         step={0.1}
         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
       />
-      {/* <div className='min-w-fit text-gray-500 dark:text-gray-300 text-sm mt-2'>
-        {t('frequencyPenalty.description')}
-      </div> */}
     </div>
   );
 };

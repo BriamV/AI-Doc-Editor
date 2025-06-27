@@ -7,7 +7,6 @@ import { SendFilled, StopFilledAlt } from '@carbon/icons-react';
 import { DocumentInterface } from '@type/document';
 
 import PopupModal from '@components/PopupModal';
-//import TokenCount from '@components/TokenCount';
 import IncludeSelectionSend from '@components/Chat/IncludeSelectionSend';
 import ClearPromptConfig from '@components/Chat/ClearPromptConfig';
 
@@ -26,6 +25,11 @@ const EditView = ({
   const chats = useStore(state => state.chats);
   const setChats = useStore(state => state.setChats);
   const currentChatIndex = useStore(state => state.currentChatIndex);
+  const generating = useStore(state => state.generating);
+  const enterToSubmit = useStore(state => state.enterToSubmit);
+  const editorSettings = useStore(state => state.editorSettings);
+  const setEditorSettings = useStore(state => state.setEditorSettings);
+  const currentSelection = useStore(state => state.currentSelection);
   const [_content, _setContent] = useState<string>(content);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const textareaRef = React.createRef<HTMLTextAreaElement>();
@@ -42,27 +46,29 @@ const EditView = ({
         navigator.userAgent
       );
 
-    if (e.key === 'Enter' && !isMobile && !e.nativeEvent.isComposing) {
-      const enterToSubmit = useStore.getState().enterToSubmit;
-      if (sticky) {
-        if ((enterToSubmit && !e.shiftKey) || (!enterToSubmit && (e.ctrlKey || e.shiftKey))) {
-          e.preventDefault();
-          handleSaveAndSubmit();
-          resetTextAreaHeight();
-        }
-      } else {
-        if (e.ctrlKey && e.shiftKey) {
-          e.preventDefault();
-          handleSaveAndSubmit();
-          resetTextAreaHeight();
-        } else if (e.ctrlKey || e.shiftKey) handleSave();
+    if (e.key !== 'Enter' || isMobile || e.nativeEvent.isComposing) return;
+
+    if (sticky) {
+      if ((enterToSubmit && !e.shiftKey) || (!enterToSubmit && (e.ctrlKey || e.shiftKey))) {
+        e.preventDefault();
+        handleSaveAndSubmit();
+        resetTextAreaHeight();
+      }
+    } else {
+      if (e.ctrlKey && e.shiftKey) {
+        e.preventDefault();
+        handleSaveAndSubmit();
+        resetTextAreaHeight();
+      } else if (e.ctrlKey || e.shiftKey) {
+        handleSave();
       }
     }
   };
 
   const handleSave = () => {
-    if (sticky && (_content === '' || useStore.getState().generating)) return;
-    const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(useStore.getState().chats));
+    if (sticky && (_content === '' || generating)) return;
+    if (!chats) return;
+    const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
     const updatedMessages = updatedChats[currentChatIndex].messageCurrent.messages;
     if (sticky) {
       updatedMessages.push({ role: inputRole, content: _content });
@@ -77,13 +83,8 @@ const EditView = ({
 
   const { handleSubmit } = useSubmit();
   const handleSaveAndSubmit = () => {
-    if (useStore.getState().generating) return;
-    const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(useStore.getState().chats));
-
-    const editorSettings = useStore.getState().editorSettings;
-    const setEditorSettings = useStore.getState().setEditorSettings;
-    const currentSelection = useStore.getState().currentSelection;
-
+    if (generating || !chats) return;
+    const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
     const updatedMessages = updatedChats[currentChatIndex].messageCurrent.messages;
     if (sticky) {
       let tempContent = _content;
@@ -124,36 +125,22 @@ const EditView = ({
     handleSubmit();
   };
 
-  // const updateChatMessage = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-  //   if (sticky && (_content === '' || useStore.getState().generating)) return;
-  //   const updatedChats: DocumentInterface[] = JSON.parse(
-  //     JSON.stringify(useStore.getState().chats)
-  //   );
-  //   const updatedMessages = updatedChats[currentChatIndex].messageCurrent.messages;
-  //   if (sticky) {
-  //     updatedMessages.push({ role: inputRole, content: e.target.value });
-  //     _setContent('');
-  //     resetTextAreaHeight();
-  //   } else {
-  //      updatedMessages[messageIndex].content = e.target.value;
-  //     // setIsEdit(false);
-  //   }
-  //   setChats(updatedChats);
-  // };
-
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
-  }, [_content]);
+  }, [_content, textareaRef]);
 
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+      textareaRef.current.focus();
+      textareaRef.current.setSelectionRange(
+        textareaRef.current.value.length,
+        textareaRef.current.value.length
+      );
     }
-  }, []);
+  }, [textareaRef]);
 
   return (
     <>
@@ -175,32 +162,24 @@ const EditView = ({
           className={`m-0 text-grey-300 resize-none bg-transparent overflow-y-hidden focus:ring-0 focus-visible:ring-0 flex w-full placeholder:text-gray-300
           ${sticky ? 'pr-10 p-1' : 'text-sm'}
           `}
-          onChange={e => {
-            _setContent(e.target.value);
-          }}
+          onChange={e => _setContent(e.target.value)}
           value={_content}
           placeholder={t('submitPlaceholder') as string}
           onKeyDown={handleKeyDown}
           rows={1}
-        ></textarea>
+        />
         {sticky && (
-          <EditViewSubmitButton
-            handleSaveAndSubmit={handleSaveAndSubmit}
-            handleSave={handleSave}
-            setIsModalOpen={setIsModalOpen}
-            setIsEdit={setIsEdit}
-            _setContent={_setContent}
-          />
+          <EditViewSubmitButton generating={generating} handleSaveAndSubmit={handleSaveAndSubmit} />
         )}
       </div>
       {sticky || (
         <EditViewButtons
           sticky={sticky}
+          generating={generating}
           handleSaveAndSubmit={handleSaveAndSubmit}
           handleSave={handleSave}
           setIsModalOpen={setIsModalOpen}
           setIsEdit={setIsEdit}
-          _setContent={_setContent}
         />
       )}
       {isModalOpen && (
@@ -217,21 +196,13 @@ const EditView = ({
 
 const EditViewSubmitButton = memo(
   ({
+    generating,
     handleSaveAndSubmit,
-    handleSave,
-    setIsModalOpen,
-    setIsEdit,
-    _setContent,
   }: {
+    generating: boolean;
     handleSaveAndSubmit: () => void;
-    handleSave: () => void;
-    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    setIsEdit: React.Dispatch<React.SetStateAction<boolean>>;
-    _setContent: React.Dispatch<React.SetStateAction<string>>;
   }) => {
-    const { t } = useTranslation();
-    const generating = useStore.getState().generating;
-    const setGenerating = useStore.getState().setGenerating;
+    const setGenerating = useStore(state => state.setGenerating);
 
     const handleCancel = () => {
       setGenerating(false);
@@ -264,25 +235,25 @@ const EditViewSubmitButton = memo(
     );
   }
 );
+EditViewSubmitButton.displayName = 'EditViewSubmitButton';
 
 const EditViewButtons = memo(
   ({
     sticky = false,
+    generating,
     handleSaveAndSubmit,
     handleSave,
     setIsModalOpen,
     setIsEdit,
-    _setContent,
   }: {
     sticky?: boolean;
+    generating: boolean;
     handleSaveAndSubmit: () => void;
     handleSave: () => void;
     setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     setIsEdit: React.Dispatch<React.SetStateAction<boolean>>;
-    _setContent: React.Dispatch<React.SetStateAction<string>>;
   }) => {
     const { t } = useTranslation();
-    const generating = useStore.getState().generating;
 
     return (
       <div className="flex">
@@ -313,7 +284,7 @@ const EditViewButtons = memo(
             <button
               className="btn relative mr-2 btn-neutral"
               onClick={() => {
-                !generating && setIsModalOpen(true);
+                if (!generating) setIsModalOpen(true);
               }}
             >
               <div className="flex items-center justify-center gap-2">{t('saveAndSubmit')}</div>
@@ -330,5 +301,6 @@ const EditViewButtons = memo(
     );
   }
 );
+EditViewButtons.displayName = 'EditViewButtons';
 
 export default EditView;

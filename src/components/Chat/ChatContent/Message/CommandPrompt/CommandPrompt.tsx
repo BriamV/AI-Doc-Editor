@@ -28,11 +28,11 @@ const CommandPrompt = ({
   }, [dropDown]);
 
   useEffect(() => {
-    const filteredPrompts = matchSorter(useStore.getState().prompts, input, {
+    const filteredPrompts = matchSorter(prompts, input, {
       keys: ['name'],
     });
     _setPrompts(filteredPrompts);
-  }, [input]);
+  }, [input, prompts]);
 
   useEffect(() => {
     _setPrompts(prompts);

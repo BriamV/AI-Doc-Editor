@@ -26,7 +26,7 @@ const DocumentSearch = ({
 
   useEffect(() => {
     debouncedUpdateFilter(_filter);
-  }, [_filter]);
+  }, [_filter, debouncedUpdateFilter]);
 
   return (
     <SearchBar

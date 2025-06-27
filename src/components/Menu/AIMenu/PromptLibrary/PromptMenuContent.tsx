@@ -1,60 +1,37 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useStore from '@store/store';
 import PromptButton from './PromptButton';
-import { useTranslation } from 'react-i18next';
+
 import { matchSorter } from 'match-sorter';
 import { Prompt } from '@type/prompt';
 
 const PromptMenuContent = ({
-  activeMenu,
   setActiveMenu,
 }: {
-  activeMenu: string;
   setActiveMenu: React.Dispatch<React.SetStateAction<string>>;
 }) => {
-  const { t } = useTranslation();
   const prompts = useStore(state => state.prompts);
-  const [_prompts, _setPrompts] = useState<Prompt[]>(
-    prompts.sort((a, b) => a.name.localeCompare(b.name))
-  );
+  const [_prompts, _setPrompts] = useState<Prompt[]>([]);
   const [input, setInput] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const [dropDown, setDropDown] = useState(false);
 
   useEffect(() => {
-    if (dropDown && inputRef.current) {
-      // When dropdown is visible, focus the input
-      //   inputRef.current.focus();
-    }
-  }, [dropDown]);
-
-  useEffect(() => {
-    const filteredPrompts = matchSorter(useStore.getState().prompts, input, {
+    const filteredPrompts = matchSorter(prompts, input, {
       keys: ['name'],
     });
     _setPrompts(filteredPrompts);
-  }, [input]);
+  }, [input, prompts]);
 
   useEffect(() => {
     // Organize prompts alphabetically
-    prompts.sort((a, b) => a.name.localeCompare(b.name));
-    _setPrompts(prompts);
+    const sortedPrompts = [...prompts].sort((a, b) => a.name.localeCompare(b.name));
+    _setPrompts(sortedPrompts);
     setInput('');
   }, [prompts]);
 
-  function handleDropdown(e: any) {
-    setDropDown(!dropDown);
-  }
-
   return (
     <div>
-      <div
-        ref={dropdownRef}
-        className={`${
-          dropDown ? '' : ''
-        } z-10 text-sm h-screen text-gray-800 dark:text-gray-100 group dark:bg-gray-900`}
-      >
+      <div className="z-10 text-sm h-screen text-gray-800 dark:text-gray-100 group dark:bg-gray-900">
         <div className="flex-col flex overflow-y-auto hide-scroll-bar border-b border-white/10 p-2 pb-4 h-full">
           <div className="h-10 mb-2">
             <input
@@ -72,9 +49,8 @@ const PromptMenuContent = ({
             {_prompts.map((prompt, index) => (
               <PromptButton
                 key={index}
-                index={index}
                 prompt={prompt}
-                activeMenu={activeMenu}
+                index={index}
                 setActiveMenu={setActiveMenu}
               />
             ))}

@@ -6,12 +6,13 @@
 
 ## Pre-Development Checklist
 
-### ✅ Technical Baseline Verification
+### Technical Baseline Verification
 
 - [ ] **Current Project State**: Verify base repository actually runs
+
   ```bash
-  npm install
-  npm run dev
+  yarn install
+  yarn run dev
   # Verify application loads at http://localhost:5173
   ```
 
@@ -32,7 +33,7 @@
   - [ ] Encryption/security model in base repository
   - [ ] Target implementation per SEC-002 requirements
 
-### ✅ Development Setup
+### Development Setup
 
 - [ ] **Git Workflow**: Review CONTRIBUTING.md for branch naming and PR process
   - [ ] Understand feature branch naming convention (`feature/T<XX>-name`)
@@ -55,7 +56,7 @@
   - [ ] TypeScript strict mode configuration
   - [ ] Import/export conventions
 
-### ✅ Execution Strategy
+### Execution Strategy
 
 - [ ] **First Task Identification**: Determine actual starting point from WORK-PLAN v5.md
   - [ ] Review R0.WP1 tasks (likely T-01: Baseline & CI/CD)
@@ -78,7 +79,7 @@
   - [ ] Dependency conflicts or version mismatches
   - [ ] Access to required external services
 
-### ✅ Context Validation
+### Context Validation
 
 - [ ] **Gap Analysis Verification**: Validate ARCH-GAP-ANALYSIS findings against actual codebase
   - [ ] Confirm 65% coverage estimate is accurate
@@ -102,26 +103,28 @@
 ## Environment Setup Commands
 
 ### Base Repository Setup
+
 ```bash
 # Clone and setup base repository
 cd /mnt/d/DELL_/Documents/GitHub/AI-Doc-Editor
-npm install
-npm run dev
+yarn install
+yarn run dev
 
 # Verify Electron build (if needed)
-npm run electron
+yarn run electron
 
 # Check for any existing tests
-npm test # (if test script exists)
+yarn test # (if test script exists)
 ```
 
 ### Development Tools Verification
+
 ```bash
 # Check Node.js version
 node --version
 
-# Check npm version  
-npm --version
+# Check Yarn version
+yarn --version
 
 # Check Git configuration
 git config --list
@@ -132,22 +135,24 @@ docker-compose --version
 ```
 
 ### Code Quality Tools
+
 ```bash
 # Check linting setup
-npm run lint # (if script exists)
+yarn run lint # (if script exists)
 
 # Check formatting
-npm run format # (if script exists)
+yarn run format # (if script exists)
 
 # TypeScript compilation check
-npm run build
+yarn run build
 ```
 
 ---
 
 ## Success Criteria
 
-✅ **Ready to Start Development** when:
+Ready to Start Development when:
+
 - [ ] All checklist items completed
 - [ ] Base repository runs without errors
 - [ ] Development environment fully configured

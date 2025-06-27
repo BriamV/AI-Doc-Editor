@@ -1,5 +1,4 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 
 const SearchBar = ({
   value,
@@ -12,8 +11,6 @@ const SearchBar = ({
   className?: React.HTMLAttributes<HTMLDivElement>['className'];
   disabled?: boolean;
 }) => {
-  const { t } = useTranslation();
-
   return (
     <div className={className}>
       <input

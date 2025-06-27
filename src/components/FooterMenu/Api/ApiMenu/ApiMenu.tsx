@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import useStore from '@store/store';
 
 import useHideOnOutsideClick from '@hooks/useHideOnOutsideClick';

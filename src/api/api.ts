@@ -1,3 +1,7 @@
+/**
+ * T-10: API Layer Definition
+ * This file defines the API layer for the application.
+ */
 import { ConfigInterface, MessageInterface } from '@type/document';
 import { isAzureEndpoint } from '@utils/api';
 

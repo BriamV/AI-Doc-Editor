@@ -1,5 +1,5 @@
 import useStore from '@store/store';
-import { DocumentInterface } from '@type/document';
+import { DocumentCurrent, DocumentInterface } from '@type/document';
 
 const useUpdateHistory = () => {
   const setChats = useStore(state => state.setChats);
@@ -14,7 +14,7 @@ const useUpdateHistory = () => {
       // Search message history and see if there is a match by ID
       // If there is a match, then update the message history
       let matchFound = false;
-      messageHistory.forEach((message: any) => {
+      messageHistory.forEach((message: DocumentCurrent) => {
         if (message.id === currentMessage.id) {
           // There's a match, so update the message history
           message = currentMessage;

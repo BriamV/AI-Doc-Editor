@@ -17,6 +17,19 @@ const ApiPopup = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(!apiKey && firstVisit);
   const [error, setError] = useState<string>('');
 
+  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    _setApiKey(e.target.value);
+  };
+
+  const handleAdvancedConfigClick = () => {
+    setIsModalOpen(false);
+    document.getElementById('api-menu')?.click();
+  };
+
+  const handleClearError = () => {
+    setError('');
+  };
+
   const handleConfirm = () => {
     if (_apiKey.length === 0) {
       setError(t('noApiKeyWarning', { ns: 'api' }) as string);
@@ -28,8 +41,10 @@ const ApiPopup = () => {
   };
 
   useEffect(() => {
-    setFirstVisit(false);
-  }, []);
+    if (firstVisit) {
+      setFirstVisit(false);
+    }
+  }, [firstVisit, setFirstVisit]);
 
   return isModalOpen ? (
     <PopupModal
@@ -47,9 +62,7 @@ const ApiPopup = () => {
             type="text"
             className="text-gray-800 dark:text-white p-3 text-sm border-none bg-gray-200 dark:bg-gray-600 rounded-md m-0 w-full mr-0 h-8 focus:outline-none"
             value={_apiKey}
-            onChange={e => {
-              _setApiKey(e.target.value);
-            }}
+            onChange={handleApiKeyChange}
           />
         </div>
 
@@ -59,6 +72,7 @@ const ApiPopup = () => {
             ns="api"
             components={[
               <a
+                key="api-key-link"
                 href="https://platform.openai.com/account/api-keys"
                 className="link"
                 target="_blank"
@@ -73,11 +87,9 @@ const ApiPopup = () => {
             ns="api"
             components={[
               <a
+                key="advanced-config-link"
                 className="link cursor-pointer"
-                onClick={() => {
-                  setIsModalOpen(false);
-                  document.getElementById('api-menu')?.click();
-                }}
+                onClick={handleAdvancedConfigClick}
               />,
             ]}
           />
@@ -94,9 +106,7 @@ const ApiPopup = () => {
             </div>
             <div
               className="text-white absolute top-1 right-1 cursor-pointer"
-              onClick={() => {
-                setError('');
-              }}
+              onClick={handleClearError}
             >
               <Close />
             </div>
@@ -104,9 +114,7 @@ const ApiPopup = () => {
         )}
       </div>
     </PopupModal>
-  ) : (
-    <></>
-  );
+  ) : null;
 };
 
 export default ApiPopup;

@@ -1,11 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import useStore from '@store/store';
-import { shallow } from 'zustand/shallow';
+import React from 'react';
 
-import countTokens from '@utils/messageUtils';
-import { modelCost } from '@constants/chat';
-
-const TokenCount = React.memo(() => {
+const TokenCount = () => {
   // const [tokenCount, setTokenCount] = useState<number>(0);
   // const generating = useStore((state) => state.generating);
   // const messages = useStore(
@@ -38,6 +33,8 @@ const TokenCount = React.memo(() => {
       </div> */}
     </div>
   );
-});
+};
 
-export default TokenCount;
+TokenCount.displayName = 'TokenCount';
+
+export default React.memo(TokenCount);

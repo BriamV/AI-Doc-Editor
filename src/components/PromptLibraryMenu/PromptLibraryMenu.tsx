@@ -9,7 +9,6 @@ import ImportPrompt from './ImportPrompt';
 import ExportPrompt from './ExportPrompt';
 import { Add, TrashCan } from '@carbon/icons-react';
 import { PromptConfig } from '@components/PromptLibraryMenu/PromptLibraryMenu/Config';
-import { update } from 'lodash';
 
 const PromptLibraryMenu = () => {
   const { t } = useTranslation();
@@ -44,11 +43,6 @@ const PromptLibraryMenuPopUp = ({
     e.target.style.maxHeight = `${e.target.scrollHeight}px`;
   };
 
-  const handleSave = () => {
-    setPrompts(_prompts);
-    setIsModalOpen(false);
-  };
-
   const addPrompt = () => {
     const updatedPrompts: Prompt[] = JSON.parse(JSON.stringify(_prompts));
     updatedPrompts.push({
@@ -62,7 +56,7 @@ const PromptLibraryMenuPopUp = ({
     setPrompts(updatedPrompts);
   };
 
-  const _updatePrompt = (__index: number, __prompt: any) => {
+  const _updatePrompt = (__index: number, __prompt: Prompt) => {
     const updatedPrompts: Prompt[] = JSON.parse(JSON.stringify(_prompts));
     updatedPrompts[__index] = __prompt;
     _setPrompts(updatedPrompts);
@@ -74,10 +68,6 @@ const PromptLibraryMenuPopUp = ({
     updatedPrompts.splice(index, 1);
     _setPrompts(updatedPrompts);
     setPrompts(updatedPrompts);
-  };
-
-  const clearPrompts = () => {
-    _setPrompts([]);
   };
 
   const handleOnFocus = (e: React.FocusEvent<HTMLTextAreaElement, Element>) => {

@@ -1,6 +1,6 @@
 // This config menu appears in the footer menu
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import useStore from '@store/store';
 import { useTranslation } from 'react-i18next';
 
@@ -18,7 +18,6 @@ import { ModelOptions } from '@type/document';
 import { _defaultChatConfig, _defaultSystemMessage } from '@constants/chat';
 
 const Config = () => {
-  const { t } = useTranslation('model');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   return (
     <div>

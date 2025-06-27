@@ -1,3 +1,4 @@
+import React from 'react';
 import useStore from '@store/store';
 import Api from './Api/Api';
 import AboutMenu from '@components/FooterMenu/AboutMenu';

@@ -7,7 +7,7 @@ import { Folder, FolderCollection } from '@type/document';
 import defaultStyles from '@components/style';
 
 const NewFolder = () => {
-  const { t } = useTranslation();
+  useTranslation();
   const generating = useStore(state => state.generating);
   const setFolders = useStore(state => state.setFolders);
 

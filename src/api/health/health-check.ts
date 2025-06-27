@@ -11,6 +11,8 @@ export interface HealthStatus {
     database?: DependencyStatus;
     vectordb?: DependencyStatus;
     openai?: DependencyStatus;
+    browser?: DependencyStatus;
+    storage?: DependencyStatus;
   };
 }
 
@@ -54,7 +56,7 @@ export const checkSystemHealth = async (): Promise<HealthCheckResponse> => {
       uptime: performance.now(),
       environment: import.meta.env.NODE_ENV || 'development',
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       health: {
         status: 'error',

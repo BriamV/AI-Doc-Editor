@@ -1,12 +1,12 @@
-import React from 'react';
+import { MouseEventHandler, ReactElement } from 'react';
 
-const BaseButton = ({
+function BaseButton({
   onClick,
   icon,
 }: {
-  onClick: React.MouseEventHandler<HTMLButtonElement>;
-  icon: React.ReactElement;
-}) => {
+  onClick: MouseEventHandler<HTMLButtonElement>;
+  icon: ReactElement;
+}) {
   return (
     <div className="text-gray-400 flex self-end lg:self-center justify-center gap-3 md:gap-4  visible">
       <button
@@ -17,6 +17,6 @@ const BaseButton = ({
       </button>
     </div>
   );
-};
+}
 
 export default BaseButton;

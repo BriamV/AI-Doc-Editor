@@ -1,34 +1,32 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import useSubmitPromptAdjust from '@hooks/useSubmitPromptAdjust';
 import { MagicWand } from '@carbon/icons-react';
 import useStore from '@store/store';
 import useClearChatPrompt from '@hooks/useClearChatPrompt';
+import { Prompt } from '@type/prompt';
 import { PromptButtonConfig } from '@components/Menu/AIMenu/PromptLibrary/PromptButton/Config';
 
 const PromptButton = ({
   prompt,
   index,
-  activeMenu,
   setActiveMenu,
 }: {
-  prompt: any;
+  prompt: Prompt;
   index: number;
-  activeMenu: string;
   setActiveMenu: React.Dispatch<React.SetStateAction<string>>;
 }) => {
   const setHideSideAIMenu = useStore(state => state.setHideSideAIMenu);
 
   const chats = useStore(state => state.chats);
-  const setChats = useStore(state => state.setChats);
-  const useClearChat = useClearChatPrompt();
+  const clearChat = useClearChatPrompt();
   const { handleSubmit } = useSubmitPromptAdjust();
   const editorSettings = useStore(state => state.editorSettings);
   const setEditorSettings = useStore(state => state.setEditorSettings);
-  const generating = useStore.getState().generating;
-  const setGenerating = useStore.getState().setGenerating;
+  const generating = useStore(state => state.generating);
+  const setGenerating = useStore(state => state.setGenerating);
   const [_promptName, _setPromptName] = useState(prompt.name);
 
-  const handleClickPlay = (e: any) => {
+  const handleClickPlay = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     if (generating) {
       setGenerating(false);
@@ -39,30 +37,26 @@ const PromptButton = ({
     handleSubmit({
       prompt: prompt.prompt,
       includeSelection: prompt.includeSelection,
-      modifiedConfig: prompt.config,
+      modifiedConfig: prompt.config ?? undefined,
     });
 
     setHideSideAIMenu(false);
     if (chats) {
-      let tempChats = chats;
-      editorSettings.activeMenu = 'chat';
-      setChats(tempChats);
+      setEditorSettings({ ...editorSettings, activeMenu: 'chat' });
       setActiveMenu('chat');
     }
   };
 
-  const mouseDown = (e: any) => {
+  const mouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
   };
 
-  const handleClickButton = (e: any) => {
+  const handleClickButton = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    useClearChat(prompt.prompt);
+    clearChat(prompt.prompt);
     setHideSideAIMenu(false);
     if (chats) {
-      let tempSettings = editorSettings;
-      tempSettings.activeMenu = 'chat';
-      setEditorSettings(tempSettings);
+      setEditorSettings({ ...editorSettings, activeMenu: 'chat' });
       setActiveMenu('chat');
     }
   };

@@ -10,7 +10,7 @@ import { roles } from '@type/document';
 import { defaultModel, modelOptions, _defaultChatConfig } from '@constants/chat';
 import { ExportV1 } from '@type/export';
 
-export const validateAndFixChats = (chats: any): chats is DocumentInterface[] => {
+export const validateAndFixChats = (chats: unknown): chats is DocumentInterface[] => {
   if (!Array.isArray(chats)) return false;
 
   for (const chat of chats) {
@@ -59,7 +59,7 @@ const validateAndFixChatConfig = (config: ConfigInterface) => {
   return true;
 };
 
-export const isLegacyImport = (importedData: any) => {
+export const isLegacyImport = (importedData: unknown) => {
   if (Array.isArray(importedData)) return true;
   return false;
 };

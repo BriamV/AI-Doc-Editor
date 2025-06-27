@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState, useEffect, useLayoutEffect } from 'react';
+import { useCallback, useMemo, useRef, useEffect, useLayoutEffect } from 'react';
 import useStore from '@store/store';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import type { GridSelection, NodeSelection } from 'lexical';
@@ -13,7 +13,7 @@ import { createDOMRange, createRectsFromDOMRange } from '@lexical/selection';
 
 const LowPriority = 1;
 
-const EditorSelection = (editorRef: any) => {
+const EditorSelection = () => {
   const [editor] = useLexicalComposerContext();
   const boxRef = useRef<HTMLDivElement>(null);
   const selectionState = useMemo(
@@ -28,9 +28,6 @@ const EditorSelection = (editorRef: any) => {
     // selectionState.container.classList.add("pointer-events-none");
   }
   const selectionRef = useRef<RangeSelection | null>(null);
-  const chats = useStore(state => state.chats);
-  const currentChatIndex = useStore(state => state.currentChatIndex);
-  const currentSelection = useStore(state => state.currentSelection);
   const setCurrentSelection = useStore(state => state.setCurrentSelection);
 
   // Scan for selection change events and save the selection in storage
@@ -40,10 +37,10 @@ const EditorSelection = (editorRef: any) => {
     SELECTION_CHANGE_COMMAND,
     () => {
       const tempSelection = $getSelection();
-      if (selectionRepeat != tempSelection) {
+      if (selectionRepeat !== tempSelection) {
         selectionRepeat = tempSelection;
-        if (selectionRepeat?.getTextContent() != null) {
-          setCurrentSelection(selectionRepeat?.getTextContent());
+        if (selectionRepeat?.getTextContent() !== null) {
+          setCurrentSelection(selectionRepeat?.getTextContent() ?? '');
         }
       }
       return true;
@@ -51,31 +48,9 @@ const EditorSelection = (editorRef: any) => {
     LowPriority
   );
 
-  function roundToNearest24(num: number) {
-    return Math.round(num / 24) * 24;
-  }
-
-  // get .editor-input element and log to console when it scrolls, useRef and useEffect, on finished scrolling, run updateLocation
-
-  const editorInput = document.getElementsByClassName('editor-input');
-
-  useEffect(() => {
-    if (editorInput[0] !== undefined) {
-      editorInput[0].addEventListener('scroll', () => {
-        resetLocation();
-      });
-    }
-
-    if (editorInput[0] !== undefined) {
-      editorInput[0].addEventListener('scrollend', () => {
-        updateLocation();
-      });
-    }
-  }, [editorInput]);
-
   const updateLocation = useCallback(() => {
     editor.getEditorState().read(() => {
-      var element = document.getElementsByClassName('editor-input');
+      document.getElementsByClassName('editor-input');
       const selection = $getSelection();
 
       if ($isRangeSelection(selection)) {
@@ -91,7 +66,7 @@ const EditorSelection = (editorRef: any) => {
         );
         const boxElem = boxRef.current;
         if (range !== null && boxElem !== null) {
-          const { left, bottom, width } = range.getBoundingClientRect();
+          const { left, width } = range.getBoundingClientRect();
           const selectionRects = createRectsFromDOMRange(editor, range);
 
           let correctedLeft = selectionRects.length === 1 ? left + width / 2 - 125 : left - 125;
@@ -99,22 +74,20 @@ const EditorSelection = (editorRef: any) => {
             correctedLeft = 10;
           }
           boxElem.style.left = `${correctedLeft}px`;
-          boxElem.style.top = `${bottom + 20}px`;
+          boxElem.style.top = `${range.getBoundingClientRect().bottom + 20}px`;
           const selectionRectsLength = selectionRects.length;
           const { container } = selectionState;
           const elements: Array<HTMLSpanElement> = selectionState.elements;
           const elementsLength = elements.length;
 
           for (let i = 0; i < selectionRectsLength; i++) {
-            let color = '50,150,255';
-            const selectionRect = selectionRects[i];
             let elem: HTMLSpanElement = elements[i];
             if (elem === undefined) {
               elem = document.createElement('span');
               elements[i] = elem;
               container.appendChild(elem);
             }
-            const style = `mix-blend-mode:color;position:absolute;top:${selectionRect.top}px;left:${selectionRect.left}px;height:${selectionRect.height}px;width:${selectionRect.width}px;background-color:rgba(${color}, 1);pointer-events:none;z-index:5;`;
+            const style = `mix-blend-mode:color;position:absolute;top:${selectionRects[i].top}px;left:${selectionRects[i].left}px;height:${selectionRects[i].height}px;width:${selectionRects[i].width}px;background-color:rgba(50,150,255, 1);pointer-events:none;z-index:5;`;
             elem.style.cssText = style;
           }
           for (let i = elementsLength - 1; i >= selectionRectsLength; i--) {
@@ -128,8 +101,6 @@ const EditorSelection = (editorRef: any) => {
   }, [editor, selectionState]);
 
   const resetLocation = useCallback(() => {
-    // remove elements with class selection-box-inner
-
     editor.getEditorState().read(() => {
       const selection = $getSelection();
 
@@ -146,21 +117,21 @@ const EditorSelection = (editorRef: any) => {
         );
         const boxElem = boxRef.current;
         if (range !== null && boxElem !== null) {
-          const { left, bottom, width } = range.getBoundingClientRect();
-          const selectionRects = createRectsFromDOMRange(editor, range);
-          let correctedLeft = selectionRects.length === 1 ? left + width / 2 - 125 : left - 125;
+          const { left, width } = range.getBoundingClientRect();
+          createRectsFromDOMRange(editor, range);
+          let correctedLeft =
+            range.getBoundingClientRect().width === 1 ? left + width / 2 - 125 : left - 125;
           if (correctedLeft < 10) {
             correctedLeft = 10;
           }
           boxElem.style.left = `-2000px`;
           boxElem.style.top = `-2000px`;
-          const selectionRectsLength = selectionRects.length;
+          const selectionRectsLength = createRectsFromDOMRange(editor, range).length;
           const { container } = selectionState;
           const elements: Array<HTMLSpanElement> = selectionState.elements;
           const elementsLength = elements.length;
 
           for (let i = 0; i < selectionRectsLength; i++) {
-            const selectionRect = selectionRects[i];
             let elem: HTMLSpanElement = elements[i];
             if (elem === undefined) {
               elem = document.createElement('span');
@@ -188,10 +159,28 @@ const EditorSelection = (editorRef: any) => {
     if (body !== null) {
       body.appendChild(container);
       return () => {
-        body.removeChild(container);
+        if (body.contains(container)) {
+          body.removeChild(container);
+        }
       };
     }
+    return () => {};
   }, [selectionState.container, updateLocation]);
+
+  useEffect(() => {
+    const editorInput = document.getElementsByClassName('editor-input');
+    if (editorInput[0] !== undefined) {
+      editorInput[0].addEventListener('scroll', () => {
+        resetLocation();
+      });
+    }
+
+    if (editorInput[0] !== undefined) {
+      editorInput[0].addEventListener('scrollend', () => {
+        updateLocation();
+      });
+    }
+  }, [resetLocation, updateLocation]);
 
   useEffect(() => {
     window.addEventListener('resize', updateLocation);
@@ -206,7 +195,7 @@ const EditorSelection = (editorRef: any) => {
     return () => {
       window.removeEventListener('resize', updateLocation);
     };
-  }, [updateLocation]);
+  }, [updateLocation, resetLocation]);
 
   useEffect(() => {
     setCurrentSelection('');
@@ -214,7 +203,7 @@ const EditorSelection = (editorRef: any) => {
       element.remove();
     });
     selectionState.elements = [];
-  }, [currentChatIndex]);
+  }, [setCurrentSelection, selectionState]);
 
   return (
     <div ref={boxRef} className="selection-box">

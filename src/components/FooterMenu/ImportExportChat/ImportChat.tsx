@@ -1,22 +1,15 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { v4 as uuidv4 } from 'uuid';
 
 import useStore from '@store/store';
 
-import { isLegacyImport, validateAndFixChats, validateExportV1 } from '@utils/import';
-
-import { DocumentInterface, Folder, FolderCollection } from '@type/document';
-import { ExportBase } from '@type/export';
+import { DocumentInterface } from '@type/document';
 
 const ImportChat = () => {
   const { t } = useTranslation();
   const setChats = useStore.getState().setChats;
   const setFolders = useStore.getState().setFolders;
-  const prompts = useStore.getState().prompts;
   const setPrompts = useStore.getState().setPrompts;
-  const defaultChatConfig = useStore.getState().defaultChatConfig;
-  const setDefaultChatConfig = useStore.getState().setDefaultChatConfig;
   const inputRef = useRef<HTMLInputElement>(null);
   const [alert, setAlert] = useState<{
     message: string;
@@ -37,7 +30,6 @@ const ImportChat = () => {
           const parsedData = JSON.parse(data);
 
           // import folders
-          parsedData.folders;
           // increment the order of existing folders
           const offset = Object.keys(parsedData.folders).length;
 

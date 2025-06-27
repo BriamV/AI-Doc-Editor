@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 
 import { TrashCan } from '@carbon/icons-react';
 
@@ -9,5 +9,7 @@ const DeleteButton = memo(
     return <BaseButton icon={<TrashCan />} onClick={() => setIsDelete(true)} />;
   }
 );
+
+DeleteButton.displayName = 'DeleteButton';
 
 export default DeleteButton;

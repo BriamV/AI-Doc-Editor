@@ -1,20 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import useStore from '@store/store';
-import useCloudAuthStore from '@store/cloud-auth-store';
 
 import PopupModal from '@components/PopupModal';
 import { Settings } from '@carbon/icons-react';
-import ThemeSwitcher from '@components/FooterMenu/ThemeSwitcher';
-import LanguageSelector from '@components/LanguageSelector';
-import AutoTitleToggle from './AutoTitleToggle';
-import AdvancedModeToggle from './AdvencedModeToggle';
-import InlineLatexToggle from './InlineLatexToggle';
 
 import PromptLibraryMenu from '@components/PromptLibraryMenu';
 import Config from '@components/FooterMenu/SettingsMenu/Config';
-import EnterToSubmitToggle from './EnterToSubmitToggle';
-import TotalTokenCost, { TotalTokenCostToggle } from './TotalTokenCost';
 import ClearConversation from '@components/FooterMenu/ClearConversation';
 import FineTuneMenu from '@components/FooterMenu/SettingsMenu/FineTuneMenu/FineTuneMenu';
 

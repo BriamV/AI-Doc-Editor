@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useGoogleLogin, googleLogout } from '@react-oauth/google';
@@ -22,7 +21,7 @@ const GoogleSyncButton = ({ loginHandler }: { loginHandler?: () => void }) => {
     onSuccess: codeResponse => {
       setGoogleAccessToken(codeResponse.access_token);
       setCloudSync(true);
-      loginHandler && loginHandler();
+      if (loginHandler) loginHandler();
       setToastStatus('success');
       setToastMessage(t('toast.sync'));
       setToastShow(true);

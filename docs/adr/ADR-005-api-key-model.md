@@ -1,9 +1,11 @@
 # ADR-005: API Key Model Architecture
 
 ## Status
+
 Proposed
 
 ## Context
+
 As part of T-17 API-SPEC & ADR Governance, we need to define the API key management model for the AI-Doc-Editor system. The system will need to handle:
 
 1. **OpenAI API Keys**: For AI document generation and processing
@@ -40,16 +42,19 @@ Current state analysis shows the frontend-only application stores API keys in In
 ### Security Model
 
 **Encryption at Rest**:
+
 - AES-256-GCM for API key storage
 - Separate encryption keys per user/service
 - Key derivation using PBKDF2 or Argon2
 
 **Encryption in Transit**:
+
 - TLS 1.3 for all API communications
 - Certificate pinning for external services
 - End-to-end encryption for sensitive operations
 
 **Access Control**:
+
 - Role-based access control (RBAC)
 - Principle of least privilege
 - Audit logging for all key operations
@@ -57,16 +62,19 @@ Current state analysis shows the frontend-only application stores API keys in In
 ### Implementation Strategy
 
 **Phase 1 (R1)**: User API Key Management
+
 - Basic encrypted storage
 - User self-service UI
 - Integration with OpenAI API
 
-**Phase 2 (R2)**: System Key Management  
+**Phase 2 (R2)**: System Key Management
+
 - Admin key management interface
 - Automatic rotation capabilities
 - Enhanced monitoring and alerting
 
 **Phase 3 (R3)**: Advanced Security
+
 - HSM integration evaluation
 - Advanced threat detection
 - Compliance certification
@@ -74,18 +82,21 @@ Current state analysis shows the frontend-only application stores API keys in In
 ## Consequences
 
 ### Positive:
+
 - Clear separation of concerns for different key types
 - Scalable architecture supporting enterprise requirements
 - Security-first design meeting GDPR/HIPAA requirements
 - User empowerment through self-service key management
 
 ### Challenges:
+
 - Complex implementation requiring careful security design
 - Key rotation complexity for system-level keys
 - Backup and recovery procedures for encrypted keys
 - Performance impact of encryption/decryption operations
 
 ### Dependencies:
+
 - **T-02**: OAuth implementation provides foundation
 - **T-12**: Credential store provides encryption infrastructure
 - **T-41**: User API key management implements user tier
@@ -98,17 +109,20 @@ Current state analysis shows the frontend-only application stores API keys in In
 3. **Client-Side Only**: Current approach, insufficient for backend requirements
 
 ## Related Decisions
+
 - **ADR-005**: Pydantic v2 (validation for API key models)
 - **ADR-008**: Pydantic v2 deferral (affects implementation timeline)
 - **T-02, T-12, T-37, T-41**: Implementation tasks
 
 ## Implementation Notes
+
 - API key models will use Pydantic v2 for validation
 - Integration with FastAPI dependency injection
 - OpenAPI 3.1 specification will define key management endpoints
 - Audit trail required for all key operations
 
 ---
+
 **Approved by**: Pending Tech Lead Review  
 **Date**: 2025-06-25  
 **Related Tasks**: T-02, T-12, T-37, T-41

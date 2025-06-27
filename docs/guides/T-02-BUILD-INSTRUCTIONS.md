@@ -1,6 +1,7 @@
 # T-02 OAuth 2.0 + JWT Implementation - Build Instructions
 
 ## 🎯 Task T-02 Completion Status
+
 ✅ **COMPLETADO** - OAuth 2.0 + JWT Roles authentication system
 
 **Branch:** `feature/T-02-oauth-jwt-roles`  
@@ -12,6 +13,7 @@
 ## 🚀 Quick Build & Run
 
 ### Option 1: Automated Docker Build (Recommended)
+
 ```bash
 # 1. Run setup validation (auto-configura .env)
 ./setup-docker-build.sh
@@ -24,6 +26,7 @@
 **🎛️ OAuth real:** Se configura después desde el Admin Panel UI (T-44)
 
 ### Option 2: Manual Docker Commands
+
 ```bash
 # Backend only
 make docker-backend
@@ -36,9 +39,10 @@ make docker-prod
 ```
 
 ### Option 3: Local Development (No Docker)
+
 ```bash
 # Frontend
-npm run dev
+yarn dev
 
 # Backend (separate terminal)
 cd backend
@@ -58,7 +62,7 @@ GOOGLE_CLIENT_ID=your-google-client-id-here
 GOOGLE_CLIENT_SECRET=your-google-client-secret-here
 
 # Microsoft OAuth (Optional)
-MICROSOFT_CLIENT_ID=your-microsoft-client-id-here  
+MICROSOFT_CLIENT_ID=your-microsoft-client-id-here
 MICROSOFT_CLIENT_SECRET=your-microsoft-client-secret-here
 
 # JWT Security (Change in production)
@@ -71,12 +75,14 @@ VITE_API_BASE_URL=http://localhost:8000/api
 ### Getting OAuth Credentials
 
 **Google OAuth:**
+
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create project → Enable Google+ API
 3. Create OAuth 2.0 credentials
 4. Add redirect URI: `http://localhost:3000/auth/callback`
 
 **Microsoft OAuth:**
+
 1. Go to [Azure Portal](https://portal.azure.com/)
 2. Azure Active Directory → App registrations
 3. Create new registration
@@ -86,18 +92,19 @@ VITE_API_BASE_URL=http://localhost:8000/api
 
 ## 🌐 Service URLs (After Build)
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| **Frontend** | http://localhost:5173 | React development server |
-| **Backend API** | http://localhost:8000 | FastAPI OAuth + JWT server |
-| **API Docs** | http://localhost:8000/docs | Interactive API documentation |
-| **ChromaDB** | http://localhost:8001 | Vector database (future RAG) |
+| Service         | URL                        | Description                   |
+| --------------- | -------------------------- | ----------------------------- |
+| **Frontend**    | http://localhost:5173      | React development server      |
+| **Backend API** | http://localhost:8000      | FastAPI OAuth + JWT server    |
+| **API Docs**    | http://localhost:8000/docs | Interactive API documentation |
+| **ChromaDB**    | http://localhost:8001      | Vector database (future RAG)  |
 
 ---
 
 ## 🔐 OAuth Endpoints (T-02 Implementation)
 
 ### Authentication Flow
+
 ```bash
 # 1. Initiate OAuth login
 POST http://localhost:8000/auth/login
@@ -105,7 +112,7 @@ POST http://localhost:8000/auth/login
   "provider": "google" | "microsoft"
 }
 
-# 2. Handle OAuth callback  
+# 2. Handle OAuth callback
 POST http://localhost:8000/auth/callback
 {
   "code": "oauth_authorization_code",
@@ -129,18 +136,20 @@ Authorization: Bearer your_access_token
 ## 🧪 Testing the Implementation
 
 ### Frontend Testing
+
 ```bash
 # Unit tests
-npm run test
+yarn test
 
-# E2E tests  
-npm run test:e2e
+# E2E tests
+yarn test:e2e
 
 # Type checking
-npm run type-check
+yarn type-check
 ```
 
 ### Backend Testing
+
 ```bash
 # Test backend health
 curl http://localhost:8000/healthz
@@ -150,6 +159,7 @@ python backend/test_backend.py
 ```
 
 ### Quality Gate
+
 ```bash
 # Complete T-02 quality validation
 make qa-gate
@@ -192,6 +202,7 @@ sg docker -c "docker-compose restart"
 ```
 
 ### Key Components
+
 - **Frontend:** React + TypeScript + Zustand + TailwindCSS
 - **Backend:** FastAPI + Python-JOSE + OAuth providers
 - **Authentication:** OAuth 2.0 Authorization Code Flow
@@ -203,17 +214,20 @@ sg docker -c "docker-compose restart"
 ## ⚠️ Important Notes
 
 ### WSL2 Docker Integration
+
 - Use `sg docker -c "command"` prefix for Docker commands
 - Ensure Docker Desktop WSL2 integration is enabled
 - Scripts automatically handle WSL2 Docker access
 
 ### Security Considerations
+
 - **Never commit real OAuth credentials to git**
 - Change `SECRET_KEY` in production environment
 - JWT tokens expire: Access (30 min) / Refresh (7 days)
 - OAuth state parameter prevents CSRF attacks
 
 ### Build Time & Resources
+
 - **Build Time:** 5-10 minutes (first build)
 - **Disk Space:** ~2GB for all Docker images
 - **Memory:** ~1GB RAM during build process
@@ -223,6 +237,7 @@ sg docker -c "docker-compose restart"
 ## 🐛 Troubleshooting
 
 ### Docker Issues
+
 ```bash
 # Docker not accessible
 sudo usermod -a -G docker $USER
@@ -233,15 +248,17 @@ newgrp docker
 ```
 
 ### OAuth Issues
+
 ```bash
 # Invalid redirect URI
 # Ensure OAuth credentials match: http://localhost:3000/auth/callback
 
-# CORS issues  
+# CORS issues
 # Backend configured for localhost:5173 frontend
 ```
 
 ### Build Failures
+
 ```bash
 # Clean and rebuild
 make clean
@@ -257,6 +274,6 @@ make docker-clean
 ✅ **Subtask ST2 (4 points):** JWT generation with roles  
 ✅ **Total Complexity:** 9 points completed  
 ✅ **Documentation:** OpenAPI spec + Certification  
-✅ **Infrastructure:** Docker + CI/CD ready  
+✅ **Infrastructure:** Docker + CI/CD ready
 
 **Ready for T-41 & T-44 development** 🚀

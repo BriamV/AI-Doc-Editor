@@ -10,13 +10,13 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+RUN yarn install --production --frozen-lockfile && yarn cache clean
 
 # Copy source code
 COPY . .
 
 # Build application
-RUN npm run build
+RUN yarn build
 
 # Stage 2: Production stage  
 FROM node:20-alpine AS production
@@ -24,7 +24,7 @@ FROM node:20-alpine AS production
 WORKDIR /app
 
 # Install serve for hosting static files
-RUN npm install -g serve@14
+RUN yarn global add serve@14
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist

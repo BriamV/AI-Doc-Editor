@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import useStore from '@store/store';
 import { Sun, Moon } from '@carbon/icons-react';
@@ -17,20 +17,22 @@ const ThemeSwitcher = () => {
   const setTheme = useStore(state => state.setTheme);
 
   const switchTheme = () => {
-    setTheme(getOppositeTheme(theme!));
+    if (theme) {
+      setTheme(getOppositeTheme(theme));
+    }
   };
 
   useEffect(() => {
     document.documentElement.className = theme;
   }, [theme]);
 
-  return theme ? (
-    <button className="items-center gap-3 btn btn-neutral" onClick={switchTheme}>
+  if (!theme) return null;
+
+  return (
+    <button className="btn btn-neutral items-center gap-3" onClick={switchTheme}>
       {theme === 'dark' ? <Sun /> : <Moon />}
       {t(getOppositeTheme(theme) + 'Mode')}
     </button>
-  ) : (
-    <></>
   );
 };
 

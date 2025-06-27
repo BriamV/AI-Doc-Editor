@@ -1,6 +1,6 @@
 import React from 'react';
 
-const logoImage = (): React.ReactElement => {
+const LogoImage = (): React.ReactElement => {
   return (
     <div className="w-12 h-12 rounded-md border border-white/10 overflow-hidden">
       <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0.00 0.00 192.00 192.00">
@@ -104,4 +104,4 @@ const logoImage = (): React.ReactElement => {
   );
 };
 
-export default logoImage;
+export default LogoImage;

@@ -2,7 +2,7 @@
  * Authentication hook
  * T-02: OAuth 2.0 + JWT integration
  */
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import useStore from '@store/store';
 import { authAPI } from '@api/auth-api';
 
@@ -13,61 +13,12 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [backendAvailable, setBackendAvailable] = useState(false);
 
-  // Check backend availability on mount
-  useEffect(() => {
-    checkBackend();
-  }, []);
-
-  // Auto-refresh tokens
-  useEffect(() => {
-    if (accessToken && refreshToken) {
-      setupTokenRefresh();
-    }
-  }, [accessToken, refreshToken]);
-
-  const checkBackend = async () => {
+  const checkBackend = useCallback(async () => {
     const available = await authAPI.healthCheck();
     setBackendAvailable(available);
-  };
+  }, []);
 
-  const login = async (provider: 'google' | 'microsoft') => {
-    if (!backendAvailable) {
-      throw new Error('Backend not available. Using fallback Google OAuth.');
-    }
-
-    setIsLoading(true);
-    try {
-      const loginData = await authAPI.initiateLogin(provider);
-
-      // Redirect to OAuth provider
-      window.location.href = loginData.auth_url;
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCallback = async (code: string, provider: string, state?: string) => {
-    setIsLoading(true);
-    try {
-      const tokenData = await authAPI.handleCallback(code, provider, state);
-
-      // Store tokens and user data
-      setTokens(tokenData.access_token, tokenData.refresh_token);
-      setUser(tokenData.user);
-
-      return tokenData;
-    } catch (error) {
-      console.error('Callback handling failed:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const refreshAccessToken = async () => {
+  const refreshAccessToken = useCallback(async () => {
     if (!refreshToken) {
       logout();
       return null;
@@ -82,9 +33,9 @@ export const useAuth = () => {
       logout();
       return null;
     }
-  };
+  }, [refreshToken, logout, setTokens]);
 
-  const setupTokenRefresh = () => {
+  const setupTokenRefresh = useCallback(() => {
     // Set up automatic token refresh before expiry
     // JWT tokens typically expire in 30 minutes, refresh at 25 minutes
     const refreshInterval = 25 * 60 * 1000; // 25 minutes
@@ -98,9 +49,64 @@ export const useAuth = () => {
     }, refreshInterval);
 
     return () => clearInterval(interval);
-  };
+  }, [isAuthenticated, refreshToken, refreshAccessToken]);
 
-  const getCurrentUser = async () => {
+  // Check backend availability on mount
+  useEffect(() => {
+    checkBackend();
+  }, [checkBackend]);
+
+  // Auto-refresh tokens
+  useEffect(() => {
+    if (accessToken && refreshToken) {
+      setupTokenRefresh();
+    }
+  }, [accessToken, refreshToken, setupTokenRefresh]);
+
+  const login = useCallback(
+    async (provider: 'google' | 'microsoft') => {
+      if (!backendAvailable) {
+        throw new Error('Backend not available. Using fallback Google OAuth.');
+      }
+
+      setIsLoading(true);
+      try {
+        const loginData = await authAPI.initiateLogin(provider);
+
+        // Redirect to OAuth provider
+        window.location.href = loginData.auth_url;
+      } catch (error) {
+        console.error('Login failed:', error);
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [backendAvailable]
+  );
+
+  const handleCallback = useCallback(
+    async (code: string, provider: string, state?: string) => {
+      setIsLoading(true);
+      try {
+        const tokenData = await authAPI.handleCallback(code, provider, state);
+
+        // Store tokens and user data
+        setTokens(tokenData.access_token, tokenData.refresh_token);
+        setUser(tokenData.user);
+
+        return tokenData;
+      } catch (error) {
+        console.error('Callback handling failed:', error);
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [setTokens, setUser]
+  );
+
+  const getCurrentUser = useCallback(async () => {
     if (!accessToken) return null;
 
     try {
@@ -118,16 +124,19 @@ export const useAuth = () => {
       }
       return null;
     }
-  };
+  }, [accessToken, setUser, refreshAccessToken]);
 
-  const hasRole = (role: 'editor' | 'admin'): boolean => {
-    if (!user) return false;
-    return user.role === role || (role === 'editor' && user.role === 'admin');
-  };
+  const hasRole = useCallback(
+    (role: 'editor' | 'admin'): boolean => {
+      if (!user) return false;
+      return user.role === role || (role === 'editor' && user.role === 'admin');
+    },
+    [user]
+  );
 
-  const isAdmin = (): boolean => {
+  const isAdmin = useCallback((): boolean => {
     return user?.role === 'admin' || false;
-  };
+  }, [user]);
 
   return {
     // State

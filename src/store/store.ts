@@ -64,7 +64,7 @@ export const createPartializedState = (state: StoreState) => ({
 });
 
 export const IDBStorage = {
-  getItem: async (name: any) => {
+  getItem: async (name: string) => {
     // Exit early on server
     if (typeof indexedDB === 'undefined') {
       return null;
@@ -73,14 +73,14 @@ export const IDBStorage = {
     const value = await get(name);
     return value || null;
   },
-  setItem: async (name: any, value: any) => {
+  setItem: async (name: string, value: unknown) => {
     // Exit early on server
     if (typeof indexedDB === 'undefined') {
       return;
     }
     set(name, value);
   },
-  removeItem: async (name: any) => {
+  removeItem: async (_name: string) => {
     // No code here
   },
 };

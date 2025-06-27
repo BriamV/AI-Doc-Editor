@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useTranslation } from 'react-i18next';
 
@@ -26,8 +26,6 @@ import { Close as CrossIcon } from '@carbon/icons-react';
 import { TrashCan as DeleteIcon } from '@carbon/icons-react';
 
 const GoogleSync = ({ clientId }: { clientId: string }) => {
-  const { t } = useTranslation(['drive']);
-
   const fileId = useGStore(state => state.fileId);
   const setFileId = useGStore(state => state.setFileId);
   const googleAccessToken = useGStore(state => state.googleAccessToken);
@@ -38,45 +36,48 @@ const GoogleSync = ({ clientId }: { clientId: string }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(cloudSync);
   const [files, setFiles] = useState<GoogleFileResource[]>([]);
 
-  const initialiseState = async (_googleAccessToken: string) => {
-    const validated = await validateGoogleOath2AccessToken(_googleAccessToken);
-    if (validated) {
-      try {
-        const _files = await getFiles(_googleAccessToken);
-        if (_files) {
-          setFiles(_files);
-          if (_files.length === 0) {
-            // _files is empty, create new file in google drive and set the file id
-            const googleFile = await createDriveFile(stateToFile(), _googleAccessToken);
-            setFileId(googleFile.id);
-          } else {
-            if (_files.findIndex(f => f.id === fileId) !== -1) {
-              // local storage file id matches one of the file ids returned
-              setFileId(fileId);
+  const initialiseState = useCallback(
+    async (_googleAccessToken: string) => {
+      const validated = await validateGoogleOath2AccessToken(_googleAccessToken);
+      if (validated) {
+        try {
+          const _files = await getFiles(_googleAccessToken);
+          if (_files) {
+            setFiles(_files);
+            if (_files.length === 0) {
+              // _files is empty, create new file in google drive and set the file id
+              const googleFile = await createDriveFile(stateToFile(), _googleAccessToken);
+              setFileId(googleFile.id);
             } else {
-              // default set file id to the latest one
-              setFileId(_files[0].id);
+              if (_files.findIndex(f => f.id === fileId) !== -1) {
+                // local storage file id matches one of the file ids returned
+                setFileId(fileId);
+              } else {
+                // default set file id to the latest one
+                setFileId(_files[0].id);
+              }
             }
+            useStore.persist.setOptions({
+              storage: createGoogleCloudStorage(),
+            });
+            useStore.persist.rehydrate();
           }
-          useStore.persist.setOptions({
-            storage: createGoogleCloudStorage(),
-          });
-          useStore.persist.rehydrate();
+        } catch (_e: unknown) {
+          //        console.log(_e);
         }
-      } catch (e: unknown) {
-        //        console.log(e);
+      } else {
+        setSyncStatus('unauthenticated');
       }
-    } else {
-      setSyncStatus('unauthenticated');
-    }
-  };
+    },
+    [fileId, setFileId, setFiles, setSyncStatus]
+  );
 
   useEffect(() => {
     if (googleAccessToken) {
       setSyncStatus('syncing');
       initialiseState(googleAccessToken);
     }
-  }, [googleAccessToken]);
+  }, [googleAccessToken, initialiseState, setSyncStatus]);
 
   return (
     <GoogleOAuthProvider clientId={clientId}>

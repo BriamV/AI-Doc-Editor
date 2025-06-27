@@ -18,14 +18,13 @@ const ClearConversation = () => {
     setFolders({});
   };
 
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
   return (
     <>
-      <button
-        className="btn btn-neutral w-48 justify-center"
-        onClick={() => {
-          setIsModalOpen(true);
-        }}
-      >
+      <button className="btn btn-neutral w-48 justify-center" onClick={handleOpenModal}>
         Delete History
       </button>
       {isModalOpen && (

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import useStore from '@store/store';
@@ -76,21 +76,20 @@ const TotalTokenCost = () => {
         {t('resetCost', { ns: 'main' })}
       </div>
     </div>
-  ) : (
-    <></>
-  );
+  ) : null;
 };
 
 export const TotalTokenCostToggle = () => {
   const { t } = useTranslation('main');
 
   const setCountTotalTokens = useStore(state => state.setCountTotalTokens);
+  const countTotalTokens = useStore(state => state.countTotalTokens);
 
-  const [isChecked, setIsChecked] = useState<boolean>(useStore.getState().countTotalTokens);
+  const [isChecked, setIsChecked] = useState<boolean>(countTotalTokens);
 
   useEffect(() => {
     setCountTotalTokens(isChecked);
-  }, [isChecked]);
+  }, [isChecked, setCountTotalTokens]);
 
   return (
     <Toggle
@@ -102,7 +101,6 @@ export const TotalTokenCostToggle = () => {
 };
 
 export const TotalTokenCostDisplay = () => {
-  const { t } = useTranslation();
   const totalTokenUsed = useStore(state => state.totalTokenUsed);
 
   const [totalCost, setTotalCost] = useState<number>(0);

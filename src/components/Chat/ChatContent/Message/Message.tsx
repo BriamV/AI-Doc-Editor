@@ -1,11 +1,11 @@
-import { useRef, useEffect } from 'react';
-import React from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import useStore from '@store/store';
 
 import Avatar from './Avatar';
 import MessageContent from './MessageContent';
 
 import { Role } from '@type/document';
+import React from 'react';
 const backgroundStyle = ['dark:bg-gray-900', 'dark:bg-gray-900/50'];
 
 const Message = React.memo(
@@ -22,34 +22,33 @@ const Message = React.memo(
   }) => {
     const hideSideMenu = useStore(state => state.hideSideMenu);
     const setAIPadding = useStore(state => state.setAIPadding);
-    const lastMessageIndex = useStore(state =>
-      state.chats ? state.chats[state.currentChatIndex].messageCurrent.messages.length : 0
+    const lastMessageIndex = useStore(
+      state => state.chats?.[state.currentChatIndex]?.messageCurrent?.messages.length ?? 0
     );
 
     const heightRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-      const handleHeightChange = () => {
-        // Access the current height of the heightRef
-        const newPadding = heightRef.current?.clientHeight || 0;
-        // Update setAIPadding with the new padding value
-        setAIPadding(newPadding);
-      };
+    const handleHeightChange = useCallback(() => {
+      // Access the current height of the heightRef
+      const newPadding = heightRef.current?.clientHeight || 0;
+      // Update setAIPadding with the new padding value
+      setAIPadding(newPadding);
+    }, [setAIPadding]);
 
-      // Add an event listener to heightRef to listen for height changes
-      if (heightRef.current) {
-        const observer = new ResizeObserver(handleHeightChange);
-        observer.observe(heightRef.current);
+    useEffect(() => {
+      const currentHeightRef = heightRef.current;
+      const observer = new ResizeObserver(handleHeightChange);
+
+      if (currentHeightRef) {
+        observer.observe(currentHeightRef);
       }
 
-      // Clean up the event listener when the component unmounts
       return () => {
-        if (heightRef.current) {
-          const observer = new ResizeObserver(handleHeightChange);
-          observer.unobserve(heightRef.current);
+        if (currentHeightRef) {
+          observer.unobserve(currentHeightRef);
         }
       };
-    }, [heightRef, setAIPadding]);
+    }, [handleHeightChange]);
 
     return messageIndex == lastMessageIndex ? (
       <div ref={heightRef} className="fixed bottom-0 w-full right-0 ">
@@ -65,14 +64,7 @@ const Message = React.memo(
                 : 'md:max-w-3xl lg:max-w-3xl xl:max-w-4xl'
             }`}
           >
-            {/* <Avatar role={role} /><span>{role}</span> */}
             <div>
-              {/* {advancedMode &&
-              <RoleSelector
-                role={role}
-                messageIndex={messageIndex}
-                sticky={sticky}
-              />} */}
               <MessageContent
                 role={role}
                 content={content}
@@ -96,7 +88,7 @@ const Message = React.memo(
               : 'md:max-w-3xl lg:max-w-3xl xl:max-w-4xl'
           }`}
         >
-          <Avatar content={''} role={role} messageIndex={messageIndex} />
+          <Avatar role={role} messageIndex={messageIndex} />
           <div>
             <MessageContent
               role={role}
@@ -110,5 +102,7 @@ const Message = React.memo(
     );
   }
 );
+
+Message.displayName = 'Message';
 
 export default Message;

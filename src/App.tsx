@@ -70,6 +70,7 @@ function App() {
           initialiseNewDocument();
         }
       } catch (e: unknown) {
+        console.error(e);
         initialiseNewDocument();
       }
       localStorage.removeItem('chats');
@@ -84,7 +85,7 @@ function App() {
         setCurrentChatIndex(0);
       }
     }
-  }, []);
+  }, [initialiseNewDocument, setApiKey, setChats, setCurrentChatIndex, setTheme]);
 
   function Home() {
     return (
@@ -95,7 +96,7 @@ function App() {
         <ApiPopup />
         <Toast />
         {/* Health Status - Development only */}
-        {process.env.NODE_ENV === 'development' && (
+        {import.meta.env.MODE === 'development' && (
           <div className="fixed bottom-4 right-4 z-50 max-w-sm">
             <HealthStatus showDetails={true} autoRefresh={true} />
           </div>

@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import useStore from '@store/store';
 import { useTranslation } from 'react-i18next';
-import { ConfigInterface, ModelOptions } from '@type/document';
+import { ModelOptions } from '@type/document';
 import { modelMaxToken, modelOptions } from '@constants/chat';
-import { max } from 'lodash';
 import { PromptDropdownItem } from '@type/prompt';
 
 const ConfigMenu = () => {
@@ -15,9 +14,7 @@ const ConfigMenu = () => {
   const [_presencePenalty, _setPresencePenalty] = useState<number>(config.presence_penalty);
   const [_topP, _setTopP] = useState<number>(config.top_p);
   const [_frequencyPenalty, _setFrequencyPenalty] = useState<number>(config.frequency_penalty);
-  const { t } = useTranslation('model');
 
-  // update config when config is changed
   useEffect(() => {
     setConfig({
       max_completion_tokens: _maxToken,
@@ -27,18 +24,7 @@ const ConfigMenu = () => {
       top_p: _topP,
       frequency_penalty: _frequencyPenalty,
     });
-  }, [_maxToken, _model, _temperature, _presencePenalty, _topP, _frequencyPenalty]);
-
-  // const handleConfirm = () => {
-  //   setConfig({
-  //     max_completion_tokens: _maxToken,
-  //     model: _model,
-  //     temperature: _temperature,
-  //     presence_penalty: _presencePenalty,
-  //     top_p: _topP,
-  //     frequency_penalty: _frequencyPenalty,
-  //   });
-  // };
+  }, [_maxToken, _model, _temperature, _presencePenalty, _topP, _frequencyPenalty, setConfig]);
 
   return (
     <div className="h-full overflow-scroll">
@@ -78,17 +64,10 @@ export const ModelSelector = ({
     []
   );
 
-  // Set defaultAndFineTuneModels to include both the model options and the fine tune options (the fine tune options are stored in the store)
-
   useEffect(() => {
-    let tempModels = [];
-    // Iterate over models in modelOptions and turn each string into an object with it's value as both the name and model
-    for (let i = 0; i < modelOptions.length; i++) {
-      tempModels.push({ name: modelOptions[i], model: modelOptions[i] });
-    }
+    let tempModels = modelOptions.map(model => ({ name: model, model: model }));
 
     if (fineTuneModels) {
-      // Add the fine tune models to the tempModels array
       tempModels = [...tempModels, ...fineTuneModels];
     }
     setDefaultAndFineTuneModels(tempModels);
@@ -111,24 +90,21 @@ export const ModelSelector = ({
       </button>
       <div
         id="dropdown"
-        className={`${
-          dropDown ? '' : 'hidden'
-        } absolute top-100 bottom-100 z-10 bg-white rounded-lg shadow-xl border-b border-black/10 dark:border-gray-900/50 text-gray-800 dark:text-gray-100 group dark:bg-gray-800 opacity-90`}
+        className={`${dropDown ? '' : 'hidden'}
+        absolute z-10 bg-white rounded-lg shadow w-44 dark:bg-gray-700 mt-1`}
       >
-        <ul
-          className="text-sm text-gray-700 dark:text-gray-200 p-0 m-0"
-          aria-labelledby="dropdownDefaultButton"
-        >
-          {defaultAndFindTuneModels.map((model, index) => (
-            <li
-              className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer"
-              onClick={() => {
-                _setModel(model.model);
-                setDropDown(false);
-              }}
-              key={index}
-            >
-              {model.name}
+        <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
+          {defaultAndFindTuneModels.map(model => (
+            <li key={model.name}>
+              <a
+                className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer"
+                onClick={() => {
+                  _setModel(model.model as ModelOptions);
+                  setDropDown(false);
+                }}
+              >
+                {model.name}
+              </a>
             </li>
           ))}
         </ul>
@@ -149,24 +125,29 @@ export const MaxTokenSlider = ({
   const { t } = useTranslation('model');
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const handleMaxTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    _setMaxToken(Number(e.target.value));
+  };
+
+  const max = modelMaxToken[_model.split(':')[0] as keyof typeof modelMaxToken] ?? 4096;
+
   useEffect(() => {
-    inputRef && inputRef.current && _setMaxToken(Number(inputRef.current.value));
-  }, [_model]);
+    _setMaxToken(max);
+  }, [max, _setMaxToken]);
 
   return (
-    <div className=" border-t border-gray-500 mt-5 pt-5">
+    <div className="mt-5 pt-5 border-t border-gray-500">
       <label className="block text-sm font-medium text-gray-900 dark:text-white">
         {t('token.label')}: {_maxToken}
       </label>
       <input
+        id="default-range"
         type="range"
         ref={inputRef}
         value={_maxToken}
-        onChange={e => {
-          _setMaxToken(Number(e.target.value));
-        }}
+        onChange={handleMaxTokenChange}
         min={0}
-        max={_model.includes(':') ? modelMaxToken[_model.split(':')[1]] : modelMaxToken[_model]}
+        max={max}
         step={1}
         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
       />
@@ -186,6 +167,10 @@ export const TemperatureSlider = ({
 }) => {
   const { t } = useTranslation('model');
 
+  const handleTemperatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    _setTemperature(Number(e.target.value));
+  };
+
   return (
     <div className="mt-5 pt-5 border-t border-gray-500">
       <label className="block text-sm font-medium text-gray-900 dark:text-white">
@@ -195,9 +180,7 @@ export const TemperatureSlider = ({
         id="default-range"
         type="range"
         value={_temperature}
-        onChange={e => {
-          _setTemperature(Number(e.target.value));
-        }}
+        onChange={handleTemperatureChange}
         min={0}
         max={2}
         step={0.1}
@@ -219,6 +202,10 @@ export const TopPSlider = ({
 }) => {
   const { t } = useTranslation('model');
 
+  const handleTopPChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    _setTopP(Number(e.target.value));
+  };
+
   return (
     <div className="mt-5 pt-5 border-t border-gray-500">
       <label className="block text-sm font-medium text-gray-900 dark:text-white">
@@ -228,9 +215,7 @@ export const TopPSlider = ({
         id="default-range"
         type="range"
         value={_topP}
-        onChange={e => {
-          _setTopP(Number(e.target.value));
-        }}
+        onChange={handleTopPChange}
         min={0}
         max={1}
         step={0.05}
@@ -252,6 +237,10 @@ export const PresencePenaltySlider = ({
 }) => {
   const { t } = useTranslation('model');
 
+  const handlePresencePenaltyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    _setPresencePenalty(Number(e.target.value));
+  };
+
   return (
     <div className="mt-5 pt-5 border-t border-gray-500">
       <label className="block text-sm font-medium text-gray-900 dark:text-white">
@@ -261,9 +250,7 @@ export const PresencePenaltySlider = ({
         id="default-range"
         type="range"
         value={_presencePenalty}
-        onChange={e => {
-          _setPresencePenalty(Number(e.target.value));
-        }}
+        onChange={handlePresencePenaltyChange}
         min={-2}
         max={2}
         step={0.1}
@@ -285,6 +272,10 @@ export const FrequencyPenaltySlider = ({
 }) => {
   const { t } = useTranslation('model');
 
+  const handleFrequencyPenaltyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    _setFrequencyPenalty(Number(e.target.value));
+  };
+
   return (
     <div className="mt-5 pt-5 border-t border-gray-500">
       <label className="block text-sm font-medium text-gray-900 dark:text-white">
@@ -294,9 +285,7 @@ export const FrequencyPenaltySlider = ({
         id="default-range"
         type="range"
         value={_frequencyPenalty}
-        onChange={e => {
-          _setFrequencyPenalty(Number(e.target.value));
-        }}
+        onChange={handleFrequencyPenaltyChange}
         min={-2}
         max={2}
         step={0.1}
