@@ -79,6 +79,32 @@ def test_models():
         print(f"❌ Models test failed: {e}")
         return False
 
+def test_config_service():
+    """Test ConfigService CRUD operations."""
+    print("🧪 Testing ConfigService...")
+
+    try:
+        import asyncio
+        from app.db.session import AsyncSessionLocal
+        from app.services.config import ConfigService
+
+        async def run_test() -> bool:
+            async with AsyncSessionLocal() as session:
+                service = ConfigService(session)
+                await service.upsert("test_key", "test_value")
+                data = await service.get_all()
+                return any(entry.key == "test_key" and entry.value == "test_value" for entry in data)
+
+        result = asyncio.run(run_test())
+        if result:
+            print("✅ ConfigService upsert works")
+            return True
+        print("❌ ConfigService upsert failed")
+        return False
+    except Exception as e:
+        print(f"❌ ConfigService test failed: {e}")
+        return False
+
 def main():
     print("🚀 T-02 Backend Testing")
     print("=" * 40)
@@ -86,7 +112,8 @@ def main():
     tests = [
         test_config,
         test_models,
-        test_auth_service
+        test_auth_service,
+        test_config_service,
     ]
     
     passed = 0
