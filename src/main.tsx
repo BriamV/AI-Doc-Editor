@@ -8,9 +8,15 @@ import './i18n';
 import useStore from '@store/store';
 
 if (import.meta.env.DEV) {
-  // expose store for Cypress tests
+  // Expose a dedicated testing interface on the window object for Cypress
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (window as any).useStore = useStore;
+  (window as any).app = {
+    // Function to set the user state for testing purposes
+    login: (user: any) => {
+      useStore.getState().setUser(user);
+    },
+    // We can add other testing utilities here in the future
+  };
 }
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(

@@ -1,14 +1,22 @@
 // cypress/support/e2e.ts
 
-// Importa los tipos necesarios desde el store de tu aplicación.
-// La ruta debe ser relativa desde este archivo al archivo del store.
-import { StoreApi } from 'zustand';
-import { StoreState } from '../../src/store/store';
-
-// Extiende la interfaz global Window para que TypeScript reconozca `useStore`.
+// Extiende la interfaz global Window para que TypeScript reconozca la interfaz de prueba `app`.
 declare global {
   interface Window {
-    useStore: StoreApi<StoreState>;
+    app: {
+      login: (user: {
+        id: string;
+        email: string;
+        name: string;
+        role: 'admin' | 'user';
+        provider: string;
+      }) => void;
+    };
   }
 }
+
+// Añadir un export vacío convierte este archivo en un módulo, lo que es necesario
+// para aumentar el alcance global de TypeScript.
+export {};
+
 
