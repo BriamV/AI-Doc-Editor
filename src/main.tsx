@@ -7,7 +7,7 @@ await import('katex/dist/katex.min.css');
 import './i18n';
 import useStore from '@store/store';
 
-if (import.meta.env.MODE === 'test') {
+if (import.meta.env.DEV) {
   // expose store for Cypress tests
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).useStore = useStore;
