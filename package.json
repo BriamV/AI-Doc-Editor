@@ -138,7 +138,8 @@
     "wait-on": "^7.0.1"
   },
   "resolutions": {
-    "quill": "2.0.2"
+    "quill": "2.0.2",
+    "minimatch": "^9.0.0"
   },
   "optionalDependencies": {
     "@swc/core-darwin-arm64": "^1.4.2",
