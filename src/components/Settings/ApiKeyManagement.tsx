@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@hooks/useAuth';
 
 interface ApiKeyStatus {
@@ -14,29 +14,29 @@ const ApiKeyManagement: React.FC = () => {
   const [showKey, setShowKey] = useState(false);
   const { user, token } = useAuth();
 
-  useEffect(() => {
-    if (user && token) {
-      fetchApiKeyStatus();
-    }
-  }, [user, token]);
-
-  const fetchApiKeyStatus = async () => {
+  const fetchApiKeyStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/user/credentials', {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setStatus(data);
       }
-    } catch (error) {
-      console.error('Error fetching API key status:', error);
+    } catch (_error) {
+      console.error('Error fetching API key status:', _error);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (user && token) {
+      fetchApiKeyStatus();
+    }
+  }, [user, token, fetchApiKeyStatus]);
 
   const handleSaveApiKey = async () => {
     if (!apiKey.trim()) {
@@ -56,7 +56,7 @@ const ApiKeyManagement: React.FC = () => {
       const response = await fetch('/api/user/credentials', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ openai_api_key: apiKey }),
@@ -72,7 +72,7 @@ const ApiKeyManagement: React.FC = () => {
         const error = await response.json();
         setMessage(error.detail || 'Error saving API key');
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage('Network error. Please try again.');
     } finally {
       setLoading(false);
@@ -89,7 +89,7 @@ const ApiKeyManagement: React.FC = () => {
       const response = await fetch('/api/user/credentials', {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -100,7 +100,7 @@ const ApiKeyManagement: React.FC = () => {
         const error = await response.json();
         setMessage(error.detail || 'Error deleting API key');
       }
-    } catch (error) {
+    } catch (_error) {
       setMessage('Network error. Please try again.');
     } finally {
       setLoading(false);
@@ -130,9 +130,7 @@ const ApiKeyManagement: React.FC = () => {
               <p className="text-sm font-medium text-green-800 dark:text-green-200">
                 API Key Configured
               </p>
-              <p className="text-sm text-green-600 dark:text-green-300">
-                {status.key_preview}
-              </p>
+              <p className="text-sm text-green-600 dark:text-green-300">{status.key_preview}</p>
             </div>
             <button
               onClick={handleDeleteApiKey}
@@ -167,7 +165,7 @@ const ApiKeyManagement: React.FC = () => {
             <input
               type="password"
               value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
+              onChange={e => setApiKey(e.target.value)}
               placeholder="sk-..."
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
             />
@@ -184,7 +182,7 @@ const ApiKeyManagement: React.FC = () => {
             >
               {loading ? 'Saving...' : 'Save API Key'}
             </button>
-            
+
             {showKey && (
               <button
                 onClick={() => {
@@ -202,11 +200,13 @@ const ApiKeyManagement: React.FC = () => {
       )}
 
       {message && (
-        <div className={`mt-4 p-3 rounded-md ${
-          message.includes('successfully') 
-            ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800'
-            : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800'
-        }`}>
+        <div
+          className={`mt-4 p-3 rounded-md ${
+            message.includes('successfully')
+              ? 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800'
+              : 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800'
+          }`}
+        >
           <p className="text-sm">{message}</p>
         </div>
       )}
