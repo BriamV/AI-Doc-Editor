@@ -3,25 +3,22 @@ import { useTranslation } from 'react-i18next';
 import { DocumentInterface, MessageInterface } from '@type/document';
 import { getChatCompletion, getChatCompletionStream } from '@api/api';
 import { parseEventSource } from '@api/helper';
-import { limitMessageTokens, updateTotalTokenUsed } from '@utils/messageUtils';
+import { updateTotalTokenUsed } from '@utils/messageUtils';
 import { _defaultChatConfig } from '@constants/chat';
 import { officialAPIEndpoint } from '@constants/auth';
-import useUpdateHistory from './useUpdateHistory';
 
 const useSubmit = () => {
   const { t, i18n } = useTranslation('api');
-  const error = useStore((state) => state.error);
-  const setError = useStore((state) => state.setError);
-  const apiEndpoint = useStore((state) => state.apiEndpoint);
-  const apiKey = useStore((state) => state.apiKey);
-  const setGenerating = useStore((state) => state.setGenerating);
-  const generating = useStore((state) => state.generating);
-  const currentChatIndex = useStore((state) => state.currentChatIndex);
-  const setChats = useStore((state) => state.setChats);
+  const error = useStore(state => state.error);
+  const setError = useStore(state => state.setError);
+  const apiEndpoint = useStore(state => state.apiEndpoint);
+  const apiKey = useStore(state => state.apiKey);
+  const setGenerating = useStore(state => state.setGenerating);
+  const generating = useStore(state => state.generating);
+  const currentChatIndex = useStore(state => state.currentChatIndex);
+  const setChats = useStore(state => state.setChats);
 
-  const generateTitle = async (
-    message: MessageInterface[]
-  ): Promise<string> => {
+  const generateTitle = async (message: MessageInterface[]): Promise<string> => {
     let data;
     if (!apiKey || apiKey.length === 0) {
       // official endpoint
@@ -30,11 +27,7 @@ const useSubmit = () => {
       }
 
       // other endpoints
-      data = await getChatCompletion(
-        useStore.getState().apiEndpoint,
-        message,
-        _defaultChatConfig
-      );
+      data = await getChatCompletion(useStore.getState().apiEndpoint, message, _defaultChatConfig);
     } else if (apiKey) {
       // own apikey
       data = await getChatCompletion(
@@ -54,7 +47,9 @@ const useSubmit = () => {
     const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
     const defaultChatConfig = useStore.getState().defaultChatConfig;
 
-    const config = updatedChats[currentChatIndex].messageCurrent.config ? updatedChats[currentChatIndex].messageCurrent.config : defaultChatConfig;
+    const config = updatedChats[currentChatIndex].messageCurrent.config
+      ? updatedChats[currentChatIndex].messageCurrent.config
+      : defaultChatConfig;
 
     updatedChats[currentChatIndex].messageCurrent.messages.push({
       role: 'assistant',
@@ -69,13 +64,12 @@ const useSubmit = () => {
       if (chats[currentChatIndex].messageCurrent.messages.length === 0)
         throw new Error('No messages submitted!');
 
-
-//       const messages = limitMessageTokens(
-//         chats[currentChatIndex].messageCurrent.messages,
-// //        undefined,
-//         config? config.max_completion_tokens : defaultChatConfig.max_completion_tokens,
-//         config? config.model : defaultChatConfig.model,
-//       );
+      //       const messages = limitMessageTokens(
+      //         chats[currentChatIndex].messageCurrent.messages,
+      // //        undefined,
+      //         config? config.max_completion_tokens : defaultChatConfig.max_completion_tokens,
+      //         config? config.model : defaultChatConfig.model,
+      //       );
 
       const messages = chats[currentChatIndex].messageCurrent.messages;
 
@@ -106,17 +100,13 @@ const useSubmit = () => {
 
       if (stream) {
         if (stream.locked)
-          throw new Error(
-            'Oops, the stream is locked right now. Please try again'
-          );
+          throw new Error('Oops, the stream is locked right now. Please try again');
         const reader = stream.getReader();
         let reading = true;
         let partial = '';
         while (reading && useStore.getState().generating) {
           const { done, value } = await reader.read();
-          const result = parseEventSource(
-            partial + new TextDecoder().decode(value)
-          );
+          const result = parseEventSource(partial + new TextDecoder().decode(value));
           partial = '';
 
           if (result === '[DONE]' || done) {
@@ -137,16 +127,15 @@ const useSubmit = () => {
             );
 
             // Check the history to see if it matches the current message
-//            const messageHistory = updatedChats[currentChatIndex].messageHistory;
-//            let matchFound = false;
-             const updatedMessages = updatedChats[currentChatIndex].messageCurrent.messages;
-             updatedMessages[updatedMessages.length - 1].content += resultString;
-             updatedChats[currentChatIndex].messageCurrent.messages = updatedMessages;
-             let matchFound = false;
+            //            const messageHistory = updatedChats[currentChatIndex].messageHistory;
+            //            let matchFound = false;
+            const updatedMessages = updatedChats[currentChatIndex].messageCurrent.messages;
+            updatedMessages[updatedMessages.length - 1].content += resultString;
+            updatedChats[currentChatIndex].messageCurrent.messages = updatedMessages;
+            let matchFound = false;
             let messageHistory = updatedChats[currentChatIndex].messageHistory;
 
-
-            for(let i = 0; i < messageHistory.length; i++) {
+            for (let i = 0; i < messageHistory.length; i++) {
               if (messageHistory[i].id == updatedChats[currentChatIndex].messageCurrent.id) {
                 messageHistory[i] = updatedChats[currentChatIndex].messageCurrent;
                 matchFound = true;
@@ -157,8 +146,8 @@ const useSubmit = () => {
               messageHistory.push(updatedChats[currentChatIndex].messageCurrent);
             }
 
-              updatedChats[currentChatIndex].messageHistory = messageHistory;
-              setChats(updatedChats);
+            updatedChats[currentChatIndex].messageHistory = messageHistory;
+            setChats(updatedChats);
           }
         }
         if (useStore.getState().generating) {
@@ -170,8 +159,6 @@ const useSubmit = () => {
         stream.cancel();
       }
 
-
-
       // update tokens used in chatting
       const currChats = useStore.getState().chats;
       const countTotalTokens = useStore.getState().countTotalTokens;
@@ -179,19 +166,11 @@ const useSubmit = () => {
       if (currChats && countTotalTokens) {
         const model = config ? config.model : defaultChatConfig.model;
         const messages = currChats[currentChatIndex].messageCurrent.messages;
-        updateTotalTokenUsed(
-          model,
-          messages.slice(0, -1),
-          messages[messages.length - 1]
-        );
+        updateTotalTokenUsed(model, messages.slice(0, -1), messages[messages.length - 1]);
       }
 
       // generate title for new chats
-      if (
-        useStore.getState().autoTitle &&
-        currChats &&
-        !currChats[currentChatIndex]?.titleSet
-      ) {
+      if (useStore.getState().autoTitle && currChats && !currChats[currentChatIndex]?.titleSet) {
         const messages_length = currChats[currentChatIndex].messageCurrent.messages.length;
         const assistant_message =
           currChats[currentChatIndex].messageCurrent.messages[messages_length - 1].content;
@@ -223,8 +202,6 @@ const useSubmit = () => {
           });
         }
       }
-
-      
     } catch (e: unknown) {
       const err = (e as Error).message;
       console.log(err);

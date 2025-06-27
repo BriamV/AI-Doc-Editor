@@ -1,2 +1,49 @@
-/.github
-/Dockerfile
+# .dockerignore for AI-Doc-Editor
+# Task T-01.5: Docker-compose setup
+
+# Node modules
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist
+build
+release
+coverage
+
+# Development files
+.git
+.gitignore
+README.md
+.env*.local
+.vscode
+.idea
+
+# Test files
+cypress/downloads
+cypress/screenshots
+cypress/videos
+jest.config.js
+cypress.config.ts
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+.cache
+
+# Documentation (keep essential only)
+docs/Sub\ Tareas\ v2.md
+docs/WORK-PLAN\ v5.md
+docs/PRD\ v2.md
+
+# Docker files (avoid recursion)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+EOF < /dev/null

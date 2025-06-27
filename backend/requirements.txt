@@ -1,0 +1,36 @@
+# FastAPI Backend Dependencies for T-02: OAuth 2.0 + JWT Roles
+# Updated to resolve security vulnerabilities found by pip-audit
+
+# Core FastAPI
+fastapi==0.111.1
+uvicorn[standard]==0.30.3
+python-multipart==0.0.9
+
+# Authentication & JWT
+python-jose[cryptography]==3.4.0
+passlib[bcrypt]==1.7.4
+authlib==1.3.1
+
+# HTTP Requests
+httpx==0.27.0
+requests==2.32.3
+
+# Database
+sqlalchemy==2.0.31
+alembic==1.13.2
+asyncpg==0.29.0  # PostgreSQL async driver
+aiosqlite==0.20.0  # SQLite async driver (for development)
+
+# Environment & Config
+python-dotenv==1.0.1
+pydantic[email]==2.8.2
+pydantic-settings==2.4.0
+email-validator==2.2.0
+
+# Development & Testing
+pytest==8.3.2
+pytest-asyncio==0.23.8
+
+# CORS
+# NOTE: fastapi-cors is unmaintained. Consider migrating to FastAPI's built-in CORSMiddleware.
+fastapi-cors==0.0.6

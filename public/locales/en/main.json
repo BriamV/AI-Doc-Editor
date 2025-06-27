@@ -40,10 +40,10 @@
   "submitPlaceholder": "Send a message...",
   "aboutTitle": "The superior AI-assisted word processor for writers.",
   "aboutGithub": "Like us on Github",
-  "aboutBulletOne":"Document Management",
-  "aboutBulletTwo":"OpenAI Compatible API Access",
-  "aboutBulletThree":"Import, Export Projects",
-  "aboutBulletFour":"Create Macros",
-  "aboutBulletFive":"Send Selections",
-  "aboutBulletSix":"Fine-Tune Support"
+  "aboutBulletOne": "Document Management",
+  "aboutBulletTwo": "OpenAI Compatible API Access",
+  "aboutBulletThree": "Import, Export Projects",
+  "aboutBulletFour": "Create Macros",
+  "aboutBulletFive": "Send Selections",
+  "aboutBulletSix": "Fine-Tune Support"
 }

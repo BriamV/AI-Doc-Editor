@@ -7,14 +7,10 @@ import {
   MessageInterface,
 } from '@type/document';
 import { roles } from '@type/document';
-import {
-  defaultModel,
-  modelOptions,
-  _defaultChatConfig,
-} from '@constants/chat';
+import { defaultModel, modelOptions, _defaultChatConfig } from '@constants/chat';
 import { ExportV1 } from '@type/export';
 
-export const validateAndFixChats = (chats: any): chats is DocumentInterface[] => {
+export const validateAndFixChats = (chats: unknown): chats is DocumentInterface[] => {
   if (!Array.isArray(chats)) return false;
 
   for (const chat of chats) {
@@ -48,15 +44,13 @@ const validateAndFixChatConfig = (config: ConfigInterface) => {
   if (!config.temperature) config.temperature = _defaultChatConfig.temperature;
   if (!(typeof config.temperature === 'number')) return false;
 
-  if (!config.presence_penalty)
-    config.presence_penalty = _defaultChatConfig.presence_penalty;
+  if (!config.presence_penalty) config.presence_penalty = _defaultChatConfig.presence_penalty;
   if (!(typeof config.presence_penalty === 'number')) return false;
 
   if (!config.top_p) config.top_p = _defaultChatConfig.top_p;
   if (!(typeof config.top_p === 'number')) return false;
 
-  if (!config.frequency_penalty)
-    config.frequency_penalty = _defaultChatConfig.frequency_penalty;
+  if (!config.frequency_penalty) config.frequency_penalty = _defaultChatConfig.frequency_penalty;
   if (!(typeof config.frequency_penalty === 'number')) return false;
 
   if (!config.model) config.model = defaultModel;
@@ -65,14 +59,12 @@ const validateAndFixChatConfig = (config: ConfigInterface) => {
   return true;
 };
 
-export const isLegacyImport = (importedData: any) => {
+export const isLegacyImport = (importedData: unknown) => {
   if (Array.isArray(importedData)) return true;
   return false;
 };
 
-export const validateFolders = (
-  folders: FolderCollection
-): folders is FolderCollection => {
+export const validateFolders = (folders: FolderCollection): folders is FolderCollection => {
   if (typeof folders !== 'object') return false;
 
   for (const folderId in folders) {

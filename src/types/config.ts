@@ -1,4 +1,4 @@
 export interface FineTuneModel {
-    name: string;
-    model: string;
+  name: string;
+  model: string;
 }

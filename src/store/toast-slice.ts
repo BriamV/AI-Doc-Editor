@@ -10,12 +10,12 @@ export interface ToastSlice {
   setToastStatus: (toastStatus: ToastStatus) => void;
 }
 
-export const createToastSlice: StoreSlice<ToastSlice> = (set, get) => ({
+export const createToastSlice: StoreSlice<ToastSlice> = (set, _get) => ({
   toastShow: false,
   toastMessage: '',
   toastStatus: 'success',
   setToastShow: (toastShow: boolean) => {
-    set((prev) => ({ ...prev, toastShow }));
+    set(prev => ({ ...prev, toastShow }));
   },
   setToastMessage: (toastMessage: string) => {
     set((prev: ToastSlice) => ({ ...prev, toastMessage }));

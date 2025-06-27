@@ -1,4 +1,4 @@
-import { PersistStorage, StorageValue, StateStorage } from 'zustand/middleware';
+import { PersistStorage, StorageValue } from 'zustand/middleware';
 import useCloudAuthStore from '@store/cloud-auth-store';
 import useStore from '@store/store';
 import {
@@ -16,12 +16,12 @@ const createGoogleCloudStorage = <S>(): PersistStorage<S> | undefined => {
   try {
     const authenticated = validateGoogleOath2AccessToken(accessToken);
     if (!authenticated) return;
-  } catch (e) {
+  } catch (_e) {
     // prevent error if the storage is not defined (e.g. when server side rendering a page)
     return;
   }
   const persistStorage: PersistStorage<S> = {
-    getItem: async (name) => {
+    getItem: async (_name: string): Promise<StorageValue<S> | null> => {
       useCloudAuthStore.getState().setSyncStatus('syncing');
       try {
         const accessToken = useCloudAuthStore.getState().googleAccessToken;
@@ -31,15 +31,15 @@ const createGoogleCloudStorage = <S>(): PersistStorage<S> | undefined => {
         const data: StorageValue<S> = await getDriveFile(fileId, accessToken);
         useCloudAuthStore.getState().setSyncStatus('synced');
         return data;
-      } catch (e: unknown) {
+      } catch (_e: unknown) {
         useCloudAuthStore.getState().setSyncStatus('unauthenticated');
-        useStore.getState().setToastMessage((e as Error).message);
+        useStore.getState().setToastMessage((_e as Error).message);
         useStore.getState().setToastShow(true);
         useStore.getState().setToastStatus('error');
         return null;
       }
     },
-    setItem: async (name, newValue): Promise<void> => {
+    setItem: async (_name: string, newValue: StorageValue<S>): Promise<void> => {
       const accessToken = useCloudAuthStore.getState().googleAccessToken;
       const fileId = useCloudAuthStore.getState().fileId;
       if (!accessToken || !fileId) return;
@@ -58,7 +58,7 @@ const createGoogleCloudStorage = <S>(): PersistStorage<S> | undefined => {
       }
     },
 
-    removeItem: async (name): Promise<void> => {
+    removeItem: async (_name: string): Promise<void> => {
       const accessToken = useCloudAuthStore.getState().googleAccessToken;
       const fileId = useCloudAuthStore.getState().fileId;
       if (!accessToken || !fileId) return;

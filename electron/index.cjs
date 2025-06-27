@@ -1,6 +1,6 @@
 const path = require('path');
 
-const {dialog,  app, BrowserWindow, Tray, Menu } = require('electron');
+const { dialog, app, BrowserWindow, Tray, Menu } = require('electron');
 const isDev = require('electron-is-dev');
 const { autoUpdater } = require('electron-updater');
 let win = null;
@@ -20,7 +20,7 @@ function createWindow() {
   autoUpdater.checkForUpdatesAndNotify();
 
   win = new BrowserWindow({
-	autoHideMenuBar: true,
+    autoHideMenuBar: true,
     show: false,
     icon: iconPath,
   });
@@ -41,12 +41,9 @@ function createWindow() {
   return win;
 }
 
-const createTray = (window) => {
+const createTray = window => {
   const tray = new Tray(
-    path.join(
-      __dirname,
-      isDev ? '../public/icon-rounded.png' : '../dist/icon-rounded.png'
-    )
+    path.join(__dirname, isDev ? '../public/icon-rounded.png' : '../dist/icon-rounded.png')
   );
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -81,7 +78,7 @@ app.on('window-all-closed', () => {
   }
 });
 
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', error => {
   // Perform any necessary cleanup tasks here
   dialog.showErrorBox('An error occurred', error.stack);
 
@@ -90,18 +87,18 @@ process.on('uncaughtException', (error) => {
 });
 
 if (!instanceLock) {
-  app.quit()
+  app.quit();
 } else {
   app.on('second-instance', (event, commandLine, workingDirectory) => {
     if (win) {
-      if (win.isMinimized()) win.restore()
-      win.focus()
+      if (win.isMinimized()) win.restore();
+      win.focus();
     }
-  })
+  });
 
   app.whenReady().then(() => {
-    win = createWindow()
-  })
+    win = createWindow();
+  });
 }
 
 const createServer = () => {

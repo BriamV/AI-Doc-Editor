@@ -1,15 +1,13 @@
 import { EventSourceData } from '@type/api';
 
-export const parseEventSource = (
-  data: string
-): '[DONE]' | EventSourceData[] => {
+export const parseEventSource = (data: string): '[DONE]' | EventSourceData[] => {
   const result = data
     .split('\n\n')
     .filter(Boolean)
-    .map((chunk) => {
+    .map(chunk => {
       const jsonString = chunk
         .split('\n')
-        .map((line) => line.replace(/^data: /, ''))
+        .map(line => line.replace(/^data: /, ''))
         .join('');
       if (jsonString === '[DONE]') return jsonString;
       try {
@@ -34,9 +32,7 @@ export const createMultipartRelatedBody = (
       metadata
     )}\r\n`
   );
-  const filePart = encoder.encode(
-    `--${boundary}\r\nContent-Type: ${file.type}\r\n\r\n`
-  );
+  const filePart = encoder.encode(`--${boundary}\r\nContent-Type: ${file.type}\r\n\r\n`);
   const endBoundary = encoder.encode(`\r\n--${boundary}--`);
 
   return new Blob([metadataPart, filePart, file, endBoundary], {

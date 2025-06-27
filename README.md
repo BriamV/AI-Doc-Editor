@@ -38,24 +38,27 @@ Este proyecto es un fork mejorado de [AI Text Editor](https://github.com/darryls
 ## 🛠️ Instalación
 
 1. Clona el repositorio:
+
    ```bash
    git clone https://github.com/BriamV/AI-Doc-Editor.git
    cd AI-Doc-Editor
    ```
 
-2. Instala las dependencias del frontend:
+2. Instala las dependencias del frontend. **Nota: Este proyecto utiliza `yarn` para asegurar la correcta resolución de dependencias.**
+
    ```bash
-   npm install
+   yarn install
    ```
 
 3. Configura las variables de entorno (copia el archivo .env.example):
+
    ```bash
    cp .env.example .env
    ```
 
 4. Inicia el servidor de desarrollo:
    ```bash
-   npm run dev
+   yarn dev
    ```
 
 ## 🚀 Uso
@@ -137,6 +140,7 @@ Tus documentos se almacenan localmente en tu dispositivo. Solo se envían a los 
 ### ¿Es compatible con estándares de seguridad?
 
 Sí, el sistema está diseñado para cumplir con GDPR, HIPAA e ISO 27001, con características como:
+
 - Cifrado de extremo a extremo
 - Registro de auditoría completo
 - Políticas de retención de datos

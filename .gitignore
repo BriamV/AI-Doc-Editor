@@ -41,6 +41,14 @@ release/
 # tasks.json
 # tasks/
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Claude local settings
+.claude/settings.local.json
+
 # Added by Task Master AI
 # Environment variables
 .vscode

@@ -17,10 +17,7 @@ const encoder = new Tiktoken(
 );
 
 // https://github.com/dqbd/tiktoken/issues/23#issuecomment-1483317174
-export const getChatGPTEncoding = (
-  messages: MessageInterface[],
-  model: ModelOptions
-) => {
+export const getChatGPTEncoding = (messages: MessageInterface[], model: ModelOptions) => {
   const isGpt3 = model === 'gpt-3.5-turbo';
 
   const msgSep = isGpt3 ? '\n' : '';
@@ -99,8 +96,7 @@ export const updateTotalTokenUsed = (
 
   const newPromptTokens = countTokens(promptMessages, model);
   const newCompletionTokens = countTokens([completionMessage], model);
-  const { promptTokens = 0, completionTokens = 0 } =
-    updatedTotalTokenUsed[model] ?? {};
+  const { promptTokens = 0, completionTokens = 0 } = updatedTotalTokenUsed[model] ?? {};
 
   updatedTotalTokenUsed[model] = {
     promptTokens: promptTokens + newPromptTokens,

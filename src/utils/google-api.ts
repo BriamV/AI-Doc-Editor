@@ -16,9 +16,7 @@ export const getFiles = async (googleAccessToken: string) => {
   }
 };
 
-export const getFileID = async (
-  googleAccessToken: string
-): Promise<string | null> => {
+export const getFileID = async (googleAccessToken: string): Promise<string | null> => {
   const driveFiles = await listDriveFiles(googleAccessToken);
   if (driveFiles.files.length === 0) return null;
   return driveFiles.files[0].id;

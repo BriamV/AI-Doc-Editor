@@ -78,4 +78,3 @@ yarn pre-commit install
 ```
 
 Run `yarn pre-commit run --all-files` to verify formatting and linting locally.
-
