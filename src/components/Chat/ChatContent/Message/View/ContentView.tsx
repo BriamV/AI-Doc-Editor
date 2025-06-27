@@ -1,9 +1,4 @@
-import React, {
-  DetailedHTMLProps,
-  HTMLAttributes,
-  memo,
-  useState,
-} from 'react';
+import React, { DetailedHTMLProps, HTMLAttributes, memo, useState } from 'react';
 
 import ReactMarkdown from 'react-markdown';
 import { CodeProps, ReactMarkdownProps } from 'react-markdown/lib/ast-to-react';
@@ -18,7 +13,7 @@ import { Checkmark, Close } from '@carbon/icons-react';
 
 import useSubmit from '@hooks/useSubmit';
 
-import { DocumentInterface } from '@type/document';
+import { DocumentInterface, Role } from '@type/document';
 
 import { codeLanguageSubset } from '@constants/chat';
 
@@ -28,10 +23,8 @@ import DownButton from './Button/DownButton';
 import CopyButton from './Button/CopyButton';
 import EditButton from './Button/EditButton';
 import DeleteButton from './Button/DeleteButton';
-// import MarkdownModeButton from './Button/MarkdownModeButton';
 
 import CodeBlock from '../CodeBlock';
-import { set } from 'lodash';
 
 const ContentView = memo(
   ({
@@ -40,7 +33,7 @@ const ContentView = memo(
     setIsEdit,
     messageIndex,
   }: {
-    role: string;
+    role: Role;
     content: string;
     setIsEdit: React.Dispatch<React.SetStateAction<boolean>>;
     messageIndex: number;
@@ -49,28 +42,27 @@ const ContentView = memo(
 
     const [isDelete, setIsDelete] = useState<boolean>(false);
 
-    
-
-    const currentChatIndex = useStore((state) => state.currentChatIndex);
-    const setChats = useStore((state) => state.setChats);
-    const lastMessageIndex = useStore((state) =>
-      state.chats ? state.chats[state.currentChatIndex].messageCurrent.messages.length - 1 : 0
-    );
-    const inlineLatex = useStore((state) => state.inlineLatex);
-    const markdownMode = useStore((state) => state.markdownMode);
+    const setChats = useStore(state => state.setChats);
+    const chats = useStore(state => state.chats);
+    const generating = useStore(state => state.generating);
+    const currentChatIndex = useStore(state => state.currentChatIndex);
+    const lastMessageIndex = useStore(state => {
+      const messages = state.chats?.[state.currentChatIndex]?.messageCurrent?.messages;
+      return messages ? messages.length - 1 : 0;
+    });
+    const inlineLatex = useStore(state => state.inlineLatex);
+    const markdownMode = useStore(state => state.markdownMode);
 
     const handleDelete = () => {
-      const updatedChats: DocumentInterface[] = JSON.parse(
-        JSON.stringify(useStore.getState().chats)
-      );
+      if (!chats) return;
+      const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
       updatedChats[currentChatIndex].messageCurrent.messages.splice(messageIndex, 1);
       setChats(updatedChats);
     };
 
     const handleMove = (direction: 'up' | 'down') => {
-      const updatedChats: DocumentInterface[] = JSON.parse(
-        JSON.stringify(useStore.getState().chats)
-      );
+      if (!chats) return;
+      const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
       const updatedMessages = updatedChats[currentChatIndex].messageCurrent.messages;
       const temp = updatedMessages[messageIndex];
       if (direction === 'up') {
@@ -92,9 +84,8 @@ const ContentView = memo(
     };
 
     const handleRefresh = () => {
-      const updatedChats: DocumentInterface[] = JSON.parse(
-        JSON.stringify(useStore.getState().chats)
-      );
+      if (!chats) return;
+      const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
       const updatedMessages = updatedChats[currentChatIndex].messageCurrent.messages;
       updatedMessages.splice(updatedMessages.length - 1, 1);
       setChats(updatedChats);
@@ -107,13 +98,10 @@ const ContentView = memo(
 
     return (
       <>
-        <div className='markdown prose w-full md:max-w-full break-words dark:prose-invert dark share-gpt-message'>
+        <div className="markdown prose w-full md:max-w-full break-words dark:prose-invert dark share-gpt-message">
           {markdownMode ? (
             <ReactMarkdown
-              remarkPlugins={[
-                remarkGfm,
-                [remarkMath, { singleDollarTextMath: inlineLatex }],
-              ]}
+              remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: inlineLatex }]]}
               rehypePlugins={[
                 rehypeKatex,
                 [
@@ -125,7 +113,7 @@ const ContentView = memo(
                   },
                 ],
               ]}
-              linkTarget='_new'
+              linkTarget="_new"
               components={{
                 code,
                 p,
@@ -134,23 +122,18 @@ const ContentView = memo(
               {content}
             </ReactMarkdown>
           ) : (
-            <span className='whitespace-pre-wrap'>{content}</span>
+            <span className="whitespace-pre-wrap">{content}</span>
           )}
         </div>
-        <div className='flex justify-end gap-2 w-full mt-2'>
+        <div className="flex justify-end gap-2 w-full mt-2">
           {isDelete || (
             <>
-              {!useStore.getState().generating &&
-                role === 'assistant' &&
-                messageIndex === lastMessageIndex && (
-                  <RefreshButton onClick={handleRefresh} />
-                )}
-              {messageIndex !== 0 && <UpButton onClick={handleMoveUp} />}
-              {messageIndex !== lastMessageIndex && (
-                <DownButton onClick={handleMoveDown} />
+              {!generating && role === 'assistant' && messageIndex === lastMessageIndex && (
+                <RefreshButton onClick={handleRefresh} />
               )}
+              {messageIndex !== 0 && <UpButton onClick={handleMoveUp} />}
+              {messageIndex !== lastMessageIndex && <DownButton onClick={handleMoveDown} />}
 
-              {/* <MarkdownModeButton /> */}
               <CopyButton onClick={handleCopy} />
               <EditButton setIsEdit={setIsEdit} />
               <DeleteButton setIsDelete={setIsDelete} />
@@ -158,13 +141,10 @@ const ContentView = memo(
           )}
           {isDelete && (
             <>
-              <button
-                className='p-1 hover:text-white'
-                onClick={() => setIsDelete(false)}
-              >
+              <button className="p-1 hover:text-white" onClick={() => setIsDelete(false)}>
                 <Close />
               </button>
-              <button className='p-1 hover:text-white' onClick={handleDelete}>
+              <button className="p-1 hover:text-white" onClick={handleDelete}>
                 <Checkmark />
               </button>
             </>
@@ -174,6 +154,7 @@ const ContentView = memo(
     );
   }
 );
+ContentView.displayName = 'ContentView';
 
 const code = memo((props: CodeProps) => {
   const { inline, className, children } = props;
@@ -186,21 +167,19 @@ const code = memo((props: CodeProps) => {
     return <CodeBlock lang={lang || 'text'} codeChildren={children} />;
   }
 });
+code.displayName = 'Code';
 
 const p = memo(
   (
     props?: Omit<
-      DetailedHTMLProps<
-        HTMLAttributes<HTMLParagraphElement>,
-        HTMLParagraphElement
-      >,
+      DetailedHTMLProps<HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>,
       'ref'
     > &
       ReactMarkdownProps
   ) => {
-    return <p className='whitespace-pre-wrap text-sm'>
-      {props?.children}</p>;
+    return <p className="whitespace-pre-wrap text-sm">{props?.children}</p>;
   }
 );
+p.displayName = 'Paragraph';
 
 export default ContentView;

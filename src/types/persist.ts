@@ -1,5 +1,5 @@
 import { LocalStorageInterfaceV7oV8 } from './document';
 
-interface PersistStorageState extends LocalStorageInterfaceV7oV8 {}
+type PersistStorageState = LocalStorageInterfaceV7oV8;
 
-export default PersistStorageState;
+export type { PersistStorageState };

@@ -1,0 +1,138 @@
+name: CI Pipeline
+
+permissions:
+  contents: read
+  id-token: write
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Lint check
+        run: yarn lint
+
+      - name: Format check
+        run: yarn format:check
+
+      - name: Run tests
+        run: yarn test:coverage
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: matrix.node-version == '20.x'
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+
+      - name: Build application
+        run: yarn build
+
+      - name: Run yarn audit (Node.js dependencies)
+        run: |
+          echo "🔒 Running yarn audit for Node.js dependencies..."
+          yarn audit --level critical || (echo "❌ Critical vulnerabilities found" && exit 1)
+
+      - name: E2E Tests (Node 20 only)
+        if: matrix.node-version == '20.x'
+        run: |
+          yarn dev &
+          npx wait-on http://localhost:5173
+          yarn test:e2e
+
+  python-security-audit:
+    name: Python Security Audit
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Audit dependencies in isolated environment
+        run: |
+          echo "--- Creating virtual environment ---"
+          python -m venv .venv
+          source .venv/bin/activate
+          echo "--- Installing dependencies ---"
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt pip-audit
+          echo "--- Running pip-audit ---"
+          pip-audit --format json --output pip-audit-report.json || true
+
+      - name: Upload pip-audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-report-${{ matrix.python-version }}
+          path: pip-audit-report.json
+
+      - name: Check for vulnerabilities
+        run: |
+          # We check if the file is not empty and if the vulnerabilities array has items
+          if [ -s pip-audit-report.json ] && [ "$(jq '.vulnerabilities | length' pip-audit-report.json)" -gt 0 ]; then
+            echo "❌ Found vulnerabilities in Python packages. See the 'pip-audit-report' artifact for details."
+            exit 1
+          else
+            echo "✅ No vulnerabilities found in Python packages."
+          fi
+
+  quality-metrics:
+    name: Code Quality Metrics
+    runs-on: ubuntu-latest
+    needs: [quality-gate, python-security-audit]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Generate coverage report
+        run: yarn test:coverage
+
+      - name: Complexity Analysis
+        run: |
+          echo "🔍 Code complexity analysis - placeholder"
+          find src -name "*.ts" -o -name "*.tsx" | wc -l
+        continue-on-error: true

@@ -41,7 +41,7 @@ export interface ConfigSlice {
   setFineTuneModels: (fineTuneModels: FineTuneModel[]) => void;
 }
 
-export const createConfigSlice: StoreSlice<ConfigSlice> = (set, get) => ({
+export const createConfigSlice: StoreSlice<ConfigSlice> = (set, _get) => ({
   openConfig: false,
   theme: 'dark',
   activeMenu: 'chat',

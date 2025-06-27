@@ -1,10 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import useStore from '@store/store';
-import i18n from './i18n';
-import { useTranslation, Trans } from 'react-i18next';
-import {
-  BrowserRouter, Routes, Route,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Document from '@components/Document/Document';
 import DocumentMenu from '@components/Menu/DocumentMenu';
 import AIMenu from '@components/Menu/AIMenu/AIMenu';
@@ -14,35 +10,32 @@ import { DocumentInterface } from '@type/document';
 import { Theme } from '@type/theme';
 import ApiPopup from '@components/FooterMenu/Api/ApiPopup';
 import Toast from '@components/Toast';
-import { set } from 'lodash';
+import { HealthStatus } from '@components/Health';
 import FAQs from '@components/FAQs/FAQs';
 
 function App() {
   const initialiseNewDocument = useInitialiseNewDocument();
-  const setChats = useStore((state) => state.setChats);
-  const setTheme = useStore((state) => state.setTheme);
-  const setApiKey = useStore((state) => state.setApiKey);
-  const setCurrentChatIndex = useStore((state) => state.setCurrentChatIndex);
-  const { t } = useTranslation(['main', 'about']);
+  const setChats = useStore(state => state.setChats);
+  const setTheme = useStore(state => state.setTheme);
+  const setApiKey = useStore(state => state.setApiKey);
+  const setCurrentChatIndex = useStore(state => state.setCurrentChatIndex);
 
-  
-// a useEffect that resets the .edited variables of all items in chats to false
+  // a useEffect that resets the .edited variables of all items in chats to false
 
-useEffect(() => {
-  const chats = useStore.getState().chats;
-  const currentDocumentIndex = useStore.getState().currentChatIndex;
+  useEffect(() => {
+    const chats = useStore.getState().chats;
 
-  if (chats && chats.length > 0) {
-    const newChats = chats.map((chat) => {
-      chat.edited = false;
-      return chat;
-    });
-    useStore.getState().setChats(newChats);
-  }
-}, []);
+    if (chats && chats.length > 0) {
+      const newChats = chats.map(chat => {
+        chat.edited = false;
+        return chat;
+      });
+      useStore.getState().setChats(newChats);
+    }
+  }, []);
 
   // useEffect(() => {
-//    document.documentElement.lang = i18n.language;
+  //    document.documentElement.lang = i18n.language;
   //   i18n.on('languageChanged', (lng) => {
   //     document.documentElement.lang = lng;
   //   });
@@ -53,7 +46,6 @@ useEffect(() => {
     const oldChats = localStorage.getItem('chats');
     const apiKey = localStorage.getItem('apiKey');
     const theme = localStorage.getItem('theme');
-
 
     if (apiKey) {
       // legacy local storage
@@ -78,6 +70,7 @@ useEffect(() => {
           initialiseNewDocument();
         }
       } catch (e: unknown) {
+        console.error(e);
         initialiseNewDocument();
       }
       localStorage.removeItem('chats');
@@ -88,37 +81,38 @@ useEffect(() => {
       if (!chats || chats.length === 0) {
         initialiseNewDocument();
       }
-      if (
-        chats &&
-        !(currentChatIndex >= 0 && currentChatIndex < chats.length)
-      ) {
+      if (chats && !(currentChatIndex >= 0 && currentChatIndex < chats.length)) {
         setCurrentChatIndex(0);
       }
     }
-  }, []);
+  }, [initialiseNewDocument, setApiKey, setChats, setCurrentChatIndex, setTheme]);
 
-  function Home (){
+  function Home() {
     return (
-    <>
-    <DocumentMenu />
-    <Document />
-    <AIMenu />
-    <ApiPopup />
-    <Toast />   
-    </>
-    )
+      <>
+        <DocumentMenu />
+        <Document />
+        <AIMenu />
+        <ApiPopup />
+        <Toast />
+        {/* Health Status - Development only */}
+        {import.meta.env.MODE === 'development' && (
+          <div className="fixed bottom-4 right-4 z-50 max-w-sm">
+            <HealthStatus showDetails={true} autoRefresh={true} />
+          </div>
+        )}
+      </>
+    );
   }
 
   return (
-    <div className='w-full h-full relative'>
-        <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/faqs" element={
-          <FAQs />
-        } />
-      </Routes>
-    </BrowserRouter>
+    <div className="w-full h-full relative">
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/faqs" element={<FAQs />} />
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }

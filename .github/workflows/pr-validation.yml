@@ -1,0 +1,65 @@
+name: PR Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-title-check:
+    name: PR Title Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check PR title format
+        uses: deepakputhraya/action-pr-title@master
+        with:
+          regex: '^(feat|fix|docs|style|refactor|test|chore)\(T-\d{2}\): .+'
+          allowed_prefixes: 'feat,fix,docs,style,refactor,test,chore'
+          prefix_case_sensitive: false
+          min_length: 10
+          max_length: 100
+
+  pr-size-check:
+    name: PR Size Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check PR size
+        uses: pascalgn/size-label-action@v0.4.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          sizes: >
+            {
+              "0": "XS",
+              "20": "S", 
+              "100": "M",
+              "500": "L",
+              "1000": "XL"
+            }
+
+  security-check:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run yarn audit
+        run: yarn audit --level moderate
+
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
+        if: github.actor != 'dependabot[bot]'
+        with:
+          config: auto
