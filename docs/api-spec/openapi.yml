@@ -181,6 +181,48 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /config:
+    get:
+      summary: Get system configuration
+      description: |
+        Retrieve all key-value configuration pairs.
+        **Status**: ✅ IMPLEMENTED (T-44)
+      operationId: getConfig
+      tags:
+        - Configuration
+      security: []
+      responses:
+        '200':
+          description: Configuration retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConfigEntry'
+    post:
+      summary: Update configuration value
+      description: |
+        Create or update a configuration entry.
+        **Status**: ✅ IMPLEMENTED (T-44)
+      operationId: setConfig
+      tags:
+        - Configuration
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigEntry'
+      responses:
+        '200':
+          description: Configuration updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigEntry'
+
 components:
   schemas:
     HealthResponse:
@@ -369,6 +411,19 @@ components:
         - role
         - provider
 
+    ConfigEntry:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Configuration key
+        value:
+          type: string
+          description: Configuration value
+      required:
+        - key
+        - value
+
     ErrorResponse:
       type: object
       properties:
@@ -405,6 +460,8 @@ tags:
     description: Health check and monitoring endpoints
   - name: Authentication
     description: User authentication and session management
+  - name: Configuration
+    description: System configuration management
 # Future endpoints (planned for R1-R6)
 # /upload - File ingesta RAG (T-04)
 # /plan - Planner service (T-05)

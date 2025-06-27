@@ -6,6 +6,9 @@ export default defineConfig({
     setupNodeEvents(_on, _config) {
       // implement node event listeners here
     },
+    env: {
+      MODE: 'test',
+    },
   },
   component: {
     devServer: {
