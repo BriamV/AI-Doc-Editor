@@ -26,7 +26,7 @@ export const downloadImg = (imgData: string, fileName: string) => {
 // Function to convert a chat object to markdown format
 export const chatToMarkdown = (chat: DocumentInterface) => {
   let markdown = `# ${chat.title}\n\n`;
-  chat.messageCurrent.messages.forEach((message) => {
+  chat.messageCurrent.messages.forEach(message => {
     markdown += `### **${message.role}**:\n\n${message.content}\n\n---\n\n`;
   });
   return markdown;

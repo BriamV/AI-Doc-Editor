@@ -1,5 +1,10 @@
 import { StoreSlice } from './store';
-import { DocumentInterface, FolderCollection, DocumentCurrent, EditorSettings } from '@type/document';
+import {
+  DocumentInterface,
+  FolderCollection,
+  DocumentCurrent,
+  EditorSettings,
+} from '@type/document';
 
 export interface DocumentSlice {
   documentCurrent: DocumentCurrent;
@@ -11,6 +16,8 @@ export interface DocumentSlice {
   folders: FolderCollection;
   editorSettings: EditorSettings;
   currentSelection: string;
+  editorState: string;
+  setEditorState: (editorState: string) => void;
   setChats: (chats: DocumentInterface[]) => void;
   setCurrentChatIndex: (currentChatIndex: number) => void;
   setForceEditorRefresh: (editorRefresh: boolean) => void;
@@ -21,7 +28,7 @@ export interface DocumentSlice {
   setCurrentSelection: (currentSelection: string) => void;
 }
 
-export const createDocumentSlice: StoreSlice<DocumentSlice> = (set, get) => ({
+export const createDocumentSlice: StoreSlice<DocumentSlice> = (set, _get) => ({
   documentCurrent: {
     id: '',
     folder: '',
@@ -47,8 +54,8 @@ export const createDocumentSlice: StoreSlice<DocumentSlice> = (set, get) => ({
   generating: false,
   error: '',
   folders: {},
-  editorState: [],
-  currentSelection: '', 
+  editorState: '',
+  currentSelection: '',
   editorSettings: {
     includeSelection: true,
     includeSelectionMenu: true,
@@ -108,7 +115,7 @@ export const createDocumentSlice: StoreSlice<DocumentSlice> = (set, get) => ({
       folders: folders,
     }));
   },
-  setEditorState: (editorState: any[]) => {
+  setEditorState: (editorState: string) => {
     set((prev: DocumentSlice) => ({
       ...prev,
       editorState: editorState,

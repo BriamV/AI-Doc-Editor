@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useTranslation } from 'react-i18next';
 
@@ -26,65 +26,63 @@ import { Close as CrossIcon } from '@carbon/icons-react';
 import { TrashCan as DeleteIcon } from '@carbon/icons-react';
 
 const GoogleSync = ({ clientId }: { clientId: string }) => {
-  const { t } = useTranslation(['drive']);
-
-  const fileId = useGStore((state) => state.fileId);
-  const setFileId = useGStore((state) => state.setFileId);
-  const googleAccessToken = useGStore((state) => state.googleAccessToken);
-  const syncStatus = useGStore((state) => state.syncStatus);
-  const cloudSync = useGStore((state) => state.cloudSync);
-  const setSyncStatus = useGStore((state) => state.setSyncStatus);
+  const fileId = useGStore(state => state.fileId);
+  const setFileId = useGStore(state => state.setFileId);
+  const googleAccessToken = useGStore(state => state.googleAccessToken);
+  const syncStatus = useGStore(state => state.syncStatus);
+  const cloudSync = useGStore(state => state.cloudSync);
+  const setSyncStatus = useGStore(state => state.setSyncStatus);
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(cloudSync);
   const [files, setFiles] = useState<GoogleFileResource[]>([]);
 
-  const initialiseState = async (_googleAccessToken: string) => {
-    const validated = await validateGoogleOath2AccessToken(_googleAccessToken);
-    if (validated) {
-      try {
-        const _files = await getFiles(_googleAccessToken);
-        if (_files) {
-          setFiles(_files);
-          if (_files.length === 0) {
-            // _files is empty, create new file in google drive and set the file id
-            const googleFile = await createDriveFile(
-              stateToFile(),
-              _googleAccessToken
-            );
-            setFileId(googleFile.id);
-          } else {
-            if (_files.findIndex((f) => f.id === fileId) !== -1) {
-              // local storage file id matches one of the file ids returned
-              setFileId(fileId);
+  const initialiseState = useCallback(
+    async (_googleAccessToken: string) => {
+      const validated = await validateGoogleOath2AccessToken(_googleAccessToken);
+      if (validated) {
+        try {
+          const _files = await getFiles(_googleAccessToken);
+          if (_files) {
+            setFiles(_files);
+            if (_files.length === 0) {
+              // _files is empty, create new file in google drive and set the file id
+              const googleFile = await createDriveFile(stateToFile(), _googleAccessToken);
+              setFileId(googleFile.id);
             } else {
-              // default set file id to the latest one
-              setFileId(_files[0].id);
+              if (_files.findIndex(f => f.id === fileId) !== -1) {
+                // local storage file id matches one of the file ids returned
+                setFileId(fileId);
+              } else {
+                // default set file id to the latest one
+                setFileId(_files[0].id);
+              }
             }
+            useStore.persist.setOptions({
+              storage: createGoogleCloudStorage(),
+            });
+            useStore.persist.rehydrate();
           }
-          useStore.persist.setOptions({
-            storage: createGoogleCloudStorage(),
-          });
-          useStore.persist.rehydrate();
+        } catch (_e: unknown) {
+          //        console.log(_e);
         }
-      } catch (e: unknown) {
-//        console.log(e);
+      } else {
+        setSyncStatus('unauthenticated');
       }
-    } else {
-      setSyncStatus('unauthenticated');
-    }
-  };
+    },
+    [fileId, setFileId, setFiles, setSyncStatus]
+  );
 
   useEffect(() => {
     if (googleAccessToken) {
       setSyncStatus('syncing');
       initialiseState(googleAccessToken);
     }
-  }, [googleAccessToken]);
+  }, [googleAccessToken, initialiseState, setSyncStatus]);
 
   return (
     <GoogleOAuthProvider clientId={clientId}>
       <div
-        className='flex py-2 px-2 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-white cursor-pointer text-sm'
+        className="flex py-2 px-2 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-white cursor-pointer text-sm"
         onClick={() => {
           setIsModalOpen(true);
         }}
@@ -93,11 +91,7 @@ const GoogleSync = ({ clientId }: { clientId: string }) => {
         {cloudSync && <SyncIcon status={syncStatus} />}
       </div>
       {isModalOpen && (
-        <GooglePopup
-          setIsModalOpen={setIsModalOpen}
-          files={files}
-          setFiles={setFiles}
-        />
+        <GooglePopup setIsModalOpen={setIsModalOpen} files={files} setFiles={setFiles} />
       )}
     </GoogleOAuthProvider>
   );
@@ -114,19 +108,17 @@ const GooglePopup = ({
 }) => {
   const { t } = useTranslation(['drive']);
 
-  const syncStatus = useGStore((state) => state.syncStatus);
-  const setSyncStatus = useGStore((state) => state.setSyncStatus);
-  const cloudSync = useGStore((state) => state.cloudSync);
-  const googleAccessToken = useGStore((state) => state.googleAccessToken);
-  const setFileId = useGStore((state) => state.setFileId);
+  const syncStatus = useGStore(state => state.syncStatus);
+  const setSyncStatus = useGStore(state => state.setSyncStatus);
+  const cloudSync = useGStore(state => state.cloudSync);
+  const googleAccessToken = useGStore(state => state.googleAccessToken);
+  const setFileId = useGStore(state => state.setFileId);
 
-  const setToastStatus = useStore((state) => state.setToastStatus);
-  const setToastMessage = useStore((state) => state.setToastMessage);
-  const setToastShow = useStore((state) => state.setToastShow);
+  const setToastStatus = useStore(state => state.setToastStatus);
+  const setToastMessage = useStore(state => state.setToastMessage);
+  const setToastShow = useStore(state => state.setToastShow);
 
-  const [_fileId, _setFileId] = useState<string>(
-    useGStore.getState().fileId || ''
-  );
+  const [_fileId, _setFileId] = useState<string>(useGStore.getState().fileId || '');
 
   const createSyncFile = async () => {
     if (!googleAccessToken) return;
@@ -145,12 +137,8 @@ const GooglePopup = ({
   };
 
   return (
-    <PopupModal
-      title={t('name') as string}
-      setIsModalOpen={setIsModalOpen}
-      cancelButton={false}
-    >
-      <div className='p-6 border-b border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 text-sm flex flex-col items-center gap-4 text-center'>
+    <PopupModal title={t('name') as string} setIsModalOpen={setIsModalOpen} cancelButton={false}>
+      <div className="p-6 border-b border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-300 text-sm flex flex-col items-center gap-4 text-center">
         <p>{t('tagline')}</p>
         <GoogleSyncButton
           loginHandler={() => {
@@ -160,12 +148,10 @@ const GooglePopup = ({
             }, 3540000); // timeout - 3540000ms = 59 min (access token last 60 min)
           }}
         />
-        <p className='border border-gray-400 px-3 py-2 rounded-md'>
-          {t('notice')}
-        </p>
+        <p className="border border-gray-400 px-3 py-2 rounded-md">{t('notice')}</p>
         {cloudSync && syncStatus !== 'unauthenticated' && (
-          <div className='flex flex-col gap-2 items-center'>
-            {files.map((file) => (
+          <div className="flex flex-col gap-2 items-center">
+            {files.map(file => (
               <FileSelector
                 id={file.id}
                 name={file.name}
@@ -176,9 +162,9 @@ const GooglePopup = ({
               />
             ))}
             {syncStatus !== 'syncing' && (
-              <div className='flex gap-4 flex-wrap justify-center'>
+              <div className="flex gap-4 flex-wrap justify-center">
                 <div
-                  className='btn btn-primary cursor-pointer'
+                  className="btn btn-primary cursor-pointer"
                   onClick={async () => {
                     setFileId(_fileId);
                     await useStore.persist.rehydrate();
@@ -190,16 +176,13 @@ const GooglePopup = ({
                 >
                   {t('button.confirm')}
                 </div>
-                <div
-                  className='btn btn-neutral cursor-pointer'
-                  onClick={createSyncFile}
-                >
+                <div className="btn btn-neutral cursor-pointer" onClick={createSyncFile}>
                   {t('button.create')}
                 </div>
               </div>
             )}
-            <div className='h-4 w-4'>
-              {syncStatus === 'syncing' && <SyncIcon status='syncing' />}
+            <div className="h-4 w-4">
+              {syncStatus === 'syncing' && <SyncIcon status="syncing" />}
             </div>
           </div>
         )}
@@ -222,12 +205,12 @@ const FileSelector = ({
   _setFileId: React.Dispatch<React.SetStateAction<string>>;
   setFiles: React.Dispatch<React.SetStateAction<GoogleFileResource[]>>;
 }) => {
-  const syncStatus = useGStore((state) => state.syncStatus);
-  const setSyncStatus = useGStore((state) => state.setSyncStatus);
+  const syncStatus = useGStore(state => state.syncStatus);
+  const setSyncStatus = useGStore(state => state.setSyncStatus);
 
-  const setToastStatus = useStore((state) => state.setToastStatus);
-  const setToastMessage = useStore((state) => state.setToastMessage);
-  const setToastShow = useStore((state) => state.setToastShow);
+  const setToastStatus = useStore(state => state.setToastStatus);
+  const setToastMessage = useStore(state => state.setToastMessage);
+  const setToastShow = useStore(state => state.setToastShow);
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
@@ -283,32 +266,32 @@ const FileSelector = ({
       }`}
     >
       <input
-        type='radio'
+        type="radio"
         checked={_fileId === id}
-        className='w-4 h-4'
+        className="w-4 h-4"
         onChange={() => {
           if (!syncing) _setFileId(id);
         }}
         disabled={syncing}
       />
-      <div className='flex-1 text-left'>
+      <div className="flex-1 text-left">
         {isEditing ? (
           <input
-            type='text'
-            className='text-gray-800 dark:text-white p-3 text-sm border-none bg-gray-200 dark:bg-gray-600 rounded-md m-0 w-full mr-0 h-8 focus:outline-none'
+            type="text"
+            className="text-gray-800 dark:text-white p-3 text-sm border-none bg-gray-200 dark:bg-gray-600 rounded-md m-0 w-full mr-0 h-8 focus:outline-none"
             value={_name}
-            onChange={(e) => {
+            onChange={e => {
               _setName(e.target.value);
             }}
           />
         ) : (
           <>
-            {name} <div className='text-[10px] md:text-xs'>{`<${id}>`}</div>
+            {name} <div className="text-[10px] md:text-xs">{`<${id}>`}</div>
           </>
         )}
       </div>
       {isEditing || isDeleting ? (
-        <div className='flex gap-1'>
+        <div className="flex gap-1">
           <div
             className={`${syncing ? 'cursor-not-allowed' : 'cursor-pointer'}`}
             onClick={() => {
@@ -331,7 +314,7 @@ const FileSelector = ({
           </div>
         </div>
       ) : (
-        <div className='flex gap-1'>
+        <div className="flex gap-1">
           <div
             className={`${syncing ? 'cursor-not-allowed' : 'cursor-pointer'}`}
             onClick={() => {
@@ -357,18 +340,18 @@ const FileSelector = ({
 const SyncIcon = ({ status }: { status: SyncStatus }) => {
   const statusToIcon = {
     unauthenticated: (
-      <div className='bg-red-600/80 rounded-full w-4 h-4 text-xs flex justify-center items-center'>
+      <div className="bg-red-600/80 rounded-full w-4 h-4 text-xs flex justify-center items-center">
         !
       </div>
     ),
     syncing: (
-      <div className='bg-gray-600/80 rounded-full p-1 animate-spin'>
-        <RefreshIcon className='h-2 w-2' />
+      <div className="bg-gray-600/80 rounded-full p-1 animate-spin">
+        <RefreshIcon className="h-2 w-2" />
       </div>
     ),
     synced: (
-      <div className='bg-gray-600/80 rounded-full p-1'>
-        <TickIcon className='h-2 w-2' />
+      <div className="bg-gray-600/80 rounded-full p-1">
+        <TickIcon className="h-2 w-2" />
       </div>
     ),
   };

@@ -7,7 +7,7 @@ export interface PromptSlice {
   setPrompts: (commandPrompt: Prompt[]) => void;
 }
 
-export const createPromptSlice: StoreSlice<PromptSlice> = (set, get) => ({
+export const createPromptSlice: StoreSlice<PromptSlice> = (set, _get) => ({
   prompts: defaultPrompts,
   setPrompts: (prompts: Prompt[]) => {
     set((prev: PromptSlice) => ({

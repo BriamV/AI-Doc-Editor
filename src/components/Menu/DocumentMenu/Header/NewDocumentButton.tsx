@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import useStore from '@store/store';
 import defaultStyles from '@components/style';
@@ -9,25 +8,19 @@ import useAddDocument from '@hooks/useAddDocument';
 const NewDocumentButton = ({ folder }: { folder?: string }) => {
   const { t } = useTranslation();
   const addChat = useAddDocument();
-  const generating = useStore((state) => state.generating);
+  const generating = useStore(state => state.generating);
 
   return (
     <a
-      className=
-      {
-        defaultStyles.buttonStyle
-      }
-
+      className={defaultStyles.buttonStyle}
       onClick={() => {
         if (!generating) addChat(folder);
       }}
-      title={folder ? String(t('newDocument')) : ''}
+      {...(folder && { title: String(t('newDocument')) })}
     >
       {folder ? (
-        <div className=
-        {defaultStyles.buttonStyle}
-        >
-          <Add size={16} /> 
+        <div className={defaultStyles.buttonStyle}>
+          <Add size={16} />
         </div>
       ) : (
         <>

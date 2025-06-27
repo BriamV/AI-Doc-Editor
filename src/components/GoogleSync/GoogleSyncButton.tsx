@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useGoogleLogin, googleLogout } from '@react-oauth/google';
@@ -9,26 +8,26 @@ import { createJSONStorage } from 'zustand/middleware';
 const GoogleSyncButton = ({ loginHandler }: { loginHandler?: () => void }) => {
   const { t } = useTranslation(['drive']);
 
-  const setGoogleAccessToken = useGStore((state) => state.setGoogleAccessToken);
-  const setSyncStatus = useGStore((state) => state.setSyncStatus);
-  const setCloudSync = useGStore((state) => state.setCloudSync);
-  const cloudSync = useGStore((state) => state.cloudSync);
+  const setGoogleAccessToken = useGStore(state => state.setGoogleAccessToken);
+  const setSyncStatus = useGStore(state => state.setSyncStatus);
+  const setCloudSync = useGStore(state => state.setCloudSync);
+  const cloudSync = useGStore(state => state.cloudSync);
 
-  const setToastStatus = useStore((state) => state.setToastStatus);
-  const setToastMessage = useStore((state) => state.setToastMessage);
-  const setToastShow = useStore((state) => state.setToastShow);
+  const setToastStatus = useStore(state => state.setToastStatus);
+  const setToastMessage = useStore(state => state.setToastMessage);
+  const setToastShow = useStore(state => state.setToastShow);
 
   const login = useGoogleLogin({
-    onSuccess: (codeResponse) => {
+    onSuccess: codeResponse => {
       setGoogleAccessToken(codeResponse.access_token);
       setCloudSync(true);
-      loginHandler && loginHandler();
+      if (loginHandler) loginHandler();
       setToastStatus('success');
       setToastMessage(t('toast.sync'));
       setToastShow(true);
     },
-    onError: (error) => {
-//      console.log('Login Failed');
+    onError: error => {
+      //      console.log('Login Failed');
       setToastStatus('error');
       setToastMessage(error?.error_description || 'Error in authenticating!');
       setToastShow(true);
@@ -51,12 +50,12 @@ const GoogleSyncButton = ({ loginHandler }: { loginHandler?: () => void }) => {
   };
 
   return (
-    <div className='flex gap-4 flex-wrap justify-center'>
-      <button className='btn btn-primary' onClick={() => login()}>
+    <div className="flex gap-4 flex-wrap justify-center">
+      <button className="btn btn-primary" onClick={() => login()}>
         {t('button.sync')}
       </button>
       {cloudSync && (
-        <button className='btn btn-neutral' onClick={logout}>
+        <button className="btn btn-neutral" onClick={logout}>
           {t('button.stop')}
         </button>
       )}

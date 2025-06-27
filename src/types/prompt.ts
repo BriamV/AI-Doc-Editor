@@ -1,4 +1,4 @@
-import { ConfigInterface } from "./document";
+import { ConfigInterface } from './document';
 
 export interface Prompt {
   id: string;

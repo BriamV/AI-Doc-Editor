@@ -13,26 +13,18 @@ import {
 } from '@type/document';
 
 const DocumentList = () => {
-  const currentDocumentIndex = useStore((state) => state.currentChatIndex);
-  const setChats = useStore((state) => state.setChats);
-  const setFolders = useStore((state) => state.setFolders);
-  const documentTitles = useStore(
-    (state) => state.chats?.map((document) => document.title),
-    shallow
-  );
+  const currentDocumentIndex = useStore(state => state.currentChatIndex);
+  const setChats = useStore(state => state.setChats);
+  const setFolders = useStore(state => state.setFolders);
+  const documentTitles = useStore(state => state.chats?.map(document => document.title), shallow);
 
   const [isHover, setIsHover] = useState<boolean>(false);
-  const [documentFolders, setDocumentFolders] = useState<DocumentHistoryFolderInterface>(
-    {}
-  );
-  const [noDocumentFolders, setNoDocumentFolders] = useState<DocumentHistoryInterface[]>(
-    []
-  );
-  const [filter, setFilter] = useState<string>('');
+  const [documentFolders, setDocumentFolders] = useState<DocumentHistoryFolderInterface>({});
+  const [noDocumentFolders, setNoDocumentFolders] = useState<DocumentHistoryInterface[]>([]);
 
   const chatsRef = useRef<DocumentInterface[]>(useStore.getState().chats || []);
   const foldersRef = useRef<FolderCollection>(useStore.getState().folders);
-  const filterRef = useRef<string>(filter);
+  const filterRef = useRef<string>('');
 
   const updateFolders = useRef(() => {
     const _folders: DocumentHistoryFolderInterface = {};
@@ -42,7 +34,7 @@ const DocumentList = () => {
 
     Object.values(folders)
       .sort((a, b) => a.order - b.order)
-      .forEach((f) => (_folders[f.id] = []));
+      .forEach(f => (_folders[f.id] = []));
 
     if (documents) {
       documents.forEach((document, index) => {
@@ -79,12 +71,8 @@ const DocumentList = () => {
   useEffect(() => {
     updateFolders();
 
-    useStore.subscribe((state) => {
-      if (
-        !state.generating &&
-        state.chats &&
-        state.chats !== chatsRef.current
-      ) {
+    const unsubscribe = useStore.subscribe(state => {
+      if (!state.generating && state.chats && state.chats !== chatsRef.current) {
         updateFolders();
         chatsRef.current = state.chats;
       } else if (state.folders !== foldersRef.current) {
@@ -92,7 +80,11 @@ const DocumentList = () => {
         foldersRef.current = state.folders;
       }
     });
-  }, []);
+
+    return () => {
+      unsubscribe();
+    };
+  }, [updateFolders]);
 
   useEffect(() => {
     if (
@@ -113,17 +105,14 @@ const DocumentList = () => {
             JSON.stringify(useStore.getState().folders)
           );
 
-          updatedFolders[folderId].expanded = true;
-          setFolders(updatedFolders);
+          if (updatedFolders[folderId]) {
+            updatedFolders[folderId].expanded = true;
+            setFolders(updatedFolders);
+          }
         }
       }
     }
-  }, [currentDocumentIndex, documentTitles]);
-
-  useEffect(() => {
-    filterRef.current = filter;
-    updateFolders();
-  }, [filter]);
+  }, [currentDocumentIndex, documentTitles, setFolders]);
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     if (e.dataTransfer) {
@@ -165,8 +154,8 @@ const DocumentList = () => {
       {/* <div className="pt-2 px-2">
       <ChatSearch filter={filter} setFilter={setFilter} />
       </div> */}
-      <div className='flex flex-col gap-2 text-gray-100 text-sm overflow-scroll h-full p-1 pt-2'>
-        {Object.keys(documentFolders).map((folderId) => (
+      <div className="flex flex-col gap-2 text-gray-100 text-sm overflow-scroll h-full p-1 pt-2">
+        {Object.keys(documentFolders).map(folderId => (
           <DocumentFolder
             folderDocuments={documentFolders[folderId]}
             folderId={folderId}
@@ -177,7 +166,7 @@ const DocumentList = () => {
           <DocumentButton title={title} key={`${title}-${id}`} chatIndex={index} />
         ))}
       </div>
-      <div className='w-full h-10' />
+      <div className="w-full h-10" />
     </div>
   );
 };

@@ -1,30 +1,33 @@
-import { $getListDepth, $isListItemNode, $isListNode } from "@lexical/list";
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { $getListDepth, $isListItemNode, $isListNode } from '@lexical/list';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
   $getSelection,
   $isElementNode,
   $isRangeSelection,
+  ElementNode,
+  LexicalNode,
+  RangeSelection,
   INDENT_CONTENT_COMMAND,
-  COMMAND_PRIORITY_HIGH
-} from "lexical";
-import { useEffect } from "react";
+  COMMAND_PRIORITY_HIGH,
+} from 'lexical';
+import { useEffect } from 'react';
 
-function getElementNodesInSelection(selection: any) {
+function getElementNodesInSelection(selection: RangeSelection): Set<ElementNode> {
   const nodesInSelection = selection.getNodes();
 
   if (nodesInSelection.length === 0) {
     return new Set([
       selection.anchor.getNode().getParentOrThrow(),
-      selection.focus.getNode().getParentOrThrow()
+      selection.focus.getNode().getParentOrThrow(),
     ]);
   }
 
   return new Set(
-    nodesInSelection.map((n: any) => ($isElementNode(n) ? n : n.getParentOrThrow()))
+    nodesInSelection.map((n: LexicalNode) => ($isElementNode(n) ? n : n.getParentOrThrow()))
   );
 }
 
-function isIndentPermitted(maxDepth: any) {
+function isIndentPermitted(maxDepth: number): boolean {
   const selection = $getSelection();
 
   if (!$isRangeSelection(selection)) {
@@ -42,7 +45,7 @@ function isIndentPermitted(maxDepth: any) {
       const parent = elementNode.getParent();
       if (!$isListNode(parent)) {
         throw new Error(
-          "ListMaxIndentLevelPlugin: A ListItemNode must have a ListNode for a parent."
+          'ListMaxIndentLevelPlugin: A ListItemNode must have a ListNode for a parent.'
         );
       }
 
@@ -53,7 +56,7 @@ function isIndentPermitted(maxDepth: any) {
   return totalDepth <= maxDepth;
 }
 
-export default function ListMaxIndentLevelPlugin({ maxDepth }: any) {
+export default function ListMaxIndentLevelPlugin({ maxDepth }: { maxDepth: number }) {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {

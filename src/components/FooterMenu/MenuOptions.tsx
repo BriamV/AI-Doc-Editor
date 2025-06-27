@@ -10,8 +10,8 @@ import { TotalTokenCostDisplay } from '@components/FooterMenu/SettingsMenu/Total
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || undefined;
 
 const MenuOptions = () => {
-  const hideMenuOptions = useStore((state) => state.hideMenuOptions);
-  const countTotalTokens = useStore((state) => state.countTotalTokens);
+  const hideMenuOptions = useStore(state => state.hideMenuOptions);
+  const countTotalTokens = useStore(state => state.countTotalTokens);
   return (
     <>
       <CollapseOptions />

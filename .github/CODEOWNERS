@@ -1,0 +1,40 @@
+# Global code ownership
+* @velasquezbriam
+
+# Architecture and Configuration
+*.md @velasquezbriam
+*.json @velasquezbriam
+*.yml @velasquezbriam
+*.yaml @velasquezbriam
+Dockerfile* @velasquezbriam
+docker-compose* @velasquezbriam
+
+# ADR and Documentation
+/docs/ @velasquezbriam
+/docs/adr/ @velasquezbriam
+
+# CI/CD Pipeline
+/.github/ @velasquezbriam
+
+# Core Application
+/src/ @velasquezbriam
+
+# Testing Configuration
+jest.config.js @velasquezbriam
+cypress.config.ts @velasquezbriam
+/src/setupTests.ts @velasquezbriam
+
+# Code Quality
+eslint.config.js @velasquezbriam
+.prettierrc @velasquezbriam
+.prettierignore @velasquezbriam
+
+# Build and Dependencies
+package.json @velasquezbriam
+package-lock.json @velasquezbriam
+tsconfig.json @velasquezbriam
+vite.config.ts @velasquezbriam
+tailwind.config.cjs @velasquezbriam
+
+# Security and Dependencies
+/docs/adr/ADR-*.md @velasquezbriam
