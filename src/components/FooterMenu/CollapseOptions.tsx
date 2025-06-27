@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowDown as ArrowBottom } from '@carbon/icons-react';
 import useStore from '@store/store';
 

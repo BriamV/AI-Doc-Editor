@@ -3,7 +3,7 @@ import { StorageValue } from 'zustand/middleware';
 import useStore from '@store/store';
 import useCloudAuthStore from '@store/cloud-auth-store';
 import { GoogleTokenInfo, GoogleFileResource, GoogleFileList } from '@type/google-api';
-import PersistStorageState from '@type/persist';
+import { PersistStorageState } from '@type/persist';
 
 import { createMultipartRelatedBody } from './helper';
 
@@ -160,6 +160,7 @@ export const updateDriveFileDebounced = debounce(
       useStore.getState().setToastShow(true);
       useStore.getState().setToastStatus('error');
       useCloudAuthStore.getState().setSyncStatus('unauthenticated');
+      return;
     }
   },
   5000

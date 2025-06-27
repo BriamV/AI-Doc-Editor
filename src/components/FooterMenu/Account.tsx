@@ -1,4 +1,3 @@
-import React from 'react';
 import { Person } from '@carbon/icons-react';
 
 const Account = () => {

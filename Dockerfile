@@ -51,4 +51,3 @@ CMD ["serve", "-s", "dist", "-l", "3000"]
 LABEL maintainer="BriamV <velasquezbriam@gmail.com>"
 LABEL description="AI-powered document editor with RAG capabilities"
 LABEL version="1.0.0"
-EOF < /dev/null

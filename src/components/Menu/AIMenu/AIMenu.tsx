@@ -55,11 +55,11 @@ const AIMenu = () => {
               {activeMenu === 'chat' ? (
                 <ChatContent />
               ) : activeMenu === 'settings' ? (
-                <PromptMenuContent setActiveMenu={setActiveMenu} activeMenu={activeMenu} />
+                <PromptMenuContent setActiveMenu={setActiveMenu} />
               ) : activeMenu === 'config' ? (
                 <ConfigMenu />
               ) : activeMenu === 'history' ? (
-                <ChatHistoryContent activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
+                <ChatHistoryContent setActiveMenu={setActiveMenu} />
               ) : (
                 <ChatContent />
               )}

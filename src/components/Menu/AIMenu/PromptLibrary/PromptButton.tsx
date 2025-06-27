@@ -53,7 +53,7 @@ const PromptButton = ({
 
   const handleClickButton = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    clearChat(prompt.prompt);
+    clearChat();
     setHideSideAIMenu(false);
     if (chats) {
       setEditorSettings({ ...editorSettings, activeMenu: 'chat' });
