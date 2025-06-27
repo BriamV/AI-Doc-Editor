@@ -47,7 +47,7 @@ const AuthCallback: React.FC<AuthCallbackProps> = ({ onSuccess, onError }) => {
 
         // Redirect to main app after successful auth
         setTimeout(() => {
-          window.location.href = '/';
+          window.location.assign('/');
         }, 2000);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Authentication failed';
@@ -120,7 +120,7 @@ const AuthCallback: React.FC<AuthCallbackProps> = ({ onSuccess, onError }) => {
           <h2 className="text-xl font-semibold text-red-800">Sign in failed</h2>
           <p className="text-gray-600">{errorMessage}</p>
           <button
-            onClick={() => (window.location.href = '/')}
+            onClick={() => window.location.assign('/')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Return to Home

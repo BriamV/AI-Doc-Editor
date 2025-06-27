@@ -214,7 +214,7 @@ export const debugHealth = async (): Promise<void> => {
   if (healthCheck.health.dependencies) {
     console.group('Dependencies:');
     Object.entries(healthCheck.health.dependencies).forEach(([name, status]) => {
-      console.log(`${name}:`, status);
+      console.log(name, status);
     });
     console.groupEnd();
   }
