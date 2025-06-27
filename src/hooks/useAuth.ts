@@ -144,6 +144,7 @@ export const useAuth = () => {
     isLoading,
     user,
     backendAvailable,
+    token: accessToken,
 
     // Actions
     login,

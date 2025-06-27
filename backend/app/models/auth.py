@@ -32,3 +32,10 @@ class TokenData(BaseModel):
     user_id: Optional[str] = None
     email: Optional[str] = None
     role: Optional[str] = None
+
+class UserCredentials(BaseModel):
+    openai_api_key: str
+
+class UserCredentialsResponse(BaseModel):
+    has_api_key: bool
+    key_preview: Optional[str] = None
