@@ -23,16 +23,16 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
+      - name: Audit dependencies in isolated environment
         run: |
+          echo "--- Creating virtual environment ---"
+          python -m venv .venv
+          source .venv/bin/activate
+          echo "--- Installing dependencies ---"
           python -m pip install --upgrade pip
-          pip install -r backend/requirements.txt
-          pip install pip-audit
-
-      - name: Run pip-audit and generate report
-        id: pip-audit
-        run: |
-          pip-audit -r backend/requirements.txt --format json > pip-audit-report.json || true
+          pip install -r backend/requirements.txt pip-audit
+          echo "--- Running pip-audit ---"
+          pip-audit --format json --output pip-audit-report.json || true
 
       - name: Upload pip-audit report
         uses: actions/upload-artifact@v4
