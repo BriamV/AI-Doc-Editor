@@ -28,6 +28,7 @@
       "@constants/*": ["./src/constants/*"],
       "@api/*": ["./src/api/*"],
       "@components/*": ["./src/components/*"],
+      "@pages/*": ["./src/pages/*"],
       "@utils/*": ["./src/utils/*"],
       "@src/*": ["./src/*"]
     }
