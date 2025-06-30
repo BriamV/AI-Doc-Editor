@@ -57,33 +57,46 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Configure Git and NPM for HTTPS
+      - name: Force HTTPS for every GitHub fetch & clear Yarn cache
         run: |
-          echo "Configuring Git to use HTTPS instead of SSH..."
-          git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+          echo "🔧 Rewriting ALL GitHub URLs to HTTPS"
+          # 1. Cobertura exhaustiva de prefijos
           git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+          git config --global url."https://github.com/".insteadOf "ssh://git@github.com"
+          git config --global url."https://github.com/".insteadOf "git+ssh://git@github.com/"
+          git config --global url."https://github.com/".insteadOf "git+ssh://git@github.com"
           
-          # Aplicar configuración específica para CI
+          # 2. Verificación rápida
+          echo "Verificando reglas configuradas:"
+          git config --global -l | grep url || true
+          
+          # 3. Aplicar configuración específica para CI
           if [ -f .npmrc.ci ]; then
             echo "Copiando .npmrc.ci a .npmrc para CI..."
             cp .npmrc.ci .npmrc
           fi
           
-          # Configuraciones adicionales para mayor robustez
+          # 4. Configuraciones adicionales para mayor robustez
           npm config set registry https://registry.npmjs.org/ --location=global
           npm config set @electron:registry https://registry.npmjs.org/ --location=global
-          yarn config set registry https://registry.npmjs.org/
-          yarn config set network-timeout 600000
+          
+          # 5. Limpieza de cache Yarn para evitar URLs ya resueltas en modo SSH
+          echo "Limpiando cache de Yarn..."
+          yarn cache clean
 
       - name: Install dependencies
+        env:
+          # Bloquea cualquier prompt interactivo
+          GIT_TERMINAL_PROMPT: "0"
         run: |
           # Verificar si package.json o yarn.lock han sido modificados
           if git diff --name-only HEAD^ HEAD | grep -q -E "package\.json|yarn\.lock"; then
-            echo "📦 Cambios detectados en package.json o yarn.lock, actualizando dependencias..."
-            yarn install --network-timeout 300000
+            echo "📦 Cambios detectados en package.json o yarn.lock -> instalación limpia"
+            yarn install --network-timeout 600000 --no-optional
           else
-            echo "📦 No hay cambios en dependencias, usando lockfile congelado..."
-            yarn install --frozen-lockfile
+            echo "📦 Sin cambios -> lockfile congelado"
+            yarn install --frozen-lockfile --no-optional
           fi
 
       - name: Run yarn audit

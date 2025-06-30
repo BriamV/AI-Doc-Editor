@@ -1,15 +1,31 @@
 # Archivo de configuración específico para entornos CI
+
+# Registros NPM oficiales para todas las dependencias
 registry=https://registry.npmjs.org/
 @electron:registry=https://registry.npmjs.org/
 @mapbox:registry=https://registry.npmjs.org/
+@babel:registry=https://registry.npmjs.org/
+@typescript-eslint:registry=https://registry.npmjs.org/
 
-# Forzar URLs HTTPS para todas las dependencias Git
+# Configuración crítica para forzar HTTPS
 git-protocol=https
 always-auth=false
+strict-ssl=true
 
-# Configuración específica para electron/node-gyp
+# Forzar redireccionamiento de URL para dependencias Git
+electron:mirror=https://github.com/electron/electron/releases/
+git+ssh://git@github.com/:git+https://github.com/
+
+# Configuración específica para paquetes problemáticos
 node-gyp:ssh=false
+node-gyp:https=true
+node-gyp-build:ssh=false
+electron-userland:ssh=false
 legacy-peer-deps=true
 
-# Aumentar timeouts para mejorar estabilidad en CI
+# Ignorar dependencias opcionales que intentan usar SSH
+ignore-optional=true
+
+# Parámetros de optimización para CI
 network-timeout=900000
+network-concurrency=1
