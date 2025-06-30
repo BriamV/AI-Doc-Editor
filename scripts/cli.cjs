@@ -6,8 +6,11 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 const logger = require('./utils/logger.cjs');
 const config = require('./utils/config.cjs');
+const { validateScriptPath, safePathJoin } = require('./utils/path-sanitizer.cjs');
+const { execSyncSafe } = require('./utils/command-validator.cjs');
 
 // Versión del CLI
 const CLI_VERSION = '1.0.0';
@@ -309,7 +312,7 @@ async function executeCommand(command, args) {
       'format': { file: 'qa.cjs', fn: 'formatCode' },
       'format-check': { file: 'qa.cjs', fn: 'checkFormatting' },
       'tsc-check': { file: 'qa.cjs', fn: 'checkTypeScript' },
-      'qa-gate': { file: '../qa-gate.cjs', fn: null },
+      'qa-gate': { file: '../qa-gate.cjs', fn: 'runQAGate' },
       'validate-design-guidelines': { file: 'qa.cjs', fn: 'validateDesignGuidelines' },
       
       // Validación Modular (Fase 1)  
@@ -380,7 +383,33 @@ async function executeCommand(command, args) {
     }
     
     const { file, fn, needsArgs, args: predefinedArgs } = commandMapping[command];
-    const scriptPath = path.join(__dirname, file.startsWith('../') ? file : `commands/${file}`);
+    
+    // Validar y obtener la ruta segura del script (previene path traversal)
+    let scriptPath;
+    
+    // Lista de archivos especiales permitidos en el directorio scripts/
+    const allowedSpecialFiles = {
+      '../qa-gate.cjs': 'qa-gate.cjs',
+      '../security-scan.cjs': 'security-scan.cjs', 
+      '../generate-traceability.cjs': 'generate-traceability.cjs',
+      '../generate-traceability-data.cjs': 'generate-traceability-data.cjs'
+    };
+    
+    if (allowedSpecialFiles[file]) {
+      // Para archivos especiales permitidos, construir ruta segura
+      scriptPath = path.join(__dirname, allowedSpecialFiles[file]);
+    } else if (file.startsWith('../') || file.startsWith('./')) {
+      // Rechazar otras rutas relativas que no están en la lista de permitidos
+      logger.error(`❌ Ruta de script no autorizada: ${file}`);
+      process.exit(1);
+    } else {
+      // Para comandos normales en el directorio commands/
+      scriptPath = safePathJoin(__dirname, 'commands', file);
+      if (!scriptPath) {
+        logger.error(`❌ Ruta de script inválida: ${file}`);
+        process.exit(1);
+      }
+    }
     
     // Verificar si el archivo existe
     if (!fs.existsSync(scriptPath)) {
@@ -393,7 +422,12 @@ async function executeCommand(command, args) {
       };
       
       if (specialCommands[command]) {
-        const specialScriptPath = path.join(__dirname, specialCommands[command]);
+        // Validar ruta especial de forma segura
+        const specialScriptPath = safePathJoin(__dirname, specialCommands[command]);
+        if (!specialScriptPath) {
+          logger.error(`❌ Ruta de script especial inválida para: ${command}`);
+          process.exit(1);
+        }
         
         if (fs.existsSync(specialScriptPath)) {
           logger.info(`Ejecutando ${command}...`);
@@ -444,6 +478,10 @@ async function executeCommand(command, args) {
       }
     } else if (typeof script === 'function') {
       await script(args);
+    } else if (fn === null) {
+      // Script se auto-ejecuta (no necesita función específica)
+      // El script ya se ejecutó al hacer require(), no necesitamos hacer nada más
+      return;
     } else {
       logger.error(`La función '${fn}' no está definida en el script '${file}'`);
       process.exit(1);
