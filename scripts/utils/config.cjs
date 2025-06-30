@@ -27,36 +27,36 @@ const paths = {
  * Comandos para las diferentes operaciones
  */
 const commands = {
-  // Comandos de desarrollo
-  dev: 'yarn dev',
-  build: 'yarn build',
-  preview: 'yarn preview',
+  // Comandos de desarrollo - Usar comandos directos de Vite/npm scripts
+  dev: 'npx vite',
+  build: 'npx vite build',
+  preview: 'npx vite preview',
   
-  // Comandos de pruebas
-  test: 'yarn test',
-  testWatch: 'yarn test:watch',
-  testCoverage: 'yarn test:coverage',
-  testE2E: 'yarn test:e2e',
-  testE2EOpen: 'yarn test:e2e:open',
+  // Comandos de pruebas - Usar comandos directos de Jest/Cypress
+  test: 'npx jest',
+  testWatch: 'npx jest --watch',
+  testCoverage: 'npx jest --coverage',
+  testE2E: 'npx cypress run',
+  testE2EOpen: 'npx cypress open',
   
   // Comandos de calidad
-  lint: 'yarn lint',
-  lintFix: 'yarn lint:fix',
-  format: 'yarn format',
-  formatCheck: 'yarn format:check',
-  tscCheck: 'yarn tsc-check', // Corregido: se cambió tsc:check por tsc-check para mantener consistencia con package.json
+  lint: 'npx eslint --max-warnings=0 "src/**/*.{js,jsx,ts,tsx}"',
+  lintFix: 'npx eslint --fix "src/**/*.{js,jsx,ts,tsx}"',
+  format: 'npx prettier --write "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}"',
+  formatCheck: 'npx prettier --check "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}"',
+  tscCheck: 'npx tsc --noEmit', // Llamada directa a TypeScript sin pasar por yarn
   
-  // Comandos de seguridad
-  audit: 'yarn audit',
-  auditFix: 'yarn audit:fix',
+  // Comandos de seguridad - Usar comandos directos de npm/yarn
+  audit: 'npm audit',
+  auditFix: 'npm audit fix',
   licenseCheck: 'license-checker --production --json --out reports/licenses.json',
   
-  // Comandos de gobernanza
-  apiSpec: 'yarn api-spec',
-  traceability: 'yarn traceability',
-  traceabilityXlsx: 'yarn traceability:xlsx',
-  traceabilityJson: 'yarn traceability:json',
-  traceabilityMd: 'yarn traceability:md',
+  // Comandos de gobernanza - Usar rutas directas a los scripts
+  apiSpec: 'npx redocly lint',
+  traceability: 'node scripts/generate-traceability.cjs',
+  traceabilityXlsx: 'node scripts/generate-traceability.cjs --format=xlsx',
+  traceabilityJson: 'node scripts/generate-traceability.cjs --format=json',
+  traceabilityMd: 'node scripts/generate-traceability.cjs --format=md',
   
   // Comandos de Docker
   dockerDev: 'docker-compose up app-dev',
@@ -68,10 +68,10 @@ const commands = {
   // Comandos de mantenimiento
   clean: 'rimraf node_modules/.cache dist coverage reports/licenses.json',
   
-  // Comandos de Electron
-  electron: 'yarn electron',
-  electronPack: 'yarn electron:pack',
-  electronMake: 'yarn electron:make'
+  // Comandos de Electron - Usar comandos directos de Electron
+  electron: 'npx electron .',
+  electronPack: 'npx electron-builder --dir',
+  electronMake: 'npx electron-builder build'
 };
 
 /**
