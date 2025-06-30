@@ -15,11 +15,11 @@ import type { User } from '@type/auth';
 
 // Garantizamos que window.app esté disponible en cualquier entorno de pruebas
 if (
-  import.meta.env.DEV || 
-  import.meta.env.VITE_ENABLE_TESTING === 'true' || 
+  import.meta.env.DEV ||
+  import.meta.env.VITE_ENABLE_TESTING === 'true' ||
   (typeof process !== 'undefined' && process.env?.CI === 'true') ||
   // Ensure it's always available when Cypress is running
-  (typeof window !== 'undefined' && (window as any).Cypress)
+  (typeof window !== 'undefined' && (window as Window & { Cypress?: unknown }).Cypress)
 ) {
   // This relies on the global declaration in `cypress/support/e2e.ts`.
   window.app = {
@@ -27,7 +27,7 @@ if (
       useStore.getState().setUser(user);
     },
   };
-  
+
   console.log('🧪 Test helpers exposed on window.app');
 }
 
