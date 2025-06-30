@@ -2,30 +2,30 @@
 
 # Registros NPM oficiales para todas las dependencias
 registry=https://registry.npmjs.org/
+
+# Patrones críticos para resolución directa de paquetes
 @electron:registry=https://registry.npmjs.org/
-@mapbox:registry=https://registry.npmjs.org/
-@babel:registry=https://registry.npmjs.org/
-@typescript-eslint:registry=https://registry.npmjs.org/
+electron-gyp:registry=https://registry.npmjs.org/
+node-gyp:registry=https://registry.npmjs.org/
 
-# Configuración crítica para forzar HTTPS
+# Resolución directa para node-gyp (esta es la clave)
+node-gyp-download=https://github.com/nodejs/node-gyp/archive/master.tar.gz
+
+# Forzar HTTPS para todas las operaciones de red
 git-protocol=https
-always-auth=false
-strict-ssl=true
 
-# Forzar redireccionamiento de URL para dependencias Git
-electron:mirror=https://github.com/electron/electron/releases/
-git+ssh://git@github.com/:git+https://github.com/
+# Mapeos específicos para casos conocidos problemáticos
+node-gyp:always-auth=false
+electron:mirror=https://github.com/electron/electron/releases/download/v
 
-# Configuración específica para paquetes problemáticos
-node-gyp:ssh=false
-node-gyp:https=true
-node-gyp-build:ssh=false
-electron-userland:ssh=false
+# Corregir problemas de compilación nativa en CI
+# Esto permite que node-gyp funcione sin SSH en la mayoría de los casos
 legacy-peer-deps=true
+unsafe-perm=true
 
-# Ignorar dependencias opcionales que intentan usar SSH
-ignore-optional=true
-
-# Parámetros de optimización para CI
+# Optimizaciones para CI
 network-timeout=900000
 network-concurrency=1
+
+# Parámetros de debug para ver URLs completas
+loglevel=info

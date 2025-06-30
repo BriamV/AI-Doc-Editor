@@ -33,32 +33,33 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Force HTTPS for every GitHub fetch & clear Yarn cache
+      - name: Configure direct dependency access (solving SSH issue)
         run: |
-          echo "🔧 Rewriting ALL GitHub URLs to HTTPS"
-          # 1. Cobertura exhaustiva de prefijos
+          echo "🚀 Configurando dependencias para entorno CI..."
+          
+          # 1. Aplicar configuración específica desde archivo
+          echo "Copiando .npmrc.ci a .npmrc para CI..."
+          cp .npmrc.ci .npmrc
+          
+          # 2. Reescribir URLs a nivel global (forzar https)
+          echo "Configurando Git para usar HTTPS en lugar de SSH..."
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
-          git config --global url."https://github.com/".insteadOf "ssh://git@github.com"
-          git config --global url."https://github.com/".insteadOf "git+ssh://git@github.com/"
-          git config --global url."https://github.com/".insteadOf "git+ssh://git@github.com"
           
-          # 2. Verificación rápida
-          echo "Verificando reglas configuradas:"
-          git config --global -l | grep url || true
+          # 3. Crear archivo .yarnrc temporal para forzar dependency protocols
+          echo "## Configuración temporal para CI" > .yarnrc
+          echo '"--install.no-lockfile" false' >> .yarnrc
+          echo '"--install.pure-lockfile" false' >> .yarnrc
           
-          # 3. Aplicar configuración específica para CI
-          if [ -f .npmrc.ci ]; then
-            echo "Copiando .npmrc.ci a .npmrc para CI..."
-            cp .npmrc.ci .npmrc
-          fi
+          # 4. Obtener node-gyp directamente (sin usar Git)
+          # Esta línea es clave: descarga node-gyp y lo almacena localmente
+          mkdir -p .node-gyp-local
+          curl -sL https://github.com/nodejs/node-gyp/archive/master.tar.gz -o .node-gyp-local/node-gyp.tar.gz
           
-          # 4. Configuraciones adicionales para mayor robustez
-          npm config set registry https://registry.npmjs.org/ --location=global
-          npm config set @electron:registry https://registry.npmjs.org/ --location=global
+          echo "Configuración completada. Verificando..." 
+          cat .npmrc
           
-          # 5. Limpieza de cache Yarn para evitar URLs ya resueltas en modo SSH
-          echo "Limpiando cache de Yarn..."
+          # 5. Limpiar cache para forzar descarga fresca
+          echo "Limpiando cache..."
           yarn cache clean
 
       - name: Install dependencies
