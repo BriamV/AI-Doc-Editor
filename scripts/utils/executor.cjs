@@ -3,7 +3,7 @@
  * Proporciona una interfaz unificada para ejecutar comandos del shell
  */
 
-const { execSync } = require('child_process');
+const { execSyncSafe } = require('./command-validator.cjs');
 const logger = require('./logger.cjs');
 
 /**
@@ -21,7 +21,7 @@ function execute(command, options = {}, successMessage = null, errorMessage = nu
     const defaultOptions = { stdio: 'inherit' };
     const mergedOptions = { ...defaultOptions, ...options };
     
-    execSync(command, mergedOptions);
+    execSyncSafe(command, mergedOptions);
     
     if (successMessage) {
       logger.success(successMessage);

@@ -251,8 +251,8 @@ function validateDiff(baseBranch, tools = ['format', 'lint']) {
   logger.title(`Validación de Diferencias vs ${baseBranch}`);
   
   try {
-    const { execSync } = require('child_process');
-    const diffFiles = execSync(`git diff --name-only ${baseBranch}...HEAD`, { encoding: 'utf8' })
+    const { gitDiffSafe } = require('../utils/command-validator.cjs');
+    const diffFiles = gitDiffSafe(baseBranch, { encoding: 'utf8' })
       .trim().split('\n').filter(f => f.length > 0);
     
     if (diffFiles.length === 0) {

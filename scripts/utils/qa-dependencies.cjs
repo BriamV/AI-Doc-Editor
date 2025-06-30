@@ -15,7 +15,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { checkPythonDependencySafe, installYarnDependenciesSafe } = require('./command-validator.cjs');
 const logger = require('./logger.cjs');
 
 class QADependencies {
@@ -30,12 +30,7 @@ class QADependencies {
    * @returns {boolean}
    */
   isPythonPackageInstalled(dependency) {
-    try {
-      execSync(`python -c "import ${dependency.split('[')[0].trim()}"`, { stdio: 'ignore' });
-      return true;
-    } catch (error) {
-      return false;
-    }
+    return checkPythonDependencySafe(dependency, { stdio: 'ignore' });
   }
 
   /**
@@ -142,12 +137,12 @@ class QADependencies {
 
     if (deps.missing.length > 0) {
       logger.task('Instalando dependencias de producción...');
-      execSync(`yarn add ${deps.missing.join(' ')}`, { stdio: 'inherit', cwd: this.rootDir });
+      installYarnDependenciesSafe(deps.missing, false, { stdio: 'inherit', cwd: this.rootDir });
     }
     
     if (deps.missingDev.length > 0) {
       logger.task('Instalando dependencias de desarrollo...');
-      execSync(`yarn add -D ${deps.missingDev.join(' ')}`, { 
+      installYarnDependenciesSafe(deps.missingDev, true, { 
         stdio: 'inherit', 
         cwd: this.rootDir 
       });
