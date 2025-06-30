@@ -1,0 +1,15 @@
+# Archivo de configuración específico para entornos CI
+registry=https://registry.npmjs.org/
+@electron:registry=https://registry.npmjs.org/
+@mapbox:registry=https://registry.npmjs.org/
+
+# Forzar URLs HTTPS para todas las dependencias Git
+git-protocol=https
+always-auth=false
+
+# Configuración específica para electron/node-gyp
+node-gyp:ssh=false
+legacy-peer-deps=true
+
+# Aumentar timeouts para mejorar estabilidad en CI
+network-timeout=900000

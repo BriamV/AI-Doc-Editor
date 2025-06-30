@@ -57,6 +57,24 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Configure Git and NPM for HTTPS
+        run: |
+          echo "Configuring Git to use HTTPS instead of SSH..."
+          git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          
+          # Aplicar configuración específica para CI
+          if [ -f .npmrc.ci ]; then
+            echo "Copiando .npmrc.ci a .npmrc para CI..."
+            cp .npmrc.ci .npmrc
+          fi
+          
+          # Configuraciones adicionales para mayor robustez
+          npm config set registry https://registry.npmjs.org/ --location=global
+          npm config set @electron:registry https://registry.npmjs.org/ --location=global
+          yarn config set registry https://registry.npmjs.org/
+          yarn config set network-timeout 600000
+
       - name: Install dependencies
         run: |
           # Verificar si package.json o yarn.lock han sido modificados
