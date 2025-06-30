@@ -3,6 +3,9 @@ const config = require('./utils/config.cjs');
 const fs = require('fs');
 const path = require('path');
 
+// Detectar si estamos en un entorno CI
+const isCI = process.env.CI === 'true';
+
 /**
  * Ejecuta el audit de seguridad con manejo adecuado de niveles de severidad
  * basado en la configuración centralizada
@@ -13,9 +16,13 @@ function runSecurityAudit() {
     console.log(`    -> Running yarn audit (blocking level: ${auditLevel})...`);
 
     try {
+        // Configurar opciones adecuadas para CI o entorno local
+        const auditOptions = isCI ? '--json --registry=https://registry.npmjs.org' : '--json';
+        console.log(`    -> Using audit options: ${auditOptions}${isCI ? ' (CI environment detected)' : ''}`);        
+        
         // Ejecutamos yarn audit y capturamos la salida
         // Nota: yarn audit siempre devuelve código 1 si encuentra cualquier vulnerabilidad
-        const output = execSync('yarn audit --json', { stdio: 'pipe', encoding: 'utf8' });
+        const output = execSync(`yarn audit ${auditOptions}`, { stdio: 'pipe', encoding: 'utf8' });
         
         // Analizamos el resultado para verificar solo las vulnerabilidades del nivel configurado
         const auditResults = parseAuditOutput(output);
