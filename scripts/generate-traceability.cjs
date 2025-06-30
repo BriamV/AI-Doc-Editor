@@ -7,7 +7,8 @@
  * Usage: node generate-traceability.cjs [--format=<xlsx|json|md|all>] [--output=<dir>]
  */
 
-const XLSX = require('xlsx');
+// Importar ExcelJS con ruta absoluta para evitar problemas de resolución
+const ExcelJS = require(require.resolve('exceljs'));
 const fs = require('fs');
 const path = require('path');
 
@@ -41,13 +42,50 @@ function generateXlsx() {
     'Last Updated': new Date().toISOString().split('T')[0],
   }));
 
-  // Crear workbook
-  const wb = XLSX.utils.book_new();
+  // Crear workbook con ExcelJS
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'AI-Doc-Editor';
+  wb.lastModifiedBy = 'Traceability Generator';
+  wb.created = new Date();
+  wb.modified = new Date();
 
+  // ===== SECCIÓN: Hoja principal de trazabilidad =====
   // Añadir hoja principal de trazabilidad
-  const ws1 = XLSX.utils.json_to_sheet(matrixData);
-  XLSX.utils.book_append_sheet(wb, ws1, 'Traceability Matrix');
+  const ws1 = wb.addWorksheet('Traceability Matrix');
+  
+  // Definir encabezados
+  const headers = [
+    'Requirement ID', 'Requirement Description', 'Task ID', 'Task Name', 
+    'Test File', 'Test Description', 'Status', 'Release', 'Related ADR', 'Last Updated'
+  ];
+  ws1.addRow(headers);
+  
+  // Dar formato a encabezados
+  ws1.getRow(1).font = { bold: true };
+  ws1.getRow(1).fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFD3D3D3' }
+  };
+  
+  // Añadir datos
+  matrixData.forEach(item => {
+    ws1.addRow(Object.values(item));
+  });
+  
+  // Auto-ajustar columnas
+  ws1.columns.forEach(column => {
+    let maxLength = 0;
+    column.eachCell({ includeEmpty: true }, cell => {
+      const columnLength = cell.value ? cell.value.toString().length : 10;
+      if (columnLength > maxLength) {
+        maxLength = columnLength;
+      }
+    });
+    column.width = Math.min(maxLength + 2, 50); // Máximo 50 caracteres de ancho
+  });
 
+  // ===== SECCIÓN: Hoja de resumen =====
   // Añadir hoja de resumen
   const uniqueReqs = new Set(traceabilityData.map(i => i.reqId));
   const uniqueTasks = new Set(traceabilityData.map(i => i.taskId));
@@ -61,9 +99,27 @@ function generateXlsx() {
     { Metric: 'Last Generated', Value: new Date().toISOString() },
   ];
 
-  const ws2 = XLSX.utils.json_to_sheet(summaryData);
-  XLSX.utils.book_append_sheet(wb, ws2, 'Summary');
+  const ws2 = wb.addWorksheet('Summary');
+  ws2.addRow(['Metric', 'Value']);
+  ws2.getRow(1).font = { bold: true };
+  
+  summaryData.forEach(item => {
+    ws2.addRow([item.Metric, item.Value]);
+  });
+  
+  // Auto-ajustar columnas
+  ws2.columns.forEach(column => {
+    let maxLength = 0;
+    column.eachCell({ includeEmpty: true }, cell => {
+      const columnLength = cell.value ? cell.value.toString().length : 10;
+      if (columnLength > maxLength) {
+        maxLength = columnLength;
+      }
+    });
+    column.width = maxLength + 2;
+  });
 
+  // ===== SECCIÓN: Desglose de requisitos =====
   // Añadir desglose de requisitos
   const categories = [
     { name: 'Authentication', prefix: 'USR' },
@@ -79,12 +135,29 @@ function generateXlsx() {
     return { Category: cat.name, Count: count, Example: example };
   });
 
-  const ws3 = XLSX.utils.json_to_sheet(reqBreakdown);
-  XLSX.utils.book_append_sheet(wb, ws3, 'Requirements Breakdown');
+  const ws3 = wb.addWorksheet('Requirements Breakdown');
+  ws3.addRow(['Category', 'Count', 'Example']);
+  ws3.getRow(1).font = { bold: true };
+  
+  reqBreakdown.forEach(item => {
+    ws3.addRow([item.Category, item.Count, item.Example]);
+  });
+  
+  // Auto-ajustar columnas
+  ws3.columns.forEach(column => {
+    let maxLength = 0;
+    column.eachCell({ includeEmpty: true }, cell => {
+      const columnLength = cell.value ? cell.value.toString().length : 10;
+      if (columnLength > maxLength) {
+        maxLength = columnLength;
+      }
+    });
+    column.width = maxLength + 2;
+  });
 
   // Escribir archivo
   const outputPath = path.join(outputDir, 'traceability.xlsx');
-  XLSX.writeFile(wb, outputPath);
+  wb.xlsx.writeFile(outputPath);
 
   return outputPath;
 }
