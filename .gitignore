@@ -53,4 +53,5 @@ __pycache__/
 # Environment variables
 .vscode
 tasks.json
-tasks/ package-lock.json
+tasks/
+package-lock.json
