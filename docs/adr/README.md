@@ -13,6 +13,7 @@ This directory contains Architecture Decision Records (ADRs) for the AI-Doc-Edit
 | [ADR-004](ADR-004-pydantic-v2-deferral.md)         | Defer Pydantic v2 Migration to Backend Phase | Accepted | 2025-06-25 | T-01.6           |
 | [ADR-005](ADR-005-api-key-model.md)                | API Key Model Architecture                   | Proposed | 2025-06-25 | T-02, T-12, T-41 |
 | [ADR-006](ADR-006-dependency-security-scanning.md) | Dependency Security Scanning Implementation  | Accepted | 2025-06-25 | T-43             |
+| [ADR-007](ADR-007-migracion-makefile-a-nodejs.md)  | Migración de Makefile a Scripts Node.js      | Accepted | 2025-06-29 | T-01.5           |
 
 ## Process
 
@@ -40,6 +41,7 @@ The ADRs are numbered in **chronological order** based on creation date:
 3. **ADR-004** (2025-06-25): Pydantic v2 migration deferral decision
 4. **ADR-005** (2025-06-25): API key management architecture (proposed)
 5. **ADR-006** (2025-06-25): Security scanning implementation
+6. **ADR-007** (2025-06-29): Migración de Makefile a Scripts Node.js
 
 ## Related Documentation
 
@@ -49,4 +51,4 @@ The ADRs are numbered in **chronological order** based on creation date:
 
 ## Next ADR Number
 
-The next ADR should be numbered **ADR-007** following the chronological sequence.
+The next ADR should be numbered **ADR-008** following the chronological sequence.

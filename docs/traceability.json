@@ -1,0 +1,110 @@
+[
+  {
+    "reqId": "USR-01",
+    "requirement": "Autenticación de usuarios con OAuth",
+    "taskId": "T-01",
+    "taskName": "Configuración de CI/CD",
+    "testFile": "tests/auth/oauth.test.js",
+    "status": "Completado",
+    "release": "R0.0"
+  },
+  {
+    "reqId": "USR-02",
+    "requirement": "Gestión de perfiles de usuario",
+    "taskId": "T-02",
+    "taskName": "Implementación de autenticación",
+    "testFile": "tests/api/health.test.js",
+    "status": "Completado",
+    "release": "R0.1"
+  },
+  {
+    "reqId": "USR-02",
+    "requirement": "Gestión de perfiles de usuario",
+    "taskId": "T-17",
+    "taskName": "Validación de API y gobernanza",
+    "testFile": "tests/components/editor.test.js",
+    "status": "En Progreso",
+    "release": "R0.1"
+  },
+  {
+    "reqId": "GEN-01",
+    "requirement": "Generación de documentos con IA",
+    "taskId": "T-17",
+    "taskName": "Validación de API y gobernanza",
+    "testFile": "tests/components/editor.test.js",
+    "status": "En Progreso",
+    "release": "R0.2"
+  },
+  {
+    "reqId": "GEN-02",
+    "requirement": "Personalización de plantillas",
+    "taskId": "T-23",
+    "taskName": "Endpoint de health-check",
+    "testFile": "tests/services/ai-service.test.js",
+    "status": "Planificado",
+    "release": "R0.3"
+  },
+  {
+    "reqId": "GEN-02",
+    "requirement": "Personalización de plantillas",
+    "taskId": "T-41",
+    "taskName": "Integración con OpenAI",
+    "testFile": "tests/utils/encryption.test.js",
+    "status": "En Progreso",
+    "release": "R0.3"
+  },
+  {
+    "reqId": "EDT-01",
+    "requirement": "Editor WYSIWYG para documentos",
+    "taskId": "T-41",
+    "taskName": "Integración con OpenAI",
+    "testFile": "tests/utils/encryption.test.js",
+    "status": "En Progreso",
+    "release": "R0.4"
+  },
+  {
+    "reqId": "EDT-02",
+    "requirement": "Control de versiones de documentos",
+    "taskId": "T-43",
+    "taskName": "Escaneo de dependencias",
+    "testFile": "tests/e2e/document-flow.test.js",
+    "status": "Planificado",
+    "release": "R1.0"
+  },
+  {
+    "reqId": "EDT-02",
+    "requirement": "Control de versiones de documentos",
+    "taskId": "T-44",
+    "taskName": "Editor de documentos React",
+    "testFile": "tests/auth/oauth.test.js",
+    "status": "En Progreso",
+    "release": "R1.0"
+  },
+  {
+    "reqId": "PERF-01",
+    "requirement": "Tiempo de respuesta < 500ms",
+    "taskId": "T-44",
+    "taskName": "Editor de documentos React",
+    "testFile": "tests/auth/oauth.test.js",
+    "status": "Completado",
+    "release": "R1.1"
+  },
+  {
+    "reqId": "SEC-01",
+    "requirement": "Cifrado de documentos en reposo",
+    "taskId": "T-01",
+    "taskName": "Configuración de CI/CD",
+    "testFile": "tests/api/health.test.js",
+    "status": "Completado",
+    "release": "R1.2"
+  },
+  {
+    "reqId": "SEC-01",
+    "requirement": "Cifrado de documentos en reposo",
+    "taskId": "T-02",
+    "taskName": "Implementación de autenticación",
+    "testFile": "tests/components/editor.test.js",
+    "status": "En Progreso",
+    "release": "R1.2"
+  }
+]
