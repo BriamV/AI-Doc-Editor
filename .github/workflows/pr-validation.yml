@@ -107,8 +107,19 @@ jobs:
       - name: Run yarn audit
         run: yarn audit --level moderate
 
-      - name: Run Semgrep
+      - name: Run Semgrep Security Scan
         uses: returntocorp/semgrep-action@v1
         if: github.actor != 'dependabot[bot]'
         with:
-          config: auto
+          config: >-
+            p/javascript
+            p/typescript
+            p/react
+            p/security-audit
+            p/owasp-top-ten
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SEMGREP_TIMEOUT: 300
+          # Activar modo estricto para bloquear PR en caso de hallazgos críticos
+          SEMGREP_BASELINE_REF: "${{ github.base_ref }}"
+          SEMGREP_BLOCK_ON_SEVERITY: CRITICAL

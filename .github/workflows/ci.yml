@@ -99,6 +99,8 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/lcov.info
           fail_ci_if_error: false
+          
+      # Análisis de calidad se realiza con Semgrep en el workflow de PR
 
       - name: Build application
         run: yarn build
