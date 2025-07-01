@@ -113,11 +113,19 @@ yarn install && yarn run cmd dev
 # Quality Gate (pre-commit): TS → ESLint → Prettier → Tests → Build → Security
 yarn run cmd qa-gate
 
-# Task Tools
+# Task Tools (Development & QA Workflow)
 tools/progress-dashboard.sh    # Project progress
 tools/task-navigator.sh T-02   # Task details
 tools/extract-subtasks.sh T-02 # Extract subtasks
-tools/status-updater.sh T-02 "Status message"
+tools/status-updater.sh T-02 "Status message"     # Basic status update
+tools/mark-subtask-complete.sh T-02 R0.WP2-T02-ST1 # Mark subtask done
+
+# QA Workflow (NEW: DoD Validation)
+tools/qa-workflow.sh T-02 dev-complete    # Mark development complete
+tools/qa-workflow.sh T-02 start-qa        # Start QA validation
+tools/validate-dod.sh T-02                # Validate Definition of Done
+tools/qa-workflow.sh T-02 qa-passed       # QA validation passed
+tools/qa-workflow.sh T-02 mark-complete   # Mark fully complete (DoD satisfied)
 ```
 
 ### Governance & Security
@@ -130,14 +138,24 @@ yarn run cmd api-spec|security-scan|audit          # Validation & security
 ### Workflow Integration
 
 ```bash
-# Daily Development Workflow
+# Enhanced Development Workflow (with QA validation)
 tools/progress-dashboard.sh                      # View progress
 tools/task-navigator.sh T-02                     # Task details
-tools/extract-subtasks.sh T-02 > current-task.md # Extract subtasks
-tools/status-updater.sh T-02 "En progreso"       # Update status
-yarn run cmd qa-gate                             # Quality checks
-tools/status-updater.sh T-02 "Completado 100%"   # Final status
-yarn run cmd governance --format=all             # Update traceability
+tools/extract-subtasks.sh T-02 > current-work.md # Extract subtasks for development
+
+# Development Phase
+tools/status-updater.sh T-02 "En progreso - ST1"         # Update progress
+tools/mark-subtask-complete.sh T-02 R0.WP2-T02-ST1      # Complete subtasks
+tools/qa-workflow.sh T-02 dev-complete                   # Mark development done
+
+# QA & Validation Phase (NEW: DoD enforcement)
+tools/validate-dod.sh T-02                               # Validate Definition of Done
+yarn run cmd qa-gate                                     # Quality checks
+tools/qa-workflow.sh T-02 qa-passed                      # Mark QA passed
+tools/qa-workflow.sh T-02 mark-complete                  # Final completion (DoD satisfied)
+
+# Governance & Traceability
+yarn run cmd governance --format=all                     # Update traceability
 
 # ADR & Security
 cp docs/adr/template.md docs/adr/ADR-$(printf "%03d" $(($(ls docs/adr/ADR-*.md | wc -l) + 1)))-title-kebab-case.md

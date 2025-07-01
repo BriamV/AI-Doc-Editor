@@ -20,6 +20,7 @@
 | **T-01** | Baseline & CI/CD          | **Enhanced** | **100%** | GitHub Actions, ADR structure, Quality gates, **Modular Validation System**, Docker setup |
 | **T-17** | API-SPEC & ADR Governance | Completed | 100%     | OpenAPI 3.1 spec, Requirements traceability, ADR process             |
 | **T-23** | Health-check API          | Completed | 100%     | /healthz endpoint, Frontend health monitoring, System diagnostics    |
+| **T-41** | User API Key Management   | Completed | 100%     | API key CRUD, Encryption, Frontend integration, test_credentials.py |
 | **T-43** | Escaneo de Dependencias   | Completed | 100%     | yarn audit, pip-audit, Security scanning, License reporting           |
 
 ### Critical Architectural Foundations Established
@@ -89,12 +90,17 @@
 
 ### Core Infrastructure Impact from R0.WP1
 
-#### **1. Development Workflow Enhancement**
+#### **1. Development Workflow Enhancement (UPDATED)**
 
 - **Quality Assurance**: Automated CI/CD prevents regressions
 - **Security-First**: Dependency vulnerabilities blocked at commit level
 - **Documentation-Driven**: ADR governance ensures architectural decisions are tracked
 - **Health Monitoring**: System observability from development to production
+- **🆕 Task Management Tools**: Enhanced workflow tools with QA validation
+  - **Progress Tracking**: Real-time dashboard and subtask management
+  - **QA Enforcement**: Definition of Done (DoD) validation before completion
+  - **Status Integrity**: Multi-state workflow (dev-complete → qa-testing → completed)
+  - **Automated Validation**: qa-gate, tests, security, build verification
 
 #### **2. Backend Transition Readiness**
 
@@ -116,6 +122,54 @@
 - **R2 AI Services**: Health monitoring and API patterns established for AI integration
 - **R3 RAG System**: Security and dependency management ready for ML dependencies
 - **R4-R6 Scale**: CI/CD and monitoring foundation supports feature expansion
+
+---
+
+## R0.WP2: Current Development Focus
+
+### Active Tasks
+
+| Task ID  | Title                        | Status                          | Progress | Priority |
+| -------- | ---------------------------- | ------------------------------- | -------- | -------- |
+| **T-02** | OAuth 2.0 + JWT Roles       | En progreso - OAuth JWT         | 0%       | Crítica  |
+| **T-44** | Admin Panel & Config Store   | Pendiente                       | 0%       | Crítica  |
+
+### Development Workflow Tools Status
+
+#### **Enhanced Task Management (2025-06-30)**
+
+- **✅ Progress Dashboard**: Real-time project progress tracking
+- **✅ Task Navigation**: Direct task access with line numbers
+- **✅ Subtask Extraction**: Actionable development checklists
+- **✅ Status Management**: Fast status updates with backup
+- **✅ Subtask Completion**: Visual progress tracking with ✅ marks
+- **✅ QA Workflow**: Multi-state validation process (NEW)
+- **✅ DoD Validation**: Automated Definition of Done verification (NEW)
+
+#### **QA Workflow States (NEW)**
+
+```
+⏳ Pendiente → 🔄 En progreso → 🚧 Desarrollo Completado → 🧪 En QA/Testing → ✅ QA Passed → ✅ Completado 100% - DoD Satisfied
+```
+
+#### **Available Commands**
+
+```bash
+# Navigation & Planning
+tools/progress-dashboard.sh              # Project overview
+tools/task-navigator.sh T-02             # Task details
+tools/extract-subtasks.sh T-02           # Development subtasks
+
+# Development Progress
+tools/status-updater.sh T-02 "Status"    # Update task status
+tools/mark-subtask-complete.sh T-02 ST1  # Mark subtask complete
+
+# QA & Validation (NEW)
+tools/qa-workflow.sh T-02 dev-complete   # Mark dev complete
+tools/validate-dod.sh T-02               # Validate DoD criteria
+tools/qa-workflow.sh T-02 qa-passed      # Mark QA passed
+tools/qa-workflow.sh T-02 mark-complete  # Final completion
+```
 
 ---
 
