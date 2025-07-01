@@ -6,8 +6,22 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from fastapi import HTTPException, status, Depends
+from fastapi.security import HTTPBearer
+from pydantic import BaseModel
 
 from app.core.config import settings
+
+# Security scheme
+security = HTTPBearer()
+
+class User(BaseModel):
+    """User model for dependency injection"""
+    id: str
+    email: str
+    name: str
+    role: str
+    provider: str
 
 class AuthService:
     def __init__(self):
@@ -117,3 +131,38 @@ class AuthService:
             
         except JWTError:
             raise ValueError("Invalid refresh token")
+
+# Global auth service instance
+auth_service = AuthService()
+
+async def get_current_user(token: str = Depends(security)) -> User:
+    """
+    Dependency to get current authenticated user from JWT token
+    T-02-ST2: JWT authentication dependency
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    try:
+        # Extract token from credentials
+        token_str = token.credentials if hasattr(token, 'credentials') else str(token)
+        
+        # Verify and decode token
+        payload = auth_service.verify_token(token_str)
+        
+        # Create user from payload
+        user = User(
+            id=payload.get("sub", ""),
+            email=payload.get("email", ""),
+            name=payload.get("name", ""),
+            role=payload.get("role", "editor"),
+            provider=payload.get("provider", "google")
+        )
+        
+        return user
+        
+    except (ValueError, JWTError):
+        raise credentials_exception

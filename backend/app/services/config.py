@@ -18,7 +18,7 @@ class ConfigService:
         """Return all configuration entries."""
         result = await self.session.execute(select(SystemConfiguration))
         configs = result.scalars().all()
-        return [ConfigEntry.from_orm(cfg) for cfg in configs]
+        return [ConfigEntry.model_validate(cfg) for cfg in configs]
 
     async def upsert(self, key: str, value: str) -> ConfigEntry:
         """Create or update a configuration entry."""
