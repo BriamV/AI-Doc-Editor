@@ -120,14 +120,14 @@
 
 ---
 
-## R0.WP3: Document Management & AI Integration
+## R0.WP3: Seguridad y Auditoría 
 
 ### Next Development Focus
 
 | Task ID  | Title                        | Status                          | Progress | Priority |
 | -------- | ---------------------------- | ------------------------------- | -------- | -------- |
-| **T-XX** | Document CRUD Operations     | Pendiente                       | 0%       | Alta     |
-| **T-XX** | AI Document Processing       | Pendiente                       | 0%       | Alta     |
+| **T-13** | Sistema de Logs WORM         | Pendiente                       | 0%       | Alta     |
+| **T-12** | Credential Store Criptográfico | Pendiente                     | 0%       | Alta     |
 
 ### Development Workflow Tools Status
 
@@ -194,9 +194,9 @@ tools/qa-workflow.sh T-02 mark-complete  # Final completion
 
 ### Immediate (R0.WP3)
 
-1. **Document Management**: CRUD operations for documents
-2. **AI Integration**: Document processing with OpenAI API
-3. **Frontend Enhancement**: Document editor improvements
+1. **T-13**: Sistema de Logs WORM (Write-Once Read-Many)
+2. **T-12**: Credential Store Criptográfico 
+3. **Security Foundation**: Base de seguridad y auditoría
 
 ### Strategic (R1 Preparation)
 
@@ -221,7 +221,7 @@ tools/qa-workflow.sh T-02 mark-complete  # Final completion
 ### Next Updates Required
 
 - **Post R0.WP2**: ✅ Completed - OAuth and user management done
-- **Post R0.WP3**: Update status after document management completion
+- **Post R0.WP3**: Update status after security and audit completion
 - **Pre R1**: Architecture evolution documentation for backend transition
 - **Ongoing**: ADR updates for major architectural decisions
 
@@ -245,4 +245,4 @@ tools/qa-workflow.sh T-02 mark-complete  # Final completion
 ---
 
 _Last Updated: 2025-07-01 - **R0.WP2 Completed**: OAuth, User API Keys, Admin Panel_  
-_Next Update: R0.WP3 Document Management tasks_
+_Next Update: R0.WP3 Security and Audit tasks (T-13, T-12)_

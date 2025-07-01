@@ -61,7 +61,7 @@ Performance: validate-*-fast (1-8s) | validate-*-full (complete) | scope-specifi
 
 ```bash
 # Status & Security
-Current: R0.WP3 (Document Management) | Previous: R0.WP2 ✅ (User+API Security)
+Current: R0.WP3 (Seguridad y Auditoría) | Previous: R0.WP2 ✅ (User+API Security)
 Status: docs/DEVELOPMENT-STATUS.md | Progress: tools/progress-dashboard.sh
 Security: IndexedDB encryption, TLS 1.3+, AES-256, OAuth 2.0, GDPR
 
