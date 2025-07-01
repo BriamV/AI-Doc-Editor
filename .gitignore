@@ -59,3 +59,9 @@ package-lock.json
 app.db
 backend/.venv/
 backend/app.db
+
+# Generated reports (auto-generated during QA/security scans)
+scripts/reports/security-audit.json
+reports/security-audit.json
+yarn-licenses.json
+npm-licenses.json

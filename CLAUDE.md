@@ -53,9 +53,11 @@ Quality: yarn run cmd qa-gate before commits | Use feature branches
 
 # MANDATORY WORKFLOW: Use tools/ directory for ALL task management
 ALWAYS start with: docs/DEVELOPMENT-STATUS.md → tools/progress-dashboard.sh
+ALWAYS check context: docs/WORK-PLAN v5.md section "6. Plan de Ejecución por Releases"
 ALWAYS navigate: tools/task-navigator.sh T-XX for task details
 ALWAYS plan: tools/extract-subtasks.sh T-XX for development planning
 ALWAYS validate: tools/validate-dod.sh T-XX before marking complete
+ALWAYS verify next steps: Check current WP completion → Next WP → Next Release
 NEVER manually search Sub Tareas v2.md - use tools/task-navigator.sh instead
 
 # Validation System (Multi-Tech + Context-Aware)
