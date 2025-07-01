@@ -55,3 +55,7 @@ __pycache__/
 tasks.json
 tasks/
 package-lock.json
+.eslintcache
+app.db
+backend/.venv/
+backend/app.db
