@@ -112,7 +112,7 @@ function getCommandDescription(cmd) {
     'validate-all': 'Valida todo el proyecto (multi-tecnología)',
     
     // Contexto de Flujo de Trabajo
-    'validate-task': 'Valida según tarea actual (T-XX) detectada automáticamente',
+    'validate-task': 'Valida según tarea actual detectada o --task=T-XX específica',
     'validate-workpackage': 'Valida según work package actual (WP)',
     'validate-release': 'Valida según release actual (R#)',
     'validate-staged': 'Valida solo archivos staged (pre-commit)',
@@ -254,10 +254,16 @@ async function _handleModularValidation(script, fn, command, args, predefinedArg
         break;
 
       case 'validate-task':
+        const contextType = predefinedArgs[0];
+        // Soportar --task=T-XX para forzar una tarea específica
+        const taskOverride = parsedArgs.task ? parsedArgs.task[0] : null;
+        await script[fn](contextType, parsedArgs.tools || ['format', 'lint'], { taskOverride });
+        break;
+        
       case 'validate-workpackage':
       case 'validate-release':
-        const contextType = predefinedArgs[0];
-        await script[fn](contextType, parsedArgs.tools || ['format', 'lint']);
+        const contextTypeOther = predefinedArgs[0];
+        await script[fn](contextTypeOther, parsedArgs.tools || ['format', 'lint']);
         break;
 
       default:
