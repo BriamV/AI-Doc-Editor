@@ -51,6 +51,13 @@ Multilingual: SPANISH docs, English code | Verify all metrics from source
 Efficient: Targeted search for large files | Read → Verify → Edit
 Quality: yarn run cmd qa-gate before commits | Use feature branches
 
+# MANDATORY WORKFLOW: Use tools/ directory for ALL task management
+ALWAYS start with: docs/DEVELOPMENT-STATUS.md → tools/progress-dashboard.sh
+ALWAYS navigate: tools/task-navigator.sh T-XX for task details
+ALWAYS plan: tools/extract-subtasks.sh T-XX for development planning
+ALWAYS validate: tools/validate-dod.sh T-XX before marking complete
+NEVER manually search Sub Tareas v2.md - use tools/task-navigator.sh instead
+
 # Validation System (Multi-Tech + Context-Aware)
 Auto-detection: TypeScript/React + Python/FastAPI | Windows/Linux/macOS/WSL
 Workflow-aware: feature/T-XX → validate-task | develop → validate-all
