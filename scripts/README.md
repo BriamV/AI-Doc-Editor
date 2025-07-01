@@ -85,6 +85,7 @@ yarn run cmd help <comando>
 - `tsc-check`: Verifica la compilación de TypeScript
 - `qa-gate`: Ejecuta todas las verificaciones de calidad
 - `validate-design-guidelines`: Valida métricas de DESIGN_GUIDELINES.md
+- `validate-task [--task=T-XX]`: Valida según tarea específica (con soporte de override)
 
 ### Validación Modular (Multi-Tecnología)
 
@@ -114,16 +115,18 @@ Sistema avanzado de validación que detecta automáticamente tecnologías (TypeS
 
 #### Por Flujo de Trabajo (Auto-detección)
 - `workflow-context`: Muestra contexto actual detectado
-- `validate-task`: Valida según tarea actual (T-XX) detectada
+- `validate-task [--task=T-XX]`: Valida según tarea actual o forzar tarea específica
 - `validate-workpackage`: Valida según work package (WP) actual
 - `validate-release`: Valida según release (R#) actual
 
 **Características:**
 - ✅ **Multi-plataforma**: Windows, Linux, macOS, WSL
 - ✅ **Multi-tecnología**: TypeScript + Python automático
-- ✅ **Context-aware**: Detección automática de branch/tarea
+- ✅ **Context-aware**: Detección automática de branch/tarea + override manual
 - ✅ **Performance optimizado**: 1-80s según scope
 - ✅ **GitFlow integration**: feature → develop → release → main
+- ✅ **DESIGN_GUIDELINES.md**: Sistema semáforo LOC, complejidad, métricas de calidad
+- ✅ **Task-specific validation**: Forzar validación de tarea específica con --task=T-XX
 
 ### Seguridad
 
@@ -157,6 +160,36 @@ Sistema avanzado de validación que detecta automáticamente tecnologías (TypeS
 ### Mantenimiento
 
 - `clean`: Limpia artefactos de construcción y dependencias
+
+## 🎯 Validación de Calidad Mejorada (R0.WP2)
+
+El sistema de QA ha sido mejorado con validación de DESIGN_GUIDELINES.md:
+
+### Métricas de Calidad Integradas
+- **Sistema Semáforo LOC**: 🟢 ≤150, 🟡 151-250, 🔴 >251 LOC por archivo
+- **Complejidad Ciclomática**: ≤10 por función (Python y TypeScript)
+- **Line Length**: ≤100 caracteres por línea
+- **Type Hints**: Cobertura de type hints en Python
+- **Docstrings**: Documentación estilo Google en Python
+- **TODO/FIXME**: Detección de código temporal en producción
+
+### Task-Specific Validation
+```bash
+# Validar tarea específica basada en branch actual
+yarn run cmd validate-task
+
+# Forzar validación de tarea específica
+yarn run cmd validate-task --task=T-02
+
+# Ejemplo completo de workflow QA
+yarn run cmd validate-task --task=T-02  # Validación específica
+yarn run cmd qa-gate                    # Quality gate completo
+```
+
+### Criterios DoD Automatizados
+- **"Código revisado y aprobado"**: Integración con DESIGN_GUIDELINES.md
+- **Score de calidad**: Porcentaje basado en métricas pasadas
+- **Validación por scope**: Frontend, backend, o proyecto completo
 
 ## 🔄 Migración desde Makefile
 
