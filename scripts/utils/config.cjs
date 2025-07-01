@@ -40,10 +40,10 @@ const commands = {
   testE2EOpen: 'npx cypress open',
   
   // Comandos de calidad
-  lint: 'npx eslint --max-warnings=0 "src/**/*.{js,jsx,ts,tsx}"',
-  lintFix: 'npx eslint --fix "src/**/*.{js,jsx,ts,tsx}"',
-  format: 'npx prettier --write "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}"',
-  formatCheck: 'npx prettier --check "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}"',
+  lint: 'npx eslint --max-warnings=0 src/**/*.{js,jsx,ts,tsx}',
+  lintFix: 'npx eslint --fix src/**/*.{js,jsx,ts,tsx}',
+  format: 'npx prettier --write src/**/*.{js,jsx,ts,tsx,json,css,scss,md}',
+  formatCheck: 'npx prettier --check src/**/*.{js,jsx,ts,tsx,json,css,scss,md}',
   tscCheck: 'npx tsc --noEmit', // Llamada directa a TypeScript sin pasar por yarn
   
   // Comandos de seguridad - Usar comandos directos de npm/yarn

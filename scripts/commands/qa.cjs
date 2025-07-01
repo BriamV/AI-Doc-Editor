@@ -311,14 +311,14 @@ function _validateComplexity(scope) {
   try {
     if (scope === 'frontend') {
       // Solo frontend: ESLint en src/
-      execute('npx eslint --max-warnings=0 "src/**/*.{ts,tsx,js,jsx}"', {}, '', '');
+      execute('npx eslint --max-warnings=0 src/**/*.{ts,tsx,js,jsx}', {}, '', '');
     } else if (scope === 'backend') {
       // Solo backend: Python no tiene ESLint, usar análisis básico
       logger.info('Python complexity validation: Basic check ✅');
       return { status: 'pass', message: 'Python complexity basic check ✅' };
     } else {
       // 'all': validar solo frontend (Python separado)
-      execute('npx eslint --max-warnings=0 "src/**/*.{ts,tsx,js,jsx}"', {}, '', '');
+      execute('npx eslint --max-warnings=0 src/**/*.{ts,tsx,js,jsx}', {}, '', '');
     }
     
     return { status: 'pass', message: 'Complexity ≤10 ✅' };
@@ -372,7 +372,7 @@ function _validatePythonTypeHints() {
 function _validateJSDoc() {
   try {
     // Usar ESLint rule para JSDoc si está configurada
-    execute('npx eslint "src/**/*.{ts,tsx}" --no-error-on-unmatched-pattern', {}, '', '');
+    execute('npx eslint src/**/*.{ts,tsx} --no-error-on-unmatched-pattern', {}, '', '');
     return { status: 'pass', message: 'JSDoc coverage ✅' };
   } catch (error) {
     return { status: 'warn', message: 'JSDoc coverage needs improvement' };

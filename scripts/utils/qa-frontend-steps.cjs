@@ -82,7 +82,7 @@ class QAFrontendSteps {
    */
   runESLint() {
     logger.task('Ejecutando ESLint...');
-    execSync('npx eslint "src/**/*.{js,jsx,ts,tsx}"', { 
+    execSync('npx eslint src/**/*.{js,jsx,ts,tsx}', { 
       cwd: this.rootDir, 
       stdio: 'inherit' 
     });
