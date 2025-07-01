@@ -66,6 +66,13 @@ case "$ACTION" in
     "qa-passed")
         NEW_STATUS="${STATES[qa-passed]}"
         echo "✅ QA passed for $TASK_ID - ready for review"
+        echo ""
+        echo "📋 Updating traceability..."
+        if yarn run cmd governance --format=md >/dev/null 2>&1; then
+            echo "✅ Traceability updated successfully"
+        else
+            echo "⚠️  Traceability update had issues (check manually)"
+        fi
         ;;
     "qa-failed")
         if [[ -z "$REASON" ]]; then
@@ -94,6 +101,13 @@ case "$ACTION" in
     "mark-complete")
         NEW_STATUS="${STATES[completed]}"
         echo "🎉 Marking $TASK_ID as fully complete (DoD satisfied)"
+        echo ""
+        echo "📋 Final traceability update..."
+        if yarn run cmd governance --format=all >/dev/null 2>&1; then
+            echo "✅ Final traceability matrix generated"
+        else
+            echo "⚠️  Traceability generation had issues (check manually)"
+        fi
         ;;
     *)
         echo "❌ Unknown action: $ACTION"

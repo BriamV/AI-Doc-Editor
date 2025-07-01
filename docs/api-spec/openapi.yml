@@ -25,8 +25,6 @@ servers:
     description: Production server
   - url: https://staging-api.aidoceditor.app
     description: Staging server
-  - url: http://localhost:8000
-    description: Development server (for local development only)
 
 paths:
   /healthz:
