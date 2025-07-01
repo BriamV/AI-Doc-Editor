@@ -1,0 +1,49 @@
+# Semgrep ignore file - exclude files from security scanning
+# Generated files and reports
+scripts/reports/
+docs/traceability/
+*.backup.cjs
+*-backup.cjs
+*-original.cjs
+
+# Test files with mock data
+cypress/fixtures/
+**/*.test.js
+**/*.test.ts
+**/*.spec.js
+**/*.spec.ts
+
+# Node modules and dependencies
+node_modules/
+.yarn/
+.pnp.*
+
+# Build outputs
+dist/
+build/
+release/
+coverage/
+
+# Configuration files (less critical for command injection)
+*.json
+*.md
+*.yml
+*.yaml
+!package.json
+!yarn.lock
+
+# Git files
+.git/
+.github/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.log

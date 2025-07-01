@@ -1,0 +1,31 @@
+# Archivo de configuración específico para entornos CI
+
+# Registros NPM oficiales para todas las dependencias
+registry=https://registry.npmjs.org/
+
+# Patrones críticos para resolución directa de paquetes
+@electron:registry=https://registry.npmjs.org/
+electron-gyp:registry=https://registry.npmjs.org/
+node-gyp:registry=https://registry.npmjs.org/
+
+# Resolución directa para node-gyp (esta es la clave)
+node-gyp-download=https://github.com/nodejs/node-gyp/archive/master.tar.gz
+
+# Forzar HTTPS para todas las operaciones de red
+git-protocol=https
+
+# Mapeos específicos para casos conocidos problemáticos
+node-gyp:always-auth=false
+electron:mirror=https://github.com/electron/electron/releases/download/v
+
+# Corregir problemas de compilación nativa en CI
+# Esto permite que node-gyp funcione sin SSH en la mayoría de los casos
+legacy-peer-deps=true
+unsafe-perm=true
+
+# Optimizaciones para CI
+network-timeout=900000
+network-concurrency=1
+
+# Parámetros de debug para ver URLs completas
+loglevel=info

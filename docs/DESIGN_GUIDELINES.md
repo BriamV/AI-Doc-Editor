@@ -74,6 +74,13 @@ This document summarizes key design and coding considerations.
 - **TDD Obligatorio**: Pruebas escritas antes que el código de implementación.
 - **Automatización**: Pre-commit hooks para linting, formatting y validación.
 - **Revisión de Código**: Obligatoria para cada PR siguiendo criterios documentados.
+- **Validación Modular**: Sistema multi-tecnología (TypeScript + Python) con detección automática de contexto:
+  ```bash
+  yarn run cmd validate-design-guidelines  # Valida métricas definidas aquí
+  yarn run cmd validate-task               # Contexto-aware por tarea actual
+  yarn run cmd validate-staged             # Pre-commit validation
+  yarn run cmd qa-gate                     # Quality gate completo
+  ```
 - **Documentar API-SPEC**: actualizar `docs/API-SPEC.md` con OpenAPI 3.1 después de cada router nuevo.
 - **ADR Obligatorios**: cada decisión de arquitectura (p.ej. elección de Chunks-size, Celery) debe tener un ADR en `docs/adr/`.
 - **Pre-commit & CI**:

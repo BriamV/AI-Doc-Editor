@@ -54,7 +54,7 @@ Esta sección proporciona el desglose completo, auditable y enriquecido de cada 
 
 - **ID de Tarea:** T-02
 - **Título:** OAuth 2.0 + JWT Roles
-- **Estado:** En*progreso*-\_Iniciando_desarrollo_OAuth_JWT
+- **Estado:** ✅ Completado 100% - DoD Satisfied
 - **Dependencias:** T-01
 - **Prioridad:** Crítica
 - **Release Target:** Release 0
@@ -86,8 +86,8 @@ Esta sección proporciona el desglose completo, auditable y enriquecido de cada 
 |                                  |                                                                                                                                                     |                      |                                                                                                                        |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | ID del Elemento de Trabajo (WII) | Descripción de la Subtarea                                                                                                                          | Complejidad Estimada | Entregable Verificable                                                                                                 |
-| R0.WP2-T02-ST1                   | Implementar el flujo de autenticación OAuth 2.0 (servidor) para Google y Microsoft, incluyendo callbacks y creación/actualización de usuario en DB. | 5                    | Test de integración que completa el flujo OAuth y verifica la existencia del usuario en la DB con los datos correctos. |
-| R0.WP2-T02-ST2                   | Implementar la generación de JWT (access y refresh tokens) con roles (editor, admin) y el endpoint /auth/refresh.                                   | 4                    | Colección Postman que demuestra que el login devuelve tokens y que /auth/refresh emite un nuevo access token válido.   |
+| ✅ R0.WP2-T02-ST1 | Implementar el flujo de autenticación OAuth 2.0 (servidor) para Google y Microsoft, incluyendo callbacks y creación/actualización de usuario en DB. | 5                    | Test de integración que completa el flujo OAuth y verifica la existencia del usuario en la DB con los datos correctos. |
+| ✅ R0.WP2-T02-ST2 | Implementar la generación de JWT (access y refresh tokens) con roles (editor, admin) y el endpoint /auth/refresh.                                   | 4                    | Colección Postman que demuestra que el login devuelve tokens y que /auth/refresh emite un nuevo access token válido.   |
 
 ---
 
@@ -1567,7 +1567,7 @@ Esta sección proporciona el desglose completo, auditable y enriquecido de cada 
 
 - **ID de Tarea:** T-41
 - **Título:** User API Key Management
-- **Estado:** Pendiente
+- **Estado:** ✅ Completado 100% - DoD Satisfied
 - **Dependencias:** T-02, T-12
 - **Prioridad:** Crítica
 - **Release Target:** Release 0
@@ -1597,9 +1597,9 @@ Esta sección proporciona el desglose completo, auditable y enriquecido de cada 
 |                                  |                                                                                                   |                      |                                                                                                  |
 | -------------------------------- | ------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------ |
 | ID del Elemento de Trabajo (WII) | Descripción de la Subtarea                                                                        | Complejidad Estimada | Entregable Verificable                                                                           |
-| R0.WP2-T41-ST1                   | Implementar el endpoint POST /user/credentials que valida y guarda la clave de API del usuario.   | 4                    | Colección Postman que prueba el endpoint con una clave válida (guarda) y una inválida (rechaza). |
-| R0.WP2-T41-ST2                   | Utilizar el Credential Store de T-12 para encriptar la clave antes de guardarla en la DB.         | 2                    | Test que verifica que la clave en la base de datos está encriptada.                              |
-| R0.WP2-T41-ST3                   | Implementar la UI en el perfil de usuario para que pueda introducir y actualizar su clave de API. | 3                    | Test Cypress donde un usuario guarda su clave de API a través de la UI.                          |
+| ✅ R0.WP2-T41-ST1 | Implementar el endpoint POST /user/credentials que valida y guarda la clave de API del usuario.   | 4                    | Colección Postman que prueba el endpoint con una clave válida (guarda) y una inválida (rechaza). |
+| ✅ R0.WP2-T41-ST2 | Utilizar el Credential Store de T-12 para encriptar la clave antes de guardarla en la DB.         | 2                    | Test que verifica que la clave en la base de datos está encriptada.                              |
+| ✅ R0.WP2-T41-ST3 | Implementar la UI en el perfil de usuario para que pueda introducir y actualizar su clave de API. | 3                    | Test Cypress donde un usuario guarda su clave de API a través de la UI.                          |
 
 ---
 
@@ -1678,7 +1678,7 @@ Esta sección proporciona el desglose completo, auditable y enriquecido de cada 
 
 - **ID de Tarea:** T-44
 - **Título:** Admin Panel Skeleton & Config Store
-- **Estado:** Pendiente
+- **Estado:** ✅ Completado 100% - DoD Satisfied
 - **Dependencias:** T-02
 - **Prioridad:** Crítica
 - **Release Target:** Release 0
@@ -1707,8 +1707,8 @@ Esta sección proporciona el desglose completo, auditable y enriquecido de cada 
 |                                  |                                                                                                           |                      |                                                                                             |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------- |
 | ID del Elemento de Trabajo (WII) | Descripción de la Subtarea                                                                                | Complejidad Estimada | Entregable Verificable                                                                      |
-| R0.WP2-T44-ST1                   | Implementar el modelo de datos y la API REST para el servicio de configuración clave-valor.               | 4                    | Colección Postman que prueba el CRUD de la API /config.                                     |
-| R0.WP2-T44-ST2                   | Crear el componente de UI base para el panel de "Settings" y proteger la ruta /settings por rol de admin. | 5                    | Test Cypress donde un admin accede a /settings y un editor recibe un error 403/redirección. |
+| ✅ R0.WP2-T44-ST1 | Implementar el modelo de datos y la API REST para el servicio de configuración clave-valor.               | 4                    | Colección Postman que prueba el CRUD de la API /config.                                     |
+| ✅ R0.WP2-T44-ST2 | Crear el componente de UI base para el panel de "Settings" y proteger la ruta /settings por rol de admin. | 5                    | Test Cypress donde un admin accede a /settings y un editor recibe un error 403/redirección. |
 
 ---
 

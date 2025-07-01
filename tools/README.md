@@ -76,7 +76,7 @@ bash tools/extract-subtasks.sh T-02
 
 ```bash
 # Actualizar estado de tarea
-bash tools/status-updater.sh T-02 "Completado 100%"
+bash tools/status-updater.sh T-02 "En progreso - ST1"
 
 # Progreso granular
 bash tools/status-updater.sh T-02 "En progreso - 3/5 subtareas"
@@ -88,28 +88,110 @@ bash tools/status-updater.sh T-02 "En progreso - 3/5 subtareas"
 - Verification de update exitoso
 - Error handling con suggestions
 
-## Development Workflow Integration
-
-### **Daily Workflow Example**
+### 5. **mark-subtask-complete.sh** - ✅ Subtask Completion
 
 ```bash
-# 1. Check overall progress
-bash tools/progress-dashboard.sh
+# Marcar subtarea como completa
+bash tools/mark-subtask-complete.sh T-02 R0.WP2-T02-ST1
+```
 
-# 2. Navigate to current task
-bash tools/task-navigator.sh T-02
+**Features:**
 
-# 3. Extract actionable subtasks
-bash tools/extract-subtasks.sh T-02 > current-work.md
+- Visual marking with ✅ emoji
+- Automatic progress calculation
+- Status update suggestions
 
-# 4. Start work and update status
-bash tools/status-updater.sh T-02 "En progreso - ST1: Configuración OAuth providers"
+### 6. **qa-workflow.sh** - 🧪 QA Workflow Management (NEW)
 
-# 5. Mark progress as you complete subtasks
-bash tools/status-updater.sh T-02 "En progreso - ST2: Implementación JWT handling"
+```bash
+# Mark development complete (ready for QA)
+bash tools/qa-workflow.sh T-02 dev-complete
 
-# 6. Final completion
-bash tools/status-updater.sh T-02 "Completado 100%"
+# Start QA phase
+bash tools/qa-workflow.sh T-02 start-qa
+
+# QA validation passed
+bash tools/qa-workflow.sh T-02 qa-passed
+
+# QA validation failed
+bash tools/qa-workflow.sh T-02 qa-failed "Reason for failure"
+
+# Mark fully complete (DoD satisfied)
+bash tools/qa-workflow.sh T-02 mark-complete
+```
+
+**QA States:**
+- 🚧 Desarrollo Completado - Listo para QA
+- 🧪 En QA/Testing
+- ✅ QA Passed - Listo para Review
+- ❌ QA Failed - Requiere correcciones
+- 📋 En Review
+- ✅ Completado 100% - DoD Satisfied
+
+### 7. **validate-dod.sh** - 🔍 Definition of Done Validator (NEW)
+
+```bash
+# Validate all DoD criteria automatically
+bash tools/validate-dod.sh T-02
+```
+
+**Validates:**
+- Code Quality (qa-gate)
+- Tests Status
+- Security Scan
+- Build Status
+- Subtasks Completion
+
+**Output:**
+- ✅ PASSED / ❌ FAILED for each criterion
+- Specific actions required for failures
+- Overall DoD satisfaction status
+
+## Development Workflow Integration
+
+### **Enhanced Daily Workflow with QA (Updated)**
+
+```bash
+# 1. Planning & Navigation
+bash tools/progress-dashboard.sh              # Check overall progress
+bash tools/task-navigator.sh T-02             # Navigate to current task
+bash tools/extract-subtasks.sh T-02 > current-work.md # Extract actionable subtasks
+
+# 2. Development Phase
+bash tools/status-updater.sh T-02 "En progreso - ST1: OAuth Implementation"
+bash tools/mark-subtask-complete.sh T-02 R0.WP2-T02-ST1  # Complete subtasks
+bash tools/status-updater.sh T-02 "En progreso - ST2: JWT Implementation"
+bash tools/mark-subtask-complete.sh T-02 R0.WP2-T02-ST2  # Complete subtasks
+
+# 3. Mark Development Complete (Ready for QA)
+bash tools/qa-workflow.sh T-02 dev-complete
+
+# 4. QA & Validation Phase (NEW: DoD Enforcement)
+bash tools/validate-dod.sh T-02               # Validate Definition of Done
+# If validation passes:
+bash tools/qa-workflow.sh T-02 qa-passed      # Mark QA passed
+
+# 5. Final Completion (Only when DoD is satisfied)
+bash tools/qa-workflow.sh T-02 mark-complete  # Mark fully complete
+
+# 6. Governance Update
+yarn run cmd governance --format=all          # Update traceability
+```
+
+### **QA Workflow States Transition**
+
+```
+⏳ Pendiente
+    ↓ (development starts)
+🔄 En progreso
+    ↓ (all subtasks complete)
+🚧 Desarrollo Completado - Listo para QA
+    ↓ (validate-dod.sh runs)
+🧪 En QA/Testing
+    ↓ (qa-gate, tests, security pass)
+✅ QA Passed - Listo para Review
+    ↓ (code review approved)
+✅ Completado 100% - DoD Satisfied
 ```
 
 ### **Git Integration (Future)**
@@ -160,6 +242,11 @@ tools/
 - **Before**: No overall project progress tracking
 - **After**: `bash tools/progress-dashboard.sh` shows real-time progress with visual bars
 
+### **Problem 5: No QA Validation** ❌ → ✅ **Solved** (NEW)
+
+- **Before**: Tasks marked "Completado 100%" without validating DoD criteria
+- **After**: `bash tools/validate-dod.sh T-02` enforces Definition of Done validation before completion
+
 ## Benefits Achieved
 
 ### **Development Velocity** 🚀
@@ -173,6 +260,8 @@ tools/
 - **Subtask Utilization**: 0% → 100% (all subtasks now actionable)
 - **Documentation Accuracy**: Manual sync → Automated updates
 - **Work Visibility**: Hidden → Real-time dashboard
+- **QA Enforcement**: Manual/Optional → Automated DoD validation (NEW)
+- **Task Completion Integrity**: Unreliable → Guaranteed DoD satisfaction (NEW)
 
 ### **Developer Experience** 💡
 
@@ -202,6 +291,6 @@ tools/
 
 ---
 
-_Tools Status: Phase 1 Complete ✅_  
-_Usage: Active development on R0.WP2_  
-_Next Enhancement: Post R0.WP2 feedback integration_
+_Tools Status: Phase 1 Complete ✅ + QA Workflow Enhanced ✅_  
+_Usage: R0.WP2 Successfully Completed with DoD Validation_  
+_Next Enhancement: R0.WP3 workflow integration_
