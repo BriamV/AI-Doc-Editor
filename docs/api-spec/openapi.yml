@@ -198,6 +198,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ConfigEntry'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     post:
       summary: Update configuration value
       description: |
@@ -220,6 +226,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConfigEntry'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   schemas:

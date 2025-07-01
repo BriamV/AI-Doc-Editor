@@ -54,7 +54,7 @@ Esta sección proporciona el desglose completo, auditable y enriquecido de cada 
 
 - **ID de Tarea:** T-02
 - **Título:** OAuth 2.0 + JWT Roles
-- **Estado:** En*progreso*-\_Iniciando_desarrollo_OAuth_JWT
+- **Estado:** 🚧 Desarrollo Completado - Listo para QA
 - **Dependencias:** T-01
 - **Prioridad:** Crítica
 - **Release Target:** Release 0
@@ -1567,7 +1567,7 @@ Esta sección proporciona el desglose completo, auditable y enriquecido de cada 
 
 - **ID de Tarea:** T-41
 - **Título:** User API Key Management
-- **Estado:** Pendiente
+- **Estado:** 🚧 Desarrollo Completado - Listo para QA
 - **Dependencias:** T-02, T-12
 - **Prioridad:** Crítica
 - **Release Target:** Release 0
@@ -1678,7 +1678,7 @@ Esta sección proporciona el desglose completo, auditable y enriquecido de cada 
 
 - **ID de Tarea:** T-44
 - **Título:** Admin Panel Skeleton & Config Store
-- **Estado:** Pendiente
+- **Estado:** 🚧 Desarrollo Completado - Listo para QA
 - **Dependencias:** T-02
 - **Prioridad:** Crítica
 - **Release Target:** Release 0
@@ -1707,7 +1707,7 @@ Esta sección proporciona el desglose completo, auditable y enriquecido de cada 
 |                                  |                                                                                                           |                      |                                                                                             |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------- |
 | ID del Elemento de Trabajo (WII) | Descripción de la Subtarea                                                                                | Complejidad Estimada | Entregable Verificable                                                                      |
-| R0.WP2-T44-ST1                   | Implementar el modelo de datos y la API REST para el servicio de configuración clave-valor.               | 4                    | Colección Postman que prueba el CRUD de la API /config.                                     |
+| ✅ R0.WP2-T44-ST1 | Implementar el modelo de datos y la API REST para el servicio de configuración clave-valor.               | 4                    | Colección Postman que prueba el CRUD de la API /config.                                     |
 | R0.WP2-T44-ST2                   | Crear el componente de UI base para el panel de "Settings" y proteger la ruta /settings por rol de admin. | 5                    | Test Cypress donde un admin accede a /settings y un editor recibe un error 403/redirección. |
 
 ---
