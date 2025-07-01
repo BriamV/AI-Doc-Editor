@@ -12,12 +12,19 @@ const path = require('path');
 const fs = require('fs');
 
 /**
- * Ejecuta pruebas unitarias
+ * Ejecuta pruebas unitarias con lógica inteligente
  * @param {Array<string>} args - Argumentos adicionales para pasar al comando de prueba
  */
 function runTests(args = []) {
   logger.title('Ejecutando Pruebas Unitarias');
   logger.task('Iniciando suite de pruebas...');
+  
+  // Verificar si existen archivos de test
+  if (!hasTestFiles()) {
+    logger.info('No se encontraron archivos de test en el proyecto.');
+    logger.success('Pruebas unitarias completadas con éxito (sin tests definidos).');
+    return;
+  }
   
   // Construir comando con argumentos adicionales
   const testCommand = args.length > 0 
@@ -30,6 +37,57 @@ function runTests(args = []) {
     'Pruebas unitarias completadas con éxito.',
     'Algunas pruebas han fallado. Revisa los errores para más detalles.'
   );
+}
+
+/**
+ * Verifica si existen archivos de test en el proyecto
+ * @returns {boolean} - true si existen archivos de test
+ */
+function hasTestFiles() {
+  const projectRoot = path.join(__dirname, '../../');
+  const srcDir = path.join(projectRoot, 'src');
+  
+  // Verificar si existe directorio src
+  if (!fs.existsSync(srcDir)) {
+    return false;
+  }
+  
+  // Buscar archivos de test recursivamente
+  function findTestFiles(dir) {
+    if (!fs.existsSync(dir)) return [];
+    
+    let testFiles = [];
+    const items = fs.readdirSync(dir);
+    
+    for (const item of items) {
+      const fullPath = path.join(dir, item);
+      const stat = fs.statSync(fullPath);
+      
+      if (stat.isDirectory()) {
+        // Buscar en subdirectorios (excepto node_modules, dist, etc.)
+        if (!['node_modules', 'dist', 'build', '.git'].includes(item)) {
+          testFiles.push(...findTestFiles(fullPath));
+        }
+      } else if (stat.isFile()) {
+        // Verificar si es archivo de test
+        if (item.match(/\.(test|spec)\.(ts|tsx|js|jsx)$/) || 
+            fullPath.includes('__tests__')) {
+          testFiles.push(fullPath);
+        }
+      }
+    }
+    
+    return testFiles;
+  }
+  
+  const testFiles = findTestFiles(srcDir);
+  
+  if (testFiles.length > 0) {
+    logger.info(`Archivos de test encontrados: ${testFiles.length}`);
+    return true;
+  }
+  
+  return false;
 }
 
 /**

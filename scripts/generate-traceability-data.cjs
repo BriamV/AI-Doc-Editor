@@ -10,6 +10,8 @@
 
 const fs = require('fs');
 const path = require('path');
+// Importamos utilidad para prevención de path traversal
+const { safePathJoin, isPathSafe } = require('./utils/path-sanitizer.cjs');
 const logger = require('./utils/logger.cjs');
 
 /**
@@ -103,16 +105,39 @@ function extractTestFiles(testDir = './tests') {
     const testFiles = [];
     
     function scanDir(dir) {
-      const files = fs.readdirSync(dir);
+      // Verificación de seguridad: validar que el directorio a escanear es legítimo
+      const rootDir = process.cwd();
+      if (!isPathSafe(rootDir, dir)) {
+        logger.warn(`⚠️ Intento de acceso a directorio no permitido: ${dir}`);
+        return;
+      }
+      
+      let files;
+      try {
+        files = fs.readdirSync(dir);
+      } catch (error) {
+        logger.error(`❌ Error al leer directorio ${dir}: ${error.message}`);
+        return;
+      }
       
       files.forEach(file => {
-        const filePath = path.join(dir, file);
-        const stat = fs.statSync(filePath);
+        // Construcción segura de la ruta del archivo
+        const filePath = safePathJoin(dir, file);
+        if (!filePath) {
+          logger.warn(`⚠️ Ruta de archivo potencialmente maliciosa ignorada: ${file}`);
+          return;
+        }
         
-        if (stat.isDirectory()) {
-          scanDir(filePath);
-        } else if (file.includes('test') || file.includes('spec')) {
-          testFiles.push(path.relative(process.cwd(), filePath));
+        try {
+          const stat = fs.statSync(filePath);
+          
+          if (stat.isDirectory()) {
+            scanDir(filePath); // Recursión con ruta validada
+          } else if (file.includes('test') || file.includes('spec')) {
+            testFiles.push(path.relative(process.cwd(), filePath));
+          }
+        } catch (error) {
+          logger.error(`❌ Error al procesar archivo ${filePath}: ${error.message}`);
         }
       });
     }

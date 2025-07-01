@@ -2,6 +2,10 @@ const { execSync } = require('child_process');
 const config = require('./utils/config.cjs');
 const fs = require('fs');
 const path = require('path');
+const logger = require('./utils/logger.cjs');
+// Importamos utilidades de seguridad
+const { execSyncSafe } = require('./utils/command-validator.cjs');
+const { safePathJoin } = require('./utils/path-sanitizer.cjs');
 
 // Detectar si estamos en un entorno CI
 const isCI = process.env.CI === 'true';
@@ -20,9 +24,16 @@ function runSecurityAudit() {
         const auditOptions = isCI ? '--json --registry=https://registry.npmjs.org' : '--json';
         console.log(`    -> Using audit options: ${auditOptions}${isCI ? ' (CI environment detected)' : ''}`);        
         
-        // Ejecutamos yarn audit y capturamos la salida
+        // Ejecutamos yarn audit de forma segura y capturamos la salida
         // Nota: yarn audit siempre devuelve código 1 si encuentra cualquier vulnerabilidad
-        const output = execSync(`yarn audit ${auditOptions}`, { stdio: 'pipe', encoding: 'utf8' });
+        // Validación: auditOptions está limitado a valores seguros específicos
+        const validOptions = ['--json', '--json --registry=https://registry.npmjs.org'];
+        if (!validOptions.includes(auditOptions)) {
+            throw new Error(`Opciones de audit no válidas: ${auditOptions}`);
+        }
+        
+        // Uso de la versión segura de execSync
+        const output = execSyncSafe(`yarn audit ${auditOptions}`, { stdio: 'pipe', encoding: 'utf8' });
         
         // Analizamos el resultado para verificar solo las vulnerabilidades del nivel configurado
         const auditResults = parseAuditOutput(output);
@@ -127,14 +138,30 @@ function parseAuditOutput(output) {
  * @param {Object} results - Resultados del análisis de vulnerabilidades
  */
 function generateAuditReport(results) {
-    // Crear directorio de informes si no existe
-    const reportsDir = path.join(__dirname, '../reports');
-    if (!fs.existsSync(reportsDir)) {
-        fs.mkdirSync(reportsDir, { recursive: true });
+    // Crear directorio de informes si no existe - usando rutas seguras
+    const reportsDir = safePathJoin(__dirname, '..', 'reports');
+    
+    if (!reportsDir) {
+        logger.error('🛑 Error al generar ruta segura para el directorio de informes');
+        return;
     }
     
-    // Guardar informe en formato JSON
-    const reportPath = path.join(reportsDir, 'security-audit.json');
+    try {
+        if (!fs.existsSync(reportsDir)) {
+            fs.mkdirSync(reportsDir, { recursive: true });
+        }
+    } catch (error) {
+        logger.error(`❌ Error al crear directorio de informes: ${error.message}`);
+        return;
+    }
+    
+    // Guardar informe en formato JSON - usando rutas seguras
+    const reportPath = safePathJoin(reportsDir, 'security-audit.json');
+    
+    if (!reportPath) {
+        logger.error('🛑 Error al generar ruta segura para el informe');
+        return;
+    }
     const reportData = {
         timestamp: new Date().toISOString(),
         vulnerabilities: results,
