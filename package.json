@@ -21,6 +21,7 @@
     "test:e2e": "yarn run cmd test-e2e",
     "test:e2e:open": "yarn run cmd test-e2e-open",
     "//-- QUALITY & FORMATTING --//": "",
+    "qa": "yarn run cmd qa",
     "lint": "yarn run cmd lint",
     "lint:fix": "yarn run cmd lint-fix",
     "format": "yarn run cmd format",
@@ -118,6 +119,7 @@
     "remark-gfm": "^3.0.1",
     "remark-math": "^5.1.1",
     "uuid": "^9.0.0",
+    "yargs": "17.7.2",
     "yjs": "^13.6.6",
     "zustand": "^4.3.6"
   },

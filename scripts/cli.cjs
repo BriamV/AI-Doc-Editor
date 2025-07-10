@@ -41,7 +41,7 @@ function showHelp() {
   const categories = {
     'Desarrollo': ['dev', 'build', 'build-analyze', 'build-dev', 'build-docs', 'build-env', 'preview'],
     'Pruebas': ['test', 'test-watch', 'test-coverage', 'test-e2e', 'test-e2e-open', 'test-all'],
-    'Calidad': ['lint', 'lint-fix', 'format', 'format-check', 'tsc-check', 'qa-gate', 'validate-design-guidelines'],
+    'Calidad': ['qa', 'lint', 'lint-fix', 'format', 'format-check', 'tsc-check', 'qa-gate', 'validate-design-guidelines'],
     'Validación Modular': ['validate-file', 'validate-dir', 'validate-frontend', 'validate-backend', 'validate-store', 'validate-types', 'validate-modified', 'validate-all'],
     'Validación Rápida': ['validate-frontend-fast', 'validate-backend-fast', 'validate-all-fast'],
     'Validación Completa': ['validate-frontend-full', 'validate-backend-full', 'validate-all-full'],
@@ -93,6 +93,7 @@ function getCommandDescription(cmd) {
     'test-all': 'Ejecuta todas las pruebas (unitarias y E2E)',
     
     // Calidad
+    'qa': 'QA Híbrido - Auto-detección de contexto + validación inteligente',
     'lint': 'Ejecuta ESLint',
     'lint-fix': 'Ejecuta ESLint con auto-corrección',
     'format': 'Formatea el código con Prettier',
@@ -313,23 +314,10 @@ async function executeCommand(command, args) {
       'test-all': { file: 'test.cjs', fn: 'runAllTests' },
       
       // Calidad
-      'lint': { file: 'qa.cjs', fn: 'runLint' },
-      'lint-fix': { file: 'qa.cjs', fn: 'runLintFix' },
-      'format': { file: 'qa.cjs', fn: 'formatCode' },
-      'format-check': { file: 'qa.cjs', fn: 'checkFormatting' },
-      'tsc-check': { file: 'qa.cjs', fn: 'checkTypeScript' },
-      'qa-gate': { file: '../qa-gate.cjs', fn: 'runQAGate' },
-      'validate-design-guidelines': { file: 'qa.cjs', fn: 'validateDesignGuidelines' },
-      
+      'qa': { file: 'qa.cjs', fn: 'run' },
+
       // Validación Modular (Fase 1)  
-      'validate-file': { file: 'qa.cjs', fn: 'validateFile', needsArgs: true },
-      'validate-dir': { file: 'qa.cjs', fn: 'validateDir', needsArgs: true },
-      'validate-frontend': { file: 'qa.cjs', fn: 'validateScope', args: ['frontend'] },
-      'validate-backend': { file: 'qa.cjs', fn: 'validateScope', args: ['backend'] },
-      'validate-store': { file: 'qa.cjs', fn: 'validateScope', args: ['store'] },
-      'validate-types': { file: 'qa.cjs', fn: 'validateScope', args: ['types'] },
-      'validate-modified': { file: 'qa.cjs', fn: 'validateModified' },
-      
+
       // Validación Rápida
       'validate-frontend-fast': { file: 'qa.cjs', fn: 'validateScope', args: ['frontend', { tools: ['format'], context: 'fast' }] },
       'validate-backend-fast': { file: 'qa.cjs', fn: 'validateScope', args: ['backend', { tools: ['format'], context: 'fast' }] },
@@ -342,13 +330,7 @@ async function executeCommand(command, args) {
       'validate-all-full': { file: 'qa.cjs', fn: 'validateScope', args: ['all', { tools: ['format', 'lint', 'types', 'loc'], context: 'pre-commit' }] },
       
       // Contexto de Flujo de Trabajo
-      'validate-task': { file: 'qa.cjs', fn: 'validateByWorkflowContext', args: ['task'] },
-      'validate-workpackage': { file: 'qa.cjs', fn: 'validateByWorkflowContext', args: ['workpackage'] },
-      'validate-release': { file: 'qa.cjs', fn: 'validateByWorkflowContext', args: ['release'] },
-      'validate-staged': { file: 'qa.cjs', fn: 'validateStaged' },
-      'validate-diff': { file: 'qa.cjs', fn: 'validateDiff', needsArgs: true },
-      'workflow-context': { file: 'qa.cjs', fn: 'showWorkflowContext' },
-      
+
       // Seguridad
       'security-scan': { file: '../security-scan.cjs', fn: null },
       'audit': { file: 'security.cjs', fn: 'runAudit' },
@@ -378,7 +360,7 @@ async function executeCommand(command, args) {
       'clean-modules': { file: 'maintenance.cjs', fn: 'cleanModules' },
       'update-deps': { file: 'maintenance.cjs', fn: 'updateDependencies' },
       'health-check': { file: 'maintenance.cjs', fn: 'checkHealth' },
-      'optimize': { file: 'maintenance.cjs', fn: 'optimizeProject' },
+      'optimize': { file: 'maintenance.cjs', fn: 'optimizeProject' }
     };
     
     // Verificar si el comando existe en el mapeo
@@ -395,7 +377,7 @@ async function executeCommand(command, args) {
     
     // Lista de archivos especiales permitidos en el directorio scripts/
     const allowedSpecialFiles = {
-      '../qa-gate.cjs': 'qa-gate.cjs',
+
       '../security-scan.cjs': 'security-scan.cjs', 
       '../generate-traceability.cjs': 'generate-traceability.cjs',
       '../generate-traceability-data.cjs': 'generate-traceability-data.cjs'
@@ -422,7 +404,7 @@ async function executeCommand(command, args) {
       // Manejo especial para archivos especiales en el directorio scripts/
       // Lista de comandos con sus propios archivos en el directorio scripts/
       const specialCommands = {
-        'qa-gate': './qa-gate.cjs',
+
         'security-scan': './security-scan.cjs',
         'traceability': './generate-traceability.cjs'
       };
@@ -475,6 +457,14 @@ async function executeCommand(command, args) {
     // Importar y ejecutar el script
     const script = require(scriptPath);
     
+    // Manejo especial para QA Híbrido CLI (antes de verificar script[fn])
+    if (commandMapping[command].isHybridCLI) {
+      const QAHybridSystem = script;
+      const qaSystem = new QAHybridSystem();
+      await qaSystem.run(args);
+      return;
+    }
+    
     if (fn && typeof script[fn] === 'function') {
       // Manejo especial para comandos modulares
       if (command.startsWith('validate-')) {
@@ -489,8 +479,20 @@ async function executeCommand(command, args) {
       // El script ya se ejecutó al hacer require(), no necesitamos hacer nada más
       return;
     } else {
-      logger.error(`La función '${fn}' no está definida en el script '${file}'`);
-      process.exit(1);
+      // Try to handle as class constructor
+      if (typeof script === 'function' && script.prototype && script.prototype.constructor === script) {
+        // This is a class, create instance and call run method
+        const instance = new script();
+        if (typeof instance.run === 'function') {
+          await instance.run(args);
+        } else {
+          logger.error(`La clase '${script.name}' no tiene un método 'run'`);
+          process.exit(1);
+        }
+      } else {
+        logger.error(`La función '${fn}' no está definida en el script '${file}'`);
+        process.exit(1);
+      }
     }
   } catch (error) {
     logger.error(`Error al ejecutar el comando '${command}': ${error.message}`);

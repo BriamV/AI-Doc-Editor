@@ -5,10 +5,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ```bash
-# Essential: dev, build, qa-gate, test, security-scan
-yarn run cmd dev|build|qa-gate|test|security-scan
+# Essential: dev, build, qa, qa-gate, test, security-scan
+yarn run cmd dev|build|qa|qa-gate|test|security-scan
 
-# Quality: lint/fix, format/check, tests, audit
+# Quality: qa (hybrid), lint/fix, format/check, tests, audit
+yarn run cmd qa T-02|qa typescript|qa refactor|qa --fast
 yarn run cmd preview|lint|lint-fix|format|format-check|test-coverage|test-all|audit
 
 # Validation Modular (Multi-Tech: TS+Python, Auto-detection)
