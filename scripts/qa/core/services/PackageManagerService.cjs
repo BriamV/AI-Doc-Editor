@@ -16,6 +16,7 @@ class PackageManagerService {
     this._detectedManager = null;
     this._initialized = false;
     this._initializationError = null;
+    this._initializationPromise = null; // Prevent concurrent initialization
     
     // Command cache
     this._commandCache = new Map();
@@ -30,25 +31,36 @@ class PackageManagerService {
   }
   
   /**
-   * Lazy initialization with robust error handling
+   * Lazy initialization with robust error handling and concurrency protection
    */
   async _initialize() {
     if (this._initialized) {
       return;
     }
     
-    try {
-      this.logger.info('PackageManagerService: Initializing...');
-      this._detectedManager = await this._detectPackageManager();
-      this.logger.info(`PackageManagerService: Detected '${this._detectedManager}'`);
-      this._initialized = true;
-      this._initializationError = null;
-    } catch (error) {
-      this._initializationError = error;
-      this._detectedManager = this.config.fallbackManager;
-      this._initialized = true;
-      this.logger.warn(`PackageManagerService: Detection failed, using fallback '${this._detectedManager}': ${error.message}`);
+    // Prevent concurrent initialization
+    if (this._initializationPromise) {
+      return await this._initializationPromise;
     }
+    
+    this._initializationPromise = (async () => {
+      try {
+        this.logger.info('PackageManagerService: Initializing...');
+        this._detectedManager = await this._detectPackageManager();
+        this.logger.info(`PackageManagerService: Detected '${this._detectedManager}'`);
+        this._initialized = true;
+        this._initializationError = null;
+      } catch (error) {
+        this._initializationError = error;
+        this._detectedManager = this.config.fallbackManager;
+        this._initialized = true;
+        this.logger.warn(`PackageManagerService: Detection failed, using fallback '${this._detectedManager}': ${error.message}`);
+      } finally {
+        this._initializationPromise = null; // Reset for future calls
+      }
+    })();
+    
+    return await this._initializationPromise;
   }
   
   /**
@@ -337,6 +349,7 @@ class PackageManagerService {
     this._detectedManager = null;
     this._initialized = false;
     this._initializationError = null;
+    this._initializationPromise = null;
     this._commandCache.clear();
   }
   

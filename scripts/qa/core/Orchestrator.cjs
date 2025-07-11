@@ -76,11 +76,13 @@ class Orchestrator {
     // Execute wrappers using T-21 WrapperCoordinator
     const executionResult = await this.wrapperCoordinator.executeWrappers(plan);
     
-    if (executionResult.success) {
+    // Critical Fix: Process results regardless of success/failure - failures are valid results, not errors
+    if (executionResult.results) {
       // Transform ResultAggregator output to match tree method expectations
       return this._transformResults(executionResult.results.details);
     } else {
-      throw new Error(`Wrapper execution failed: ${executionResult.error}`);
+      // Only throw error for actual execution failures (no results), not validation failures
+      throw new Error(`Wrapper execution failed: ${executionResult.error || 'No results returned'}`);
     }
   }
   
@@ -96,6 +98,7 @@ class Orchestrator {
         dimensionGroups[detail.dimension] = {
           dimension: detail.dimension,
           status: 'passed',
+          success: true,
           message: `${detail.dimension} validation`,
           duration: 0,
           items: []
@@ -105,7 +108,8 @@ class Orchestrator {
       // Add tool result to dimension
       dimensionGroups[detail.dimension].items.push({
         status: detail.success ? 'passed' : 'failed',
-        message: detail.error || `${detail.tool} completed successfully`,
+        success: detail.success,
+        message: detail.success ? `${detail.tool} completed successfully` : (detail.error || `${detail.tool} failed`),
         duration: detail.executionTime,
         details: detail.result
       });
@@ -114,15 +118,24 @@ class Orchestrator {
       dimensionGroups[detail.dimension].duration += detail.executionTime || 0;
       if (!detail.success) {
         dimensionGroups[detail.dimension].status = 'failed';
+        dimensionGroups[detail.dimension].success = false;
       }
     }
     
     // Convert to array and update dimension messages
     const results = Object.values(dimensionGroups);
     for (const result of results) {
-      const passed = result.items.filter(item => item.status === 'passed').length;
+      const passed = result.items.filter(item => item.success === true).length;
+      const failed = result.items.filter(item => item.success === false).length;
       const total = result.items.length;
-      result.message = `${result.dimension}: ${passed}/${total} tools passed`;
+      
+      if (failed > 0) {
+        result.message = `${result.dimension}: ${failed}/${total} tools failed`;
+        result.success = false;
+      } else {
+        result.message = `${result.dimension}: ${passed}/${total} tools passed`;
+        result.success = true;
+      }
     }
     
     return results;
@@ -130,12 +143,14 @@ class Orchestrator {
   
   _formatResults(results, context, plan) {
     const totalDuration = Date.now() - this.startTime;
+    
+    // Critical Fix: Count actual tool results correctly
     const stats = {
       total: results.length,
-      passed: results.filter(r => r.status === 'passed').length,
-      warnings: results.filter(r => r.status === 'warning').length,
-      failed: results.filter(r => r.status === 'failed').length,
-      pending: results.filter(r => r.status === 'pending').length
+      passed: results.filter(result => result.success === true).length,
+      warnings: results.filter(result => result.success === true && result.status === 'warning').length,
+      failed: results.filter(result => result.success === false).length,
+      pending: results.filter(result => result.status === 'pending').length
     };
     
     return {

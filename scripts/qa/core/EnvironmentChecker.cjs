@@ -13,6 +13,7 @@
 const ToolChecker = require('./environment/ToolChecker.cjs');
 const EnvironmentValidator = require('./environment/EnvironmentValidator.cjs');
 const { getPackageManagerService } = require('./services/PackageManagerService.cjs');
+const VenvManager = require('../utils/VenvManager.cjs');
 
 class EnvironmentChecker {
   constructor(config, logger) {
@@ -20,7 +21,8 @@ class EnvironmentChecker {
     this.logger = logger;
     
     // Initialize SOLID components
-    this.toolChecker = new ToolChecker(logger);
+    this.venvManager = new VenvManager(process.cwd(), logger);
+    this.toolChecker = new ToolChecker(logger, this.venvManager);
     this.environmentValidator = new EnvironmentValidator(logger);
     
     // Tool definitions
@@ -32,7 +34,7 @@ class EnvironmentChecker {
     };
     
     this.optionalTools = {
-      megalinter: { command: 'megalinter --version', description: 'MegaLinter (local installation)', installUrl: 'https://megalinter.github.io/latest/installation/', fallback: 'docker' },
+      megalinter: { command: 'npm list mega-linter-runner --depth=0 2>/dev/null | grep mega-linter-runner', description: 'MegaLinter (local installation)', installUrl: 'https://megalinter.github.io/latest/installation/', fallback: 'docker' },
       snyk: { command: 'snyk --version', description: 'Snyk security scanner', installUrl: 'https://docs.snyk.io/snyk-cli/install-the-snyk-cli', fallback: 'skip' },
       prettier: { command: 'npx prettier --version', description: 'Prettier code formatter', installUrl: 'lazy:prettier', fallback: 'megalinter' },
       eslint: { command: 'npx eslint --version', description: 'ESLint JavaScript linter', installUrl: 'lazy:eslint', fallback: 'megalinter' },
@@ -40,7 +42,7 @@ class EnvironmentChecker {
       pylint: { command: 'pylint --version', description: 'Pylint Python linter', installUrl: 'pip install pylint', fallback: 'megalinter' },
       tsc: { command: 'npx tsc --version', description: 'TypeScript compiler', installUrl: 'lazy:typescript', fallback: 'skip' },
       pip: { command: 'pip --version', description: 'Python package installer', installUrl: 'https://pip.pypa.io/en/stable/installation/', fallback: 'skip' },
-      spectral: { command: 'npx @stoplight/spectral-cli --version', description: 'OpenAPI/JSON Schema linter', installUrl: 'lazy:@stoplight/spectral-cli', fallback: 'skip' }
+      spectral: { command: 'ls node_modules/@stoplight/spectral-cli/package.json', description: 'OpenAPI/JSON Schema linter', installUrl: 'lazy:@stoplight/spectral-cli', fallback: 'skip' }
     };
     
     this.checkResults = {
@@ -60,6 +62,10 @@ class EnvironmentChecker {
     // Initialize package manager service first
     const packageManagerService = getPackageManagerService();
     await packageManagerService._initialize();
+    
+    // Detect and setup virtual environment for Python tools
+    const venvDetected = this.venvManager.detectVirtualEnvironment();
+    this.logger.info(`🐍 Virtual environment detection: ${venvDetected}`);
     
     // Add detected package manager to required tools
     const detectedManager = await packageManagerService.getManager();
@@ -126,16 +132,19 @@ class EnvironmentChecker {
       recommendations.push('Install Docker for optimal MegaLinter performance');
     }
     
-    // MegaLinter recommendation
+    // MegaLinter recommendation (PRD RF-007: Local installation preferred)
     const megalinterResult = this.checkResults.optional.get('megalinter');
     if (!megalinterResult?.available && dockerResult?.available) {
-      recommendations.push('MegaLinter will run via Docker (slower than local installation)');
+      recommendations.push('MegaLinter will run via Docker (slower than local installation). Consider: yarn add --dev mega-linter-runner');
+    } else if (!megalinterResult?.available && !dockerResult?.available) {
+      recommendations.push('Install MegaLinter locally for optimal performance: yarn add --dev mega-linter-runner');
     }
     
-    // Snyk recommendation
+    // Snyk recommendation (PRD RF-007: Standard installation methods)
     const snykResult = this.checkResults.optional.get('snyk');
     if (!snykResult?.available) {
-      recommendations.push('Install Snyk CLI for security scanning capabilities');
+      const snykInstallCmd = await this._getInstallCommand('snyk');
+      recommendations.push(`Install Snyk CLI for security scanning capabilities: ${snykInstallCmd} OR npm install -g snyk`);
     }
     
     // TypeScript recommendation
@@ -145,10 +154,10 @@ class EnvironmentChecker {
       recommendations.push(`Install TypeScript for build validation (${typescriptInstallCmd})`);
     }
     
-    // Python pip recommendation
+    // Python pip recommendation (PRD RF-007: Standard installation)
     const pipResult = this.checkResults.optional.get('pip');
     if (!pipResult?.available) {
-      recommendations.push('Install pip for Python dependency management');
+      recommendations.push('Install pip for Python dependency management: https://pip.pypa.io/en/stable/installation/');
     }
     
     // Spectral recommendation
@@ -158,10 +167,24 @@ class EnvironmentChecker {
       recommendations.push(`Install Spectral for OpenAPI/JSON Schema validation (${spectralInstallCmd})`);
     }
     
-    // Environment variables
+    // Environment variables (PRD RF-007: Clear configuration instructions)
     const snykToken = this.checkResults.environment.get('SNYK_TOKEN');
     if (snykResult?.available && !snykToken?.available) {
-      recommendations.push('Set SNYK_TOKEN environment variable for authenticated security scans');
+      recommendations.push('Set SNYK_TOKEN environment variable for authenticated security scans: export SNYK_TOKEN=your_token_here');
+    }
+    
+    // .mega-linter.yml configuration recommendation (PRD centralized config)
+    const hasMegaLinterConfig = require('fs').existsSync('.mega-linter.yml');
+    if (!hasMegaLinterConfig) {
+      recommendations.push('Create .mega-linter.yml for centralized QA configuration as specified in PRD');
+    }
+    
+    // Virtual environment recommendations
+    const venvInfo = this.venvManager.getVenvInfo();
+    if (venvInfo.detected) {
+      recommendations.push(`✅ Virtual environment detected at ${venvInfo.path} - Python tools will use isolated environment`);
+    } else {
+      recommendations.push('Consider creating a Python virtual environment (.venv) for isolated Python tool execution');
     }
     
     this.checkResults.recommendations = recommendations;
@@ -237,6 +260,13 @@ class EnvironmentChecker {
       // Fallback to npm
       return `npm install --save-dev ${packageName}`;
     }
+  }
+  
+  /**
+   * Get virtual environment manager
+   */
+  getVenvManager() {
+    return this.venvManager;
   }
 }
 

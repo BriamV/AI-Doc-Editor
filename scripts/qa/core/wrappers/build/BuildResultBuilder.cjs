@@ -185,7 +185,13 @@ class BuildResultBuilder {
    * Helper methods
    */
   _determineOverallSuccess(processedResults) {
-    // Align with status determination logic: success if no failures or errors
+    // Critical Fix: If ANY individual tool failed, overall success is false
+    const hasFailure = processedResults.some(result => result.success === false);
+    if (hasFailure) {
+      return false;
+    }
+    
+    // Otherwise use status hierarchy logic: success if no failures or errors
     const overallStatus = this._determineOverallStatus(processedResults);
     return overallStatus === 'passed' || overallStatus === 'warning';
   }

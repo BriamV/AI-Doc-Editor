@@ -1,0 +1,32 @@
+# Pylint configuration for Python linting
+# Aligned with PRD-QA CLI.md Design Metrics (RF-003)
+
+[MASTER]
+init-hook='import sys; sys.path.append(".")'
+load-plugins=
+
+[MESSAGES CONTROL]
+# Disable some overly strict rules while maintaining quality
+disable=missing-docstring,too-few-public-methods,fixme,too-many-arguments
+
+[FORMAT]
+# PRD RF-003: 100 character line length limit
+max-line-length=100
+indent-string='    '
+
+[DESIGN]
+# PRD RF-003: Complexity limits
+max-complexity=10
+max-args=5
+max-locals=15
+max-returns=6
+max-branches=12
+max-statements=50
+
+[SIMILARITIES]
+min-similarity-lines=4
+ignore-comments=yes
+ignore-docstrings=yes
+
+[VARIABLES]
+additional-builtins=

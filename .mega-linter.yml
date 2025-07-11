@@ -1,0 +1,74 @@
+# MegaLinter Configuration - Centralized QA System Configuration
+# Aligned with PRD-QA CLI.md specifications (líneas 126, 338, 403)
+# Complete configuration for all stacks: Frontend, Backend, Security
+
+# Core configuration
+APPLY_FIXES: none  # QA system reports but doesn't modify code (PRD section 3)
+SHOW_ELAPSED_TIME: true
+PARALLEL: true
+LOG_LEVEL: INFO
+
+# Frontend Stack Configuration (TypeScript/React) - PRD RF-004
+ENABLE_LINTERS:
+  # JavaScript/TypeScript
+  - JAVASCRIPT_ES
+  - JAVASCRIPT_PRETTIER
+  - TYPESCRIPT_ES
+  - TYPESCRIPT_PRETTIER
+  
+  # React specific
+  - REACT
+  
+  # Configuration files
+  - JSON_JSONLINT
+  - JSON_PRETTIER
+  - YAML_YAMLLINT
+  - YAML_PRETTIER
+  
+  # Documentation
+  - MARKDOWN_MARKDOWNLINT
+  
+  # Infrastructure
+  - DOCKERFILE_HADOLINT
+  - BASH_SHELLCHECK
+  
+  # Frontend styling
+  - CSS_STYLELINT
+  - HTML_HTMLHINT
+
+# Backend Stack Configuration (Python) - PRD RF-004
+  # Python linting and formatting
+  - PYTHON_PYLINT
+  - PYTHON_BLACK
+  - PYTHON_FLAKE8
+  - PYTHON_MYPY
+
+# Design Metrics Configuration (PRD RF-003)
+# Complexity and LOC limits as specified in PRD lines 111-113
+JAVASCRIPT_ES_CONFIG_FILE: "eslint.config.js"
+TYPESCRIPT_ES_CONFIG_FILE: "eslint.config.js"
+PYTHON_PYLINT_CONFIG_FILE: ".pylintrc"
+PYTHON_BLACK_CONFIG_FILE: "pyproject.toml"
+
+# Performance optimizations (PRD RNF-002)
+VALIDATE_ALL_CODEBASE: false  # Incremental validation by default
+FILEIO_REPORTER: false  # Reduce I/O overhead
+CLI_LINT_MODE: list_of_files
+
+# Integration with project package manager (auto-detected)
+PRE_COMMANDS:
+  - command: echo "🚀 QA System validation starting..."
+    cwd: "."
+
+# Disable tools that QA System handles directly (PRD architecture)
+DISABLE_LINTERS:
+  - COPYPASTE_JSCPD  # Handled by Design Metrics dimension
+  - SPELL_MISSPELL   # Handled by Error Detection dimension
+  - CREDENTIALS      # Handled by Security dimension (Snyk/Semgrep)
+
+# Security scanning exclusions (handled by dedicated Security dimension)
+DISABLE:
+  - CREDENTIALS  # Handled by Snyk and Semgrep in Security dimension
+
+# Output configuration for QA System integration
+MEGALINTER_CONFIG: .mega-linter.yml

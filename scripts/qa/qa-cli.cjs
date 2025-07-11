@@ -14,9 +14,43 @@ const path = require('path');
 // Import QA modules
 const QALogger = require('./utils/QALogger.cjs');
 const QAConfig = require('./config/QAConfig.cjs');
+const { getPackageManagerService } = require('./core/services/PackageManagerService.cjs');
 
 // Initialize logger instance
 const logger = new QALogger();
+
+/**
+ * Get dynamic package manager command for help text
+ * Falls back to 'npm run cmd qa' if detection fails
+ */
+async function getQACommand() {
+  try {
+    const packageManagerService = getPackageManagerService();
+    await packageManagerService.initialize();
+    const manager = packageManagerService.getManager();
+    
+    // Map package manager to appropriate command
+    const commandMap = {
+      'yarn': 'yarn run cmd qa',
+      'npm': 'npm run cmd qa', 
+      'pnpm': 'pnpm run cmd qa'
+    };
+    
+    return commandMap[manager] || 'npm run cmd qa';
+  } catch (error) {
+    // Fallback if detection fails
+    return 'npm run cmd qa';
+  }
+}
+
+/**
+ * Get short command name for script name
+ */
+function getShortQACommand() {
+  // For now, use generic command since scriptName needs to be synchronous
+  // TODO: Consider making CLI initialization async to support dynamic detection
+  return 'qa';
+}
 
 /**
  * Main CLI implementation
@@ -25,7 +59,7 @@ function createCLI() {
   const cli = yargs(hideBin(process.argv));
   
   return cli
-    .scriptName('yarn qa')
+    .scriptName(getShortQACommand())
     .version('0.1.0')
     .usage('Sistema de Automatización QA para Desarrollo con Agentes IA\nUsage: $0 [command] [options]')
     
@@ -92,8 +126,8 @@ function createCLI() {
           type: 'string'
         });
       },
-      (argv) => {
-        showDetailedHelp(argv.command);
+      async (argv) => {
+        await showDetailedHelp(argv.command);
       }
     )
     
@@ -220,7 +254,7 @@ async function runQAValidation(argv) {
 /**
  * Show detailed help information
  */
-function showDetailedHelp(command) {
+async function showDetailedHelp(command) {
   const logger = new QALogger();
   
   logger.info('🔍 QA System - Detailed Help');
@@ -234,7 +268,8 @@ function showDetailedHelp(command) {
     logger.info('  tasks     - Task-specific validation (T-XX)');
     logger.info('  config    - Configuration options');
     logger.info('');
-    logger.info('Usage: yarn qa help <topic>');
+    const qaCommand = await getQACommand();
+    logger.info(`Usage: ${qaCommand} help <topic>`);
     return;
   }
   
@@ -265,9 +300,10 @@ function showDetailedHelp(command) {
       
     case 'tasks':
       logger.info('📋 Task Validation:');
-      logger.info('  yarn qa T-02       Validate specific task');
-      logger.info('  yarn qa dod:test   Validate DoD criteria');
-      logger.info('  yarn qa feature/*  Auto-detect from branch');
+      const qaCommand = await getQACommand();
+      logger.info(`  ${qaCommand} T-02       Validate specific task`);
+      logger.info(`  ${qaCommand} dod:test   Validate DoD criteria`);
+      logger.info(`  ${qaCommand} feature/*  Auto-detect from branch`);
       break;
       
     case 'config':
@@ -279,7 +315,8 @@ function showDetailedHelp(command) {
       
     default:
       logger.warn(`Unknown help topic: ${command}`);
-      logger.info('Use "yarn qa help" to see available topics');
+      const qaCommandDefault = await getQACommand();
+      logger.info(`Use "${qaCommandDefault} help" to see available topics`);
   }
 }
 

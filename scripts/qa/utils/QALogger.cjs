@@ -175,20 +175,29 @@ class QALogger {
     this.currentLevel++;
     
     for (const result of results) {
-      const symbol = result.status === 'passed' ? this.symbols.success : 
-                    result.status === 'warning' ? this.symbols.warning : 
+      // Critical Fix: Prioritize success field for accurate display
+      const symbol = (result.success === false) ? this.symbols.error :
+                    (result.success === true) ? this.symbols.success : 
+                    (result.status === 'warning') ? this.symbols.warning : 
                     this.symbols.error;
       
+      const actualStatus = (result.success === false) ? 'error' : 
+                          (result.success === true) ? 'success' : 
+                          result.status;
       const duration = result.duration ? ` (${result.duration}ms)` : '';
-      this.log(result.status, symbol, `${result.dimension}: ${result.message}${duration}`, result.details);
+      this.log(actualStatus, symbol, `${result.dimension}: ${result.message}${duration}`, result.details);
       
       if (result.items && result.items.length > 0) {
         this.currentLevel++;
         for (const item of result.items) {
-          const itemSymbol = item.status === 'passed' ? this.symbols.success : 
-                           item.status === 'warning' ? this.symbols.warning : 
+          const itemSymbol = (item.success === false) ? this.symbols.error :
+                           (item.success === true) ? this.symbols.success : 
+                           (item.status === 'warning') ? this.symbols.warning : 
                            this.symbols.error;
-          this.log(item.status, itemSymbol, item.message, item.details);
+          const itemStatus = (item.success === false) ? 'error' : 
+                            (item.success === true) ? 'success' : 
+                            item.status;
+          this.log(itemStatus, itemSymbol, item.message, item.details);
         }
         this.currentLevel--;
       }

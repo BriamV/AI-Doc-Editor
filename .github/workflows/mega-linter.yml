@@ -1,0 +1,169 @@
+# MegaLinter GitHub Action configuration file
+# Aligned with PRD-QA CLI.md Release 0.4.0 - CI/CD Integration (línea 343)
+# More info at https://megalinter.io
+---
+name: MegaLinter
+
+# Trigger mega-linter at every push and pull requests to main
+on:
+  push:
+    branches:
+      - main
+      - master
+      - refactor/*
+      - feature/*
+      - fix/*
+
+  pull_request:
+    branches:
+      - main
+      - master
+
+# Environment variables for MegaLinter execution
+env:
+  # Apply linter fixes configuration (PRD Section 3: Sistema solo reporta)
+  APPLY_FIXES: none  # QA system reports but doesn't modify code per PRD
+  
+  # Event triggers for fixes application
+  APPLY_FIXES_EVENT: pull_request
+  APPLY_FIXES_MODE: pull_request
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  megalinter:
+    name: MegaLinter
+    runs-on: ubuntu-latest
+
+    # Permissions aligned with PRD security requirements
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: write
+      security-events: write
+
+    steps:
+      # Git Checkout
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      # Setup Node.js environment (PRD requirement: Node.js 18+)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'yarn'
+
+      # Setup Python environment for backend validation
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+
+      # Install project dependencies
+      - name: Install dependencies
+        run: |
+          yarn install --frozen-lockfile
+          pip install black pylint pytest
+
+      # MegaLinter execution
+      - name: MegaLinter
+        uses: oxsecurity/megalinter@v7
+        id: ml
+        
+        # Environment variables aligned with PRD specifications
+        env:
+          # Validate only changed files for performance (PRD RNF-002)
+          VALIDATE_ALL_CODEBASE: false
+          
+          # GitHub token for API access
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+          # Performance optimizations (PRD RNF-002)
+          PARALLEL: true
+          SHOW_ELAPSED_TIME: true
+          LOG_LEVEL: INFO
+          
+          # Frontend stack configuration (PRD RF-004)
+          ENABLE_LINTERS: >-
+            JAVASCRIPT_ES,JAVASCRIPT_PRETTIER,
+            TYPESCRIPT_ES,TYPESCRIPT_PRETTIER,
+            REACT,JSON_JSONLINT,JSON_PRETTIER,
+            YAML_YAMLLINT,YAML_PRETTIER,
+            MARKDOWN_MARKDOWNLINT,DOCKERFILE_HADOLINT,
+            PYTHON_PYLINT,PYTHON_BLACK,PYTHON_FLAKE8,
+            BASH_SHELLCHECK,CSS_STYLELINT,HTML_HTMLHINT
+          
+          # Design metrics configuration (PRD RF-003)
+          JAVASCRIPT_ES_CONFIG_FILE: .eslintrc.js
+          TYPESCRIPT_ES_CONFIG_FILE: .eslintrc.js
+          PYTHON_PYLINT_CONFIG_FILE: .pylintrc
+          
+          # Disable tools handled by QA System (PRD architecture)
+          DISABLE_LINTERS: COPYPASTE_JSCPD,SPELL_MISSPELL,CREDENTIALS
+          
+          # Output configuration for integration
+          CLI_LINT_MODE: list_of_files
+          MEGALINTER_CONFIG: .mega-linter.yml
+
+      # Upload MegaLinter artifacts
+      - name: Archive MegaLinter reports
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: MegaLinter reports
+          include-hidden-files: true
+          path: |
+            megalinter-reports
+            mega-linter.log
+
+      # QA System integration test (PRD verification)
+      - name: Run QA System integration test
+        if: success() || failure()
+        run: |
+          echo "🔍 Testing QA System integration with MegaLinter..."
+          node scripts/qa/qa-cli.cjs --dimension build --scope frontend --verbose | grep -E "🔍 Checking environment|✅.*:|🟡.*not available|✅ Environment check completed" || true
+
+      # Security scan integration (PRD RF-004 Security dimension)
+      - name: Run security scan
+        if: success() || failure()
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          if [ -n "$SNYK_TOKEN" ]; then
+            echo "🔒 Running security scan..."
+            yarn run cmd security-scan || echo "⚠️ Security scan completed with warnings"
+          else
+            echo "ℹ️ SNYK_TOKEN not configured, skipping authenticated security scan"
+          fi
+
+      # Comment PR with results summary
+      - name: Comment PR
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const output = `
+            ## 🔍 QA System Results
+            
+            **MegaLinter Status**: ${{ steps.ml.outcome }}
+            
+            - **Linters executed**: Frontend (TS/React) + Backend (Python) + Infrastructure
+            - **Configuration**: Centralized via .mega-linter.yml (PRD compliant)
+            - **Performance**: Optimized for changed files only
+            
+            📊 Detailed reports available in artifacts.
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });

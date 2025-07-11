@@ -48,17 +48,23 @@ class ResultAggregator {
         aggregated.summary.warnings += result.result.warnings.length;
       }
       
-      if (result.result && result.result.metrics) {
-        aggregated.metrics[result.tool.name] = result.result.metrics;
+      // Fix: Handle both string and object formats for tool
+      const toolName = typeof result.tool === 'string' ? result.tool : result.tool?.name;
+      if (result.result && result.result.metrics && toolName) {
+        aggregated.metrics[toolName] = result.result.metrics;
       }
       
     } else {
       aggregated.summary.failed++;
     }
     
+    // Fix: Handle both string and object formats for tool and dimension
+    const toolName = typeof result.tool === 'string' ? result.tool : result.tool?.name;
+    const dimensionName = typeof result.dimension === 'string' ? result.dimension : result.tool?.dimension;
+    
     aggregated.details.push({
-      tool: result.tool.name,
-      dimension: result.tool.dimension,
+      tool: toolName,
+      dimension: dimensionName,
       success: result.success,
       error: result.error,
       executionTime: result.executionTime,

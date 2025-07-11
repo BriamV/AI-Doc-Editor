@@ -68,11 +68,14 @@ class WrapperCoordinator extends EventEmitter {
       const executionTime = performance.now() - startTime;
       const aggregatedResults = this.resultAggregator.aggregateResults(results, executionTime);
       
+      // Critical Fix: Determine success based on aggregated results, not hardcoded
+      const overallSuccess = aggregatedResults.summary.failed === 0;
+      
       this.executionState.endTime = performance.now();
       this.logger.info(`Wrapper execution completed in ${Math.round(executionTime)}ms`);
       
       return {
-        success: true,
+        success: overallSuccess,
         results: aggregatedResults,
         executionTime: executionTime,
         plan: plan

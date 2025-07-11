@@ -1,0 +1,27 @@
+# Python tool configuration
+# Aligned with PRD-QA CLI.md Design Metrics (RF-003)
+
+[tool.black]
+line-length = 100  # PRD RF-003: Strict 100 character limit
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # Exclude auto-generated files
+  \.git
+  | \.venv
+  | \.tox
+  | \.pytest_cache
+  | __pycache__
+  | node_modules
+  | dist
+  | build
+)/
+'''
+
+[tool.pytest.ini_options]
+# Test configuration for PRD RF-004 Testing dimension
+testpaths = ["backend/tests", "tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_functions = ["test_*"]
+addopts = ["--verbose", "--tb=short", "--cov=.", "--cov-report=term-missing"]
