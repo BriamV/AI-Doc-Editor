@@ -5,17 +5,19 @@
  */
 
 const { execSync } = require('child_process');
+const ToolTypeClassifier = require('./ToolTypeClassifier.cjs');
 
 class ToolValidator {
-  constructor(config, logger) {
+  constructor(config, logger, environmentChecker) {
     this.config = config;
     this.logger = logger;
+    this.environmentChecker = environmentChecker;
     
-    // Cache for tool availability checks
-    this.availabilityCache = new Map();
+    // Systematic tool type classifier
+    this.toolTypeClassifier = new ToolTypeClassifier(config, logger);
     
-    // Tool command mappings for availability checks
-    this.toolCommands = {
+    // Base tool command mappings (extensible)
+    this.baseToolCommands = {
       prettier: 'npx prettier --version',
       black: 'black --version',
       eslint: 'npx eslint --version',
@@ -27,6 +29,9 @@ class ToolValidator {
       tsc: 'npx tsc --version',
       vite: 'npx vite --version',
       npm: 'npm --version',
+      yarn: 'yarn --version',
+      pnpm: 'pnpm --version',
+      pip: 'pip --version',
       'python-compile': 'python -c "import py_compile"'
     };
   }
@@ -60,28 +65,69 @@ class ToolValidator {
   }
   
   /**
-   * Check if a specific tool is available
+   * Check if a specific tool is available (delegate to ToolChecker directly)
    */
   async checkToolAvailability(toolName) {
-    // Use cache to avoid repeated checks
-    if (this.availabilityCache.has(toolName)) {
-      return this.availabilityCache.get(toolName);
-    }
+    // ARCHITECTURAL FIX: Use ToolChecker directly to avoid timing issues
+    // EnvironmentChecker.isToolAvailable() requires checkEnvironment() to be completed first
+    const toolChecker = this.environmentChecker.toolChecker;
     
-    const command = this.toolCommands[toolName];
-    if (!command) {
-      this.logger.warn(`Unknown tool: ${toolName}`);
-      this.availabilityCache.set(toolName, false);
+    // Get tool configuration from EnvironmentChecker
+    const toolConfig = this.environmentChecker.optionalTools[toolName] || 
+                      this.environmentChecker.requiredTools[toolName];
+    
+    if (!toolConfig) {
       return false;
     }
     
     try {
-      execSync(command, { stdio: 'ignore', timeout: 5000 });
-      this.availabilityCache.set(toolName, true);
-      return true;
+      const result = await toolChecker.checkTool(toolName, toolConfig);
+      return result.available;
     } catch (error) {
-      this.availabilityCache.set(toolName, false);
       return false;
+    }
+  }
+  
+  /**
+   * Get version command for tool (systematic by type)
+   */
+  async _getVersionCommand(toolName) {
+    // First check base commands (existing tools)
+    if (this.baseToolCommands[toolName]) {
+      return this.baseToolCommands[toolName];
+    }
+    
+    try {
+      // Systematic approach: Generate command based on tool type
+      const toolType = await this.toolTypeClassifier.getToolType(toolName);
+      
+      switch (toolType) {
+        case 'package-manager':
+          return `${toolName} --version`;
+        case 'compiler':
+          return toolName.startsWith('npx') ? toolName + ' --version' : `npx ${toolName} --version`;
+        case 'bundler':
+          return `npx ${toolName} --version`;
+        case 'dependency-manager':
+          return `${toolName} --version`;
+        case 'linter':
+          return `npx ${toolName} --version`;
+        case 'formatter':
+          return `npx ${toolName} --version`;
+        case 'test-runner':
+          return `npx ${toolName} --version`;
+        case 'security-scanner':
+          return `${toolName} --version`;
+        case 'dimension':
+          // MODULAR FIX: Dimension tools are always available (they represent internal validation)
+          return 'echo "Dimension tool - always available"';
+        default:
+          // Fallback for unknown types
+          return `${toolName} --version`;
+      }
+    } catch (error) {
+      // Final fallback: standard version command
+      return `${toolName} --version`;
     }
   }
   
