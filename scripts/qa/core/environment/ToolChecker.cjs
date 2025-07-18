@@ -53,6 +53,7 @@ class ToolChecker {
     }
   }
   
+  
   /**
    * Internal method with comprehensive fallback detection
    */
@@ -63,8 +64,10 @@ class ToolChecker {
     
     const execOptions = { 
       stdio: 'pipe',
-      timeout: 10000,
-      encoding: 'utf8'
+      timeout: 8000, // ROLLBACK: Restored original 8s timeout
+      encoding: 'utf8',
+      // ARCHITECTURAL FIX: Preserve original PATH for NPM commands
+      env: { ...process.env, PATH: this._getCleanPath(toolName, toolConfig) }
     };
     
     try {
@@ -209,6 +212,28 @@ class ToolChecker {
     }
     
     return results;
+  }
+  
+  /**
+   * ARCHITECTURAL FIX: Get clean PATH for tool execution
+   * Prevents venv PATH interference with NPM commands
+   */
+  _getCleanPath(toolName, toolConfig) {
+    // For NPM-based tools, use original PATH to avoid venv interference
+    const npmTools = ['eslint', 'prettier', 'tsc'];
+    const npmCommands = ['npx', 'npm', 'yarn'];
+    
+    // Check if tool uses NPM commands
+    const isNpmTool = npmTools.includes(toolName) || 
+                      npmCommands.some(cmd => (toolConfig.command || '').includes(cmd));
+    
+    if (isNpmTool && this.venvManager && this.venvManager.originalPath) {
+      // Return original PATH for NPM tools to avoid venv interference
+      return this.venvManager.originalPath;
+    }
+    
+    // For other tools, use current PATH (potentially venv-modified)
+    return process.env.PATH;
   }
 }
 
