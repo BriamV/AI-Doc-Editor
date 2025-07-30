@@ -1,0 +1,4555 @@
+{
+  "timestamp": "2025-07-15T18:04:00.446Z",
+  "summary": {
+    "solid": {
+      "overall": "PASS",
+      "scores": {
+        "srp": 85.55555555555556,
+        "ocp": 85.18518518518519,
+        "lsp": 100,
+        "isp": 72.22222222222223,
+        "dip": 82.5925925925926
+      }
+    },
+    "metrics": {
+      "overall": "FAIL",
+      "violations": 87
+    },
+    "dependencies": {
+      "overall": "PASS",
+      "circular": 0
+    },
+    "coverage": {
+      "overall": "PASS",
+      "ratio": 90.94827586206897
+    }
+  },
+  "details": {
+    "solid": {
+      "srp": [
+        {
+          "file": "ContextDetector.cjs",
+          "passed": false,
+          "issues": [
+            "Class ContextDetector has too many methods (47), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "EnvironmentChecker.cjs",
+          "passed": false,
+          "issues": [
+            "Class EnvironmentChecker has too many methods (47), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "Orchestrator.cjs",
+          "passed": false,
+          "issues": [
+            "Class Orchestrator has too many methods (30), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "PlanSelector.cjs",
+          "passed": false,
+          "issues": [
+            "Class PlanSelector has too many methods (50), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "WrapperCoordinator.cjs",
+          "passed": false,
+          "issues": [
+            "Class WrapperCoordinator has too many methods (20), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "EnvironmentValidator.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "ToolChecker.cjs",
+          "passed": false,
+          "issues": [
+            "Class ToolChecker has too many methods (37), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ExecutionController.cjs",
+          "passed": false,
+          "issues": [
+            "Class ExecutionController has too many methods (31), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ExecutionPlanner.cjs",
+          "passed": false,
+          "issues": [
+            "Class ExecutionPlanner has too many methods (17), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ResultAggregator.cjs",
+          "passed": false,
+          "issues": [
+            "Class ResultAggregator has too many methods (37), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "WrapperManager.cjs",
+          "passed": false,
+          "issues": [
+            "Class WrapperManager has too many methods (72), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "FeedbackManager.cjs",
+          "passed": false,
+          "issues": [
+            "Class FeedbackManager has too many methods (74), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "TemplateManager.cjs",
+          "passed": false,
+          "issues": [
+            "Class TemplateManager has too many methods (34), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "AutomaticMode.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "DimensionMode.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "DoDMode.cjs",
+          "passed": false,
+          "issues": [
+            "Class DoDMode has too many methods (25), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "FastMode.cjs",
+          "passed": false,
+          "issues": [
+            "Class FastMode has too many methods (33), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ModeDetector.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "ScopeMode.cjs",
+          "passed": false,
+          "issues": [
+            "Class ScopeMode has too many methods (22), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "PackageManagerService.cjs",
+          "passed": false,
+          "issues": [
+            "Class PackageManagerService has too many methods (65), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ToolConfigurator.cjs",
+          "passed": false,
+          "issues": [
+            "Class ToolConfigurator has too many methods (34), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ToolMapper.cjs",
+          "passed": false,
+          "issues": [
+            "Class ToolMapper has too many methods (24), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ToolTypeClassifier.cjs",
+          "passed": false,
+          "issues": [
+            "Class ToolTypeClassifier has too many methods (29), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ToolValidator.cjs",
+          "passed": false,
+          "issues": [
+            "Class ToolValidator has too many methods (48), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "BuildWrapper.cjs",
+          "passed": false,
+          "issues": [
+            "Class BuildWrapper has too many methods (38), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "DataWrapper.cjs",
+          "passed": false,
+          "issues": [
+            "Class DataWrapper has too many methods (22), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "JestWrapper.cjs",
+          "passed": false,
+          "issues": [
+            "Class JestWrapper has too many methods (39), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "MegaLinterWrapper.cjs",
+          "passed": false,
+          "issues": [
+            "Class MegaLinterWrapper has too many methods (23), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "NativeWrapper.cjs",
+          "passed": false,
+          "issues": [
+            "Class NativeWrapper has too many methods (17), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "PytestWrapper.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SemgrepWrapper.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SnykWrapper.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "BuildConfig.cjs",
+          "passed": false,
+          "issues": [
+            "Class BuildConfig has too many methods (108), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "BuildExecutor.cjs",
+          "passed": false,
+          "issues": [
+            "Class BuildExecutor has too many methods (57), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "BuildReporter.cjs",
+          "passed": false,
+          "issues": [
+            "Class BuildReporter has too many methods (22), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "BuildResultBuilder.cjs",
+          "passed": false,
+          "issues": [
+            "Class BuildResultBuilder has too many methods (49), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "DataConfig.cjs",
+          "passed": false,
+          "issues": [
+            "Class DataConfig has too many methods (29), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "DataExecutor.cjs",
+          "passed": false,
+          "issues": [
+            "Class DataExecutor has too many methods (42), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "DataReporter.cjs",
+          "passed": false,
+          "issues": [
+            "Class DataReporter has too many methods (22), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "DataResultBuilder.cjs",
+          "passed": false,
+          "issues": [
+            "Class DataResultBuilder has too many methods (28), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "MegaLinterConfig.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "MegaLinterExecutor.cjs",
+          "passed": false,
+          "issues": [
+            "Class MegaLinterExecutor has too many methods (31), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "MegaLinterReporter.cjs",
+          "passed": false,
+          "issues": [
+            "Class MegaLinterReporter has too many methods (25), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "PytestConfig.cjs",
+          "passed": false,
+          "issues": [
+            "Class PytestConfig has too many methods (17), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "PytestExecutor.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "PytestReporter.cjs",
+          "passed": false,
+          "issues": [
+            "Class PytestReporter has too many methods (16), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "PytestResultBuilder.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SemgrepConfig.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SemgrepExecutor.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SemgrepReporter.cjs",
+          "passed": false,
+          "issues": [
+            "Class SemgrepReporter has too many methods (23), violates SRP"
+          ],
+          "score": 80
+        },
+        {
+          "file": "BaseTestConfig.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SnykConfig.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SnykExecutor.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SnykReporter.cjs",
+          "passed": false,
+          "issues": [
+            "Class SnykReporter has too many methods (17), violates SRP"
+          ],
+          "score": 80
+        }
+      ],
+      "ocp": [
+        {
+          "file": "ContextDetector.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "EnvironmentChecker.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "Orchestrator.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "PlanSelector.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "WrapperCoordinator.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "EnvironmentValidator.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ToolChecker.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ExecutionController.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ExecutionPlanner.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "ResultAggregator.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "WrapperManager.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "FeedbackManager.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "TemplateManager.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "AutomaticMode.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "DimensionMode.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "DoDMode.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "FastMode.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "ModeDetector.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ScopeMode.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "PackageManagerService.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ToolConfigurator.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ToolMapper.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ToolTypeClassifier.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ToolValidator.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "BuildWrapper.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "DataWrapper.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "JestWrapper.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "MegaLinterWrapper.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "NativeWrapper.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "PytestWrapper.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "SemgrepWrapper.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "SnykWrapper.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "BuildConfig.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "BuildExecutor.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "BuildReporter.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "BuildResultBuilder.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "DataConfig.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "DataExecutor.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "DataReporter.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "DataResultBuilder.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "MegaLinterConfig.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "MegaLinterExecutor.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "MegaLinterReporter.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "PytestConfig.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "PytestExecutor.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "PytestReporter.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "PytestResultBuilder.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "SemgrepConfig.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "SemgrepExecutor.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "SemgrepReporter.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "BaseTestConfig.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "SnykConfig.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "SnykExecutor.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "SnykReporter.cjs",
+          "passed": true,
+          "issues": [
+            "No extensibility patterns detected"
+          ],
+          "score": 80
+        }
+      ],
+      "lsp": [
+        {
+          "file": "ContextDetector.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "EnvironmentChecker.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "Orchestrator.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "PlanSelector.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "WrapperCoordinator.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "EnvironmentValidator.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "ToolChecker.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "ExecutionController.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "ExecutionPlanner.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "ResultAggregator.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "WrapperManager.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "FeedbackManager.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "TemplateManager.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "AutomaticMode.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "DimensionMode.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "DoDMode.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "FastMode.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "ModeDetector.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "ScopeMode.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "PackageManagerService.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "ToolConfigurator.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "ToolMapper.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "ToolTypeClassifier.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "ToolValidator.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "BuildWrapper.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "DataWrapper.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "JestWrapper.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "MegaLinterWrapper.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "NativeWrapper.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "PytestWrapper.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SemgrepWrapper.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SnykWrapper.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "BuildConfig.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "BuildExecutor.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "BuildReporter.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "BuildResultBuilder.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "DataConfig.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "DataExecutor.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "DataReporter.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "DataResultBuilder.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "MegaLinterConfig.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "MegaLinterExecutor.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "MegaLinterReporter.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "PytestConfig.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "PytestExecutor.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "PytestReporter.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "PytestResultBuilder.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SemgrepConfig.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SemgrepExecutor.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SemgrepReporter.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "BaseTestConfig.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SnykConfig.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SnykExecutor.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SnykReporter.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        }
+      ],
+      "isp": [
+        {
+          "file": "ContextDetector.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 47 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "EnvironmentChecker.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 44 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "Orchestrator.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 24 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "PlanSelector.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 46 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "WrapperCoordinator.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 19 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "EnvironmentValidator.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 12 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "ToolChecker.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 35 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "ExecutionController.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 27 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "ExecutionPlanner.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 15 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "ResultAggregator.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 27 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "WrapperManager.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 65 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "FeedbackManager.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 63 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "TemplateManager.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 26 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "AutomaticMode.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 14 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "DimensionMode.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "DoDMode.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 20 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "FastMode.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 30 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "ModeDetector.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 12 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "ScopeMode.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 19 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "PackageManagerService.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 60 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "ToolConfigurator.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 33 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "ToolMapper.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 21 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "ToolTypeClassifier.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 27 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "ToolValidator.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 46 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "BuildWrapper.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 34 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "DataWrapper.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 19 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "JestWrapper.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 33 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "MegaLinterWrapper.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 21 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "NativeWrapper.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 15 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "PytestWrapper.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 12 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "SemgrepWrapper.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 11 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "SnykWrapper.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 11 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "BuildConfig.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 98 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "BuildExecutor.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 51 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "BuildReporter.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 17 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "BuildResultBuilder.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 32 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "DataConfig.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 27 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "DataExecutor.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 36 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "DataReporter.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 17 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "DataResultBuilder.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 17 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "MegaLinterConfig.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "MegaLinterExecutor.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 28 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "MegaLinterReporter.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 18 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "PytestConfig.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 15 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "PytestExecutor.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 12 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "PytestReporter.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 14 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "PytestResultBuilder.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SemgrepConfig.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 12 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "SemgrepExecutor.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 14 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "SemgrepReporter.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 18 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "BaseTestConfig.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SnykConfig.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 11 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "SnykExecutor.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 14 public methods"
+          ],
+          "score": 70
+        },
+        {
+          "file": "SnykReporter.cjs",
+          "passed": false,
+          "issues": [
+            "Interface too large: 13 public methods"
+          ],
+          "score": 70
+        }
+      ],
+      "dip": [
+        {
+          "file": "ContextDetector.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "EnvironmentChecker.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "Orchestrator.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "PlanSelector.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "WrapperCoordinator.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "EnvironmentValidator.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ToolChecker.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ExecutionController.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ExecutionPlanner.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "ResultAggregator.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "WrapperManager.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "FeedbackManager.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "TemplateManager.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "AutomaticMode.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "DimensionMode.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "DoDMode.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "FastMode.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ModeDetector.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ScopeMode.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "PackageManagerService.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ToolConfigurator.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ToolMapper.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "ToolTypeClassifier.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "ToolValidator.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "BuildWrapper.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "DataWrapper.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "JestWrapper.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "MegaLinterWrapper.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "NativeWrapper.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "PytestWrapper.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "SemgrepWrapper.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "SnykWrapper.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "BuildConfig.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "BuildExecutor.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "BuildReporter.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "BuildResultBuilder.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "DataConfig.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "DataExecutor.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "DataReporter.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "DataResultBuilder.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "MegaLinterConfig.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "MegaLinterExecutor.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "MegaLinterReporter.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "PytestConfig.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "PytestExecutor.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "PytestReporter.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "PytestResultBuilder.cjs",
+          "passed": true,
+          "issues": [],
+          "score": 100
+        },
+        {
+          "file": "SemgrepConfig.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "SemgrepExecutor.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "SemgrepReporter.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "BaseTestConfig.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "SnykConfig.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "SnykExecutor.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        },
+        {
+          "file": "SnykReporter.cjs",
+          "passed": true,
+          "issues": [
+            "No dependency injection detected"
+          ],
+          "score": 80
+        }
+      ]
+    },
+    "metrics": {
+      "loc": [
+        {
+          "file": "config/QAConfig.cjs",
+          "total": 350,
+          "code": 286,
+          "limit": 212,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/ContextDetector.cjs",
+          "total": 389,
+          "code": 301,
+          "limit": 212,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/EnvironmentChecker.cjs",
+          "total": 273,
+          "code": 202,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/Orchestrator.cjs",
+          "total": 199,
+          "code": 160,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/PlanSelector.cjs",
+          "total": 255,
+          "code": 184,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/WrapperCoordinator.cjs",
+          "total": 166,
+          "code": 119,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/environment/EnvironmentValidator.cjs",
+          "total": 84,
+          "code": 67,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/environment/ToolChecker.cjs",
+          "total": 215,
+          "code": 160,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/execution/ExecutionController.cjs",
+          "total": 230,
+          "code": 179,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/execution/ExecutionPlanner.cjs",
+          "total": 107,
+          "code": 78,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/execution/ResultAggregator.cjs",
+          "total": 286,
+          "code": 232,
+          "limit": 212,
+          "passed": false,
+          "score": 60
+        },
+        {
+          "file": "core/execution/WrapperManager.cjs",
+          "total": 350,
+          "code": 256,
+          "limit": 212,
+          "passed": false,
+          "score": 12
+        },
+        {
+          "file": "core/feedback/FeedbackManager.cjs",
+          "total": 567,
+          "code": 420,
+          "limit": 212,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/feedback/TemplateManager.cjs",
+          "total": 207,
+          "code": 154,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/modes/AutomaticMode.cjs",
+          "total": 81,
+          "code": 62,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/modes/DimensionMode.cjs",
+          "total": 45,
+          "code": 31,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/modes/DoDMode.cjs",
+          "total": 227,
+          "code": 181,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/modes/FastMode.cjs",
+          "total": 181,
+          "code": 131,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/modes/ModeDetector.cjs",
+          "total": 74,
+          "code": 49,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/modes/ScopeMode.cjs",
+          "total": 173,
+          "code": 136,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/services/PackageManagerService.cjs",
+          "total": 415,
+          "code": 335,
+          "limit": 212,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/tools/ToolConfigurator.cjs",
+          "total": 279,
+          "code": 222,
+          "limit": 212,
+          "passed": false,
+          "score": 80
+        },
+        {
+          "file": "core/tools/ToolMapper.cjs",
+          "total": 200,
+          "code": 144,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/tools/ToolTypeClassifier.cjs",
+          "total": 209,
+          "code": 161,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/tools/ToolValidator.cjs",
+          "total": 324,
+          "code": 256,
+          "limit": 212,
+          "passed": false,
+          "score": 12
+        },
+        {
+          "file": "core/wrappers/BuildWrapper.cjs",
+          "total": 243,
+          "code": 181,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/DataWrapper.cjs",
+          "total": 159,
+          "code": 118,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/JestWrapper.cjs",
+          "total": 294,
+          "code": 222,
+          "limit": 212,
+          "passed": false,
+          "score": 80
+        },
+        {
+          "file": "core/wrappers/MegaLinterWrapper.cjs",
+          "total": 156,
+          "code": 115,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/NativeWrapper.cjs",
+          "total": 127,
+          "code": 103,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/PytestWrapper.cjs",
+          "total": 66,
+          "code": 47,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/SemgrepWrapper.cjs",
+          "total": 98,
+          "code": 74,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/SnykWrapper.cjs",
+          "total": 88,
+          "code": 64,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/build/BuildConfig.cjs",
+          "total": 625,
+          "code": 481,
+          "limit": 212,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/wrappers/build/BuildExecutor.cjs",
+          "total": 343,
+          "code": 251,
+          "limit": 212,
+          "passed": false,
+          "score": 22
+        },
+        {
+          "file": "core/wrappers/build/BuildReporter.cjs",
+          "total": 98,
+          "code": 87,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/build/BuildResultBuilder.cjs",
+          "total": 290,
+          "code": 232,
+          "limit": 212,
+          "passed": false,
+          "score": 60
+        },
+        {
+          "file": "core/wrappers/data/DataConfig.cjs",
+          "total": 217,
+          "code": 166,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/data/DataExecutor.cjs",
+          "total": 250,
+          "code": 194,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/data/DataReporter.cjs",
+          "total": 115,
+          "code": 95,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/data/DataResultBuilder.cjs",
+          "total": 131,
+          "code": 110,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/megalinter/MegaLinterConfig.cjs",
+          "total": 112,
+          "code": 91,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/megalinter/MegaLinterExecutor.cjs",
+          "total": 183,
+          "code": 132,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/megalinter/MegaLinterReporter.cjs",
+          "total": 182,
+          "code": 145,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/pytest/PytestConfig.cjs",
+          "total": 104,
+          "code": 72,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/pytest/PytestExecutor.cjs",
+          "total": 65,
+          "code": 52,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/pytest/PytestReporter.cjs",
+          "total": 98,
+          "code": 74,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/pytest/PytestResultBuilder.cjs",
+          "total": 53,
+          "code": 42,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/semgrep/SemgrepConfig.cjs",
+          "total": 110,
+          "code": 77,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/semgrep/SemgrepExecutor.cjs",
+          "total": 104,
+          "code": 84,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/semgrep/SemgrepReporter.cjs",
+          "total": 135,
+          "code": 104,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/shared/BaseTestConfig.cjs",
+          "total": 65,
+          "code": 50,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/snyk/SnykConfig.cjs",
+          "total": 104,
+          "code": 71,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/snyk/SnykExecutor.cjs",
+          "total": 104,
+          "code": 84,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/snyk/SnykReporter.cjs",
+          "total": 114,
+          "code": 87,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "qa-cli.cjs",
+          "total": 585,
+          "code": 459,
+          "limit": 212,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "tests/integration/dependency-basic.test.cjs",
+          "total": 209,
+          "code": 139,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/integration/dependency-commands.test.cjs",
+          "total": 223,
+          "code": 161,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/integration/qa-system-validation.test.cjs",
+          "total": 212,
+          "code": 163,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/qa-config.test.cjs",
+          "total": 209,
+          "code": 147,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/qa-logger-core.test.cjs",
+          "total": 181,
+          "code": 138,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/qa-logger-tree-format.test.cjs",
+          "total": 198,
+          "code": 148,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-build-dependencies/build-config.test.cjs",
+          "total": 294,
+          "code": 248,
+          "limit": 212,
+          "passed": false,
+          "score": 28
+        },
+        {
+          "file": "tests/test-build-dependencies/build-wrapper.test.cjs",
+          "total": 186,
+          "code": 154,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-build-dependencies/dependency-install.test.cjs",
+          "total": 262,
+          "code": 219,
+          "limit": 212,
+          "passed": false,
+          "score": 86
+        },
+        {
+          "file": "tests/test-cicd/cross-platform.test.cjs",
+          "total": 193,
+          "code": 157,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-cicd/exit-codes.test.cjs",
+          "total": 129,
+          "code": 108,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-cicd/github-actions.test.cjs",
+          "total": 155,
+          "code": 131,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-cicd/json-reports.test.cjs",
+          "total": 158,
+          "code": 127,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-context/context-detector.test.cjs",
+          "total": 239,
+          "code": 186,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-context/context-mapping.test.cjs",
+          "total": 275,
+          "code": 220,
+          "limit": 212,
+          "passed": false,
+          "score": 84
+        },
+        {
+          "file": "tests/test-context/git-integration.test.cjs",
+          "total": 349,
+          "code": 277,
+          "limit": 212,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "tests/test-context/stack-detection.test.cjs",
+          "total": 325,
+          "code": 257,
+          "limit": 212,
+          "passed": false,
+          "score": 10
+        },
+        {
+          "file": "tests/test-environment/docker-fallback.test.cjs",
+          "total": 148,
+          "code": 126,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-environment/environment-checker.test.cjs",
+          "total": 189,
+          "code": 151,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-environment/error-messages.test.cjs",
+          "total": 201,
+          "code": 160,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-environment/tool-availability.test.cjs",
+          "total": 147,
+          "code": 131,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-error-detection/design-metrics-validation.test.cjs",
+          "total": 203,
+          "code": 161,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-error-detection/megalinter-env-vars.test.cjs",
+          "total": 192,
+          "code": 132,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-error-detection/megalinter-executor.test.cjs",
+          "total": 206,
+          "code": 151,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-error-detection/megalinter-wrapper.test.cjs",
+          "total": 203,
+          "code": 168,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-integration/orchestrator-integration.test.cjs",
+          "total": 130,
+          "code": 104,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-integration/plan-execution.test.cjs",
+          "total": 154,
+          "code": 127,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-integration/result-aggregation.test.cjs",
+          "total": 114,
+          "code": 92,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-integration/wrapper-manager.test.cjs",
+          "total": 209,
+          "code": 166,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-modes/automatic-mode.test.cjs",
+          "total": 185,
+          "code": 148,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-modes/dod-mode.test.cjs",
+          "total": 167,
+          "code": 145,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-modes/fast-mode.test.cjs",
+          "total": 165,
+          "code": 145,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-modes/mode-orchestration.test.cjs",
+          "total": 178,
+          "code": 158,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-modes/scope-mode.test.cjs",
+          "total": 164,
+          "code": 144,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-performance/baseline-measurement.test.cjs",
+          "total": 206,
+          "code": 172,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-performance/memory-usage.test.cjs",
+          "total": 205,
+          "code": 172,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-performance/parallel-execution.test.cjs",
+          "total": 212,
+          "code": 173,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-performance/regression-detection.test.cjs",
+          "total": 204,
+          "code": 173,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-performance/scalability-test.test.cjs",
+          "total": 184,
+          "code": 156,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-security-audit/audit-integration.test.cjs",
+          "total": 205,
+          "code": 169,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-security-audit/security-reporting.test.cjs",
+          "total": 237,
+          "code": 203,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-security-audit/semgrep-wrapper.test.cjs",
+          "total": 235,
+          "code": 196,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-security-audit/snyk-wrapper.test.cjs",
+          "total": 211,
+          "code": 170,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-testing-coverage/coverage-thresholds.test.cjs",
+          "total": 206,
+          "code": 173,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-testing-coverage/jest-wrapper.test.cjs",
+          "total": 185,
+          "code": 149,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-testing-coverage/pytest-wrapper.test.cjs",
+          "total": 193,
+          "code": 157,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-testing-coverage/test-execution.test.cjs",
+          "total": 223,
+          "code": 186,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/utils/hardcoding-scanner.cjs",
+          "total": 244,
+          "code": 191,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "utils/QALogger.cjs",
+          "total": 306,
+          "code": 239,
+          "limit": 212,
+          "passed": false,
+          "score": 46
+        },
+        {
+          "file": "utils/VenvManager.cjs",
+          "total": 267,
+          "code": 204,
+          "limit": 212,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "validation/architectural-validator.cjs",
+          "total": 714,
+          "code": 528,
+          "limit": 212,
+          "passed": false,
+          "score": 0
+        }
+      ],
+      "complexity": [
+        {
+          "file": "config/QAConfig.cjs",
+          "complexity": 30,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/ContextDetector.cjs",
+          "complexity": 31,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/EnvironmentChecker.cjs",
+          "complexity": 31,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/Orchestrator.cjs",
+          "complexity": 24,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/PlanSelector.cjs",
+          "complexity": 21,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/WrapperCoordinator.cjs",
+          "complexity": 11,
+          "limit": 10,
+          "passed": false,
+          "score": 90
+        },
+        {
+          "file": "core/environment/EnvironmentValidator.cjs",
+          "complexity": 11,
+          "limit": 10,
+          "passed": false,
+          "score": 90
+        },
+        {
+          "file": "core/environment/ToolChecker.cjs",
+          "complexity": 34,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/execution/ExecutionController.cjs",
+          "complexity": 21,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/execution/ExecutionPlanner.cjs",
+          "complexity": 15,
+          "limit": 10,
+          "passed": false,
+          "score": 50
+        },
+        {
+          "file": "core/execution/ResultAggregator.cjs",
+          "complexity": 36,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/execution/WrapperManager.cjs",
+          "complexity": 60,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/feedback/FeedbackManager.cjs",
+          "complexity": 55,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/feedback/TemplateManager.cjs",
+          "complexity": 17,
+          "limit": 10,
+          "passed": false,
+          "score": 30
+        },
+        {
+          "file": "core/modes/AutomaticMode.cjs",
+          "complexity": 17,
+          "limit": 10,
+          "passed": false,
+          "score": 30
+        },
+        {
+          "file": "core/modes/DimensionMode.cjs",
+          "complexity": 4,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/modes/DoDMode.cjs",
+          "complexity": 16,
+          "limit": 10,
+          "passed": false,
+          "score": 40
+        },
+        {
+          "file": "core/modes/FastMode.cjs",
+          "complexity": 24,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/modes/ModeDetector.cjs",
+          "complexity": 11,
+          "limit": 10,
+          "passed": false,
+          "score": 90
+        },
+        {
+          "file": "core/modes/ScopeMode.cjs",
+          "complexity": 14,
+          "limit": 10,
+          "passed": false,
+          "score": 60
+        },
+        {
+          "file": "core/services/PackageManagerService.cjs",
+          "complexity": 68,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/tools/ToolConfigurator.cjs",
+          "complexity": 40,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/tools/ToolMapper.cjs",
+          "complexity": 27,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/tools/ToolTypeClassifier.cjs",
+          "complexity": 23,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/tools/ToolValidator.cjs",
+          "complexity": 53,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/wrappers/BuildWrapper.cjs",
+          "complexity": 40,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/wrappers/DataWrapper.cjs",
+          "complexity": 16,
+          "limit": 10,
+          "passed": false,
+          "score": 40
+        },
+        {
+          "file": "core/wrappers/JestWrapper.cjs",
+          "complexity": 32,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/wrappers/MegaLinterWrapper.cjs",
+          "complexity": 17,
+          "limit": 10,
+          "passed": false,
+          "score": 30
+        },
+        {
+          "file": "core/wrappers/NativeWrapper.cjs",
+          "complexity": 5,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/PytestWrapper.cjs",
+          "complexity": 9,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/SemgrepWrapper.cjs",
+          "complexity": 8,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/SnykWrapper.cjs",
+          "complexity": 8,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/build/BuildConfig.cjs",
+          "complexity": 108,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/wrappers/build/BuildExecutor.cjs",
+          "complexity": 49,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/wrappers/build/BuildReporter.cjs",
+          "complexity": 16,
+          "limit": 10,
+          "passed": false,
+          "score": 40
+        },
+        {
+          "file": "core/wrappers/build/BuildResultBuilder.cjs",
+          "complexity": 36,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/wrappers/data/DataConfig.cjs",
+          "complexity": 28,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/wrappers/data/DataExecutor.cjs",
+          "complexity": 28,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/wrappers/data/DataReporter.cjs",
+          "complexity": 17,
+          "limit": 10,
+          "passed": false,
+          "score": 30
+        },
+        {
+          "file": "core/wrappers/data/DataResultBuilder.cjs",
+          "complexity": 14,
+          "limit": 10,
+          "passed": false,
+          "score": 60
+        },
+        {
+          "file": "core/wrappers/megalinter/MegaLinterConfig.cjs",
+          "complexity": 7,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/megalinter/MegaLinterExecutor.cjs",
+          "complexity": 15,
+          "limit": 10,
+          "passed": false,
+          "score": 50
+        },
+        {
+          "file": "core/wrappers/megalinter/MegaLinterReporter.cjs",
+          "complexity": 18,
+          "limit": 10,
+          "passed": false,
+          "score": 20
+        },
+        {
+          "file": "core/wrappers/pytest/PytestConfig.cjs",
+          "complexity": 17,
+          "limit": 10,
+          "passed": false,
+          "score": 30
+        },
+        {
+          "file": "core/wrappers/pytest/PytestExecutor.cjs",
+          "complexity": 3,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/pytest/PytestReporter.cjs",
+          "complexity": 14,
+          "limit": 10,
+          "passed": false,
+          "score": 60
+        },
+        {
+          "file": "core/wrappers/pytest/PytestResultBuilder.cjs",
+          "complexity": 3,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/semgrep/SemgrepConfig.cjs",
+          "complexity": 14,
+          "limit": 10,
+          "passed": false,
+          "score": 60
+        },
+        {
+          "file": "core/wrappers/semgrep/SemgrepExecutor.cjs",
+          "complexity": 6,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/semgrep/SemgrepReporter.cjs",
+          "complexity": 22,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/wrappers/shared/BaseTestConfig.cjs",
+          "complexity": 5,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/snyk/SnykConfig.cjs",
+          "complexity": 13,
+          "limit": 10,
+          "passed": false,
+          "score": 70
+        },
+        {
+          "file": "core/wrappers/snyk/SnykExecutor.cjs",
+          "complexity": 6,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/snyk/SnykReporter.cjs",
+          "complexity": 16,
+          "limit": 10,
+          "passed": false,
+          "score": 40
+        },
+        {
+          "file": "qa-cli.cjs",
+          "complexity": 52,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "tests/integration/dependency-basic.test.cjs",
+          "complexity": 9,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/integration/dependency-commands.test.cjs",
+          "complexity": 16,
+          "limit": 10,
+          "passed": false,
+          "score": 40
+        },
+        {
+          "file": "tests/integration/qa-system-validation.test.cjs",
+          "complexity": 35,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "tests/qa-config.test.cjs",
+          "complexity": 6,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/qa-logger-core.test.cjs",
+          "complexity": 2,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/qa-logger-tree-format.test.cjs",
+          "complexity": 4,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-build-dependencies/build-config.test.cjs",
+          "complexity": 7,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-build-dependencies/build-wrapper.test.cjs",
+          "complexity": 8,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-build-dependencies/dependency-install.test.cjs",
+          "complexity": 3,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-cicd/cross-platform.test.cjs",
+          "complexity": 5,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-cicd/exit-codes.test.cjs",
+          "complexity": 11,
+          "limit": 10,
+          "passed": false,
+          "score": 90
+        },
+        {
+          "file": "tests/test-cicd/github-actions.test.cjs",
+          "complexity": 9,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-cicd/json-reports.test.cjs",
+          "complexity": 4,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-context/context-detector.test.cjs",
+          "complexity": 3,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-context/context-mapping.test.cjs",
+          "complexity": 6,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-context/git-integration.test.cjs",
+          "complexity": 4,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-context/stack-detection.test.cjs",
+          "complexity": 5,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-environment/docker-fallback.test.cjs",
+          "complexity": 7,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-environment/environment-checker.test.cjs",
+          "complexity": 7,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-environment/error-messages.test.cjs",
+          "complexity": 13,
+          "limit": 10,
+          "passed": false,
+          "score": 70
+        },
+        {
+          "file": "tests/test-environment/tool-availability.test.cjs",
+          "complexity": 6,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-error-detection/design-metrics-validation.test.cjs",
+          "complexity": 13,
+          "limit": 10,
+          "passed": false,
+          "score": 70
+        },
+        {
+          "file": "tests/test-error-detection/megalinter-env-vars.test.cjs",
+          "complexity": 6,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-error-detection/megalinter-executor.test.cjs",
+          "complexity": 4,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-error-detection/megalinter-wrapper.test.cjs",
+          "complexity": 2,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-integration/orchestrator-integration.test.cjs",
+          "complexity": 1,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-integration/plan-execution.test.cjs",
+          "complexity": 1,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-integration/result-aggregation.test.cjs",
+          "complexity": 1,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-integration/wrapper-manager.test.cjs",
+          "complexity": 3,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-modes/automatic-mode.test.cjs",
+          "complexity": 10,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-modes/dod-mode.test.cjs",
+          "complexity": 11,
+          "limit": 10,
+          "passed": false,
+          "score": 90
+        },
+        {
+          "file": "tests/test-modes/fast-mode.test.cjs",
+          "complexity": 8,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-modes/mode-orchestration.test.cjs",
+          "complexity": 26,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "tests/test-modes/scope-mode.test.cjs",
+          "complexity": 3,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-performance/baseline-measurement.test.cjs",
+          "complexity": 5,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-performance/memory-usage.test.cjs",
+          "complexity": 12,
+          "limit": 10,
+          "passed": false,
+          "score": 80
+        },
+        {
+          "file": "tests/test-performance/parallel-execution.test.cjs",
+          "complexity": 5,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-performance/regression-detection.test.cjs",
+          "complexity": 6,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-performance/scalability-test.test.cjs",
+          "complexity": 12,
+          "limit": 10,
+          "passed": false,
+          "score": 80
+        },
+        {
+          "file": "tests/test-security-audit/audit-integration.test.cjs",
+          "complexity": 3,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-security-audit/security-reporting.test.cjs",
+          "complexity": 4,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-security-audit/semgrep-wrapper.test.cjs",
+          "complexity": 4,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-security-audit/snyk-wrapper.test.cjs",
+          "complexity": 9,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-testing-coverage/coverage-thresholds.test.cjs",
+          "complexity": 5,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-testing-coverage/jest-wrapper.test.cjs",
+          "complexity": 3,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-testing-coverage/pytest-wrapper.test.cjs",
+          "complexity": 3,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-testing-coverage/test-execution.test.cjs",
+          "complexity": 4,
+          "limit": 10,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/utils/hardcoding-scanner.cjs",
+          "complexity": 32,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "utils/QALogger.cjs",
+          "complexity": 28,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "utils/VenvManager.cjs",
+          "complexity": 48,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "validation/architectural-validator.cjs",
+          "complexity": 43,
+          "limit": 10,
+          "passed": false,
+          "score": 0
+        }
+      ],
+      "coupling": [
+        {
+          "file": "config/QAConfig.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/ContextDetector.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/EnvironmentChecker.cjs",
+          "dependencies": 5,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/Orchestrator.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/PlanSelector.cjs",
+          "dependencies": 9,
+          "limit": 5,
+          "passed": false,
+          "score": 40
+        },
+        {
+          "file": "core/WrapperCoordinator.cjs",
+          "dependencies": 6,
+          "limit": 5,
+          "passed": false,
+          "score": 85
+        },
+        {
+          "file": "core/environment/EnvironmentValidator.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/environment/ToolChecker.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/execution/ExecutionController.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/execution/ExecutionPlanner.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/execution/ResultAggregator.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/execution/WrapperManager.cjs",
+          "dependencies": 9,
+          "limit": 5,
+          "passed": false,
+          "score": 40
+        },
+        {
+          "file": "core/feedback/FeedbackManager.cjs",
+          "dependencies": 14,
+          "limit": 5,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "core/feedback/TemplateManager.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/modes/AutomaticMode.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/modes/DimensionMode.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/modes/DoDMode.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/modes/FastMode.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/modes/ModeDetector.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/modes/ScopeMode.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/services/PackageManagerService.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/tools/ToolConfigurator.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/tools/ToolMapper.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/tools/ToolTypeClassifier.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/tools/ToolValidator.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/BuildWrapper.cjs",
+          "dependencies": 5,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/DataWrapper.cjs",
+          "dependencies": 4,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/JestWrapper.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/MegaLinterWrapper.cjs",
+          "dependencies": 4,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/NativeWrapper.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/PytestWrapper.cjs",
+          "dependencies": 4,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/SemgrepWrapper.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/SnykWrapper.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/build/BuildConfig.cjs",
+          "dependencies": 6,
+          "limit": 5,
+          "passed": false,
+          "score": 85
+        },
+        {
+          "file": "core/wrappers/build/BuildExecutor.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/build/BuildReporter.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/build/BuildResultBuilder.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/data/DataConfig.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/data/DataExecutor.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/data/DataReporter.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/data/DataResultBuilder.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/megalinter/MegaLinterConfig.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/megalinter/MegaLinterExecutor.cjs",
+          "dependencies": 5,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/megalinter/MegaLinterReporter.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/pytest/PytestConfig.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/pytest/PytestExecutor.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/pytest/PytestReporter.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/pytest/PytestResultBuilder.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/semgrep/SemgrepConfig.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/semgrep/SemgrepExecutor.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/semgrep/SemgrepReporter.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/shared/BaseTestConfig.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/snyk/SnykConfig.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/snyk/SnykExecutor.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "core/wrappers/snyk/SnykReporter.cjs",
+          "dependencies": 0,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "qa-cli.cjs",
+          "dependencies": 14,
+          "limit": 5,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "tests/integration/dependency-basic.test.cjs",
+          "dependencies": 4,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/integration/dependency-commands.test.cjs",
+          "dependencies": 4,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/integration/qa-system-validation.test.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/qa-config.test.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/qa-logger-core.test.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/qa-logger-tree-format.test.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-build-dependencies/build-config.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-build-dependencies/build-wrapper.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-build-dependencies/dependency-install.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-cicd/cross-platform.test.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-cicd/exit-codes.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-cicd/github-actions.test.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-cicd/json-reports.test.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-context/context-detector.test.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-context/context-mapping.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-context/git-integration.test.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-context/stack-detection.test.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-environment/docker-fallback.test.cjs",
+          "dependencies": 4,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-environment/environment-checker.test.cjs",
+          "dependencies": 23,
+          "limit": 5,
+          "passed": false,
+          "score": 0
+        },
+        {
+          "file": "tests/test-environment/error-messages.test.cjs",
+          "dependencies": 11,
+          "limit": 5,
+          "passed": false,
+          "score": 10
+        },
+        {
+          "file": "tests/test-environment/tool-availability.test.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-error-detection/design-metrics-validation.test.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-error-detection/megalinter-env-vars.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-error-detection/megalinter-executor.test.cjs",
+          "dependencies": 4,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-error-detection/megalinter-wrapper.test.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-integration/orchestrator-integration.test.cjs",
+          "dependencies": 4,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-integration/plan-execution.test.cjs",
+          "dependencies": 4,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-integration/result-aggregation.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-integration/wrapper-manager.test.cjs",
+          "dependencies": 6,
+          "limit": 5,
+          "passed": false,
+          "score": 85
+        },
+        {
+          "file": "tests/test-modes/automatic-mode.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-modes/dod-mode.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-modes/fast-mode.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-modes/mode-orchestration.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-modes/scope-mode.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-performance/baseline-measurement.test.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-performance/memory-usage.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-performance/parallel-execution.test.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-performance/regression-detection.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-performance/scalability-test.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-security-audit/audit-integration.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-security-audit/security-reporting.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-security-audit/semgrep-wrapper.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-security-audit/snyk-wrapper.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-testing-coverage/coverage-thresholds.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-testing-coverage/jest-wrapper.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-testing-coverage/pytest-wrapper.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/test-testing-coverage/test-execution.test.cjs",
+          "dependencies": 1,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "tests/utils/hardcoding-scanner.cjs",
+          "dependencies": 2,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "utils/QALogger.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "utils/VenvManager.cjs",
+          "dependencies": 4,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        },
+        {
+          "file": "validation/architectural-validator.cjs",
+          "dependencies": 3,
+          "limit": 5,
+          "passed": true,
+          "score": 100
+        }
+      ]
+    },
+    "dependencies": {
+      "graph": {
+        "config/QAConfig.cjs": [],
+        "core/ContextDetector.cjs": [],
+        "core/EnvironmentChecker.cjs": [
+          "environment/ToolChecker.cjs",
+          "environment/EnvironmentValidator.cjs",
+          "services/PackageManagerService.cjs"
+        ],
+        "core/Orchestrator.cjs": [],
+        "core/PlanSelector.cjs": [
+          "modes/ModeDetector.cjs",
+          "modes/AutomaticMode.cjs",
+          "modes/FastMode.cjs",
+          "modes/ScopeMode.cjs",
+          "modes/DoDMode.cjs",
+          "modes/DimensionMode.cjs",
+          "tools/ToolMapper.cjs",
+          "tools/ToolConfigurator.cjs",
+          "tools/ToolValidator.cjs"
+        ],
+        "core/WrapperCoordinator.cjs": [
+          "execution/ExecutionPlanner.cjs",
+          "execution/WrapperManager.cjs",
+          "execution/ExecutionController.cjs",
+          "execution/ResultAggregator.cjs"
+        ],
+        "core/environment/EnvironmentValidator.cjs": [],
+        "core/environment/ToolChecker.cjs": [],
+        "core/execution/ExecutionController.cjs": [],
+        "core/execution/ExecutionPlanner.cjs": [],
+        "core/execution/ResultAggregator.cjs": [],
+        "core/execution/WrapperManager.cjs": [],
+        "core/feedback/FeedbackManager.cjs": [
+          "TemplateManager.cjs"
+        ],
+        "core/feedback/TemplateManager.cjs": [],
+        "core/modes/AutomaticMode.cjs": [],
+        "core/modes/DimensionMode.cjs": [],
+        "core/modes/DoDMode.cjs": [],
+        "core/modes/FastMode.cjs": [],
+        "core/modes/ModeDetector.cjs": [],
+        "core/modes/ScopeMode.cjs": [],
+        "core/services/PackageManagerService.cjs": [],
+        "core/tools/ToolConfigurator.cjs": [],
+        "core/tools/ToolMapper.cjs": [],
+        "core/tools/ToolTypeClassifier.cjs": [],
+        "core/tools/ToolValidator.cjs": [
+          "ToolTypeClassifier.cjs"
+        ],
+        "core/wrappers/BuildWrapper.cjs": [
+          "build/BuildConfig.cjs",
+          "build/BuildExecutor.cjs",
+          "build/BuildReporter.cjs",
+          "build/BuildResultBuilder.cjs"
+        ],
+        "core/wrappers/DataWrapper.cjs": [
+          "data/DataConfig.cjs",
+          "data/DataExecutor.cjs",
+          "data/DataReporter.cjs",
+          "data/DataResultBuilder.cjs"
+        ],
+        "core/wrappers/JestWrapper.cjs": [],
+        "core/wrappers/MegaLinterWrapper.cjs": [
+          "megalinter/MegaLinterConfig.cjs",
+          "megalinter/MegaLinterExecutor.cjs",
+          "megalinter/MegaLinterReporter.cjs"
+        ],
+        "core/wrappers/NativeWrapper.cjs": [],
+        "core/wrappers/PytestWrapper.cjs": [
+          "pytest/PytestConfig.cjs",
+          "pytest/PytestExecutor.cjs",
+          "pytest/PytestReporter.cjs",
+          "pytest/PytestResultBuilder.cjs"
+        ],
+        "core/wrappers/SemgrepWrapper.cjs": [
+          "semgrep/SemgrepConfig.cjs",
+          "semgrep/SemgrepExecutor.cjs",
+          "semgrep/SemgrepReporter.cjs"
+        ],
+        "core/wrappers/SnykWrapper.cjs": [
+          "snyk/SnykConfig.cjs",
+          "snyk/SnykExecutor.cjs",
+          "snyk/SnykReporter.cjs"
+        ],
+        "core/wrappers/build/BuildConfig.cjs": [],
+        "core/wrappers/build/BuildExecutor.cjs": [],
+        "core/wrappers/build/BuildReporter.cjs": [],
+        "core/wrappers/build/BuildResultBuilder.cjs": [],
+        "core/wrappers/data/DataConfig.cjs": [],
+        "core/wrappers/data/DataExecutor.cjs": [],
+        "core/wrappers/data/DataReporter.cjs": [],
+        "core/wrappers/data/DataResultBuilder.cjs": [],
+        "core/wrappers/megalinter/MegaLinterConfig.cjs": [],
+        "core/wrappers/megalinter/MegaLinterExecutor.cjs": [],
+        "core/wrappers/megalinter/MegaLinterReporter.cjs": [],
+        "core/wrappers/pytest/PytestConfig.cjs": [],
+        "core/wrappers/pytest/PytestExecutor.cjs": [],
+        "core/wrappers/pytest/PytestReporter.cjs": [],
+        "core/wrappers/pytest/PytestResultBuilder.cjs": [],
+        "core/wrappers/semgrep/SemgrepConfig.cjs": [],
+        "core/wrappers/semgrep/SemgrepExecutor.cjs": [],
+        "core/wrappers/semgrep/SemgrepReporter.cjs": [],
+        "core/wrappers/shared/BaseTestConfig.cjs": [],
+        "core/wrappers/snyk/SnykConfig.cjs": [],
+        "core/wrappers/snyk/SnykExecutor.cjs": [],
+        "core/wrappers/snyk/SnykReporter.cjs": [],
+        "qa-cli.cjs": [
+          "utils/QALogger.cjs",
+          "config/QAConfig.cjs",
+          "core/services/PackageManagerService.cjs",
+          "core/ContextDetector.cjs",
+          "core/PlanSelector.cjs",
+          "core/WrapperCoordinator.cjs",
+          "core/EnvironmentChecker.cjs",
+          "core/Orchestrator.cjs",
+          "core/feedback/FeedbackManager.cjs",
+          "core/feedback/FeedbackManager.cjs",
+          "core/feedback/FeedbackManager.cjs"
+        ],
+        "tests/integration/dependency-basic.test.cjs": [],
+        "tests/integration/dependency-commands.test.cjs": [],
+        "tests/integration/qa-system-validation.test.cjs": [],
+        "tests/qa-config.test.cjs": [],
+        "tests/qa-logger-core.test.cjs": [],
+        "tests/qa-logger-tree-format.test.cjs": [],
+        "tests/test-build-dependencies/build-config.test.cjs": [],
+        "tests/test-build-dependencies/build-wrapper.test.cjs": [],
+        "tests/test-build-dependencies/dependency-install.test.cjs": [],
+        "tests/test-cicd/cross-platform.test.cjs": [],
+        "tests/test-cicd/exit-codes.test.cjs": [],
+        "tests/test-cicd/github-actions.test.cjs": [],
+        "tests/test-cicd/json-reports.test.cjs": [],
+        "tests/test-context/context-detector.test.cjs": [],
+        "tests/test-context/context-mapping.test.cjs": [],
+        "tests/test-context/git-integration.test.cjs": [],
+        "tests/test-context/stack-detection.test.cjs": [],
+        "tests/test-environment/docker-fallback.test.cjs": [],
+        "tests/test-environment/environment-checker.test.cjs": [],
+        "tests/test-environment/error-messages.test.cjs": [],
+        "tests/test-environment/tool-availability.test.cjs": [],
+        "tests/test-error-detection/design-metrics-validation.test.cjs": [],
+        "tests/test-error-detection/megalinter-env-vars.test.cjs": [],
+        "tests/test-error-detection/megalinter-executor.test.cjs": [],
+        "tests/test-error-detection/megalinter-wrapper.test.cjs": [],
+        "tests/test-integration/orchestrator-integration.test.cjs": [],
+        "tests/test-integration/plan-execution.test.cjs": [],
+        "tests/test-integration/result-aggregation.test.cjs": [],
+        "tests/test-integration/wrapper-manager.test.cjs": [],
+        "tests/test-modes/automatic-mode.test.cjs": [],
+        "tests/test-modes/dod-mode.test.cjs": [],
+        "tests/test-modes/fast-mode.test.cjs": [],
+        "tests/test-modes/mode-orchestration.test.cjs": [],
+        "tests/test-modes/scope-mode.test.cjs": [],
+        "tests/test-performance/baseline-measurement.test.cjs": [],
+        "tests/test-performance/memory-usage.test.cjs": [],
+        "tests/test-performance/parallel-execution.test.cjs": [],
+        "tests/test-performance/regression-detection.test.cjs": [],
+        "tests/test-performance/scalability-test.test.cjs": [],
+        "tests/test-security-audit/audit-integration.test.cjs": [],
+        "tests/test-security-audit/security-reporting.test.cjs": [],
+        "tests/test-security-audit/semgrep-wrapper.test.cjs": [],
+        "tests/test-security-audit/snyk-wrapper.test.cjs": [],
+        "tests/test-testing-coverage/coverage-thresholds.test.cjs": [],
+        "tests/test-testing-coverage/jest-wrapper.test.cjs": [],
+        "tests/test-testing-coverage/pytest-wrapper.test.cjs": [],
+        "tests/test-testing-coverage/test-execution.test.cjs": [],
+        "tests/utils/hardcoding-scanner.cjs": [],
+        "utils/QALogger.cjs": [],
+        "utils/VenvManager.cjs": [],
+        "validation/architectural-validator.cjs": []
+      },
+      "circular": [],
+      "violations": []
+    },
+    "coverage": {
+      "real": 422,
+      "mocks": 1300,
+      "ratio": 90.94827586206897
+    }
+  }
+}

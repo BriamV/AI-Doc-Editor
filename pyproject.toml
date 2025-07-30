@@ -19,6 +19,51 @@ extend-exclude = '''
 )/
 '''
 
+[tool.ruff]
+# Core settings aligned with existing quality standards
+line-length = 100  # Match Black and PRD RF-003
+target-version = "py38"
+
+[tool.ruff.lint]
+# Select comprehensive rules (equivalent to Pylint + security)
+select = [
+    "E", "W",    # pycodestyle errors & warnings
+    "F",         # pyflakes
+    "C90",       # mccabe complexity
+    "I",         # isort
+    "N",         # pep8-naming
+    "UP",        # pyupgrade
+    "S",         # flake8-bandit (security)
+    "B",         # flake8-bugbear
+    "A",         # flake8-builtins
+    "C4",        # flake8-comprehensions
+    "PIE",       # flake8-pie
+    "PT",        # flake8-pytest-style
+    "SIM",       # flake8-simplify
+    "PL",        # pylint
+    "RUF",       # ruff-specific rules
+]
+
+# Ignore rules that conflict with existing codebase style
+ignore = [
+    "D100", "D101", "D102", "D103", "D104",  # Missing docstrings
+    "S104",      # Binding to all interfaces (valid for dev servers)
+]
+
+# Complexity settings (match .pylintrc)
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+# Import sorting configuration
+[tool.ruff.lint.isort]
+known-first-party = ["backend", "app"]
+
+# Per-file ignores
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "D"]  # Allow assert statements and missing docstrings in tests
+"*/migrations/*" = ["D"]   # Allow missing docstrings in migrations
+"__init__.py" = ["F401"]   # Allow unused imports in __init__.py
+
 [tool.pytest.ini_options]
 # Test configuration for PRD RF-004 Testing dimension
 testpaths = ["backend/tests", "tests"]

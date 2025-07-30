@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Architectural Validation Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .pass { color: green; }
+        .fail { color: red; }
+        .warning { color: orange; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .metric { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🏗️ Architectural Validation Report</h1>
+    <p><strong>Generated:</strong> 2025-07-15T18:04:00.446Z</p>
+    
+    <h2>Summary</h2>
+    <div class="metric">
+        <h3>SOLID Principles: <span class="pass">PASS</span></h3>
+        <ul>
+            <li>SRP: 85.6%</li>
+            <li>OCP: 85.2%</li>
+            <li>LSP: 100.0%</li>
+            <li>ISP: 72.2%</li>
+            <li>DIP: 82.6%</li>
+        </ul>
+    </div>
+    
+    <div class="metric">
+        <h3>Code Metrics: <span class="fail">FAIL</span></h3>
+        <p>Violations: 87</p>
+    </div>
+    
+    <div class="metric">
+        <h3>Dependencies: <span class="pass">PASS</span></h3>
+        <p>Circular Dependencies: 0</p>
+    </div>
+    
+    <div class="metric">
+        <h3>Test Coverage: <span class="pass">PASS</span></h3>
+        <p>Real Tests Ratio: 90.9%</p>
+    </div>
+    
+    <h2>Detailed Results</h2>
+    <p>See JSON report for complete details.</p>
+</body>
+</html>

@@ -4,6 +4,8 @@
  */
 
 const { execSync } = require('child_process');
+const path = require('path');
+const fs = require('fs');
 
 class ToolChecker {
   constructor(logger, venvManager = null) {
@@ -64,44 +66,50 @@ class ToolChecker {
     
     const execOptions = { 
       stdio: 'pipe',
-      timeout: 8000, // ROLLBACK: Restored original 8s timeout
+      timeout: 5000, // PERFORMANCE FIX: Reduced timeout from 8s to 5s for faster detection
       encoding: 'utf8',
       // ARCHITECTURAL FIX: Preserve original PATH for NPM commands
       env: { ...process.env, PATH: this._getCleanPath(toolName, toolConfig) }
     };
     
     try {
-      // For Python tools, use direct venv detection
+      // For Python tools, try VenvManager first, then fallback to system PATH
       const pythonTools = ['black', 'pylint', 'pytest'];
-      if (pythonTools.includes(toolName)) {
-        let venvExecutable = null;
-        
-        // Check Windows-style venv structure first
-        const windowsPath = `.venv/Scripts/${toolName}.exe`;
-        if (fs.existsSync(windowsPath)) {
-          venvExecutable = windowsPath;
-        } else {
-          // Check Unix-style venv structure
-          const unixPath = `.venv/bin/${toolName}`;
-          if (fs.existsSync(unixPath)) {
-            venvExecutable = unixPath;
+      if (pythonTools.includes(toolName) && this.venvManager) {
+        try {
+          const venvToolPath = this._getVenvToolPath(toolName);
+          if (venvToolPath) {
+            try {
+              const venvCommand = command.replace(`${toolName} --version`, `"${venvToolPath}" --version`);
+              
+              const pythonExecOptions = {
+                stdio: 'pipe',
+                timeout: 5000, // PERFORMANCE FIX: Reduced Python tool timeout
+                encoding: 'utf8',
+                cwd: process.cwd(),
+                shell: process.platform === 'win32' ? true : undefined
+              };
+              
+              const output = execSync(venvCommand, pythonExecOptions);
+              const versionMatch = output.match(/v?(\d+\.\d+\.\d+)/);
+              const version = versionMatch ? versionMatch[1] : 'installed';
+              
+              return {
+                available: true,
+                version: version,
+                command: venvCommand,
+                description: toolConfig.description,
+                detectionMethod: 'venv'
+              };
+            } catch (venvError) {
+              // Venv tool failed, continue to system PATH fallback
+              this.logger.debug(`Venv ${toolName} failed, trying system PATH: ${venvError.message}`);
+            }
           }
+        } catch (venvPathError) {
+          this.logger.debug(`_getVenvToolPath failed for ${toolName}: ${venvPathError.message}`);
         }
-        
-        if (venvExecutable) {
-          command = command.replace(`${toolName} --version`, `${venvExecutable} --version`);
-          const output = execSync(command, execOptions);
-          const versionMatch = output.match(/v?(\d+\.\d+\.\d+)/);
-          const version = versionMatch ? versionMatch[1] : 'installed';
-          
-          return {
-            available: true,
-            version: version,
-            command: command,
-            description: toolConfig.description,
-            detectionMethod: 'venv'
-          };
-        }
+        // Continue to system PATH for ALL Python tools (venv success already returned above)
       }
       
       // Special handling for spectral - check file existence and get version
@@ -149,6 +157,23 @@ class ToolChecker {
         
         // If all Docker commands failed, throw error to trigger main catch
         throw new Error('All Docker detection methods failed');
+      }
+      
+      // Cache warming for NPM-based tools to improve reliability
+      const npmTools = ['eslint', 'prettier', 'tsc'];
+      if (npmTools.includes(toolName)) {
+        try {
+          // Pre-warm NPM cache with quick dependency check
+          execSync('npm list --depth=0', { 
+            stdio: 'pipe', 
+            timeout: 3000, // PERFORMANCE FIX: Reduced cache warming timeout
+            encoding: 'utf8',
+            env: { ...process.env, PATH: this._getCleanPath(toolName, toolConfig) }
+          });
+        } catch (warmupError) {
+          // Cache warming failed, but continue with main detection
+          // This is non-critical as it's an optimization
+        }
       }
       
       // Regular command execution for all other tools
@@ -212,6 +237,26 @@ class ToolChecker {
     }
     
     return results;
+  }
+  
+  /**
+   * Get virtual environment tool path (delegates to VenvManager)
+   * SOLID: Single Responsibility - eliminates duplicate venv detection
+   */
+  _getVenvToolPath(toolName) {
+    if (!this.venvManager || !this.venvManager.venvPath) {
+      return null;
+    }
+    
+    const venvBinPath = process.platform === 'win32' 
+      ? path.join(this.venvManager.venvPath, 'Scripts')
+      : path.join(this.venvManager.venvPath, 'bin');
+    
+    const toolPath = process.platform === 'win32'
+      ? path.join(venvBinPath, `${toolName}.exe`)
+      : path.join(venvBinPath, toolName);
+    
+    return fs.existsSync(toolPath) ? toolPath : null;
   }
   
   /**

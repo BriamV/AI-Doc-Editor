@@ -1,0 +1,252 @@
+# Reusable QA Workflow
+# Implementación de T-14: CI/CD Integration según PRD-QA CLI.md RNF-004
+# Patrón: Orquestador Inteligente sobre Herramientas Externas
+
+name: Reusable QA Validation
+
+on:
+  workflow_call:
+    inputs:
+      scope:
+        description: 'Scope for validation (directory/file path)'
+        required: false
+        type: string
+        default: ''
+      dimension:
+        description: 'Specific QA dimension to run'
+        required: false
+        type: string
+        default: ''
+      mode:
+        description: 'Execution mode: fast, full, dod, auto'
+        required: false
+        type: string
+        default: 'auto'
+      dod-config:
+        description: 'DoD configuration for task validation'
+        required: false
+        type: string
+        default: ''
+      report-format:
+        description: 'Report format: console, json, both'
+        required: false
+        type: string
+        default: 'both'
+      node-version:
+        description: 'Node.js version to use'
+        required: false
+        type: string
+        default: '20.x'
+    outputs:
+      qa-passed:
+        description: 'Whether QA validation passed'
+        value: ${{ jobs.qa-validation.outputs.qa-passed }}
+      report-json:
+        description: 'QA report in JSON format'
+        value: ${{ jobs.qa-validation.outputs.report-json }}
+      issues-found:
+        description: 'Number of issues found'
+        value: ${{ jobs.qa-validation.outputs.issues-found }}
+
+env:
+  # Configuración de entorno según RNF-004 (Node.js 18+)
+  GIT_TERMINAL_PROMPT: "0"
+  npm_config_registry: "https://registry.npmjs.org/"
+
+jobs:
+  qa-validation:
+    name: QA System Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ 
+      inputs.scope == 'backend' && 15 || 
+      inputs.scope == 'frontend' && 5 || 
+      inputs.mode == 'fast' && 3 || 10 
+    }}
+    
+    outputs:
+      qa-passed: ${{ steps.qa-execution.outputs.qa-passed }}
+      report-json: ${{ steps.qa-execution.outputs.report-json }}
+      issues-found: ${{ steps.qa-execution.outputs.issues-found }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for git diff analysis
+      
+      - name: Setup Node.js ${{ inputs.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'yarn'
+      
+      - name: Setup Python for backend validation
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+      
+      - name: Resolver problemas de dependencias SSH en GitHub Actions
+        run: |
+          echo "🚀 Aplicando solución definitiva para dependencias con referencias SSH..."
+          
+          # Configurar entorno para forzar HTTPS
+          export ELECTRON_GET_USE_PROXY=1
+          export ELECTRON_MIRROR=https://github.com/electron/electron/releases/download/
+          
+          # Configurar Git para usar HTTPS globalmente
+          echo "🔧 Configurando Git para usar siempre HTTPS..."
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+          git config --global url."https://github.com/".insteadOf "git+ssh://git@github.com/"
+          
+          # Crear .npmrc optimizado para CI
+          cat > .npmrc << EOL
+          registry=https://registry.npmjs.org/
+          @electron:registry=https://registry.npmjs.org/
+          node-gyp:registry=https://registry.npmjs.org/
+          strict-ssl=true
+          EOL
+          
+          # Limpiar caché de Yarn
+          yarn cache clean
+
+      - name: Install dependencies
+        run: |
+          # Verificar si package.json o yarn.lock han sido modificados
+          if git diff --name-only HEAD^ HEAD | grep -q -E "package\.json|yarn\.lock"; then
+            echo "📜 Cambios detectados en package.json o yarn.lock -> regeneración completa"
+            yarn install --network-timeout 600000 --update-checksums
+          else
+            echo "📜 Sin cambios -> usando configuración optimizada"
+            yarn install --network-timeout 600000
+          fi
+
+      - name: QA System Execution
+        id: qa-execution
+        run: |
+          echo "🔍 Iniciando QA System con configuración:"
+          echo "  - Scope: ${{ inputs.scope }}"
+          echo "  - Dimension: ${{ inputs.dimension }}"
+          echo "  - Mode: ${{ inputs.mode }}"
+          echo "  - DoD Config: ${{ inputs.dod-config }}"
+          echo "  - Report Format: ${{ inputs.report-format }}"
+          
+          # Construir comando QA con parámetros
+          QA_CMD="yarn run cmd qa"
+          
+          # Agregar parámetros según inputs
+          if [ -n "${{ inputs.scope }}" ]; then
+            QA_CMD="$QA_CMD --scope=\"${{ inputs.scope }}\""
+          fi
+          
+          if [ -n "${{ inputs.dimension }}" ]; then
+            QA_CMD="$QA_CMD --dimension=${{ inputs.dimension }}"
+          fi
+          
+          case "${{ inputs.mode }}" in
+            "fast")
+              QA_CMD="$QA_CMD --fast"
+              ;;
+            "dod")
+              if [ -n "${{ inputs.dod-config }}" ]; then
+                QA_CMD="$QA_CMD --dod=\"${{ inputs.dod-config }}\""
+              else
+                QA_CMD="$QA_CMD --dod"
+              fi
+              ;;
+            "full")
+              QA_CMD="$QA_CMD --full"
+              ;;
+          esac
+          
+          # Agregar formato de reporte para CI/CD integration
+          if [ "${{ inputs.report-format }}" = "json" ] || [ "${{ inputs.report-format }}" = "both" ]; then
+            QA_CMD="$QA_CMD --report ci-json"
+          fi
+          
+          echo "🚀 Ejecutando: $QA_CMD"
+          
+          # Ejecutar QA system y capturar resultado
+          if eval $QA_CMD; then
+            echo "qa-passed=true" >> $GITHUB_OUTPUT
+            QA_EXIT_CODE=0
+          else
+            echo "qa-passed=false" >> $GITHUB_OUTPUT
+            QA_EXIT_CODE=1
+          fi
+          
+          # Procesar reporte JSON si existe
+          if [ -f "qa-report.json" ]; then
+            echo "📊 Procesando reporte JSON..."
+            ISSUES_COUNT=$(jq -r '.summary.issues_found // 0' qa-report.json 2>/dev/null || echo "0")
+            echo "issues-found=$ISSUES_COUNT" >> $GITHUB_OUTPUT
+            
+            # Preparar output JSON (truncado para GitHub Actions limits)
+            REPORT_JSON=$(jq -c '.summary' qa-report.json 2>/dev/null || echo '{}')
+            echo "report-json=$REPORT_JSON" >> $GITHUB_OUTPUT
+          else
+            echo "issues-found=0" >> $GITHUB_OUTPUT
+            echo "report-json={}" >> $GITHUB_OUTPUT
+          fi
+          
+          # Mantener exit code para workflow failure
+          exit $QA_EXIT_CODE
+
+      - name: Upload QA Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qa-report-${{ inputs.mode }}-${{ github.run_id }}
+          path: |
+            qa-report.json
+            qa-reports/
+          retention-days: 30
+
+      - name: Upload Local Issues (if any)
+        uses: actions/upload-artifact@v4
+        if: always() && hashFiles('qa-reports/issues/*.json') != ''
+        with:
+          name: qa-local-issues-${{ github.run_id }}
+          path: qa-reports/issues/
+          retention-days: 7
+
+      - name: QA Results Summary
+        if: always()
+        run: |
+          echo "## 🔍 QA System Results Summary"
+          echo "- **Mode**: ${{ inputs.mode }}"
+          echo "- **Scope**: ${{ inputs.scope || 'Full project' }}"
+          echo "- **Dimension**: ${{ inputs.dimension || 'All dimensions' }}"
+          echo "- **Status**: ${{ steps.qa-execution.outputs.qa-passed == 'true' && '✅ PASSED' || '❌ FAILED' }}"
+          echo "- **Issues Found**: ${{ steps.qa-execution.outputs.issues-found }}"
+          
+          if [ -f "qa-report.json" ]; then
+            echo ""
+            echo "### Report Details"
+            jq -r '.summary.message // "QA validation completed"' qa-report.json 2>/dev/null || echo "Detailed report available in artifacts"
+          fi
+
+      - name: Validate DoD Requirements (if DoD mode)
+        if: inputs.mode == 'dod' && always()
+        run: |
+          echo "🎯 Validating Definition of Done requirements..."
+          
+          # Ejecutar validación DoD específica
+          if [ -n "${{ inputs.dod-config }}" ]; then
+            yarn run cmd validate-dod --config="${{ inputs.dod-config }}" || echo "⚠️ DoD validation completed with warnings"
+          else
+            yarn run cmd validate-dod || echo "⚠️ DoD validation completed with warnings"
+          fi
+
+      - name: Performance Metrics Collection
+        if: always()
+        run: |
+          echo "⏱️ Collecting performance metrics..."
+          
+          # Extraer métricas de tiempo del reporte si existe
+          if [ -f "qa-report.json" ]; then
+            DURATION=$(jq -r '.metadata.total_duration // "unknown"' qa-report.json 2>/dev/null || echo "unknown")
+            echo "QA_DURATION=$DURATION" >> $GITHUB_ENV
+            echo "Total execution time: $DURATION"
+          fi

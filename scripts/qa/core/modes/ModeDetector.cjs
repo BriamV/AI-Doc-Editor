@@ -38,12 +38,13 @@ class ModeDetector {
    * Determine validation scope from context and options
    */
   static determineScope(context, options) {
-    // Explicit scope override
+    // Explicit scope override always takes precedence
     if (options.scope) {
-      return options.scope;
+      return options.scope;  
     }
     
-    // Auto-detect from modified files
+    // Default scope detection based on context
+    // Each mode handler will override this as needed
     const stackCounts = context.files?.summary?.byStack || {};
     const primaryStack = Object.entries(stackCounts)
       .sort(([,a], [,b]) => b - a)

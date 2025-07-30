@@ -10,10 +10,12 @@
  * Dependencies: T-01
  */
 
+const path = require('path');
 const ToolChecker = require('./environment/ToolChecker.cjs');
 const EnvironmentValidator = require('./environment/EnvironmentValidator.cjs');
 const { getPackageManagerService } = require('./services/PackageManagerService.cjs');
 const VenvManager = require('../utils/VenvManager.cjs');
+const SharedToolDetectionService = require('./services/SharedToolDetectionService.cjs');
 
 class EnvironmentChecker {
   constructor(config, logger) {
@@ -25,6 +27,9 @@ class EnvironmentChecker {
     this.toolChecker = new ToolChecker(logger, this.venvManager);
     this.environmentValidator = new EnvironmentValidator(logger);
     
+    // Initialize SharedToolDetectionService to eliminate double detection
+    this.sharedToolService = new SharedToolDetectionService(this.toolChecker, logger);
+    
     // Tool definitions
     this.requiredTools = {
       git: { command: 'git --version', description: 'Git version control system', installUrl: 'https://git-scm.com/downloads', critical: true },
@@ -34,13 +39,13 @@ class EnvironmentChecker {
     };
     
     this.optionalTools = {
-      megalinter: { command: 'npm list mega-linter-runner --depth=0 2>/dev/null | grep mega-linter-runner', description: 'MegaLinter (local installation)', installUrl: 'https://megalinter.github.io/latest/installation/', fallback: 'docker' },
       snyk: { command: 'snyk --version', description: 'Snyk security scanner', installUrl: 'https://docs.snyk.io/snyk-cli/install-the-snyk-cli', fallback: 'skip' },
-      prettier: { command: 'npx prettier --version', description: 'Prettier code formatter', installUrl: 'lazy:prettier', fallback: 'megalinter' },
-      eslint: { command: 'npx eslint --version', description: 'ESLint JavaScript linter', installUrl: 'lazy:eslint', fallback: 'megalinter' },
-      black: { command: 'black --version', description: 'Black Python formatter', installUrl: 'pip install black', fallback: 'megalinter' },
-      pylint: { command: 'pylint --version', description: 'Pylint Python linter', installUrl: 'pip install pylint', fallback: 'megalinter' },
-      tsc: { command: 'npx tsc --version', description: 'TypeScript compiler', installUrl: 'lazy:typescript', fallback: 'skip' },
+      prettier: { command: 'yarn exec prettier --version', description: 'Prettier code formatter', installUrl: 'lazy:prettier', fallback: 'skip' },
+      eslint: { command: 'yarn exec eslint --version', description: 'ESLint JavaScript linter', installUrl: 'lazy:eslint', fallback: 'skip' },
+      black: { command: 'black --version', description: 'Black Python formatter', installUrl: 'pip install black', fallback: 'skip' },
+      pylint: { command: 'pylint --version', description: 'Pylint Python linter', installUrl: 'pip install pylint', fallback: 'skip' },
+      ruff: { command: 'ruff --version', description: 'Ruff Python linter and formatter', installUrl: 'pip install ruff', fallback: 'skip' },
+      tsc: { command: 'yarn exec tsc --version', description: 'TypeScript compiler', installUrl: 'lazy:typescript', fallback: 'skip' },
       pip: { command: 'pip --version', description: 'Python package installer', installUrl: 'https://pip.pypa.io/en/stable/installation/', fallback: 'skip' },
       spectral: { command: 'ls node_modules/@stoplight/spectral-cli/package.json', description: 'OpenAPI/JSON Schema linter', installUrl: 'lazy:@stoplight/spectral-cli', fallback: 'skip' }
     };
@@ -56,16 +61,21 @@ class EnvironmentChecker {
   /**
    * Main environment check - called once at Orchestrator startup
    */
-  async checkEnvironment() {
+  async checkEnvironment(mode = 'automatic') {
     this.logger.info('🔍 Checking environment and dependencies...');
     
     // Initialize package manager service first
     const packageManagerService = getPackageManagerService();
-    await packageManagerService._initialize();
+    await packageManagerService.initialize();
     
-    // Detect and setup virtual environment for Python tools
+    // Detect virtual environment for Python tools (but don't activate yet)
     const venvDetected = this.venvManager.detectVirtualEnvironment();
-    this.logger.info(`🐍 Virtual environment detection: ${venvDetected}`);
+    if (venvDetected) {
+      const venvPath = path.relative(process.cwd(), this.venvManager.venvPath);
+      this.logger.info(`📦 Virtual environment detected: ${venvPath}`);
+    } else {
+      this.logger.info('🔍 No virtual environment detected - using system Python');
+    }
     
     // Add detected package manager to required tools
     const detectedManager = await packageManagerService.getManager();
@@ -77,16 +87,54 @@ class EnvironmentChecker {
     };
     
     try {
-      // Check critical tools first
-      this.checkResults.critical = await this.toolChecker.checkCriticalTools(this.requiredTools);
+      // ARCHITECTURAL FIX: Use SharedToolDetectionService for single detection
+      // This eliminates duplicate tool detection in ToolValidator.validateAndFilterTools()
       
-      // Check optional tools
+      // Separate NPM and Python tools for phased detection (preserve existing logic)
+      const npmOptionalTools = {};
+      const pythonOptionalTools = {};
+      
+      Object.entries(this.optionalTools).forEach(([name, config]) => {
+        if (['black', 'pylint', 'pytest', 'ruff'].includes(name)) {
+          pythonOptionalTools[name] = config;
+        } else {
+          npmOptionalTools[name] = config;
+        }
+      });
+      
+      // Get non-critical required tools
       const optionalRequired = Object.fromEntries(
         Object.entries(this.requiredTools).filter(([, config]) => !config.critical)
       );
-      const optionalResults1 = await this.toolChecker.checkTools(optionalRequired);
-      const optionalResults2 = await this.toolChecker.checkTools(this.optionalTools);
-      this.checkResults.optional = new Map([...optionalResults1, ...optionalResults2]);
+      
+      // Activate virtual environment for Python tools (preserve existing timing)
+      if (venvDetected) {
+        const venvActivated = this.venvManager.activateVenv();
+        this.logger.info(`🔧 Virtual environment activation: ${venvActivated}`);
+      }
+      
+      // Fast mode optimization: Only check essential tools for speed
+      let toolsToCheck = { ...optionalRequired, ...npmOptionalTools, ...pythonOptionalTools };
+      
+      if (mode === 'fast') {
+        // Only check direct linters for fast mode (<5s target)
+        const fastModeTools = {
+          prettier: this.optionalTools.prettier,
+          eslint: this.optionalTools.eslint,
+          black: this.optionalTools.black,
+          ruff: this.optionalTools.ruff
+        };
+        toolsToCheck = fastModeTools;
+        this.logger.info(`Fast mode: Checking only direct linters for speed (${Object.keys(fastModeTools).length} tools)`);
+      } else {
+        this.logger.info(`Full mode: Checking all tools (${Object.keys(toolsToCheck).length} tools)`);
+      }
+      
+      // Single detection via SharedService - eliminates duplicate detection later
+      const detectionResults = await this.sharedToolService.detectAllTools(this.requiredTools, toolsToCheck);
+      
+      this.checkResults.critical = detectionResults.critical;
+      this.checkResults.optional = detectionResults.optional;
       
       // Check environment variables
       this.checkResults.environment = await this.environmentValidator.checkEnvironmentVariables();
@@ -126,18 +174,10 @@ class EnvironmentChecker {
   async _generateRecommendations() {
     const recommendations = [];
     
-    // Docker recommendation
+    // Docker recommendation (for container-based development)
     const dockerResult = this.checkResults.optional.get('docker');
     if (!dockerResult?.available) {
-      recommendations.push('Install Docker for optimal MegaLinter performance');
-    }
-    
-    // MegaLinter recommendation (PRD RF-007: Local installation preferred)
-    const megalinterResult = this.checkResults.optional.get('megalinter');
-    if (!megalinterResult?.available && dockerResult?.available) {
-      recommendations.push('MegaLinter will run via Docker (slower than local installation). Consider: yarn add --dev mega-linter-runner');
-    } else if (!megalinterResult?.available && !dockerResult?.available) {
-      recommendations.push('Install MegaLinter locally for optimal performance: yarn add --dev mega-linter-runner');
+      recommendations.push('Install Docker for container-based development workflows');
     }
     
     // Snyk recommendation (PRD RF-007: Standard installation methods)
@@ -173,11 +213,6 @@ class EnvironmentChecker {
       recommendations.push('Set SNYK_TOKEN environment variable for authenticated security scans: export SNYK_TOKEN=your_token_here');
     }
     
-    // .mega-linter.yml configuration recommendation (PRD centralized config)
-    const hasMegaLinterConfig = require('fs').existsSync('.mega-linter.yml');
-    if (!hasMegaLinterConfig) {
-      recommendations.push('Create .mega-linter.yml for centralized QA configuration as specified in PRD');
-    }
     
     // Virtual environment recommendations
     const venvInfo = this.venvManager.getVenvInfo();
@@ -189,6 +224,7 @@ class EnvironmentChecker {
     
     this.checkResults.recommendations = recommendations;
   }
+  
   
   /**
    * Generate environment check summary
@@ -267,6 +303,13 @@ class EnvironmentChecker {
    */
   getVenvManager() {
     return this.venvManager;
+  }
+  
+  /**
+   * Get shared tool detection service (used by ToolValidator)
+   */
+  getSharedToolService() {
+    return this.sharedToolService;
   }
 }
 

@@ -1,0 +1,11 @@
+[
+  {
+    "reportId": "QA-1752446919874-w0ltnp",
+    "timestamp": "2025-07-13T22:48:39.881Z",
+    "tool": "eslint",
+    "dimension": "general",
+    "mode": "manual",
+    "error": "Unexpected token ';'",
+    "status": "open"
+  }
+]

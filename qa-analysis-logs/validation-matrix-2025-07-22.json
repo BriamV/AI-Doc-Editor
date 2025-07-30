@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-07-22T03:53:14.860Z",
+  "environments": {
+    "cmd": {
+      "available": false,
+      "error": "Cannot find module '../environment/ToolChecker.cjs'\nRequire stack:\n- D:\\DELL_\\Documents\\GitHub\\AI-Doc-Editor\\scripts\\qa\\validation\\cross-environment-validator.cjs"
+    },
+    "powershell": {
+      "available": false,
+      "error": "Cannot find module '../environment/ToolChecker.cjs'\nRequire stack:\n- D:\\DELL_\\Documents\\GitHub\\AI-Doc-Editor\\scripts\\qa\\validation\\cross-environment-validator.cjs"
+    },
+    "wsl": {
+      "available": false,
+      "error": "Cannot find module '../environment/ToolChecker.cjs'\nRequire stack:\n- D:\\DELL_\\Documents\\GitHub\\AI-Doc-Editor\\scripts\\qa\\validation\\cross-environment-validator.cjs"
+    }
+  },
+  "summary": {
+    "totalTools": 11,
+    "totalEnvironments": 3,
+    "totalSuccess": 0,
+    "totalPossible": 0,
+    "successRate": 0
+  }
+}

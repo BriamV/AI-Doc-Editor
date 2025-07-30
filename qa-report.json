@@ -1,0 +1,55 @@
+{
+  "metadata": {
+    "version": "0.1.0",
+    "timestamp": "2025-07-13T23:34:35.011Z",
+    "system": "QA System - AI-Doc-Editor",
+    "context": {
+      "branch": "unknown",
+      "commit": "unknown",
+      "environment": "development",
+      "mode": "fast",
+      "scope": "all"
+    }
+  },
+  "summary": {
+    "total": 1,
+    "passed": 0,
+    "warnings": 0,
+    "failed": 1,
+    "pending": 0,
+    "status": "failed",
+    "completionRate": 0
+  },
+  "dimensions": {
+    "format": {
+      "tools": [
+        {
+          "success": false,
+          "executionTime": 0
+        }
+      ],
+      "passed": 0,
+      "failed": 1,
+      "totalTime": 0
+    }
+  },
+  "tools": {
+    "unknown": {
+      "dimension": "format",
+      "success": false,
+      "executionTime": 0
+    }
+  },
+  "failures": [
+    {
+      "dimension": "format"
+    }
+  ],
+  "warnings": [],
+  "recommendations": [],
+  "artifacts": {
+    "logFile": "qa-system.log",
+    "reportPath": "qa-report.json",
+    "megalinterReports": "megalinter-reports/"
+  }
+}

@@ -1,0 +1,83 @@
+# MegaLinter Configuration - Centralized QA System Configuration
+# Aligned with PRD-QA CLI.md specifications (líneas 126, 338, 403)
+# Complete configuration for all stacks: Frontend, Backend, Security
+
+# Core configuration
+APPLY_FIXES: none # QA system reports but doesn't modify code (PRD section 3)
+
+VALIDATE_ALL_CODEBASE: false # Incremental validation by default
+
+# Frontend Stack Configuration (TypeScript/React) - PRD RF-004
+ENABLE_LINTERS:
+  # JavaScript/TypeScript
+  - JAVASCRIPT_ES
+  - JAVASCRIPT_PRETTIER
+  - TYPESCRIPT_ES
+  - TYPESCRIPT_PRETTIER
+  - REACT # React specific
+  - JSON_JSONLINT # Configuration files
+  - JSON_PRETTIER
+  - YAML_YAMLLINT
+  - YAML_PRETTIER
+  - MARKDOWN_MARKDOWNLINT # Documentation
+  - DOCKERFILE_HADOLINT # Infrastructure
+  - BASH_SHELLCHECK
+  - CSS_STYLELINT # Frontend styling
+  - HTML_HTMLHINT
+  - PYTHON_PYLINT # Python linting and formatting
+  - PYTHON_BLACK
+  - PYTHON_FLAKE8
+  - PYTHON_MYPY
+
+# Design Metrics Configuration (PRD RF-004)
+# Complejidad Ciclomática: 🟢(≤10), 🟡(11-15), 🔴(>15)
+# LOC por Archivo: 🟢(≤212), 🟡(213-300), 🔴(>300)  
+# Longitud de Línea: Límite estricto de 100 caracteres
+# ESLint Flat Config Fix: Use newer MegaLinter ESLint handling
+JAVASCRIPT_ES_CONFIG_FILE: 'eslint.config.js'
+JAVASCRIPT_ES_USE_ESLINTRC: false
+JAVASCRIPT_ES_ARGUMENTS:
+  - --max-warnings=0
+  - --rule=complexity:[error,10]
+  - --rule=max-lines:[error,212]
+  - --rule=max-len:[error,{code:100}]
+
+TYPESCRIPT_ES_CONFIG_FILE: 'eslint.config.js'
+TYPESCRIPT_ES_USE_ESLINTRC: false
+TYPESCRIPT_ES_ARGUMENTS:
+  - --max-warnings=0
+  - --rule=complexity:[error,10]
+  - --rule=max-lines:[error,212]
+  - --rule=max-len:[error,{code:100}]
+
+PYTHON_PYLINT_CONFIG_FILE: '.pylintrc'
+PYTHON_PYLINT_ARGUMENTS:
+  - --max-line-length=100
+  - --max-module-lines=212
+  - --max-complexity=10
+
+PYTHON_BLACK_CONFIG_FILE: 'pyproject.toml'
+
+# Performance optimizations (PRD RNF-002)
+FILEIO_REPORTER: false # Reduce I/O overhead
+CLI_LINT_MODE: list_of_files
+
+# Disable tools that QA System handles directly (PRD architecture)
+DISABLE_LINTERS:
+  - COPYPASTE_JSCPD # Handled by Design Metrics dimension
+  - SPELL_MISSPELL # Handled by Error Detection dimension
+  - CREDENTIALS # Handled by Security dimension (Snyk/Semgrep)
+
+# Security scanning exclusions (handled by dedicated Security dimension)
+DISABLE:
+  - CREDENTIALS # Handled by Snyk and Semgrep in Security dimension
+
+# Performance optimizations (PRD RNF-002)
+SHOW_ELAPSED_TIME: true
+PARALLEL: true
+LOG_LEVEL: INFO
+
+# Integration with project package manager (auto-detected)
+PRE_COMMANDS:
+  - command: echo "🚀 QA System validation starting..."
+    cwd: '.'

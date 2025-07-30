@@ -27,7 +27,7 @@
     },
     "lint": {
       "frontend": ["eslint"],
-      "backend": ["pylint"],
+      "backend": ["ruff"],
       "infrastructure": ["eslint"],
       "all": ["eslint"]
     },
@@ -106,7 +106,7 @@
       "commands": {
         "_note": "Commands are now dynamically detected by PackageManagerDetector",
         "install": "auto-detect",
-        "audit": "auto-detect", 
+        "audit": "auto-detect",
         "outdated": "auto-detect"
       },
       "timeout": 120000,
@@ -116,8 +116,8 @@
     },
     "tsc": {
       "commands": {
-        "check": ["npx", "tsc", "--noEmit"],
-        "build": ["npx", "tsc", "--build"]
+        "check": ["yarn", "exec", "tsc", "--noEmit"],
+        "build": ["yarn", "exec", "tsc", "--build"]
       },
       "timeout": 60000,
       "workingDirectory": ".",
@@ -144,7 +144,11 @@
       "workingDirectory": ".",
       "requiredFiles": [],
       "supportedFormats": ["yaml", "yml", "json"],
-      "patterns": ["**/openapi.{yaml,yml,json}", "**/swagger.{yaml,yml,json}", "**/api-spec.{yaml,yml,json}"]
+      "patterns": [
+        "**/openapi.{yaml,yml,json}",
+        "**/swagger.{yaml,yml,json}",
+        "**/api-spec.{yaml,yml,json}"
+      ]
     },
     "django-migrations": {
       "commands": {

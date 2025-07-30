@@ -27,6 +27,28 @@ export default [
       'tailwind.config.cjs',
     ],
   },
+  
+  // CommonJS files configuration (.cjs) - MegaLinter migration
+  {
+    files: ['**/*.cjs'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: { ...globals.node, ...globals.commonjs },
+      sourceType: 'commonjs',
+    },
+    plugins: {
+      prettier: prettier,
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      // MegaLinter extracted rules (from .mega-linter.yml:42-44)
+      'complexity': ['error', 10],
+      'max-lines': ['error', 212],
+      'max-len': ['error', { code: 100 }],
+      'prettier/prettier': 'error',
+    },
+  },
+  
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
@@ -60,6 +82,11 @@ export default [
         'error',
         { argsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
       ],
+      
+      // MegaLinter extracted rules (from .mega-linter.yml:50-52)
+      'complexity': ['error', 10],
+      'max-lines': ['error', 212],
+      'max-len': ['error', { code: 100 }],
       'prettier/prettier': 'error',
     },
     settings: {

@@ -56,16 +56,28 @@ async function run(args = []) {
       config: path.join(__dirname, '..', 'qa', 'qa-config.json')
     };
     
-    // Parse scope
+    // Parse scope (support both --scope=value and --scope value formats)
     const scopeIndex = args.findIndex(arg => arg === '--scope' || arg === '-s');
     if (scopeIndex !== -1 && args[scopeIndex + 1]) {
       argv.scope = args[scopeIndex + 1];
+    } else {
+      // Handle --scope=value format
+      const scopeEqualArg = args.find(arg => arg.startsWith('--scope='));
+      if (scopeEqualArg) {
+        argv.scope = scopeEqualArg.split('=')[1];
+      }
     }
     
-    // Parse dimension
+    // Parse dimension (support both --dimension=value and --dimension value formats)
     const dimensionIndex = args.findIndex(arg => arg === '--dimension' || arg === '-d');
     if (dimensionIndex !== -1 && args[dimensionIndex + 1]) {
       argv.dimension = args[dimensionIndex + 1];
+    } else {
+      // Handle --dimension=value format
+      const dimensionEqualArg = args.find(arg => arg.startsWith('--dimension='));
+      if (dimensionEqualArg) {
+        argv.dimension = dimensionEqualArg.split('=')[1];
+      }
     }
     
     // Parse positional arguments (task)

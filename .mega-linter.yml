@@ -3,10 +3,10 @@
 # Complete configuration for all stacks: Frontend, Backend, Security
 
 # Core configuration
-APPLY_FIXES: none  # QA system reports but doesn't modify code (PRD section 3)
-SHOW_ELAPSED_TIME: true
-PARALLEL: true
-LOG_LEVEL: INFO
+---
+APPLY_FIXES: none # QA system reports but doesn't modify code (PRD section 3)
+
+VALIDATE_ALL_CODEBASE: false # Incremental validation by default
 
 # Frontend Stack Configuration (TypeScript/React) - PRD RF-004
 ENABLE_LINTERS:
@@ -15,60 +15,134 @@ ENABLE_LINTERS:
   - JAVASCRIPT_PRETTIER
   - TYPESCRIPT_ES
   - TYPESCRIPT_PRETTIER
-  
-  # React specific
-  - REACT
-  
-  # Configuration files
-  - JSON_JSONLINT
+  - REACT # React specific
+  - JSON_JSONLINT # Configuration files
   - JSON_PRETTIER
   - YAML_YAMLLINT
   - YAML_PRETTIER
-  
-  # Documentation
-  - MARKDOWN_MARKDOWNLINT
-  
-  # Infrastructure
-  - DOCKERFILE_HADOLINT
+  - MARKDOWN_MARKDOWNLINT # Documentation
+  - DOCKERFILE_HADOLINT # Infrastructure
   - BASH_SHELLCHECK
-  
-  # Frontend styling
-  - CSS_STYLELINT
+  - CSS_STYLELINT # Frontend styling
   - HTML_HTMLHINT
-
-# Backend Stack Configuration (Python) - PRD RF-004
-  # Python linting and formatting
-  - PYTHON_PYLINT
+  - PYTHON_PYLINT # Python linting and formatting
   - PYTHON_BLACK
   - PYTHON_FLAKE8
   - PYTHON_MYPY
 
-# Design Metrics Configuration (PRD RF-003)
-# Complexity and LOC limits as specified in PRD lines 111-113
-JAVASCRIPT_ES_CONFIG_FILE: "eslint.config.js"
-TYPESCRIPT_ES_CONFIG_FILE: "eslint.config.js"
-PYTHON_PYLINT_CONFIG_FILE: ".pylintrc"
-PYTHON_BLACK_CONFIG_FILE: "pyproject.toml"
+# Design Metrics Configuration (PRD RF-004)
+# Complejidad Ciclomática: 🟢(≤10), 🟡(11-15), 🔴(>15)
+# LOC por Archivo: 🟢(≤212), 🟡(213-300), 🔴(>300)  
+# Longitud de Línea: Límite estricto de 100 caracteres
+# ESLint Flat Config Fix: Replace deprecated --no-eslintrc with --no-config-lookup
+JAVASCRIPT_ES_CONFIG_FILE: 'eslint.config.js'
+JAVASCRIPT_ES_ARGUMENTS:
+  - --no-config-lookup
+  - --max-warnings=0
+  - --rule=complexity:[error,10]
+  - --rule=max-lines:[error,212]
+  - --rule=max-len:[error,{code:100}]
+
+TYPESCRIPT_ES_CONFIG_FILE: 'eslint.config.js'
+TYPESCRIPT_ES_ARGUMENTS:
+  - --no-config-lookup
+  - --max-warnings=0
+  - --rule=complexity:[error,10]
+  - --rule=max-lines:[error,212]
+  - --rule=max-len:[error,{code:100}]
+
+PYTHON_PYLINT_CONFIG_FILE: '.pylintrc'
+PYTHON_PYLINT_ARGUMENTS:
+  - --max-line-length=100
+  - --max-module-lines=212
+  - --max-complexity=10
+
+PYTHON_BLACK_CONFIG_FILE: 'pyproject.toml'
+
+# JavaScript/TypeScript File Extensions (CRITICAL: Include .cjs files)
+JAVASCRIPT_ES_FILE_EXTENSIONS:
+  - .js
+  - .jsx
+  - .cjs
+  - .mjs
+
+JAVASCRIPT_PRETTIER_FILE_EXTENSIONS:
+  - .js
+  - .jsx
+  - .cjs
+  - .mjs
+
+# CSS Design Metrics (PRD RF-003)
+CSS_STYLELINT_ARGUMENTS:
+  - --max-warnings=0
+
+# HTML Design Metrics (PRD RF-003)  
+HTML_HTMLHINT_ARGUMENTS:
+  - --rules=attr-value-double-quotes,id-class-value
+
+# BASH Design Metrics (PRD RF-003)
+BASH_SHELLCHECK_ARGUMENTS:
+  - --severity=warning
+  - --exclude=SC1091  # Allow non-constant source
+
+# YAML Design Metrics (PRD RF-003)
+YAML_YAMLLINT_ARGUMENTS:
+  - --strict
+  - --config-data={extends: default, rules: {line-length: {max: 100}}}
+
+# JSON Design Metrics (PRD RF-003)
+JSON_JSONLINT_ARGUMENTS:
+  - --compact
+
+# Markdown Design Metrics (PRD RF-003)
+MARKDOWN_MARKDOWNLINT_ARGUMENTS:
+  - --config=.markdownlint.json
+
+# Prettier Design Metrics (PRD RF-003) - Consistent formatting
+JAVASCRIPT_PRETTIER_ARGUMENTS:
+  - --print-width=100
+
+TYPESCRIPT_PRETTIER_ARGUMENTS:
+  - --print-width=100
+
+JSON_PRETTIER_ARGUMENTS:
+  - --print-width=100
+
+YAML_PRETTIER_ARGUMENTS:
+  - --print-width=100
+
+# Python Flake8 Design Metrics (PRD RF-003) - Already configured via .flake8/.setup.cfg
+PYTHON_FLAKE8_ARGUMENTS:
+  - --max-line-length=100
+  - --max-complexity=10
+
+# Python MyPy Design Metrics (PRD RF-003) - Type checking quality
+PYTHON_MYPY_ARGUMENTS:
+  - --strict
+  - --show-error-codes
 
 # Performance optimizations (PRD RNF-002)
-VALIDATE_ALL_CODEBASE: false  # Incremental validation by default
-FILEIO_REPORTER: false  # Reduce I/O overhead
+FILEIO_REPORTER: false # Reduce I/O overhead
 CLI_LINT_MODE: list_of_files
+
+# Disable tools that QA System handles directly (PRD architecture)
+DISABLE_LINTERS:
+  - COPYPASTE_JSCPD # Handled by Design Metrics dimension
+  - SPELL_MISSPELL # Handled by Error Detection dimension
+
+# Exclude coverage files from linting (generated files)
+FILTER_REGEX_EXCLUDE: "(coverage/.*|node_modules/.*|\.venv/.*|build/.*|dist/.*)"
+
+# Security scanning exclusions (handled by dedicated Security dimension)
+DISABLE:
+  - CREDENTIALS # Handled by Security dimension (Snyk/Semgrep)
+
+# Performance optimizations (PRD RNF-002)
+SHOW_ELAPSED_TIME: true
+PARALLEL: true
+LOG_LEVEL: INFO
 
 # Integration with project package manager (auto-detected)
 PRE_COMMANDS:
   - command: echo "🚀 QA System validation starting..."
-    cwd: "."
-
-# Disable tools that QA System handles directly (PRD architecture)
-DISABLE_LINTERS:
-  - COPYPASTE_JSCPD  # Handled by Design Metrics dimension
-  - SPELL_MISSPELL   # Handled by Error Detection dimension
-  - CREDENTIALS      # Handled by Security dimension (Snyk/Semgrep)
-
-# Security scanning exclusions (handled by dedicated Security dimension)
-DISABLE:
-  - CREDENTIALS  # Handled by Snyk and Semgrep in Security dimension
-
-# Output configuration for QA System integration
-MEGALINTER_CONFIG: .mega-linter.yml
+    cwd: '.'

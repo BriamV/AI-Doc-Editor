@@ -1,0 +1,165 @@
+{
+  "version": "0.1.0",
+  "system": {
+    "name": "QA System",
+    "description": "Sistema de Automatización QA para Desarrollo con Agentes IA",
+    "author": "AI-Doc-Editor Team"
+  },
+  "limits": {
+    "maxLinesOfCode": 212,
+    "testCoverageThreshold": 80,
+    "maxComplexity": 10,
+    "maxFileSize": "1MB"
+  },
+  "paths": {
+    "frontend": ["src/**/*.{ts,tsx,js,jsx}", "public/**/*.{js,json}"],
+    "backend": ["backend/**/*.py"],
+    "infrastructure": ["scripts/**/*.{cjs,js}", "tools/**/*.sh", "*.{js,cjs,ts}"],
+    "tests": ["src/**/*.test.{ts,tsx}", "backend/**/*test*.py", "cypress/**/*.ts"],
+    "docs": ["docs/**/*.md", "*.md"]
+  },
+  "tools": {
+    "format": {
+      "frontend": ["prettier"],
+      "backend": ["black", "prettier"],
+      "infrastructure": ["prettier"],
+      "all": ["prettier"]
+    },
+    "lint": {
+      "frontend": ["eslint"],
+      "backend": ["pylint"],
+      "infrastructure": ["eslint"],
+      "all": ["eslint"]
+    },
+    "test": {
+      "frontend": ["jest"],
+      "backend": ["pytest"],
+      "e2e": ["cypress"],
+      "all": ["jest"]
+    },
+    "security": {
+      "frontend": ["snyk"],
+      "backend": ["bandit", "snyk"],
+      "infrastructure": ["snyk"],
+      "all": ["snyk", "semgrep"]
+    },
+    "build": {
+      "frontend": ["npm", "tsc", "vite"],
+      "backend": ["pip", "python-compile"],
+      "infrastructure": ["npm", "tsc"],
+      "all": ["npm", "tsc"]
+    },
+    "data": {
+      "api": ["spectral"],
+      "backend": ["django-migrations"],
+      "infrastructure": ["spectral"],
+      "all": ["spectral", "django-migrations"]
+    }
+  },
+  "modes": {
+    "fast": {
+      "description": "Pre-commit validation mode",
+      "timeLimit": 10,
+      "onlyModified": true,
+      "skipTests": true,
+      "tools": ["format", "lint"]
+    },
+    "full": {
+      "description": "Complete validation mode",
+      "timeLimit": 300,
+      "onlyModified": false,
+      "skipTests": false,
+      "tools": ["format", "lint", "test", "security", "build", "data"]
+    },
+    "dod": {
+      "description": "Definition of Done validation",
+      "timeLimit": 180,
+      "onlyModified": true,
+      "skipTests": false,
+      "tools": ["format", "lint", "test", "security"]
+    }
+  },
+  "dodMappings": {
+    "code-review": ["format", "lint", "security"],
+    "all-tests": ["build", "test"],
+    "full-test": ["build", "test", "data"],
+    "testing": ["test"],
+    "integration": ["build", "test", "security", "data"],
+    "deployment": ["build", "test", "security", "data", "audit"],
+    "api-validation": ["format", "lint", "data"]
+  },
+  "reporting": {
+    "console": {
+      "enabled": true,
+      "format": "tree",
+      "colors": true,
+      "timestamps": true
+    },
+    "json": {
+      "enabled": true,
+      "file": "qa-report.json",
+      "includeDetails": true
+    }
+  },
+  "toolConfigurations": {
+    "npm": {
+      "commands": {
+        "_note": "Commands are now dynamically detected by PackageManagerDetector",
+        "install": "auto-detect",
+        "audit": "auto-detect",
+        "outdated": "auto-detect"
+      },
+      "timeout": 120000,
+      "workingDirectory": ".",
+      "requiredFiles": ["package.json"],
+      "optionalFiles": ["package-lock.json", "yarn.lock", "pnpm-lock.yaml"]
+    },
+    "tsc": {
+      "commands": {
+        "check": ["yarn", "exec", "tsc", "--noEmit"],
+        "build": ["yarn", "exec", "tsc", "--build"]
+      },
+      "timeout": 60000,
+      "workingDirectory": ".",
+      "requiredFiles": ["tsconfig.json"],
+      "optionalFiles": ["tsconfig.build.json"]
+    },
+    "pip": {
+      "commands": {
+        "install": ["pip", "install", "-r", "requirements.txt"],
+        "check": ["pip", "check"],
+        "outdated": ["pip", "list", "--outdated"]
+      },
+      "timeout": 180000,
+      "workingDirectory": ".",
+      "requiredFiles": ["requirements.txt"],
+      "optionalFiles": ["requirements-dev.txt", "pyproject.toml"]
+    },
+    "spectral": {
+      "commands": {
+        "lint": ["spectral", "lint"],
+        "validate": ["spectral", "lint", "--format", "json"]
+      },
+      "timeout": 30000,
+      "workingDirectory": ".",
+      "requiredFiles": [],
+      "supportedFormats": ["yaml", "yml", "json"],
+      "patterns": [
+        "**/openapi.{yaml,yml,json}",
+        "**/swagger.{yaml,yml,json}",
+        "**/api-spec.{yaml,yml,json}"
+      ]
+    },
+    "django-migrations": {
+      "commands": {
+        "check": ["python", "manage.py", "migrate", "--check"],
+        "showmigrations": ["python", "manage.py", "showmigrations"],
+        "makemigrations": ["python", "manage.py", "makemigrations", "--dry-run"]
+      },
+      "timeout": 60000,
+      "workingDirectory": "backend",
+      "requiredFiles": ["manage.py"],
+      "optionalFiles": ["requirements.txt", "pyproject.toml"]
+    }
+  }
+}

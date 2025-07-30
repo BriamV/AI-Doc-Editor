@@ -9,13 +9,13 @@
 **Objetivos Principales**:
 
 - Proporcionar una interfaz CLI intuitiva para ejecutar validaciones QA automáticas
-    
+
 - Detectar automáticamente el contexto de desarrollo y aplicar las validaciones apropiadas
-    
+
 - Soportar múltiples stacks tecnológicos (Frontend: TypeScript/React, Backend: Python/Databases)
-    
+
 - Facilitar la integración con pipelines CI/CD y flujos de trabajo de desarrollo
-    
+
 
 ### 2. Stakeholders & Roles
 
@@ -34,32 +34,32 @@
 **Incluido**:
 
 - **Capa de Orquestación Inteligente (CLI):** Un script de línea de comandos (yarn qa) que actúa como el cerebro del sistema.
-    
+
 - **Detección de Contexto:** Detección automática de rama, cambios (git diff), flags de la CLI y tipo de proyecto.
-    
+
 - **Mapeo Contexto-Dimensiones:** Lógica para mapear el contexto detectado a un plan de validación específico (conjunto de Dimensiones de Calidad).
-    
+
 - **Integración y Configuración Dinámica de Herramientas:** El sistema integrará y controlará un ecosistema de herramientas de calidad líderes (ej. MegaLinter, Snyk, Pytest, Jest), configurándolas dinámicamente en tiempo de ejecución para satisfacer los requisitos del plan de validación.
-    
+
 - **Validación Multi-Stack:** Soporte para Frontend (TypeScript/React), Backend (Python) e Infraestructura/Tooling (.cjs, .sh).
-    
+
 - **Soporte para Modos de Ejecución:** Implementación de los modos Automático, Por Tarea (DoD), Por Scope y Rápido (Pre-commit).
-    
+
 - **Reportes de Validación Unificados:** Generación de reportes estructurados y visuales en la consola, agregando los resultados de todas las herramientas ejecutadas.
-    
+
 - **Arquitectura Extensible:** Diseño que facilita la adición de nuevas herramientas o dimensiones a través de "wrappers" de herramientas.
-    
+
 
 **Excluido**:
 
 - **Desarrollo de Herramientas de Validación Propias:** El sistema no implementará sus propios linters, escáneres de seguridad o frameworks de testing. Se basa 100% en herramientas existentes del ecosistema.
-    
+
 - **UI Gráfica:** La interacción es exclusivamente a través de la CLI.
-    
+
 - **Modificación Automática de Código:** El sistema solo reporta problemas; no los corrige.
-    
+
 - **Gestión de Versiones del Código y Deployment.**
-    
+
 
 ### 4. Arquitectura de la Solución
 
@@ -68,12 +68,12 @@ El sistema se diseñará siguiendo un patrón de **Orquestador Inteligente sobr
 1. **CLI Entry Point (qa-cli.cjs):** Punto de entrada que parsea los argumentos de la línea de comandos.
 2. **Capa de Orquestación (Orchestrator.cjs):** Es el núcleo del sistema. No contiene lógica de validación, sino la lógica de control de flujo:
     - Utiliza un **Detector de Contexto** para entender el entorno de ejecución.
-    - Selecciona un **Plan de Ejecución** (un conjunto de dimensiones a validar) basado en el contexto y los modos de RF-005. 
+    - Selecciona un **Plan de Ejecución** (un conjunto de dimensiones a validar) basado en el contexto y los modos de RF-005.
     - Para cada dimensión en el plan, invoca al **Wrapper de Herramienta** correspondiente.
     - Recopila los resultados de todos los wrappers y los pasa a un **Generador de Reportes**.
 3. **Wrappers de Herramientas (tool-wrappers/):** Son módulos pequeños y especializados que actúan como una capa de abstracción (façade) sobre cada **herramienta principal orquestada**. Un MegaLinterWrapper.cjs sabrá cómo invocar a MegaLinter con las variables de entorno y flags correctos para una ejecución rápida o completa. Un JestWrapper.cjs sabrá cómo ejecutar Jest en un scope específico. Esto aísla al orquestador de los detalles de implementación de cada herramienta.
 4. **Herramientas Externas:** **MegaLinter, Snyk, Jest, Pytest, etc.** Son las "cajas negras" que realizan el trabajo pesado de validación. El sistema confía en ellas y se enfoca en orquestar su ejecución y unificar sus resultados.
-    
+
 
 Esta arquitectura maximiza la reutilización de herramientas probadas en la industria mientras nos da control total sobre el flujo de validación, cumpliendo con todos los requisitos funcionales.
 
@@ -82,42 +82,43 @@ Esta arquitectura maximiza la reutilización de herramientas probadas en la indu
 #### RF-001: Interfaz CLI Principal
 
 - El sistema debe exponer un comando principal (ej. `yarn qa`, `npm run qa` (configurable en `package.json`).
-    
+
 - Debe detectar automáticamente el contexto de ejecución
-    
+
 - Debe soportar flags para control explícito (--scope, --dimension, --fast)
-    
+
 
 #### RF-002: Detección de Contexto
 
 - Detectar tipo de rama (feature, refactor, fix, etc.)
-    
+
 - Identificar archivos modificados usando git diff (filtrar/ignorar archivos que hayan sido eliminados en la rama actual, como parte de los trabajos en la rama)
-    
+
 - Determinar stack tecnológico de archivos (TypeScript, Python, etc.)
-    
+
 - Mapear contexto a dimensiones de validación relevantes
-    
+
 
 #### RF-003: Dimensiones de Validación
 
 - **Error Detection**: Linting y formateo de código
-    
+
 - **Testing & Coverage**: Ejecución de pruebas y cobertura
-    
+
 - **Build & Dependencies**: Validación de build y dependencias
-    
+
 - **Design Metrics**: Métricas de calidad de código evaluadas con un sistema de semáforos para proporcionar una guía flexible y accionable. Los umbrales serán configurables a través de los archivos de configuración de las herramientas subyacentes (ej. `.mega-linter.yml`).
-	- **Complejidad Ciclomática**: - 🟢 **Verde (Pasa)**: ≤ 10 - 🟡 **Amarillo (Advertencia)**: 11 - 15 - 🔴 **Rojo (Falla)**: > 15
-	- **Líneas de Código (LOC) por Archivo**: - 🟢 **Verde (Pasa)**: ≤ 212 - 🟡 **Amarillo (Advertencia)**: 213 - 300 - 🔴 **Rojo (Falla)**: > 300
-	- **Longitud de Línea**: Se establece un límite estricto de 100 caracteres, con excepciones configurables para casos justificados.
-    
+  - **Complejidad Ciclomática**: - 🟢 **Verde (Pasa)**: ≤ 10 - 🟡 **Amarillo (Advertencia)**: 11 - 15 - 🔴 **Rojo (Falla)**: > 15
+  - **Líneas de Código (LOC) por Archivo**: - 🟢 **Verde (Pasa)**: ≤ 212 - 🟡 **Amarillo (Advertencia)**: 213 - 300 - 🔴 **Rojo (Falla)**: > 300
+  - **Longitud de Línea**: Se establece un límite estricto de 100 caracteres, con excepciones configurables para casos justificados.
+
 - **Security & Audit**: Análisis de vulnerabilidades
-    
+
 - **Data & Compatibility**: Validación de migraciones y APIs
-    
+
 
 #### RF-004: Validación por Stack
+
 
 La estrategia se basa en un orquestador inteligente que integra un motor de validación central (MegaLinter) y herramientas especializadas.
 
@@ -129,59 +130,59 @@ La estrategia se basa en un orquestador inteligente que integra un motor de vali
 | **Design Metrics** (Complejidad, LOC) | **MegaLinter** (usando los linters subyacentes) | Frontend (TS/React), Backend (Python) | **Complejidad Ciclomática:** 🟢(≤10), 🟡(11-15), 🔴(>15). <br> **LOC por Archivo:** 🟢(≤212), 🟡(213-300), 🔴(>300). <br> **Longitud de Línea:** Límite estricto de 100 caracteres (configurable). |
 | **Security & Audit** (SAST & SCA) | **Snyk** (Principal) <br> **Semgrep** (Complementario) | Frontend (TS/React), Backend (Python) | **Snyk:** Para análisis de vulnerabilidades en dependencias (SCA) y código (SAST). <br> **Semgrep:** Para reglas de seguridad personalizadas y patrones específicos no cubiertos por Snyk. |
 | **Data & Compatibility** (Migraciones, API) | **Herramientas de Migración** (ej. `manage.py makemigrations --check`) <br> **Spectral** (para OpenAPI) | Backend (Python) <br> API Specs (YAML/JSON) | Se validará que no haya migraciones de BD pendientes. Se usará Spectral para "lintear" las especificaciones de API y asegurar su consistencia. |
-    
+
 
 #### RF-005: Modos de Ejecución
 
 - **Automático**: Basado en contexto detectado.
-    
-    - **Mecanismo de Implementación**: El Orquestador consultará el tipo de rama (feature, refactor, fix) y aplicará un conjunto de dimensiones preconfigurado para cada tipo.
-        
+
+  - **Mecanismo de Implementación**: El Orquestador consultará el tipo de rama (feature, refactor, fix) y aplicará un conjunto de dimensiones preconfigurado para cada tipo.
+
 - **Por Tarea (Validación DoD)**: Validación contra un Definition of Done (DoD) explícito.
-    
-    - **Mecanismo de Activación**: Presencia de etiquetas en el nombre de la rama Git (ej: feature/T-02_dod-full-test) o un archivo qa.json en la rama.
-    - **Mapeo de DoD**: El sistema mapeará etiquetas a conjuntos de Dimensiones.
-        - dod:code-review: Ejecuta Error Detection, Design Metrics, Security & Audit.
-        - dod:all-tests: Ejecuta Build & Dependencies, Testing & Coverage, Data & Compatibility.
-            
-    - **Mecanismo de Implementación**: El Orquestador identificará la etiqueta DoD, seleccionará el plan de dimensiones correspondiente e invocará solo los wrappers de las herramientas necesarias (ej. para dod:code-review, llamará a los wrappers de MegaLinter y Snyk, pero no a los de Jest/Pytest).
-        
+
+  - **Mecanismo de Activación**: Presencia de etiquetas en el nombre de la rama Git (ej: feature/T-02_dod-full-test) o un archivo qa.json en la rama.
+  - **Mapeo de DoD**: El sistema mapeará etiquetas a conjuntos de Dimensiones.
+    - dod:code-review: Ejecuta Error Detection, Design Metrics, Security & Audit.
+    - dod:all-tests: Ejecuta Build & Dependencies, Testing & Coverage, Data & Compatibility.
+
+  - **Mecanismo de Implementación**: El Orquestador identificará la etiqueta DoD, seleccionará el plan de dimensiones correspondiente e invocará solo los wrappers de las herramientas necesarias (ej. para dod:code-review, llamará a los wrappers de MegaLinter y Snyk, pero no a los de Jest/Pytest).
+
 - **Por Scope**: Validación de directorios o archivos específicos (--scope <path>).
-    
-    - **Mecanismo de Implementación**: El Orquestador pasará el <path> proporcionado a cada wrapper de herramienta. Los wrappers, a su vez, lo usarán como argumento para la herramienta subyacente (ej. jest <path>, snyk test --file=<path>).
-        
+
+  - **Mecanismo de Implementación**: El Orquestador pasará el <path> proporcionado a cada wrapper de herramienta. Los wrappers, a su vez, lo usarán como argumento para la herramienta subyacente (ej. jest <path>, snyk test --file=<path>).
+
 - **Rápido (Modo Pre-commit)**: Ejecución optimizada para velocidad, ideal para pre-commit hooks. El rendimiento se medirá según los objetivos definidos en RNF-002, no por un tiempo absoluto.
-    
-    - **Alcance**: Se enfoca en los archivos modificados (git diff --cached), ignora archivos eliminados.
-    - **Dimensiones Incluidas**: Error Detection (linting y formato) y Design Metrics (solo las más rápidas).
-    - **Dimensiones Excluidas**: Se excluyen operaciones lentas como la ejecución completa de suites de tests (`Testing & Coverage`), análisis de dependencias (`Security & Audit`) y validaciones de build.
-    - **Mecanismo de Implementación**: El Orquestador:
-        
+
+  - **Alcance**: Se enfoca en los archivos modificados (git diff --cached), ignora archivos eliminados.
+  - **Dimensiones Incluidas**: Error Detection (linting y formato) y Design Metrics (solo las más rápidas).
+  - **Dimensiones Excluidas**: Se excluyen operaciones lentas como la ejecución completa de suites de tests (`Testing & Coverage`), análisis de dependencias (`Security & Audit`) y validaciones de build.
+  - **Mecanismo de Implementación**: El Orquestador:
+
         1. Detectará el flag --fast o el contexto de pre-commit.
         2. Obtendrá la lista de archivos en staging.
         3. Invocará al wrapper de MegaLinter, que a su vez ejecutará la herramienta con variables de entorno para optimizar la velocidad (ej. VALIDATE_ONLY_CHANGED_FILES=true, DISABLE_LINTERS=...) y pasándole la lista de archivos.
         4. No se invocarán los wrappers de Snyk, Jest, Pytest ni los de validación de build.
-    
+
 
 #### RF-006: Reportes y Salida
 
 - El sistema debe generar una salida en la consola que sea informativa, estructurada y fácil de leer, permitiendo a los usuarios identificar rápidamente el progreso, los problemas y los tiempos de ejecución.
-    
+
 - La salida debe seguir un formato visual de árbol, ser minimalista pero accionable.
-    
+
 - Se debe mostrar la duración de cada dimensión principal y el tiempo total de la validación.
-    
+
 - **Ejemplo de Salida en Consola:**
-    
+
     Generated code
-    
+
           `[ℹ️] QA System: Iniciando validación completa...  [DETECCIÓN DE CONTEXTO] (en 0.1s) └── ✅ Contexto detectado: Desarrollo de Tarea (T-02)     └── Mapeando a Dimensiones de Calidad: Error Detection, Testing, Security & Audit  [MOTOR DE VALIDACIÓN] ├── [⚙️] Ejecutando Dimensión: Error Detection... │   ├── 🟡 WARNING: src/components/NewFeature.jsx │   │   └── Línea 42: La variable 'userData' se asigna pero nunca se usa (no-unused-vars). │   └── Revisión de Frontend completada (en 1.8s) ├── ✅ Dimensión: Error Detection (Completada con advertencias en 2.5s) │ ├── [⚙️] Ejecutando Dimensión: Testing & Coverage... │   ├── Revisión de Backend completada (en 3.1s) │   └── Revisión de Frontend completada (en 4.2s) ├── ✅ Dimensión: Testing & Coverage (Completada en 7.3s) │ ├── [⚙️] Ejecutando Dimensión: Security & Audit... │   └── ❌ ERROR: yarn.lock │       └── Dependencia 'left-pad@1.3.0': Vulnerabilidad crítica de seguridad encontrada (CVE-2023-9999). └── ❌ Dimensión: Security & Audit (Fallida en 1.2s)  [RESUMEN FINAL] (Duración total: 11.1s) └── ❌ VALIDACIÓN FALLIDA      • Errores: 1     • Advertencias: 1      Archivos con problemas:     - ❌ yarn.lock (1 error)     - 🟡 src/components/NewFeature.jsx (1 advertencia)      Revisa los errores críticos para poder continuar.`
         
-    
+
 - **Códigos de Salida**: El proceso debe finalizar con códigos de salida estándar (0 para éxito, >0 para fallo) para facilitar la integración en scripts y pipelines CI/CD.
-    
+
 - **Jerarquía de Estados**: Un solo Error debe hacer que toda la validación falle. Si no hay errores pero sí Warnings, la validación puede considerarse completada con advertencias.
-    
+
 
 #### RF-007: Verificación de Entorno y Dependencias
 - Antes de ejecutar las validaciones, el sistema debe verificar la **presencia** de las herramientas externas requeridas (ej: `megalinter`, `snyk`, `pytest`).
@@ -196,23 +197,23 @@ La estrategia se basa en un orquestador inteligente que integra un motor de vali
 #### **RF-009: Interfaz de Ayuda y Auto-documentación**
 
 - **Objetivo**: Proporcionar a los usuarios una forma rápida y directa de entender cómo usar la herramienta, sus comandos, flags y modos de ejecución.
-    
+
 - **Requisito**: El sistema debe exponer un mecanismo de ayuda estándar en la CLI.
-    
-    - Al ejecutar el comando con el flag --help (o -h), se debe mostrar en la consola un mensaje de ayuda claro y estructurado.
-        
-    - El mensaje de ayuda debe listar y describir:
-        
-        - El uso básico del comando (ej. yarn qa [options]).
-            
-        - Todos los flags disponibles (ej. --scope, --dimension, --fast, --report-issue) con una breve explicación de su función.
-            
-        - Los modos de ejecución principales y cómo se activan (si es aplicable a través de flags).
-            
-        - Ejemplos de uso comunes para ilustrar la funcionalidad.
-            
+
+  - Al ejecutar el comando con el flag --help (o -h), se debe mostrar en la consola un mensaje de ayuda claro y estructurado.
+
+  - El mensaje de ayuda debe listar y describir:
+
+    - El uso básico del comando (ej. yarn qa [options]).
+
+    - Todos los flags disponibles (ej. --scope, --dimension, --fast, --report-issue) con una breve explicación de su función.
+
+    - Los modos de ejecución principales y cómo se activan (si es aplicable a través de flags).
+
+    - Ejemplos de uso comunes para ilustrar la funcionalidad.
+
 - **Mantenibilidad**: La información de ayuda debe generarse dinámicamente a partir de la configuración de los comandos para evitar que quede desactualizada a medida que se añaden o modifican opciones.
-    
+
 
 **Ejemplo de Salida del Comando de Ayuda:**
 
@@ -259,46 +260,46 @@ Ejemplos:
 #### RNF-001: Modularidad
 
 - **Límite de LOC**: Como norma general, ningún archivo debería exceder las 212 líneas de código. Este límite, derivado de estándares internos, promueve la alta cohesión y el Principio de Responsabilidad Única (SRP). Las excepciones deben ser justificadas y documentadas.
-    
+
 
 #### RNF-002: Performance
 
 - **Enfoque de Medición Relativa**: El rendimiento se medirá en relación con una baseline para evitar metas absolutas que no consideran las variaciones de hardware o la complejidad del código.
 - **Proyecto de Referencia para Benchmarking**: Se utilizará un proyecto de referencia interno para establecer baselines de rendimiento y validar la escalabilidad. Características: Monorepo con ~150k LOC (60% TypeScript/React, 40% Python), ~2000 dependencias, ~5000 tests.
 - **Objetivos de Performance**:
-	- **Regresión de Performance**: Una ejecución sobre un conjunto de cambios no debe exceder en más de un 20% el tiempo de la baseline establecida para un scope comparable.
-	- **Modo Rápido (Guía)**: En el proyecto de referencia y bajo hardware estándar, el tiempo de ejecución para cambios típicos (hasta 10 archivos) se monitoreará para mantenerse en un rango competitivo (ej. P95 < 15 segundos), sirviendo como un indicador de salud y no como un criterio de fallo estricto.
-	- **Escalabilidad**: El tiempo de ejecución debe escalar de forma predecible (sub-lineal o casi-lineal) con el número de archivos analizados. Se debe favorecer la ejecución paralela de validaciones independientes.
-    
+  - **Regresión de Performance**: Una ejecución sobre un conjunto de cambios no debe exceder en más de un 20% el tiempo de la baseline establecida para un scope comparable.
+  - **Modo Rápido (Guía)**: En el proyecto de referencia y bajo hardware estándar, el tiempo de ejecución para cambios típicos (hasta 10 archivos) se monitoreará para mantenerse en un rango competitivo (ej. P95 < 15 segundos), sirviendo como un indicador de salud y no como un criterio de fallo estricto.
+  - **Escalabilidad**: El tiempo de ejecución debe escalar de forma predecible (sub-lineal o casi-lineal) con el número de archivos analizados. Se debe favorecer la ejecución paralela de validaciones independientes.
+
 
 #### RNF-003: Extensibilidad
 
 - Agregar nuevo lenguaje/herramienta sin modificar código existente
-    
+
 - Configuración declarativa para nuevas validaciones
-    
+
 - Plugins para dimensiones personalizadas
-    
+
 
 #### RNF-004: Compatibilidad
 
 - Node.js 18+
-    
+
 - **Sistemas Operativos**:
-	- **Tier 1 (Soporte completo y probado)**: Ubuntu 20.04+, macOS 12+, Windows 11 con WSL2.
-	- **Tier 2 (Soporte de mejor esfuerzo)**: Windows 11 nativo (PowerShell 7+).
-    
+  - **Tier 1 (Soporte completo y probado)**: Ubuntu 20.04+, macOS 12+, Windows 11 con WSL2.
+  - **Tier 2 (Soporte de mejor esfuerzo)**: Windows 11 nativo (PowerShell 7+).
+
 - Integración con GitHub Actions, GitLab CI, Jenkins
-    
+
 
 #### RNF-005: Mantenibilidad
 
 - Cobertura de pruebas >80%
-    
+
 - Documentación inline para cada módulo
-    
+
 - Logs estructurados para debugging, siguiendo el formato visual definido en RF-006.
-    
+
 
 ### 7. Supuestos y Dependencias
 
@@ -306,9 +307,9 @@ Ejemplos:
 
 - Los proyectos usan Git para control de versiones.
 - El entorno de ejecución tiene Node.js 18+ disponible.
-- El proyecto utiliza un gestor de paquetes de Node.js estándar (npm, yarn, pnpm) y define los comandos de calidad como scripts en `package.json`.    
+- El proyecto utiliza un gestor de paquetes de Node.js estándar (npm, yarn, pnpm) y define los comandos de calidad como scripts en `package.json`.
 - Estructura de proyecto estándar (frontend/, backend/, scripts/)
-    
+
 
 **Dependencias**:
 
@@ -316,7 +317,7 @@ Ejemplos:
 - Node.js 18+ runtime
 - Herramientas externas de validación por stack
 - Sistema de archivos con permisos de lectura
-    
+
 
 ### 8. Roadmap Iterativo (Releases)
 
@@ -360,7 +361,7 @@ Ejemplos:
 - La salida del logger cumple con el formato especificado en RF-006
 - Sin dependencias circulares
 - Documentación actualizada
-    
+
 
 #### Validación (¿Construimos el producto correcto?)
 
@@ -369,7 +370,7 @@ Ejemplos:
 - Detecta correctamente errores inyectados intencionalmente
 - Integración exitosa con pipelines existentes
 - Feedback positivo de usuarios piloto
-    
+
 
 ### 10. KPIs & Analítica
 
@@ -403,7 +404,7 @@ Ejemplos:
 - **Configuración por proyecto**: Extender y refinar la configuración nativa de las herramientas orquestadoras (ej. `.mega-linter.yml`, `.snyk`).
 - **Modo watch**: Validación continua durante desarrollo
 - **Integración con servicios cloud**: AWS CodeGuru, SonarCloud
-    
+
 
 ### 13. Aprobación
 
@@ -420,25 +421,25 @@ Ejemplos:
 ## Anexo A – Glosario
 
 - **Agente de Programación IA**: Sistema de inteligencia artificial capaz de generar código automáticamente
-    
+
 - **CLI**: Command Line Interface - Interfaz de línea de comandos
-    
+
 - **Contexto**: Estado actual del desarrollo (rama, archivos modificados, tipo de cambio)
-    
+
 - **Dimensión**: Categoría de validación (testing, seguridad, etc.)
-    
+
 - **DoD**: Definition of Done - Criterios de aceptación para completar una tarea
-    
+
 - **LOC**: Lines of Code - Líneas de código
-    
+
 - **Scope**: Alcance de validación (archivos/directorios específicos)
-    
+
 - **Stack**: Conjunto de tecnologías (Frontend/Backend)
-    
+
 - **SOLID**: Principios de diseño orientado a objetos
-    
+
 - **QA Gate**: Punto de control de calidad que debe pasar el código
-    
+
 
 ---
 

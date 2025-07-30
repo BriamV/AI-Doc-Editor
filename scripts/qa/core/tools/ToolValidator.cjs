@@ -1,7 +1,7 @@
 /**
  * Tool Validator - Single Responsibility: Tool Availability & Validation
  * Extracted from PlanSelector to follow SRP
- * Includes MegaLinter and Snyk prototypes for early validation
+ * Direct linter validation and tool availability checking
  */
 
 const { execSync } = require('child_process');
@@ -16,18 +16,21 @@ class ToolValidator {
     // Systematic tool type classifier
     this.toolTypeClassifier = new ToolTypeClassifier(config, logger);
     
+    // Availability cache for tool checks
+    this.availabilityCache = new Map();
+    
     // Base tool command mappings (extensible)
     this.baseToolCommands = {
-      prettier: 'npx prettier --version',
+      prettier: 'yarn exec prettier --version',
       black: 'black --version',
-      eslint: 'npx eslint --version',
+      eslint: 'yarn exec eslint --version',
       pylint: 'pylint --version',
-      jest: 'npx jest --version',
+      jest: 'yarn exec jest --version',
       pytest: 'pytest --version',
       snyk: 'snyk --version',
       bandit: 'bandit --version',
-      tsc: 'npx tsc --version',
-      vite: 'npx vite --version',
+      tsc: 'yarn exec tsc --version',
+      vite: 'yarn exec vite --version',
       npm: 'npm --version',
       yarn: 'yarn --version',
       pnpm: 'pnpm --version',
@@ -68,24 +71,17 @@ class ToolValidator {
    * Check if a specific tool is available (delegate to ToolChecker directly)
    */
   async checkToolAvailability(toolName) {
-    // ARCHITECTURAL FIX: Use ToolChecker directly to avoid timing issues
-    // EnvironmentChecker.isToolAvailable() requires checkEnvironment() to be completed first
-    const toolChecker = this.environmentChecker.toolChecker;
+    // ARCHITECTURAL FIX: Use SharedToolDetectionService to eliminate duplicate detection
+    // This prevents the double detection problem: EnvironmentChecker + ToolValidator
+    const sharedService = this.environmentChecker.getSharedToolService();
     
-    // Get tool configuration from EnvironmentChecker
-    const toolConfig = this.environmentChecker.optionalTools[toolName] || 
-                      this.environmentChecker.requiredTools[toolName];
-    
-    if (!toolConfig) {
-      return false;
+    if (!sharedService) {
+      this.logger.warn('SharedToolDetectionService not available, falling back to direct check');
+      return this.environmentChecker.isToolAvailable(toolName);
     }
     
-    try {
-      const result = await toolChecker.checkTool(toolName, toolConfig);
-      return result.available;
-    } catch (error) {
-      return false;
-    }
+    // Return cached result from SharedService - eliminates duplicate tool detection
+    return sharedService.isToolAvailable(toolName);
   }
   
   /**
@@ -105,17 +101,17 @@ class ToolValidator {
         case 'package-manager':
           return `${toolName} --version`;
         case 'compiler':
-          return toolName.startsWith('npx') ? toolName + ' --version' : `npx ${toolName} --version`;
+          return toolName.startsWith('yarn') ? toolName + ' --version' : `yarn exec ${toolName} --version`;
         case 'bundler':
-          return `npx ${toolName} --version`;
+          return `yarn exec ${toolName} --version`;
         case 'dependency-manager':
           return `${toolName} --version`;
         case 'linter':
-          return `npx ${toolName} --version`;
+          return `yarn exec ${toolName} --version`;
         case 'formatter':
-          return `npx ${toolName} --version`;
+          return `yarn exec ${toolName} --version`;
         case 'test-runner':
-          return `npx ${toolName} --version`;
+          return `yarn exec ${toolName} --version`;
         case 'security-scanner':
           return `${toolName} --version`;
         case 'dimension':
@@ -131,46 +127,6 @@ class ToolValidator {
     }
   }
   
-  /**
-   * Prototype: MegaLinter integration check
-   * RF-006: Enhanced QA Tools Integration
-   */
-  async checkMegaLinterAvailability() {
-    const cacheKey = 'megalinter';
-    
-    if (this.availabilityCache.has(cacheKey)) {
-      return this.availabilityCache.get(cacheKey);
-    }
-    
-    try {
-      // Check for multiple MegaLinter installation methods
-      const commands = [
-        'which megalinter',
-        'which mega-linter',
-        'docker images | grep megalinter',
-        'npx mega-linter --version'
-      ];
-      
-      for (const command of commands) {
-        try {
-          execSync(command, { stdio: 'ignore', timeout: 3000 });
-          this.logger.info('MegaLinter detected, can be used for enhanced validation');
-          this.availabilityCache.set(cacheKey, true);
-          return true;
-        } catch (error) {
-          // Continue to next command
-        }
-      }
-      
-      this.logger.warn('MegaLinter not available, using individual tools');
-      this.availabilityCache.set(cacheKey, false);
-      return false;
-    } catch (error) {
-      this.logger.error(`Error checking MegaLinter: ${error.message}`);
-      this.availabilityCache.set(cacheKey, false);
-      return false;
-    }
-  }
   
   /**
    * Prototype: Snyk integration check

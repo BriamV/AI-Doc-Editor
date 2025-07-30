@@ -1,0 +1,45 @@
+# Spectral OpenAPI Linting Configuration
+# Aligned with PRD RF-003 Design Metrics
+
+extends: ["@stoplight/spectral-core"]
+
+rules:
+  # Core OpenAPI rules
+  openapi-tags: true
+  openapi-operation-operationId: true
+  openapi-operation-description: true
+  openapi-operation-tags: true
+  openapi-parameters: true
+  openapi-no-unevaluated-properties: true
+  
+  # Custom rules aligned with PRD RF-003 quality standards
+  operation-description-length:
+    description: Operation descriptions should be meaningful
+    message: "Operation description should be at least 10 characters"
+    given: "$.paths.*[get,post,put,patch,delete].description"
+    then:
+      function: length
+      functionOptions:
+        min: 10
+
+  schema-names-pascal-case:
+    description: Schema names should be PascalCase
+    message: "Schema names should be PascalCase"  
+    given: "$.components.schemas.*~"
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[A-Z][a-zA-Z0-9]*$"
+
+  # API versioning consistency
+  info-version-format:
+    description: API version should follow semantic versioning
+    message: "API version should follow semver format (e.g., 1.0.0)"
+    given: "$.info.version"
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+
+# File pattern support
+formats: ["oas2", "oas3", "oas3.0", "oas3.1", "asyncapi2"]

@@ -3,7 +3,7 @@
  * T-20: Lean orchestrator using Strategy Pattern + Dependency Injection
  * 
  * Orchestrates mode handlers and tool components for plan selection
- * Reduced from 362 LOC → 186 LOC following SOLID principles
+ * Reduced from 362 LOC → 254 LOC following SOLID principles
  */
 
 const ModeDetector = require('./modes/ModeDetector.cjs');
@@ -18,9 +18,10 @@ const ToolConfigurator = require('./tools/ToolConfigurator.cjs');
 const ToolValidator = require('./tools/ToolValidator.cjs');
 
 class PlanSelector {
-  constructor(config, logger) {
+  constructor(config, logger, environmentChecker) {
     this.config = config;
     this.logger = logger;
+    this.environmentChecker = environmentChecker;
     
     // Initialize mode handlers (Strategy Pattern)
     this.modeHandlers = {
@@ -34,7 +35,7 @@ class PlanSelector {
     // Initialize tool components (Dependency Injection)
     this.toolMapper = new ToolMapper(config, logger);
     this.toolConfigurator = new ToolConfigurator(config, logger);
-    this.toolValidator = new ToolValidator(config, logger);
+    this.toolValidator = new ToolValidator(config, logger, environmentChecker);
   }
   
   /**
@@ -46,15 +47,17 @@ class PlanSelector {
     
     // 1. Determine execution mode and scope
     const mode = ModeDetector.determineMode(options, context);
-    const scope = ModeDetector.determineScope(context, options);
+    
+    // 2. Determine scope using existing architecture (SOLID: ScopeMode handles all scope logic)
+    const scope = options.scope || ModeDetector.determineScope(context, options);
     
     this.logger.info(`Plan selection: ${mode} mode, ${scope} scope`);
     
-    // 2. Select dimensions using appropriate mode handler
+    // 3. Select dimensions using appropriate mode handler
     const dimensions = await this._selectDimensionsForMode(mode, context, options);
     
-    // 3. Map dimensions to tools
-    const tools = this.toolMapper.mapDimensionsToTools(dimensions, scope);
+    // 4. Map dimensions to tools (mode-aware)
+    const tools = this.toolMapper.mapDimensionsToTools(dimensions, scope, mode);
     
     // 4. Configure tools with mode-specific settings
     const configuredTools = await this.toolConfigurator.configureTools(tools, mode);
@@ -240,12 +243,6 @@ class PlanSelector {
     };
   }
   
-  /**
-   * Legacy compatibility methods (maintain T-20 API)
-   */
-  async checkMegaLinterAvailability() {
-    return await this.toolValidator.checkMegaLinterAvailability();
-  }
   
   async checkSnykAvailability() {
     return await this.toolValidator.checkSnykAvailability();

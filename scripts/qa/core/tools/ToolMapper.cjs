@@ -51,7 +51,7 @@ class ToolMapper {
   /**
    * Map dimensions to specific tools based on scope
    */
-  mapDimensionsToTools(dimensions, scope) {
+  mapDimensionsToTools(dimensions, scope, mode = 'automatic') {
     const tools = [];
     const configTools = this.config.get('tools', {});
     
@@ -62,6 +62,41 @@ class ToolMapper {
         continue;
       }
       
+      // FIXED: In dimension mode, map to real tools from config instead of creating virtual tools
+      if (mode === 'dimension') {
+        // Get tools for specific scope, fallback to 'all' (reusing existing logic)
+        let scopeTools = dimensionConfig[scope] || dimensionConfig['all'] || [];
+        
+        // Ensure it's an array (reusing existing validation)
+        if (!Array.isArray(scopeTools)) {
+          scopeTools = [];
+        }
+        
+        // Map each real tool in this dimension (reusing existing tool creation pattern)
+        for (const tool of scopeTools) {
+          const toolConfig = {
+            scope: scope,
+            dimension: dimension,
+            dimensionMode: true, // Maintain backward compatibility flag
+            args: this._getToolArgs(tool, dimension, scope), // Reuse existing method
+            timeout: this.config.get(`toolConfig.${tool}.timeout`, 44000) // Use tool-specific timeout
+          };
+          
+          const toolObj = {
+            name: tool, // Fixed: Use real tool name (e.g., 'eslint', not 'lint')
+            dimension: dimension,
+            scope: scope,
+            config: toolConfig
+          };
+          
+          tools.push(toolObj);
+        }
+        
+        this.logger.info(`Dimension mode: Mapped dimension '${dimension}' to ${scopeTools.length} real tools for scope: ${scope}`);
+        continue;
+      }
+      
+      // STANDARD MODE: Map to individual tools
       // Get tools for specific scope, fallback to 'all'
       let scopeTools = dimensionConfig[scope] || dimensionConfig['all'] || [];
       
@@ -89,7 +124,7 @@ class ToolMapper {
       }
     }
     
-    this.logger.info(`Mapped ${dimensions.length} dimensions to ${tools.length} tools for scope: ${scope}`);
+    this.logger.info(`Mapped ${dimensions.length} dimensions to ${tools.length} tools for scope: ${scope} (mode: ${mode})`);
     return tools;
   }
   
@@ -103,6 +138,23 @@ class ToolMapper {
     
     // Ensure args is always an array
     return Array.isArray(args) ? args : [];
+  }
+  
+  /**
+   * Get dimension-specific arguments (for dimension mode)
+   */
+  _getDimensionArgs(dimension, scope) {
+    const dimensionConfig = this.config.get(`toolConfig.${dimension}`, {}) || {};
+    const args = (dimensionConfig && dimensionConfig.args) ? dimensionConfig.args : [];
+    
+    // Add scope-specific args if available
+    const scopeArgs = this.config.get(`toolConfig.${dimension}.${scope}`, {}) || {};
+    const scopeArgsArray = (scopeArgs && scopeArgs.args) ? scopeArgs.args : [];
+    
+    // Combine dimension and scope args
+    const combinedArgs = [...(Array.isArray(args) ? args : []), ...(Array.isArray(scopeArgsArray) ? scopeArgsArray : [])];
+    
+    return combinedArgs;
   }
   
   /**

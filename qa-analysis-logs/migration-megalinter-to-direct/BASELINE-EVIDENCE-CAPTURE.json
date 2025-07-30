@@ -1,0 +1,32 @@
+{
+  "capture_date": "2025-07-24",
+  "source": "qa-analysis-logs/qa-levels/nivel1-solid/nivel1-analysis-meticuloso.log",
+  "solid_metrics": {
+    "SRP": { "pass": 39, "fail": 15, "total": 54 },
+    "OCP": { "pass": 54, "fail": 0, "total": 54 },
+    "LSP": { "pass": 54, "fail": 0, "total": 54 },
+    "ISP": { "pass": 50, "fail": 4, "total": 54 },
+    "DIP": { "pass": 54, "fail": 0, "total": 54 }
+  },
+  "performance_baseline": {
+    "startup_time": "30-60s",
+    "resource_usage": "4GB Docker",
+    "source": "qa-analysis-logs/MEGALINTER-vs-DIRECT-LINTERS-UNIFIED-ANALYSIS.md"
+  },
+  "rf003_status": {
+    "error_detection": "FAILED - MegaLinter dependency missing",
+    "testing_coverage": "FAILED - Jest execution failed", 
+    "build_dependencies": "FAILED - template resolution bug",
+    "security_audit": "FAILED - Snyk execution failed",
+    "data_compatibility": "PASSED - no execution groups",
+    "design_metrics": "FAILED - MegaLinter missing",
+    "source": "qa-analysis-logs/qa-levels/nivel4-requirements/rf003-dimensiones/qa-vs-direct-comparison.log"
+  },
+  "target_improvements": {
+    "solid_srp": "15 → 0 failures",
+    "solid_isp": "4 → 0 failures", 
+    "startup_time": "30-60s → <5s",
+    "resources": "4GB → <100MB",
+    "rf003_dimensions": "4 failed → all pass"
+  }
+}
