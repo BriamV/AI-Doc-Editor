@@ -50,6 +50,10 @@ class WrapperCoordinator extends EventEmitter {
     this.executionState.currentPlan = plan;
     
     this.logger.info(`Starting wrapper execution: ${plan.tools.length} tools, ${plan.mode} mode`);
+    this.logger.info(`🚀 WrapperCoordinator: Plan received with ${plan.tools.length} tools`);
+    plan.tools.forEach((tool, i) => {
+      this.logger.info(`🚀 Tool ${i + 1}: ${tool.name} (dimension: ${tool.dimension})`);
+    });
     
     try {
       // Validate plan
@@ -60,6 +64,7 @@ class WrapperCoordinator extends EventEmitter {
       
       // Plan execution strategy
       const executionGroups = this.executionPlanner.planExecutionStrategy(plan);
+      this.logger.info(`🚀 WrapperCoordinator: Created ${executionGroups.length} execution groups`);
       
       // Execute groups
       const results = await this._executeGroups(executionGroups);
@@ -108,21 +113,25 @@ class WrapperCoordinator extends EventEmitter {
     
     for (const group of groups) {
       this.logger.info(`Executing ${group.dimension} dimension: ${group.tools.length} tools`);
+      this.logger.info(`🚀 WrapperCoordinator: Group details - parallel: ${group.parallel}, tools: ${group.tools.map(t => t.name).join(', ')}`);
       
       let groupResults;
       
       if (group.parallel && group.tools.length > 1) {
+        this.logger.info(`🚀 WrapperCoordinator: Calling executeToolsInParallel for ${group.tools.length} tools`);
         groupResults = await this.executionController.executeToolsInParallel(
           group.tools, 
           this.wrapperManager
         );
       } else {
+        this.logger.info(`🚀 WrapperCoordinator: Calling executeToolsSequentially for ${group.tools.length} tools`);
         groupResults = await this.executionController.executeToolsSequentially(
           group.tools, 
           this.wrapperManager
         );
       }
       
+      this.logger.info(`🚀 WrapperCoordinator: Group execution completed with ${groupResults.length} results`);
       allResults.push(...groupResults);
       
       // Check for critical failures

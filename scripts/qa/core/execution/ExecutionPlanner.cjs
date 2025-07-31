@@ -48,12 +48,14 @@ class ExecutionPlanner {
     const grouped = {};
     
     for (const tool of tools) {
+      this.logger.info(`📋 ExecutionPlanner: Processing tool ${tool.name} (dimension: ${tool.dimension})`);
       if (!grouped[tool.dimension]) {
         grouped[tool.dimension] = [];
       }
       grouped[tool.dimension].push(tool);
     }
     
+    this.logger.info(`📋 ExecutionPlanner: Grouped ${tools.length} tools into dimensions: ${Object.keys(grouped).join(', ')}`);
     return grouped;
   }
   

@@ -16,7 +16,18 @@ class WrapperFactory {
    */
   _registerDefaultWrappers() {
     // Lazy loading - only register paths, not require() them yet
+    
+    // Orchestrator wrapper (coordinates multiple linters)
     this.wrapperClasses.set('direct-linters', () => require('../wrappers/DirectLintersOrchestrator.cjs'));
+    
+    // Individual linter wrappers (for direct tool access)
+    this.wrapperClasses.set('eslint', () => require('../wrappers/ESLintWrapper.cjs'));
+    this.wrapperClasses.set('ruff', () => require('../wrappers/RuffWrapper.cjs'));
+    this.wrapperClasses.set('black', () => require('../wrappers/BlackWrapper.cjs'));
+    this.wrapperClasses.set('prettier', () => require('../wrappers/PrettierWrapper.cjs'));
+    this.wrapperClasses.set('spectral', () => require('../wrappers/SpectralWrapper.cjs'));
+    
+    // Other specialized wrappers
     this.wrapperClasses.set('snyk', () => require('../wrappers/SnykWrapper.cjs'));
     this.wrapperClasses.set('semgrep', () => require('../wrappers/SemgrepWrapper.cjs'));
     this.wrapperClasses.set('jest', () => require('../wrappers/JestWrapper.cjs'));
@@ -71,6 +82,18 @@ class WrapperFactory {
     
     return {
       async execute(command, args = []) {
+        // Check if we have too many file arguments (Windows ENAMETOOLONG fix)
+        const MAX_COMMAND_LENGTH = 8000; // Windows command line limit is ~8192 chars
+        const commandString = `${command} ${args.join(' ')}`;
+        
+        if (commandString.length > MAX_COMMAND_LENGTH && this._hasFileArguments(args)) {
+          return await this._executeBatched(command, args);
+        }
+        
+        return await this._executeSingle(command, args);
+      },
+
+      async _executeSingle(command, args = []) {
         return new Promise((resolve, reject) => {
           // CRITICAL FIX: Use direct Node.js execution for local tools to avoid symlink issues
           const localTools = {
@@ -96,7 +119,7 @@ class WrapperFactory {
             finalArgs = args;
           }
           
-          const process = spawn(finalCommand, finalArgs, { 
+          const childProcess = spawn(finalCommand, finalArgs, { 
             stdio: ['pipe', 'pipe', 'pipe'],
             shell: true,
             cwd: process.cwd()
@@ -105,10 +128,10 @@ class WrapperFactory {
           let stdout = '';
           let stderr = '';
           
-          process.stdout.on('data', (data) => stdout += data.toString());
-          process.stderr.on('data', (data) => stderr += data.toString());
+          childProcess.stdout.on('data', (data) => stdout += data.toString());
+          childProcess.stderr.on('data', (data) => stderr += data.toString());
           
-          process.on('close', (code) => {
+          childProcess.on('close', (code) => {
             resolve({
               success: code === 0,
               stdout: stdout.trim(),
@@ -117,8 +140,78 @@ class WrapperFactory {
             });
           });
           
-          process.on('error', reject);
+          childProcess.on('error', reject);
         });
+      },
+
+      async _executeBatched(command, args) {
+        // Separate file arguments from other arguments
+        const { fileArgs, otherArgs } = this._separateFileArgs(args);
+        
+        if (fileArgs.length === 0) {
+          return await this._executeSingle(command, args);
+        }
+
+        // Batch files to avoid command line length limits
+        const BATCH_SIZE = 50; // Process 50 files at a time
+        const batches = [];
+        for (let i = 0; i < fileArgs.length; i += BATCH_SIZE) {
+          batches.push(fileArgs.slice(i, i + BATCH_SIZE));
+        }
+
+        // Execute each batch and combine results
+        const results = [];
+        let allSuccess = true;
+        let combinedStdout = '';
+        let combinedStderr = '';
+
+        for (const batch of batches) {
+          const batchArgs = [...otherArgs, ...batch];
+          const result = await this._executeSingle(command, batchArgs);
+          
+          results.push(result);
+          allSuccess = allSuccess && result.success;
+          
+          if (result.stdout) {
+            combinedStdout += (combinedStdout ? '\n' : '') + result.stdout;
+          }
+          if (result.stderr) {
+            combinedStderr += (combinedStderr ? '\n' : '') + result.stderr;
+          }
+        }
+
+        return {
+          success: allSuccess,
+          stdout: combinedStdout,
+          stderr: combinedStderr,
+          exitCode: allSuccess ? 0 : 1,
+          batched: true,
+          batchCount: batches.length
+        };
+      },
+
+      _hasFileArguments(args) {
+        // Check if args contain file paths (simple heuristic)
+        return args.some(arg => 
+          !arg.startsWith('-') && 
+          (arg.includes('.') && (arg.includes('/') || arg.includes('\\')))
+        );
+      },
+
+      _separateFileArgs(args) {
+        const fileArgs = [];
+        const otherArgs = [];
+        
+        for (const arg of args) {
+          if (!arg.startsWith('-') && 
+              (arg.includes('.') && (arg.includes('/') || arg.includes('\\')))) {
+            fileArgs.push(arg);
+          } else {
+            otherArgs.push(arg);
+          }
+        }
+        
+        return { fileArgs, otherArgs };
       }
     };
   }

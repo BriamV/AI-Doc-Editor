@@ -45,6 +45,7 @@ class FastMode {
   /**
    * Apply fast mode optimizations to plan (RF-005)
    * Configure direct linters for optimized speed with staged files only
+   * FIXED: Pass plan scope to _ensureEssentialDirectLinters
    */
   applyOptimizations(plan) {
     // Migration: Use direct linters for <5s performance target
@@ -85,15 +86,23 @@ class FastMode {
     });
     
     // RF-005: Fast mode should use direct linters (ESLint, Prettier, Black, Ruff)
-    const allowedTools = ['eslint', 'prettier', 'black', 'ruff', 'spectral'];
+    // FIXED: Filter tools based on scope compatibility, not just tool names
+    const actualScope = plan.scope || 'all';
     plan.tools = plan.tools.filter(tool => {
-      const isAllowed = allowedTools.includes(tool.name);
+      const isAllowed = ['eslint', 'prettier', 'black', 'ruff', 'spectral'].includes(tool.name);
+      const isRelevantForScope = this._isToolRelevantForScope(tool.name, actualScope);
       
       if (!isAllowed) {
         this.logger.info(`Fast mode (RF-005): Excluding ${tool.name} - using direct linters for speed`);
+        return false;
       }
       
-      return isAllowed;
+      if (!isRelevantForScope) {
+        this.logger.info(`Fast mode: Excluding ${tool.name} - not relevant for scope: ${actualScope}`);
+        return false;
+      }
+      
+      return true;
     });
     
     // Ensure we have essential direct linters for fast mode
@@ -104,32 +113,38 @@ class FastMode {
   
   /**
    * Ensure essential direct linters are present for fast mode
+   * FIXED: Respect user's scope instead of hardcoding tool scopes
    */
   _ensureEssentialDirectLinters(plan) {
-    const essentialLinters = [
-      { name: 'prettier', dimension: 'format', scope: 'frontend' },
-      { name: 'eslint', dimension: 'lint', scope: 'frontend' },
-      { name: 'black', dimension: 'format', scope: 'backend' },
-      { name: 'ruff', dimension: 'lint', scope: 'backend' }
-    ];
+    // Get the actual scope from plan or existing tools
+    const actualScope = plan.scope || (plan.tools.length > 0 ? plan.tools[0].scope : 'all');
+    
+    // Define tools by their primary technology, but respect the user's chosen scope
+    const availableLinters = {
+      'prettier': { dimension: 'format', technology: 'frontend' },
+      'eslint': { dimension: 'lint', technology: 'frontend' },
+      'black': { dimension: 'format', technology: 'backend' },
+      'ruff': { dimension: 'lint', technology: 'backend' }
+    };
     
     const existingTools = plan.tools.map(tool => tool.name);
     
-    for (const linter of essentialLinters) {
-      if (!existingTools.includes(linter.name)) {
-        this.logger.info(`Fast mode: Adding essential direct linter: ${linter.name}`);
+    // Only add tools that are relevant to the selected scope
+    for (const [linterName, linterInfo] of Object.entries(availableLinters)) {
+      if (!existingTools.includes(linterName) && this._isToolRelevantForScope(linterName, actualScope)) {
+        this.logger.info(`Fast mode: Adding essential direct linter: ${linterName}`);
         
         const directLinterTool = {
-          name: linter.name,
-          dimension: linter.dimension,
-          scope: linter.scope,
+          name: linterName,
+          dimension: linterInfo.dimension,
+          scope: actualScope, // FIXED: Use actual scope, not hardcoded scope
           config: {
-            scope: linter.scope,
-            dimension: linter.dimension,
+            scope: actualScope, // FIXED: Use actual scope, not hardcoded scope
+            dimension: linterInfo.dimension,
             mode: 'fast',
             args: [],
             fastMode: true,
-            timeout: this._getOptimalTimeout({ name: linter.name }),
+            timeout: this._getOptimalTimeout({ name: linterName }),
             stagedFilesOnly: true
           }
         };
@@ -137,6 +152,26 @@ class FastMode {
         plan.tools.push(directLinterTool);
       }
     }
+  }
+  
+  /**
+   * Check if a tool is relevant for the selected scope
+   * FIXED: Implement proper scope-to-tool mapping logic
+   */
+  _isToolRelevantForScope(toolName, scope) {
+    // Scope-to-tool compatibility mapping
+    const scopeCompatibility = {
+      'frontend': ['prettier', 'eslint'],
+      'backend': ['black', 'ruff'],
+      'tooling': ['prettier', 'eslint'], // Tooling uses JS/TS tools for .cjs/.sh files
+      'docs': ['prettier'],
+      'config': ['prettier'],
+      'infrastructure': ['prettier', 'eslint'],
+      'all': ['prettier', 'eslint', 'black', 'ruff']
+    };
+    
+    const compatibleTools = scopeCompatibility[scope] || scopeCompatibility['all'];
+    return compatibleTools.includes(toolName);
   }
   
   /**

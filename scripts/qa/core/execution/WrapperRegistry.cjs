@@ -18,13 +18,21 @@ class WrapperRegistry {
     this.wrapperRegistry = new Map();
     this.wrapperCache = new Map();
     
-    // Base wrapper type mappings (tools → wrappers)
+    // Base wrapper type mappings (tools → wrappers)  
+    // ARCHITECTURAL CHOICE: Support both orchestrator and individual wrapper modes
     this.baseWrapperMappings = {
-      'prettier': 'direct-linters',
-      'eslint': 'direct-linters',
-      'black': 'direct-linters',
-      'ruff': 'direct-linters',
-      'spectral': 'direct-linters',
+      // Individual linter wrappers (for direct tool execution)
+      'prettier': 'prettier',
+      'eslint': 'eslint', 
+      'black': 'black',
+      'ruff': 'ruff',
+      'spectral': 'spectral',
+      
+      // Multi-linter orchestrator (for dimension-level execution)
+      'format': 'direct-linters',  // prettier + black orchestration
+      'lint': 'direct-linters',    // eslint + ruff orchestration
+      
+      // Other specialized wrappers
       'snyk': 'snyk',
       'semgrep': 'semgrep',
       'jest': 'jest',
@@ -32,8 +40,7 @@ class WrapperRegistry {
       'tsc': 'build',
       'npm': 'build',
       'pip': 'build',
-      'vite': 'build',  // Critical Fix: vite should use build wrapper consistently
-      'spectral': 'data',
+      'vite': 'build',
       'django-migrations': 'data'
     };
     
@@ -50,12 +57,12 @@ class WrapperRegistry {
     
     // Add dimension-level fallbacks by analyzing tool patterns
     const dimensionMappings = {
-      'format': 'direct-linters',  // Direct Prettier + Black execution
-      'lint': 'direct-linters',    // Direct ESLint + Ruff execution
-      'test': 'jest',         // Default testing wrapper
-      'security': 'snyk',     // Default security wrapper
-      'build': 'build',       // Build operations
-      'data': 'data'          // Data operations
+      'format': 'direct-linters',  // Orchestrator: Prettier + Black execution
+      'lint': 'direct-linters',    // Orchestrator: ESLint + Ruff execution  
+      'test': 'jest',              // Default testing wrapper
+      'security': 'snyk',          // Default security wrapper
+      'build': 'build',            // Build operations
+      'data': 'data'               // Data operations
     };
     
     return { ...completeMappings, ...dimensionMappings };

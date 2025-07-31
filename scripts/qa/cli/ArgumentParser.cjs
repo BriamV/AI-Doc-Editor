@@ -36,7 +36,7 @@ class ArgumentParser {
       .option('scope', {
         type: 'string',
         description: 'Ámbito de validación',
-        choices: ['frontend', 'backend', 'infrastructure', 'all']
+        choices: ['frontend', 'backend', 'infrastructure', 'tooling', 'docs', 'config', 'all']
       })
       .option('dimension', {
         type: 'string',
