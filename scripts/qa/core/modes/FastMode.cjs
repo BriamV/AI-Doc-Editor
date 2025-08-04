@@ -15,11 +15,32 @@ class FastMode {
   /**
    * Select minimal dimensions for fast execution (RF-005)
    * Fast mode uses direct linters for Error Detection + Design Metrics (<5s target)
+   * FIXED: Respect explicit --dimension argument override
    */
   async selectDimensions(context, options) {
+    // CRITICAL FIX: If user specifies --dimension, respect that instead of fast mode defaults
+    if (options.dimension) {
+      this.logger.info(`Fast mode: Respecting explicit dimension override: ${options.dimension}`);
+      
+      // Validate the dimension is supported
+      const supportedDimensions = ['format', 'lint', 'test', 'security', 'build', 'data'];
+      if (!supportedDimensions.includes(options.dimension)) {
+        this.logger.warn(`Unsupported dimension: ${options.dimension}, falling back to fast mode defaults`);
+        return this._getDefaultFastDimensions(context);
+      }
+      
+      return [options.dimension];
+    }
+    
     // RF-005: Fast mode only includes Error Detection (linting/format) + Design Metrics (fast)
     // Migration: Direct linters (ESLint, Prettier, Black, Ruff) instead of MegaLinter
-    
+    return this._getDefaultFastDimensions(context);
+  }
+  
+  /**
+   * Get default dimensions for fast mode when no explicit override
+   */
+  _getDefaultFastDimensions(context) {
     // SYSTEMATIC FIX: Fast mode should validate modified files, not just staged
     // PRD RNF-002: Fast mode targets modified files for pre-commit scenarios
     const hasModifiedOrStagedFiles = this._hasModifiedOrStagedFiles(context);
@@ -87,9 +108,24 @@ class FastMode {
     
     // RF-005: Fast mode should use direct linters (ESLint, Prettier, Black, Ruff)
     // FIXED: Filter tools based on scope compatibility, not just tool names
+    // DIMENSION OVERRIDE FIX: Allow dimension-specific tools when explicitly requested
     const actualScope = plan.scope || 'all';
+    const hasSecurityDimension = plan.tools.some(tool => tool.dimension === 'security');
+    const hasTestDimension = plan.tools.some(tool => tool.dimension === 'test');
+    const hasBuildDimension = plan.tools.some(tool => tool.dimension === 'build');
+    
     plan.tools = plan.tools.filter(tool => {
-      const isAllowed = ['eslint', 'prettier', 'black', 'ruff', 'spectral'].includes(tool.name);
+      const baseAllowedTools = ['eslint', 'prettier', 'black', 'ruff', 'spectral'];
+      const securityTools = ['snyk', 'semgrep'];
+      const testTools = ['jest', 'pytest'];
+      const buildTools = ['yarn', 'npm', 'tsc', 'vite', 'webpack'];
+      
+      // Allow dimension-specific tools if dimension is present (explicit override)
+      const isAllowed = baseAllowedTools.includes(tool.name) || 
+                       (hasSecurityDimension && securityTools.includes(tool.name)) ||
+                       (hasTestDimension && testTools.includes(tool.name)) ||
+                       (hasBuildDimension && buildTools.includes(tool.name));
+      
       const isRelevantForScope = this._isToolRelevantForScope(tool.name, actualScope);
       
       if (!isAllowed) {
@@ -113,9 +149,27 @@ class FastMode {
   
   /**
    * Ensure essential direct linters are present for fast mode
-   * FIXED: Respect user's scope instead of hardcoding tool scopes
+   * CRITICAL FIX: Respect explicit dimension constraints from user
    */
   _ensureEssentialDirectLinters(plan) {
+    // SURGICAL FIX: Check for explicit dimension constraint from CLI options
+    // If user specified --dimension, respect ONLY that dimension
+    const explicitDimension = this._getExplicitDimension();
+    
+    if (explicitDimension) {
+      this.logger.info(`Fast mode: Respecting explicit dimension constraint '${explicitDimension}' - not adding cross-dimension tools`);
+      return; // Do not add any tools outside the requested dimension
+    }
+    
+    // Legacy check for existing tools (fallback)
+    const existingDimensions = [...new Set(plan.tools.map(tool => tool.dimension))];
+    const hasExplicitDimensionConstraint = existingDimensions.length === 1 && plan.options && plan.options.dimension;
+    
+    if (hasExplicitDimensionConstraint) {
+      this.logger.info(`Fast mode: Respecting existing dimension constraint '${plan.options.dimension}' - not adding cross-dimension tools`);
+      return; // Do not add any tools outside the requested dimension
+    }
+    
     // Get the actual scope from plan or existing tools
     const actualScope = plan.scope || (plan.tools.length > 0 ? plan.tools[0].scope : 'all');
     
@@ -129,9 +183,13 @@ class FastMode {
     
     const existingTools = plan.tools.map(tool => tool.name);
     
-    // Only add tools that are relevant to the selected scope
+    // Only add tools that are relevant to the selected scope AND allowed dimensions
     for (const [linterName, linterInfo] of Object.entries(availableLinters)) {
-      if (!existingTools.includes(linterName) && this._isToolRelevantForScope(linterName, actualScope)) {
+      const isToolMissing = !existingTools.includes(linterName);
+      const isRelevantForScope = this._isToolRelevantForScope(linterName, actualScope);
+      const isDimensionAllowed = existingDimensions.length === 0 || existingDimensions.includes(linterInfo.dimension);
+      
+      if (isToolMissing && isRelevantForScope && isDimensionAllowed) {
         this.logger.info(`Fast mode: Adding essential direct linter: ${linterName}`);
         
         const directLinterTool = {
@@ -161,13 +219,13 @@ class FastMode {
   _isToolRelevantForScope(toolName, scope) {
     // Scope-to-tool compatibility mapping
     const scopeCompatibility = {
-      'frontend': ['prettier', 'eslint'],
-      'backend': ['black', 'ruff'],
+      'frontend': ['prettier', 'eslint', 'snyk', 'jest', 'yarn', 'npm', 'tsc', 'vite', 'webpack'],
+      'backend': ['black', 'ruff', 'pytest'],
       'tooling': ['prettier', 'eslint'], // Tooling uses JS/TS tools for .cjs/.sh files
       'docs': ['prettier'],
       'config': ['prettier'],
       'infrastructure': ['prettier', 'eslint'],
-      'all': ['prettier', 'eslint', 'black', 'ruff']
+      'all': ['prettier', 'eslint', 'black', 'ruff', 'snyk', 'jest', 'pytest', 'yarn', 'npm', 'tsc', 'vite', 'webpack']
     };
     
     const compatibleTools = scopeCompatibility[scope] || scopeCompatibility['all'];
@@ -251,6 +309,32 @@ class FastMode {
 
     // Return tool-specific timeout or default fast mode timeout
     return timeouts[tool.name] || 15000; // Default: 15s for unknown tools
+  }
+  
+  /**
+   * Get explicit dimension from CLI options
+   * SURGICAL FIX: Access global CLI options to check for --dimension flag
+   */
+  _getExplicitDimension() {
+    // Check global process.argv for --dimension flag
+    const args = process.argv;
+    const dimensionIndex = args.findIndex(arg => arg === '--dimension');
+    
+    if (dimensionIndex !== -1 && dimensionIndex < args.length - 1) {
+      const dimension = args[dimensionIndex + 1];
+      this.logger.debug(`Detected explicit dimension from CLI: ${dimension}`);
+      return dimension;
+    }
+    
+    // Check for --dimension=value format
+    const dimensionArg = args.find(arg => arg.startsWith('--dimension='));
+    if (dimensionArg) {
+      const dimension = dimensionArg.split('=')[1];
+      this.logger.debug(`Detected explicit dimension from CLI (equals format): ${dimension}`);
+      return dimension;
+    }
+    
+    return null;
   }
 }
 
