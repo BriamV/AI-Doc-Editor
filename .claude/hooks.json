@@ -1,0 +1,88 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 2,
+            "command": "[ -f .cc-session-start ] || touch .cc-session-start"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 8,
+            "command": "if [ -f .cc-metrics-fail.json ]; then tries=$(cat .cc-refactor-attempts 2>/dev/null || echo 0); next=$((tries+1)); echo $next > .cc-refactor-attempts; python - <<'PY'\nimport json,sys\nj=json.load(open('.cc-metrics-fail.json'))\nprint('\\n🛠️  PLAN DE REFACTOR (objetivo: CC≤15 y LOC≤300):')\nfor it in j:\n  f=it.get('file'); cc=it.get('cc') or it.get('ccBand'); loc=it.get('loc');\n  tips=[]\n  if (isinstance(cc,int) and cc>15) or cc=='red': tips.append('reduce complejidad: extrae funciones y usa early-returns')\n  if (isinstance(loc,int) and loc>300) or it.get('locBand')=='red': tips.append('divide en módulos/componentes y extrae helpers')\n  if tips: print(f' - {f}: ' + '; '.join(tips))\nPY\n; if [ $next -ge 3 ]; then echo '⚠️ Intentos de refactor agotados (3). Dejando de fallar automáticamente.'; rm -f .cc-metrics-fail.json .cc-refactor-attempts >/dev/null 2>&1 || true; fi; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 12,
+            "command": "missing=0; if [ ! -f .venv/bin/activate ]; then echo '⚠️ Virtualenv (.venv) no encontrado. Crea uno con: python3 -m venv .venv'; missing=1; fi; for t in black ruff markdownlint yamllint shellcheck spectral yamlfix patch radon; do if ! command -v $t >/dev/null 2>&1; then echo \"⚠️ Herramienta $t no encontrada. Instálala para QA.\"; missing=1; fi; done; if [ -f yarn.lock ]; then if ! command -v yarn >/dev/null 2>&1; then echo '⚠️ yarn no encontrado. Instálalo o usa npm.'; missing=1; fi; else if ! command -v npx >/dev/null 2>&1; then echo '⚠️ npx no encontrado. Instálalo para ESLint/Prettier.'; missing=1; fi; fi; if [ $missing -ne 0 ]; then echo 'Instala las herramientas QA faltantes para asegurar validaciones y autofix.'; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 10,
+            "command": "git secrets --scan 2>/dev/null || echo 'No secrets found'"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 10,
+            "command": "manage.py makemigrations --check 2>/dev/null && echo 'No pending migrations' || echo '⚠️ Pending migrations detected'"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 10,
+            "command": "spectral lint api-spec.yaml || true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 60,
+            "command": "files=$(python - <<'PY'\nimport sys,json\nj=json.load(sys.stdin)\npaths=set()\nti=j.get('tool_input') or {}\ntr=j.get('tool_response') or {}\nfor k in ('file_path','path','filePath'):\n    if isinstance(ti,dict) and ti.get(k): paths.add(ti[k])\n    if isinstance(tr,dict) and tr.get(k): paths.add(tr[k])\nfor k in ('files','changes','editedFiles'):\n    v=tr.get(k)\n    if isinstance(v,list):\n        for x in v:\n            if isinstance(x,str): paths.add(x)\n            elif isinstance(x,dict):\n                for kk in ('file','path','filePath'):\n                    if kk in x: paths.add(x[kk])\nprint('\\n'.join(sorted(paths)))\nPY\n); \nif [ -z \"$files\" ]; then \n  changed_git=$(git status --porcelain -z 2>/dev/null | tr '\\0' '\\n' | awk '{print $2}'); \n  changed_sess=$( [ -f .cc-session-start ] && find . -type f -newer .cc-session-start 2>/dev/null | sed 's|^\\./||' ); \n  files=$(printf \"%s\\n%s\\n\" \"$changed_git\" \"$changed_sess\" | sort -u)\nfi;\nfor f in $files; do \n  case \"$f\" in \n    *.py)\n      [ -f .venv/bin/activate ] && . .venv/bin/activate; \n      ruff \"$f\" --fix || true; \n      black \"$f\" --quiet 2>/dev/null || true \n      ;;\n    *.ts|*.tsx|*.js|*.jsx)\n      if [ -f yarn.lock ]; then \n        yarn -s eslint \"$f\" --max-warnings=0 --fix || true; \n        yarn -s prettier --write \"$f\" || true; \n      else \n        npx eslint \"$f\" --max-warnings=0 --fix || true; \n        npx prettier --write \"$f\" || true; \n      fi \n      ;;\n    *.md)\n      markdownlint-cli2 --fix \"$f\" || true \n      ;;\n    *.yml|*.yaml)\n      if command -v yamlfix >/dev/null 2>&1; then yamlfix \"$f\" || true; else yamllint \"$f\" || true; fi \n      ;;\n    *.sh)\n      scdiff=$(shellcheck -f diff \"$f\" 2>/dev/null || true); \n      [ -n \"$scdiff\" ] && printf \"%s\" \"$scdiff\" | patch -p0 --silent || true \n      ;;\n  esac; \ndone"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 40,
+            "command": "fail=0; out='['; sep=''; files=$(python - <<'PY'\nimport sys,json\nj=json.load(sys.stdin)\npaths=set()\nti=j.get('tool_input') or {}\ntr=j.get('tool_response') or {}\nfor k in ('file_path','path','filePath'):\n    if isinstance(ti,dict) and ti.get(k): paths.add(ti[k])\n    if isinstance(tr,dict) and tr.get(k): paths.add(tr[k])\nfor k in ('files','changes','editedFiles'):\n    v=tr.get(k)\n    if isinstance(v,list):\n        for x in v:\n            if isinstance(x,str): paths.add(x)\n            elif isinstance(x,dict):\n                for kk in ('file','path','filePath'):\n                    if kk in x: paths.add(x[kk])\nprint('\\n'.join(sorted(paths)))\nPY\n); \nif [ -z \"$files\" ]; then \n  changed_git=$(git status --porcelain -z 2>/dev/null | tr '\\0' '\\n' | awk '{print $2}'); \n  changed_sess=$( [ -f .cc-session-start ] && find . -type f -newer .cc-session-start 2>/dev/null | sed 's|^\\./||' ); \n  files=$(printf \"%s\\n%s\\n\" \"$changed_git\" \"$changed_sess\" | sort -u)\nfi;\nfor f in $files; do \n  case \"$f\" in \n    *.py)\n      [ -f .venv/bin/activate ] && . .venv/bin/activate; \n      loc=$(wc -l < \"$f\" 2>/dev/null || echo 0); \n      if command -v radon >/dev/null 2>&1; then \n        maxcc=$(radon cc -s -j \"$f\" 2>/dev/null | python - <<'PY'\nimport json,sys\ntry:\n  j=json.load(sys.stdin)\nexcept Exception:\n  print(0); sys.exit(0)\nmx=0\nfor _,items in j.items():\n  for it in items:\n    try:\n      mx=max(mx,int(it.get('complexity',0)))\n    except Exception:\n      pass\nprint(mx)\nPY\n); \n      else echo \"[PY] $f | ⚠️ radon no disponible (pip install radon)\"; maxcc=0; fi; \n      [ \"$maxcc\" -le 10 ] || cc_band='yellow'; [ \"$maxcc\" -le 15 ] || { cc_band='red'; }; [ -n \"$cc_band\" ] || cc_band='green'; \n      [ \"$loc\" -le 212 ] || loc_band='yellow'; [ \"$loc\" -le 300 ] || { loc_band='red'; }; [ -n \"$loc_band\" ] || loc_band='green'; \n      [ \"$cc_band\" = 'red' ] && fail=1; [ \"$loc_band\" = 'red' ] && fail=1; \n      out=\"$out$sep{\\\"lang\\\":\\\"py\\\",\\\"file\\\":\\\"$f\\\",\\\"cc\\\":$maxcc,\\\"ccBand\\\":\\\"$cc_band\\\",\\\"loc\\\":$loc,\\\"locBand\\\":\\\"$loc_band\\\"}\"; sep=\",\" \n      ;;\n    *.ts|*.tsx|*.js|*.jsx)\n      loc=$(wc -l < \"$f\" 2>/dev/null || echo 0); \n      if [ -f yarn.lock ]; then ycmd='yarn -s'; else ycmd='npx'; fi; \n      $ycmd eslint \"$f\" --no-error-on-unmatched-pattern --rule '{\"complexity\":[\"error\",10]}' >/dev/null 2>&1; ec10=$?; \n      $ycmd eslint \"$f\" --no-error-on-unmatched-pattern --rule '{\"complexity\":[\"error\",15]}' >/dev/null 2>&1; ec15=$?; \n      if [ $ec10 -eq 0 ]; then cc_band='green'; elif [ $ec15 -eq 0 ]; then cc_band='yellow'; else cc_band='red'; fi; \n      [ \"$loc\" -le 212 ] || loc_band='yellow'; [ \"$loc\" -le 300 ] || { loc_band='red'; }; [ -n \"$loc_band\" ] || loc_band='green'; \n      [ \"$cc_band\" = 'red' ] && fail=1; [ \"$loc_band\" = 'red' ] && fail=1; \n      out=\"$out$sep{\\\"lang\\\":\\\"ts\\\",\\\"file\\\":\\\"$f\\\",\\\"ccBand\\\":\\\"$cc_band\\\",\\\"loc\\\":$loc,\\\"locBand\\\":\\\"$loc_band\\\"}\"; sep=\",\" \n      ;;\n  esac; done; \n  out=\"$out]\"; echo \"$out\" > .cc-metrics-fail.json; \n  if [ $fail -ne 0 ]; then \n    echo '❌ Design Metrics en ROJO (CC>15 o LOC>300). Refactoriza: divide funciones >30-40 líneas, reduce ramas anidadas, extrae helpers. Ver .cc-metrics-fail.json.' 1>&2; \n    exit 2; \n  else rm -f .cc-metrics-fail.json >/dev/null 2>&1 || true; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
