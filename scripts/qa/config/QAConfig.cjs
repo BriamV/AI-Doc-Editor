@@ -31,24 +31,37 @@ class QAConfig {
         docs: ['docs/**/*.md', '*.md']
       },
       tools: {
-        linting: {
-          frontend: ['eslint', 'prettier'],
-          backend: ['pylint', 'black'],
-          infrastructure: ['eslint']
+        format: {
+          frontend: ['prettier'],
+          backend: ['black'],
+          infrastructure: ['prettier'],
+          all: ['prettier', 'black']
         },
-        testing: {
+        lint: {
+          frontend: ['eslint'],
+          backend: ['ruff'],
+          infrastructure: ['eslint'],
+          all: ['eslint', 'ruff']
+        },
+        test: {
           frontend: ['jest'],
           backend: ['pytest'],
-          e2e: ['cypress']
+          e2e: ['cypress'],
+          all: ['jest', 'pytest']
         },
         security: {
-          frontend: ['package-manager-audit', 'snyk'],
-          backend: ['bandit', 'safety'],
-          general: ['semgrep']
+          frontend: ['snyk'],
+          backend: ['snyk'],
+          general: ['semgrep'],
+          all: ['snyk', 'semgrep']
         },
         build: {
           frontend: ['tsc', 'vite'],
-          backend: ['python -m py_compile']
+          backend: ['python', 'pip'],
+          all: ['tsc', 'vite', 'python', 'pip']
+        },
+        data: {
+          all: ['spectral']
         }
       },
       modes: {

@@ -19,6 +19,14 @@ class SnykWrapper {
   }
   
   /**
+   * Mark this as an orchestrator wrapper that expects execute(tool) interface
+   */
+  getFilesForTool() {
+    // This method exists to signal ExecutionController to use execute(tool) interface
+    return [];
+  }
+
+  /**
    * Execute Snyk security scan
    */
   async execute(tool) {
@@ -67,6 +75,33 @@ class SnykWrapper {
         error: error.message,
         executionTime: Date.now() - startTime
       };
+    }
+  }
+  
+  /**
+   * Get wrapper name (required by IBaseLinterWrapper interface)
+   */
+  getName() {
+    return 'SnykWrapper';
+  }
+  
+  /**
+   * Get wrapper version
+   */
+  getVersion() {
+    return '1.0.0';
+  }
+  
+  /**
+   * Check if Snyk is available
+   */
+  async isAvailable() {
+    try {
+      const availabilityCheck = await this.executor.checkAuth();
+      return availabilityCheck !== null;
+    } catch (error) {
+      this.logger.warn(`Snyk availability check failed: ${error.message}`);
+      return false;
     }
   }
   

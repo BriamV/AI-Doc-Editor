@@ -37,7 +37,8 @@ class SnykExecutor {
       const childProcess = spawn(command[0], command.slice(1), {
         stdio: ['pipe', 'pipe', 'pipe'],
         timeout: timeout,
-        cwd: process.cwd()
+        cwd: process.cwd(),
+        shell: process.platform === 'win32' ? true : undefined
       });
       
       let stdout = '';
@@ -72,7 +73,8 @@ class SnykExecutor {
     return new Promise((resolve, reject) => {
       const childProcess = spawn(command[0], command.slice(1), {
         stdio: ['pipe', 'pipe', 'pipe'],
-        timeout: timeout
+        timeout: timeout,
+        shell: process.platform === 'win32' ? true : undefined
       });
       
       let stdout = '';

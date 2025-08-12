@@ -80,6 +80,33 @@ class SemgrepWrapper {
   }
   
   /**
+   * Get wrapper name (required by IBaseLinterWrapper interface)
+   */
+  getName() {
+    return 'SemgrepWrapper';
+  }
+  
+  /**
+   * Get wrapper version
+   */
+  getVersion() {
+    return '1.0.0';
+  }
+  
+  /**
+   * Check if Semgrep is available
+   */
+  async isAvailable() {
+    try {
+      const availabilityCheck = await this.executor.checkAvailability();
+      return availabilityCheck.success;
+    } catch (error) {
+      this.logger.warn(`Semgrep availability check failed: ${error.message}`);
+      return false;
+    }
+  }
+  
+  /**
    * Get wrapper capabilities
    */
   getCapabilities() {

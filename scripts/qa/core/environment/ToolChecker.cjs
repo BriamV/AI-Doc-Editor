@@ -112,6 +112,27 @@ class ToolChecker {
         // Continue to system PATH for ALL Python tools (venv success already returned above)
       }
       
+      // Special handling for Jest - use Node.js require for reliable detection
+      if (toolName === 'jest' && command.includes('node -e')) {
+        try {
+          const jestPackagePath = 'node_modules/jest/package.json';
+          if (fs.existsSync(jestPackagePath)) {
+            const packageInfo = JSON.parse(fs.readFileSync(jestPackagePath, 'utf8'));
+            return {
+              available: true,
+              version: packageInfo.version,
+              command: command,
+              description: toolConfig.description,
+              detectionMethod: 'node-require'
+            };
+          } else {
+            throw new Error('Jest package.json not found');
+          }
+        } catch (jestError) {
+          throw new Error(`Jest detection failed: ${jestError.message}`);
+        }
+      }
+      
       // Special handling for spectral - check file existence and get version
       if (toolName === 'spectral' && command.includes('node_modules')) {
         const packagePath = 'node_modules/@stoplight/spectral-cli/package.json';
@@ -160,7 +181,7 @@ class ToolChecker {
       }
       
       // Cache warming for NPM-based tools to improve reliability
-      const npmTools = ['eslint', 'prettier', 'tsc'];
+      const npmTools = ['eslint', 'prettier', 'tsc', 'jest'];
       if (npmTools.includes(toolName)) {
         try {
           // Pre-warm NPM cache with quick dependency check
@@ -265,7 +286,7 @@ class ToolChecker {
    */
   _getCleanPath(toolName, toolConfig) {
     // For NPM-based tools, use original PATH to avoid venv interference
-    const npmTools = ['eslint', 'prettier', 'tsc'];
+    const npmTools = ['eslint', 'prettier', 'tsc', 'jest', 'snyk'];
     const npmCommands = ['npx', 'npm', 'yarn'];
     
     // Check if tool uses NPM commands

@@ -10,7 +10,7 @@ class ResultAggregator {
   }
   
   /**
-   * Aggregate results from all tools
+   * Aggregate results from all tools (RF-006 Enhanced)
    */
   aggregateResults(results, executionTime) {
     const aggregated = {
@@ -19,15 +19,19 @@ class ResultAggregator {
         passed: 0,
         failed: 0,
         warnings: 0,
-        executionTime: executionTime
+        executionTime: executionTime,
+        filesWithProblems: [] // NEW: Track files with specific problems for actionable summary
       },
       details: [],
       metrics: {},
       recommendations: []
     };
     
+    // Track files with violations across all tools
+    const fileViolations = new Map(); // filePath -> { errors: count, warnings: count }
+    
     for (const result of results) {
-      this._processResult(result, aggregated);
+      this._processResult(result, aggregated, fileViolations);
     }
     
     // CRITICAL FIX: Calculate total from actual file checks, not just tool count
@@ -39,6 +43,17 @@ class ResultAggregator {
       return sum + filesProcessed;
     }, 0);
     
+    // Convert file violations map to array for summary display
+    aggregated.summary.filesWithProblems = Array.from(fileViolations.entries())
+      .filter(([file, stats]) => stats.errors > 0 || stats.warnings > 0)
+      .map(([file, stats]) => ({ file, ...stats }))
+      .sort((a, b) => {
+        // Sort by errors first (desc), then warnings (desc), then filename
+        if (a.errors !== b.errors) return b.errors - a.errors;
+        if (a.warnings !== b.warnings) return b.warnings - a.warnings;
+        return a.file.localeCompare(b.file);
+      });
+    
     // Generate recommendations
     aggregated.recommendations = this._generateRecommendations(aggregated);
     
@@ -46,26 +61,29 @@ class ResultAggregator {
   }
   
   /**
-   * Process individual result
-   * MODERATE ISSUE FIX RF-003.5: Enhanced processing for tri-state model
+   * Process individual result (RF-006 Enhanced)
+   * CRITICAL FIX RF-003: Remove double-counting, properly handle success/failure states
    */
-  _processResult(result, aggregated) {
+  _processResult(result, aggregated, fileViolations) {
     // Handle tri-state model: SUCCESS, SUCCESS+WARNING, FAILED
     const isEmptyTestSuite = result.emptyTestSuite || false;
     const hasWarningLevel = result.level === 'WARNING';
     
     if (result.success) {
+      // SUCCESS: Tool executed without errors
       aggregated.summary.passed++;
       
-      // CRITICAL FIX: Count violations from linter results
+      // Process warnings from successful executions
       if (result.result && result.result.violations) {
-        // Count violations by severity
+        // Count violations by severity - but only warnings for successful results
         for (const violation of result.result.violations) {
-          if (violation.severity === 'error') {
-            aggregated.summary.failed++;
-          } else if (violation.severity === 'warning') {
+          if (violation.severity === 'warning') {
             aggregated.summary.warnings++;
+            // Track file-level violations for detailed summary
+            this._trackFileViolation(violation, 'warning', fileViolations);
           }
+          // NOTE: severity "error" violations should not occur in successful results
+          // If they do, it indicates a bug in the wrapper's success determination
         }
       }
       
@@ -79,19 +97,33 @@ class ResultAggregator {
         aggregated.summary.warnings++;
       }
       
-      // Fix: Handle both string and object formats for tool
-      const toolName = typeof result.tool === 'string' ? result.tool : result.tool?.name;
-      if (result.result && result.result.metrics && toolName) {
-        aggregated.metrics[toolName] = result.result.metrics;
-      }
-      
     } else {
+      // FAILED: Tool failed or found critical errors
       aggregated.summary.failed++;
+      
+      // Failed results can still have detailed violation information
+      if (result.result && result.result.violations) {
+        // Count additional warnings from failed results (for metrics)
+        for (const violation of result.result.violations) {
+          if (violation.severity === 'warning') {
+            aggregated.summary.warnings++;
+            this._trackFileViolation(violation, 'warning', fileViolations);
+          } else if (violation.severity === 'error') {
+            // Track error-level violations for detailed summary
+            this._trackFileViolation(violation, 'error', fileViolations);
+          }
+        }
+      }
     }
     
     // Fix: Handle both string and object formats for tool and dimension
     const toolName = typeof result.tool === 'string' ? result.tool : result.tool?.name;
     const dimensionName = typeof result.dimension === 'string' ? result.dimension : result.tool?.dimension;
+    
+    // Handle metrics from both successful and failed results
+    if (result.result && result.result.metrics && toolName) {
+      aggregated.metrics[toolName] = result.result.metrics;
+    }
     
     aggregated.details.push({
       tool: toolName,
@@ -107,6 +139,23 @@ class ResultAggregator {
     });
   }
   
+  /**
+   * Track file-level violations for detailed summary
+   */
+  _trackFileViolation(violation, severity, fileViolations) {
+    const filePath = violation.file || 'unknown';
+    if (!fileViolations.has(filePath)) {
+      fileViolations.set(filePath, { errors: 0, warnings: 0 });
+    }
+    
+    const fileStats = fileViolations.get(filePath);
+    if (severity === 'error') {
+      fileStats.errors++;
+    } else if (severity === 'warning') {
+      fileStats.warnings++;
+    }
+  }
+
   /**
    * Generate recommendations based on results
    */

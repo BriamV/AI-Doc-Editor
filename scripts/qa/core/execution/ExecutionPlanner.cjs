@@ -22,8 +22,8 @@ class ExecutionPlanner {
     const groups = [];
     const toolsByDimension = this._groupToolsByDimension(plan.tools);
     
-    // Define execution order: format → lint → test → security → build
-    const executionOrder = ['format', 'lint', 'test', 'security', 'build'];
+    // Define execution order: format → lint → test → security → data → build
+    const executionOrder = ['format', 'lint', 'test', 'security', 'data', 'build'];
     
     for (const dimension of executionOrder) {
       const dimensionTools = toolsByDimension[dimension];

@@ -187,7 +187,7 @@ Esta arquitectura maximiza la reutilización de herramientas probadas en la indu
 
 
 #### RF-007: Verificación de Entorno y Dependencias
-- Antes de ejecutar las validaciones, el sistema debe verificar la **presencia** de las herramientas externas requeridas (ej: `megalinter`, `snyk`, `pytest`).
+- Antes de ejecutar las validaciones, el sistema debe verificar la **presencia** de las herramientas externas requeridas (ej: `snyk`, `pytest`, etc.).
 - Si una herramienta no se encuentra en el `PATH`, el sistema **debe fallar inmediatamente** la ejecución.
 - Se debe emitir un mensaje de error claro y accionable que identifique la herramienta faltante y la dimensión de QA afectada. El mensaje debe sugerir un método de instalación estándar (ej: `Error: 'snyk' no encontrado. Por favor, instálelo globalmente con 'npm install -g snyk' o añádalo a las devDependencies del proyecto para ejecutar la dimensión 'Security & Audit'.`).
 - La gestión de versiones específicas de las herramientas debe ser delegada a los archivos de configuración de dependencias del proyecto (ej. `package.json`, `requirements.txt`), que son la fuente de verdad para el entorno.

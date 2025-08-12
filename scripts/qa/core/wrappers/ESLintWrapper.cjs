@@ -62,30 +62,51 @@ class ESLintWrapper extends BaseWrapper {
         '--max-warnings', '0',  // Treat warnings as errors for consistency
       ];
 
+      // CRITICAL FIX: Let ESLint find its config automatically to avoid path issues
       // Only add config if it exists
-      const configPath = await this.loadConfig();
-      if (configPath) {
-        args.push('--config', configPath);
-      }
+      // const configPath = await this.loadConfig();
+      // if (configPath) {
+      //   args.push('--config', configPath);
+      // }
 
       this.logger.debug(`ESLint executing with args: ${args.join(' ')}`);
       const result = await this.processService.execute('eslint', args);
-      this.logger.debug(`ESLint result: success=${result.success}, stdout length=${result.stdout?.length || 0}`);
+      this.logger.info(`🔧 ESLintWrapper: ProcessService returned success=${result.success}, exitCode=${result.exitCode}, stdout length=${result.stdout?.length || 0}, stderr="${result.stderr}"`);
+      this.logger.debug(`ESLint result: success=${result.success}, exitCode=${result.exitCode}, stdout length=${result.stdout?.length || 0}`);
       
       const violations = this.parseESLintOutput(result.stdout || '[]');
       
+      // CRITICAL FIX RF-003: Success determination based on PRD specification
+      // "Un solo Error debe hacer que toda la validación falle"
+      // Only consider success if ESLint executed AND no severity "error" violations found
+      let isSuccess = false;
+      
+      if (result.exitCode > 1) {
+        // ESLint had execution error (config issues, etc.)
+        isSuccess = false;
+      } else if (!Array.isArray(violations)) {
+        // Parsing failed
+        isSuccess = false;
+      } else {
+        // ESLint executed successfully - check violation severity
+        const hasErrorViolations = violations.some(v => v.severity === 'error');
+        isSuccess = !hasErrorViolations; // Success only if no error-level violations
+      }
+      
+      this.logger.debug(`ESLint success determination: exitCode=${result.exitCode}, violations=${violations.length}, hasErrors=${violations.some(v => v.severity === 'error')}, isSuccess=${isSuccess}`);
+      
       return this.formatResult(
-        result.success,
+        isSuccess,
         violations,
         Date.now() - startTime,
-        { filesProcessed: jsFiles.length }
+        { filesProcessed: jsFiles.length, exitCode: result.exitCode }
       );
     } catch (error) {
       return this.handleExecutionError(error, 'ESLint');
     }
   }
 
-  // ESLint-specific parsing (no dead code - only what's needed)
+  // ESLint-specific parsing with Design Metrics semaphore classification
   parseESLintOutput(stdout) {
     try {
       if (!stdout || stdout.trim() === '') {
@@ -94,20 +115,111 @@ class ESLintWrapper extends BaseWrapper {
       }
       
       const results = JSON.parse(stdout);
-      return results.flatMap(file => 
-        file.messages.map(msg => ({
-          file: file.filePath,
-          line: msg.line,
-          column: msg.column,
-          severity: msg.severity === 2 ? 'error' : 'warning',
-          message: msg.message,
-          ruleId: msg.ruleId
-        }))
+      const violations = results.flatMap(file => 
+        file.messages.map(msg => {
+          const violation = {
+            file: file.filePath,
+            line: msg.line,
+            column: msg.column,
+            severity: msg.severity === 2 ? 'error' : 'warning',
+            message: msg.message,
+            ruleId: msg.ruleId
+          };
+          
+          // Add Design Metrics semaphore classification
+          const designMetrics = this.classifyDesignMetricsViolation(msg);
+          if (designMetrics) {
+            violation.designMetrics = designMetrics;
+          }
+          
+          return violation;
+        })
       );
+      
+      return violations;
     } catch (error) {
       this.logger.warn(`Failed to parse ESLint output: ${error.message}`);
       this.logger.debug(`ESLint stdout was: ${stdout.substring(0, 200)}...`);
       return [];
+    }
+  }
+
+  // Design Metrics semaphore classification (RF-003 requirements)
+  classifyDesignMetricsViolation(message) {
+    const designMetricsRules = {
+      'complexity': { 
+        metric: 'cyclomaticComplexity',
+        green: 10, 
+        yellow: 15, 
+        thresholds: '🟢≤10, 🟡11-15, 🔴>15'
+      },
+      'max-lines': { 
+        metric: 'linesOfCode',
+        green: 212, 
+        yellow: 300,
+        thresholds: '🟢≤212, 🟡213-300, 🔴>300'
+      },
+      'max-len': { 
+        metric: 'lineLength',
+        green: 100,
+        thresholds: '🟢≤100, 🔴>100 (strict limit)'
+      }
+    };
+    
+    const rule = designMetricsRules[message.ruleId];
+    if (!rule) return null;
+    
+    // Extract numeric value from message
+    const value = this.extractMetricValue(message.message, message.ruleId);
+    if (value === null) return null;
+    
+    // Classify based on thresholds
+    let classification, semaphore;
+    if (value <= rule.green) {
+      classification = 'green';
+      semaphore = '🟢';
+    } else if (rule.yellow && value <= rule.yellow) {
+      classification = 'yellow';
+      semaphore = '🟡';
+    } else {
+      classification = 'red';
+      semaphore = '🔴';
+    }
+    
+    return {
+      metric: rule.metric,
+      value: value,
+      classification: classification,
+      semaphore: semaphore,
+      thresholds: rule.thresholds
+    };
+  }
+
+  // Extract numeric value from ESLint error messages
+  extractMetricValue(message, ruleId) {
+    try {
+      switch (ruleId) {
+        case 'complexity':
+          // "Function 'myFunc' has a complexity of 12. Maximum allowed is 10."
+          const complexityMatch = message.match(/complexity of (\d+)/);
+          return complexityMatch ? parseInt(complexityMatch[1]) : null;
+          
+        case 'max-lines':
+          // "File has 250 lines. Maximum allowed is 212."
+          const linesMatch = message.match(/has (\d+) lines/);
+          return linesMatch ? parseInt(linesMatch[1]) : null;
+          
+        case 'max-len':
+          // "Line 42 exceeds the maximum line length of 100."
+          const lengthMatch = message.match(/exceeds.*?(\d+)/);
+          return lengthMatch ? parseInt(lengthMatch[1]) : null;
+          
+        default:
+          return null;
+      }
+    } catch (error) {
+      this.logger.debug(`Failed to extract metric value from: ${message}`);
+      return null;
     }
   }
 }

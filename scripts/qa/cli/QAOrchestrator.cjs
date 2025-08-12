@@ -68,7 +68,11 @@ class QAOrchestrator {
       
       // T-10: Check environment before execution (pass mode for optimization)
       const mode = argv.fast ? 'fast' : 'automatic';
-      const envCheck = await environmentChecker.checkEnvironment(mode);
+      
+      // CRITICAL FIX: Pre-determine required tools based on user arguments to avoid hardcoded checks
+      const requiredTools = this._determineRequiredTools(argv);
+      
+      const envCheck = await environmentChecker.checkEnvironment(mode, requiredTools);
       if (!envCheck.success) {
         this.logger.error(`Environment check failed: ${envCheck.error}`);
         process.exit(1);
@@ -117,6 +121,66 @@ class QAOrchestrator {
       // Re-throw for error handler
       throw error;
     }
+  }
+
+  /**
+   * Pre-determine required tools based on user arguments
+   * This avoids hardcoded tool checks when user specifies specific dimensions/scopes
+   */
+  _determineRequiredTools(argv) {
+    const tools = [];
+    
+    // If user specified specific dimension, map to specific tools
+    if (argv.dimension) {
+      const scope = argv.scope || 'frontend'; // default to frontend if not specified
+      
+      const dimensionToolMap = {
+        format: {
+          frontend: ['prettier'],
+          backend: ['black'],
+          infrastructure: ['prettier'],
+          all: ['prettier', 'black']
+        },
+        lint: {
+          frontend: ['eslint'],
+          backend: ['ruff'],
+          infrastructure: ['eslint'],
+          all: ['eslint', 'ruff']
+        },
+        test: {
+          frontend: ['jest'],
+          backend: ['pytest'],
+          all: ['jest', 'pytest']
+        },
+        security: {
+          all: ['snyk']
+        },
+        build: {
+          all: ['yarn', 'npm', 'tsc']
+        }
+      };
+      
+      const dimensionTools = dimensionToolMap[argv.dimension];
+      if (dimensionTools) {
+        const scopeTools = dimensionTools[scope] || dimensionTools['all'] || [];
+        tools.push(...scopeTools);
+        this.logger.info(`Pre-determined tools for --dimension=${argv.dimension} --scope=${scope}: ${scopeTools.join(', ')}`);
+      }
+    } else if (argv.scope) {
+      // If user specified scope but no dimension, determine common tools for that scope
+      const scopeToolMap = {
+        frontend: ['prettier', 'eslint', 'jest'],
+        backend: ['black', 'ruff', 'pytest'],
+        infrastructure: ['prettier', 'eslint']
+      };
+      
+      const scopeTools = scopeToolMap[argv.scope] || [];
+      tools.push(...scopeTools);
+      this.logger.info(`Pre-determined tools for --scope=${argv.scope}: ${scopeTools.join(', ')}`);
+    }
+    
+    // If no specific tools determined, return null to use fallback logic
+    return tools.length > 0 ? tools : null;
   }
 }
 

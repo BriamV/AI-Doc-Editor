@@ -41,9 +41,11 @@ class EnvironmentChecker {
     this.optionalTools = {
       snyk: { command: 'snyk --version', description: 'Snyk security scanner', installUrl: 'https://docs.snyk.io/snyk-cli/install-the-snyk-cli', fallback: 'skip' },
       prettier: { command: 'yarn exec prettier --version', description: 'Prettier code formatter', installUrl: 'lazy:prettier', fallback: 'skip' },
-      eslint: { command: 'yarn exec eslint --version', description: 'ESLint JavaScript linter', installUrl: 'lazy:eslint', fallback: 'skip' },
+      eslint: { command: 'node node_modules/eslint/bin/eslint.js --version', description: 'ESLint JavaScript linter', installUrl: 'lazy:eslint', fallback: 'skip' },
+      jest: { command: 'node -e "console.log(require(\'jest/package.json\').version)"', description: 'Jest JavaScript test runner', installUrl: 'lazy:jest', fallback: 'skip' },
       black: { command: 'black --version', description: 'Black Python formatter', installUrl: 'pip install black', fallback: 'skip' },
       pylint: { command: 'pylint --version', description: 'Pylint Python linter', installUrl: 'pip install pylint', fallback: 'skip' },
+      pytest: { command: 'pytest --version', description: 'Pytest Python test runner', installUrl: 'pip install pytest', fallback: 'skip' },
       ruff: { command: 'ruff --version', description: 'Ruff Python linter and formatter', installUrl: 'pip install ruff', fallback: 'skip' },
       tsc: { command: 'yarn exec tsc --version', description: 'TypeScript compiler', installUrl: 'lazy:typescript', fallback: 'skip' },
       pip: { command: 'pip --version', description: 'Python package installer', installUrl: 'https://pip.pypa.io/en/stable/installation/', fallback: 'skip' },
@@ -60,8 +62,10 @@ class EnvironmentChecker {
   
   /**
    * Main environment check - called once at Orchestrator startup
+   * @param {string} mode - execution mode ('fast', 'automatic', etc.)
+   * @param {Array<string>} requiredToolNames - specific tools needed for this execution
    */
-  async checkEnvironment(mode = 'automatic') {
+  async checkEnvironment(mode = 'automatic', requiredToolNames = null) {
     this.logger.info('🔍 Checking environment and dependencies...');
     
     // Initialize package manager service first
@@ -113,19 +117,32 @@ class EnvironmentChecker {
         this.logger.info(`🔧 Virtual environment activation: ${venvActivated}`);
       }
       
-      // Fast mode optimization: Only check essential tools for speed
+      // CRITICAL FIX: Only check tools that are actually needed
       let toolsToCheck = { ...optionalRequired, ...npmOptionalTools, ...pythonOptionalTools };
       
-      if (mode === 'fast') {
-        // Only check direct linters for fast mode (<5s target)
+      if (requiredToolNames && requiredToolNames.length > 0) {
+        // TARGETED MODE: Only check the specific tools needed for this execution
+        const targetedTools = {};
+        for (const toolName of requiredToolNames) {
+          if (this.optionalTools[toolName]) {
+            targetedTools[toolName] = this.optionalTools[toolName];
+          }
+        }
+        toolsToCheck = targetedTools;
+        this.logger.info(`Targeted mode: Checking only required tools (${Object.keys(targetedTools).length} tools): ${requiredToolNames.join(', ')}`);
+      } else if (mode === 'fast') {
+        // FALLBACK: Fast mode checks essential tools when no specific tools provided
         const fastModeTools = {
           prettier: this.optionalTools.prettier,
           eslint: this.optionalTools.eslint,
+          jest: this.optionalTools.jest,
           black: this.optionalTools.black,
-          ruff: this.optionalTools.ruff
+          pytest: this.optionalTools.pytest,
+          ruff: this.optionalTools.ruff,
+          snyk: this.optionalTools.snyk
         };
         toolsToCheck = fastModeTools;
-        this.logger.info(`Fast mode: Checking only direct linters for speed (${Object.keys(fastModeTools).length} tools)`);
+        this.logger.info(`Fast mode fallback: Checking direct linters for speed (${Object.keys(fastModeTools).length} tools)`);
       } else {
         this.logger.info(`Full mode: Checking all tools (${Object.keys(toolsToCheck).length} tools)`);
       }

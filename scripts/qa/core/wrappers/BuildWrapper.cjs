@@ -188,6 +188,32 @@ class BuildWrapper {
   }
   
   /**
+   * Get wrapper name (required by IBaseLinterWrapper interface)
+   */
+  getName() {
+    return 'BuildWrapper';
+  }
+  
+  /**
+   * Get wrapper version
+   */
+  getVersion() {
+    return '1.0.0';
+  }
+  
+  /**
+   * Check if build tools are available
+   */
+  async isAvailable() {
+    try {
+      const availableTools = await this.buildConfig.getAvailableTools();
+      return availableTools.length > 0;
+    } catch (error) {
+      return false;
+    }
+  }
+  
+  /**
    * Get wrapper capabilities
    */
   getCapabilities() {

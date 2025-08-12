@@ -64,13 +64,8 @@ class ToolMapper {
       
       // FIXED: In dimension mode, map to real tools from config instead of creating virtual tools
       if (mode === 'dimension') {
-        // Get tools for specific scope, fallback to 'all' (reusing existing logic)
-        let scopeTools = dimensionConfig[scope] || dimensionConfig['all'] || [];
-        
-        // Ensure it's an array (reusing existing validation)
-        if (!Array.isArray(scopeTools)) {
-          scopeTools = [];
-        }
+        // COMPREHENSIVE FIX: Get tools for specific scope with proper mapping
+        let scopeTools = this._getScopeTools(dimensionConfig, scope);
         
         // Map each real tool in this dimension (reusing existing tool creation pattern)
         for (const tool of scopeTools) {
@@ -97,13 +92,8 @@ class ToolMapper {
       }
       
       // STANDARD MODE: Map to individual tools
-      // Get tools for specific scope, fallback to 'all'
-      let scopeTools = dimensionConfig[scope] || dimensionConfig['all'] || [];
-      
-      // Ensure it's an array
-      if (!Array.isArray(scopeTools)) {
-        scopeTools = [];
-      }
+      // COMPREHENSIVE FIX: Get tools for specific scope with proper mapping
+      let scopeTools = this._getScopeTools(dimensionConfig, scope);
       
       for (const tool of scopeTools) {
         const toolConfig = {
@@ -126,6 +116,54 @@ class ToolMapper {
     
     this.logger.info(`Mapped ${dimensions.length} dimensions to ${tools.length} tools for scope: ${scope} (mode: ${mode})`);
     return tools;
+  }
+  
+  /**
+   * Get tools for specific scope with proper mapping and fallback logic
+   * COMPREHENSIVE FIX: Handles scope naming inconsistencies and 'all' scope properly
+   */
+  _getScopeTools(dimensionConfig, scope) {
+    // Map CLI scope names to config scope names
+    const scopeMapping = {
+      'tooling': 'infrastructure',  // Map 'tooling' CLI param to 'infrastructure' config key
+      'frontend': 'frontend',
+      'backend': 'backend', 
+      'all': 'all'
+    };
+    
+    const configScope = scopeMapping[scope] || scope;
+    
+    // For 'all' scope, combine tools from all specific scopes
+    if (scope === 'all') {
+      const allTools = new Set();
+      
+      // Collect tools from all specific scopes
+      const specificScopes = ['frontend', 'backend', 'infrastructure'];
+      for (const specificScope of specificScopes) {
+        const scopeTools = dimensionConfig[specificScope];
+        if (Array.isArray(scopeTools)) {
+          scopeTools.forEach(tool => allTools.add(tool));
+        }
+      }
+      
+      // Also include tools explicitly defined for 'all' scope
+      const explicitAllTools = dimensionConfig['all'];
+      if (Array.isArray(explicitAllTools)) {
+        explicitAllTools.forEach(tool => allTools.add(tool));
+      }
+      
+      return Array.from(allTools);
+    }
+    
+    // For specific scopes, get tools directly or fallback to 'all'
+    let scopeTools = dimensionConfig[configScope] || dimensionConfig['all'] || [];
+    
+    // Ensure it's an array
+    if (!Array.isArray(scopeTools)) {
+      scopeTools = [];
+    }
+    
+    return scopeTools;
   }
   
   /**

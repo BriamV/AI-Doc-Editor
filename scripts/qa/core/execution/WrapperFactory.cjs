@@ -119,7 +119,16 @@ class WrapperFactory {
             finalArgs = args;
           }
           
-          const childProcess = spawn(finalCommand, finalArgs, { 
+          // CRITICAL FIX: Quote arguments that contain spaces for Windows compatibility
+          const quotedArgs = finalArgs.map(arg => {
+            // Quote arguments that contain spaces or special characters
+            if (typeof arg === 'string' && (arg.includes(' ') || arg.includes('&') || arg.includes('('))) {
+              return `"${arg}"`;
+            }
+            return arg;
+          });
+          
+          const childProcess = spawn(finalCommand, quotedArgs, { 
             stdio: ['pipe', 'pipe', 'pipe'],
             shell: true,
             cwd: process.cwd()

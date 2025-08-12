@@ -20,12 +20,14 @@ class ModeDetector {
       }
     }
     
-    // Explicit dimension mode
+    // FIXED: Handle combined dimension + scope mode
+    // When both --dimension and --scope are provided, use dimension mode
+    // but the dimension mode will respect the scope parameter
     if (options.dimension) {
       return 'dimension';
     }
     
-    // Explicit scope mode
+    // Explicit scope mode (only when no dimension is specified)
     if (options.scope && options.scope !== 'all') {
       return 'scope';
     }

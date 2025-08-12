@@ -28,7 +28,12 @@ class JestWrapper {
     const startTime = Date.now();
     
     try {
-      this.logger.info(`Executing Jest for ${tool.name} (${tool.dimension})`);
+      // Defensive programming: Handle different tool parameter structures
+      const toolName = tool.name || tool.toolName || 'jest';
+      const toolDimension = tool.dimension || 'test';
+      const toolScope = tool.scope || tool.config?.scope || 'all';
+      
+      this.logger.info(`Executing Jest for ${toolName} (${toolDimension})`);
       
       // Build Jest command with coverage
       const command = await this._buildJestCommand(tool);
@@ -42,7 +47,7 @@ class JestWrapper {
       // Process Jest results
       const processedResults = await this._processJestResults(result, tool);
       
-      this.logger.info(`Jest execution completed for ${tool.name} in ${executionTime}ms`);
+      this.logger.info(`Jest execution completed for ${toolName} in ${executionTime}ms`);
       
       // MODERATE ISSUE FIX RF-003.5: Proper exit code interpretation for empty test suites
       const hasTests = processedResults.tests.total > 0;
@@ -50,8 +55,8 @@ class JestWrapper {
       
       return {
         success: result.exitCode === 0,
-        tool: tool.name,
-        dimension: tool.dimension,
+        tool: toolName,
+        dimension: toolDimension,
         executionTime: executionTime,
         results: processedResults,
         warnings: processedResults.warnings || [],
@@ -63,12 +68,13 @@ class JestWrapper {
       };
       
     } catch (error) {
-      this.logger.error(`Jest execution failed for ${tool.name}: ${error.message}`);
+      const toolName = tool.name || tool.toolName || 'jest';
+      this.logger.error(`Jest execution failed for ${toolName}: ${error.message}`);
       
       return {
         success: false,
-        tool: tool.name,
-        dimension: tool.dimension,
+        tool: toolName,
+        dimension: tool.dimension || 'test',
         error: error.message,
         executionTime: Date.now() - startTime
       };
@@ -85,12 +91,11 @@ class JestWrapper {
     command.push('--coverage');
     command.push('--coverageReporters=json', '--coverageReporters=text');
     
-    // Add scope-specific patterns
-    if (tool.config.scope) {
-      const scopePatterns = this._getScopePatterns(tool.config.scope);
-      if (scopePatterns.length > 0) {
-        command.push('--testPathPattern', scopePatterns.join('|'));
-      }
+    // Add scope-specific patterns - defensive handling
+    const toolScope = tool.scope || tool.config?.scope || 'all';
+    const scopePatterns = this._getScopePatterns(toolScope);
+    if (scopePatterns && scopePatterns.length > 0) {
+      command.push('--testPathPattern', scopePatterns.join('|'));
     }
     
     // Add configuration file if exists
@@ -118,10 +123,11 @@ class JestWrapper {
       frontend: ['src/**/*.test.js', 'src/**/*.spec.js', 'components/**/*.test.js'],
       backend: ['api/**/*.test.js', 'server/**/*.test.js', 'lib/**/*.test.js'],
       infrastructure: ['scripts/**/*.test.js', 'tools/**/*.test.js'],
-      all: this.jestConfig.testMatch
+      all: this.jestConfig.testMatch || ['**/*.test.js', '**/*.spec.js']
     };
     
-    return patterns[scope] || patterns.all;
+    const result = patterns[scope] || patterns.all;
+    return Array.isArray(result) ? result : [result];
   }
   
   /**
@@ -165,7 +171,9 @@ class JestWrapper {
       const childProcess = spawn(command[0], command.slice(1), {
         stdio: ['pipe', 'pipe', 'pipe'],
         timeout: this.jestConfig.timeout,
-        cwd: process.cwd()
+        cwd: process.cwd(),
+        shell: process.platform === 'win32' ? true : undefined,
+        env: { ...process.env }
       });
       
       let stdout = '';
@@ -292,6 +300,32 @@ class JestWrapper {
     } else if (testMatch) {
       processed.tests.passed = parseInt(testMatch[1]);
       processed.tests.total = parseInt(testMatch[2]);
+    }
+  }
+  
+  /**
+   * Get wrapper name (required by IBaseLinterWrapper interface)
+   */
+  getName() {
+    return 'JestWrapper';
+  }
+  
+  /**
+   * Get wrapper version
+   */
+  getVersion() {
+    return '1.0.0';
+  }
+  
+  /**
+   * Check if Jest is available
+   */
+  async isAvailable() {
+    try {
+      const fs = require('fs');
+      return fs.existsSync('node_modules/jest/package.json');
+    } catch (error) {
+      return false;
     }
   }
   

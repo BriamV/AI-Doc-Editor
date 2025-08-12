@@ -19,13 +19,13 @@ class ToolValidator {
     // Availability cache for tool checks
     this.availabilityCache = new Map();
     
-    // Base tool command mappings (extensible)
+    // Base tool command mappings (extensible) - Fixed for Windows compatibility
     this.baseToolCommands = {
       prettier: 'yarn exec prettier --version',
       black: 'black --version',
       eslint: 'yarn exec eslint --version',
       pylint: 'pylint --version',
-      jest: 'yarn exec jest --version',
+      jest: 'node -e "console.log(require(\'jest/package.json\').version)"',
       pytest: 'pytest --version',
       snyk: 'snyk --version',
       bandit: 'bandit --version',
@@ -111,6 +111,10 @@ class ToolValidator {
         case 'formatter':
           return `yarn exec ${toolName} --version`;
         case 'test-runner':
+          // Enhanced: Use Node.js require for Jest on Windows for better compatibility
+          if (toolName === 'jest') {
+            return 'node -e "console.log(require(\'jest/package.json\').version)"';
+          }
           return `yarn exec ${toolName} --version`;
         case 'security-scanner':
           return `${toolName} --version`;

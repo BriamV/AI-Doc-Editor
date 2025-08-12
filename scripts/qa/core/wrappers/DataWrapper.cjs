@@ -132,6 +132,33 @@ class DataWrapper {
   }
   
   /**
+   * Get wrapper name (required by IBaseLinterWrapper interface)
+   */
+  getName() {
+    return 'DataWrapper';
+  }
+  
+  /**
+   * Get wrapper version
+   */
+  getVersion() {
+    return '1.0.0';
+  }
+  
+  /**
+   * Check if data validation tools are available
+   */
+  async isAvailable() {
+    try {
+      const availableTools = await this.dataConfig.getAvailableTools();
+      return availableTools.length > 0;
+    } catch (error) {
+      this.logger.warn(`Data validation tools availability check failed: ${error.message}`);
+      return false;
+    }
+  }
+  
+  /**
    * Get wrapper capabilities
    */
   getCapabilities() {

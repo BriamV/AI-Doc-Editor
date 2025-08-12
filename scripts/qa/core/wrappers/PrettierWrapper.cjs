@@ -47,8 +47,8 @@ class PrettierWrapper extends BaseWrapper {
     const startTime = Date.now();
     
     try {
+      // Use --list-different instead of --check since they can't be combined
       const args = [
-        '--check',  // Check formatting without writing
         '--list-different',  // List files that would be formatted
         ...files
       ];
@@ -56,11 +56,30 @@ class PrettierWrapper extends BaseWrapper {
       const result = await this.processService.execute('prettier', args);
       const violations = this.parsePrettierOutput(result.stdout, result.stderr);
       
+      // CRITICAL DEBUG: Log the ProcessService result
+      this.logger.info(`🔧 PrettierWrapper: ProcessService returned success=${result.success}, exitCode=${result.exitCode}, stdout length=${result.stdout?.length}, stderr="${result.stderr}"`);
+      
+      // CRITICAL FIX RF-003: Success determination based on PRD specification
+      // "Un solo Error debe hacer que toda la validación falle"
+      // Prettier violations are always severity "error" (formatting issues)
+      let isSuccess = false;
+      
+      if (result.exitCode > 1) {
+        // Prettier had execution error
+        isSuccess = false;
+      } else {
+        // Prettier executed successfully - check if any violations found
+        // All Prettier violations are severity "error", so any violations = failure
+        isSuccess = violations.length === 0;
+      }
+      
+      this.logger.debug(`Prettier success determination: exitCode=${result.exitCode}, violations=${violations.length}, isSuccess=${isSuccess}`);
+      
       return this.formatResult(
-        result.success,
+        isSuccess,
         violations,
         Date.now() - startTime,
-        { filesProcessed: files.length, tool: 'prettier' }
+        { filesProcessed: files.length, tool: 'prettier', exitCode: result.exitCode }
       );
     } catch (error) {
       return this.handleExecutionError(error, 'Prettier');
