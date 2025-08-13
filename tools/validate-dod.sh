@@ -63,7 +63,7 @@ while IFS= read -r criterion; do
         # Pattern matching for validation suggestions
         case $(echo "$criterion" | tr '[:upper:]' '[:lower:]') in
             *"código revisado"*|*"code review"*|*"aprobado"*)
-                echo "    ✓ Run: yarn run cmd validate-task (linting, formatting)"
+                echo "    ✓ Run: npx eslint . && npx prettier --check . (linting, formatting)"
                 echo "    ✓ Check: Git commits follow conventional format"
                 echo "    ✓ Verify: No TODO/FIXME comments in production code"
                 ;;
@@ -96,7 +96,7 @@ while IFS= read -r criterion; do
                 fi
                 ;;
             *"seguridad"*|*"security"*)
-                echo "    ✓ Run: yarn run cmd security-scan"
+                echo "    ✓ Run: npm audit && npx semgrep --config=auto ."
                 echo "    ✓ Check: No secrets in code or logs"
                 echo "    ✓ Verify: Authentication/authorization works correctly"
                 if [[ "$TASK_ID" == "T-02" ]]; then

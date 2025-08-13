@@ -68,7 +68,7 @@ case "$ACTION" in
         echo "✅ QA passed for $TASK_ID - ready for review"
         echo ""
         echo "📋 Updating traceability..."
-        if yarn run cmd governance --format=md >/dev/null 2>&1; then
+        if npx tsx scripts/governance.ts --format=md >/dev/null 2>&1; then
             echo "✅ Traceability updated successfully"
         else
             echo "⚠️  Traceability update had issues (check manually)"
@@ -103,7 +103,7 @@ case "$ACTION" in
         echo "🎉 Marking $TASK_ID as fully complete (DoD satisfied)"
         echo ""
         echo "📋 Final traceability update..."
-        if yarn run cmd governance --format=all >/dev/null 2>&1; then
+        if npx tsx scripts/governance.ts --format=all >/dev/null 2>&1; then
             echo "✅ Final traceability matrix generated"
         else
             echo "⚠️  Traceability generation had issues (check manually)"
@@ -132,7 +132,7 @@ if grep -A 20 "### \*\*Tarea ${TASK_ID}:" "$FILE" | grep -q "Estado:.*${NEW_STAT
             echo ""
             echo "💡 Next actions:"
             echo "  ./tools/qa-workflow.sh $TASK_ID start-qa"
-            echo "  yarn run cmd qa-gate  # Run quality checks"
+            echo "  git commit -m 'Ready for QA'  # Quality checks via hooks"
             ;;
         "qa-passed")
             echo ""
