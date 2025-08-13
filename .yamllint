@@ -1,0 +1,32 @@
+# yamllint configuration for AI-Doc-Editor project
+extends: default
+
+rules:
+  # Allow longer lines for readability
+  line-length:
+    max: 120
+    level: warning
+
+  # Be more flexible with indentation
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+
+  # Allow comments at the end of lines
+  comments:
+    min-spaces-from-content: 1
+
+  # Be flexible with truthy values (on/off, yes/no, etc.)
+  truthy:
+    allowed-values: ['true', 'false', 'on', 'off', 'yes', 'no']
+    check-keys: true
+
+  # Allow document start without ---
+  document-start: disable
+
+  # Be flexible with empty lines
+  empty-lines:
+    max: 2
+    max-start: 1
+    max-end: 1
