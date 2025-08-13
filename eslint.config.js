@@ -61,6 +61,8 @@ export default [
         { argsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
       ],
       'prettier/prettier': 'error',
+      // Complexity rule for Claude hooks design metrics validation
+      'complexity': ['error', 15],
     },
     settings: {
       react: {
