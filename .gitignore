@@ -65,3 +65,14 @@ scripts/reports/security-audit.json
 reports/security-audit.json
 yarn-licenses.json
 npm-licenses.json
+
+# Python virtual environment (root level)
+.venv/
+*.coverage
+.coverage
+backend/.coverage
+
+# Temporary Claude session files
+.cc-session-start
+.cc-metrics-fail.json
+.cc-refactor-attempts
