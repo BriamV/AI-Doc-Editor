@@ -216,7 +216,14 @@ npm audit && npx semgrep --config=auto . --severity=ERROR
 Tier 1: CLAUDE.md, qa.cjs, package.json
 Tier 2: DEVELOPMENT-STATUS.md, traceability docs
 
-# Future: Slash Commands (Post R0.WP2)
-Current: tools/task-navigator.sh T-02 | git commit (automatic QA)
-Planned: /task, /qg, /cert, /doc, /dev
+# Claude Code Slash Commands (ACTIVE)
+/task-dev [T-XX] [complete]     # Task development with sub-agent delegation
+/pr-flow [target] [--draft]     # PR creation with multi-agent code review  
+/release-prep [RX.Y] [validate] # Release preparation via sub-agent orchestration
+
+# Sub-Agent Integration (Claude Code Best Practices)
+✅ Explicit invocation: "> Use the [agent] sub-agent to [task]"
+✅ Context detection: Analyze task/branch/files for appropriate sub-agent
+✅ Multi-agent orchestration: Sequential delegation for complex workflows
+✅ Tool limitation: Each sub-agent accesses only necessary tools
 ```

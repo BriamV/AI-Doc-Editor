@@ -1,5 +1,37 @@
 {
   "hooks": {
+    "preSubAgent": [
+      {
+        "matcher": "task-dev|pr-flow|release-prep|intelligent-qa|multi-agent-orchestrator",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 4,
+            "command": "echo 'Pre-SubAgent: GitFlow Context Detection (timeout: 4s)...'; BRANCH=$(git branch --show-current 2>/dev/null); export TASK_ID=$(echo \"$BRANCH\" | sed -n 's/.*T-\\([0-9]\\+\\).*/T-\\1/p' | head -1); export RELEASE_ID=$(echo \"$BRANCH\" | sed -n 's/^release\\/R\\([0-9]\\+\\).*/R\\1/p' | head -1); if [[ \"$BRANCH\" =~ ^feature/T-[0-9]+ ]]; then export WORKFLOW_TYPE='task-development'; elif [[ \"$BRANCH\" =~ ^release/R[0-9]+ ]]; then export WORKFLOW_TYPE='release-preparation'; elif [[ \"$BRANCH\" =~ ^hotfix/ ]]; then export WORKFLOW_TYPE='hotfix'; elif [[ \"$BRANCH\" == 'develop' ]]; then export WORKFLOW_TYPE='integration'; elif [[ \"$BRANCH\" == 'main' ]]; then export WORKFLOW_TYPE='production'; else export WORKFLOW_TYPE='general-development'; fi; echo \"Branch: $BRANCH | Workflow: $WORKFLOW_TYPE | Task: ${TASK_ID:-none} | Release: ${RELEASE_ID:-none}\""
+          }
+        ]
+      },
+      {
+        "matcher": "task-dev|pr-flow|release-prep",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 2,
+            "command": "echo 'Pre-SubAgent: Sub-Agent Selection (timeout: 2s)...'; case \"$WORKFLOW_TYPE\" in 'task-development') if [ -n \"$TASK_ID\" ] && [ -f tools/task-navigator.sh ]; then task_content=$(timeout 2s bash tools/task-navigator.sh \"$TASK_ID\" --format=json 2>/dev/null | grep -i 'security\\|auth\\|oauth' && echo 'security-auditor') || echo 'task-developer'; else echo 'frontend-developer'; fi;; 'release-preparation') echo 'release-manager';; 'hotfix') echo 'hotfix-specialist';; *) echo 'workflow-architect';; esac | { read agent; export SUB_AGENT=\"$agent\"; echo \"Selected sub-agent: $agent\"; }"
+          }
+        ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 2,
+            "command": "echo 'Pre-SubAgent: Environment Check (timeout: 2s)...'; missing=0; for tool in git node npm; do command -v $tool >/dev/null 2>&1 || { echo \"Missing: $tool\"; missing=1; }; done; [ $missing -eq 0 ] && echo 'Environment ready' || echo 'Environment issues detected'"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Edit|Write|MultiEdit",
@@ -80,6 +112,48 @@
             "type": "command",
             "timeout": 15,
             "command": "echo 'Analizando metricas de calidad (timeout: 15s)...'; fail=0; out='['; sep=''; files=$(python - <<'PY'\nimport sys,json\nj=json.load(sys.stdin)\npaths=set()\nti=j.get('tool_input') or {}\ntr=j.get('tool_response') or {}\nfor k in ('file_path','path','filePath'):\n    if isinstance(ti,dict) and ti.get(k): paths.add(ti[k])\n    if isinstance(tr,dict) and tr.get(k): paths.add(tr[k])\nfor k in ('files','changes','editedFiles'):\n    v=tr.get(k)\n    if isinstance(v,list):\n        for x in v:\n            if isinstance(x,str): paths.add(x)\n            elif isinstance(x,dict):\n                for kk in ('file','path','filePath'):\n                    if kk in x: paths.add(x[kk])\nprint('\\n'.join(sorted(paths)))\nPY\n); \nif [ -z \"$files\" ]; then \n  changed_git=$(git status --porcelain -z 2>/dev/null | tr '\\0' '\\n' | awk '{print $2}'); \n  changed_sess=$( [ -f .cc-session-start ] && find . -type f -newer .cc-session-start 2>/dev/null | sed 's|^\\./||' ); \n  files=$(printf \"%s\\n%s\\n\" \"$changed_git\" \"$changed_sess\" | sort -u)\nfi;\n# Excluir rutas irrelevantes (generados, dependencias, caches)\nfiles=$(printf \"%s\\n\" \"$files\" | grep -Ev '(^|/)(coverage|node_modules|\\.venv|build|dist|\\.git|\\.cache|\\.pytest_cache)(/|$)' | grep -Ev '\\.(min\\.js|min\\.css)$' || true)\n[ -z \"$files\" ] && { echo '— Design Metrics — (sin archivos relevantes)'; exit 0; }\nfor f in $files; do \n  case \"$f\" in \n    *.py)\n      [ -f .venv/bin/activate ] && . .venv/bin/activate; \n      loc=$(wc -l < \"$f\" 2>/dev/null || echo 0); \n      if command -v radon >/dev/null 2>&1; then \n        maxcc=$(radon cc -s -j \"$f\" 2>/dev/null | python - <<'PY'\nimport json,sys\ntry:\n  j=json.load(sys.stdin)\nexcept Exception:\n  print(0); sys.exit(0)\nmx=0\nfor _,items in j.items():\n  for it in items:\n    try:\n      mx=max(mx,int(it.get('complexity',0)))\n    except Exception:\n      pass\nprint(mx)\nPY\n); \n      else echo \"[PY] $f | ⚠️ radon no disponible (pip install radon)\"; maxcc=0; fi; \n      [ \"$maxcc\" -le 10 ] || cc_band='yellow'; [ \"$maxcc\" -le 15 ] || { cc_band='red'; }; [ -n \"$cc_band\" ] || cc_band='green'; \n      [ \"$loc\" -le 212 ] || loc_band='yellow'; [ \"$loc\" -le 300 ] || { loc_band='red'; }; [ -n \"$loc_band\" ] || loc_band='green'; \n      [ \"$cc_band\" = 'red' ] && fail=1; [ \"$loc_band\" = 'red' ] && fail=1; \n      out=\"$out$sep{\\\"lang\\\":\\\"py\\\",\\\"file\\\":\\\"$f\\\",\\\"cc\\\":$maxcc,\\\"ccBand\\\":\\\"$cc_band\\\",\\\"loc\\\":$loc,\\\"locBand\\\":\\\"$loc_band\\\"}\"; sep=\",\" \n      ;;\n    *.ts|*.tsx|*.js|*.jsx|*.cjs|*.mjs)\n      loc=$(wc -l < \"$f\" 2>/dev/null || echo 0); \n      if [ -f yarn.lock ]; then ycmd='yarn -s'; else ycmd='npx'; fi; \n      $ycmd eslint \"$f\" --no-error-on-unmatched-pattern --rule '{\"complexity\":[\"error\",10]}' >/dev/null 2>&1; ec10=$?; \n      $ycmd eslint \"$f\" --no-error-on-unmatched-pattern --rule '{\"complexity\":[\"error\",15]}' >/dev/null 2>&1; ec15=$?; \n      if [ $ec10 -eq 0 ]; then cc_band='green'; elif [ $ec15 -eq 0 ]; then cc_band='yellow'; else cc_band='red'; fi; \n      [ \"$loc\" -le 212 ] || loc_band='yellow'; [ \"$loc\" -le 300 ] || { loc_band='red'; }; [ -n \"$loc_band\" ] || loc_band='green'; \n      [ \"$cc_band\" = 'red' ] && fail=1; [ \"$loc_band\" = 'red' ] && fail=1; \n      out=\"$out$sep{\\\"lang\\\":\\\"js\\\",\\\"file\\\":\\\"$f\\\",\\\"ccBand\\\":\\\"$cc_band\\\",\\\"loc\\\":$loc,\\\"locBand\\\":\\\"$loc_band\\\"}\"; sep=\",\" \n      ;;\n  esac; done; \n  out=\"$out]\"; echo \"$out\" > .cc-metrics-fail.json; \n  if [ $fail -ne 0 ]; then \n    echo '❌ Design Metrics en ROJO (CC>15 o LOC>300). Si timeout, revisa .cc-metrics-fail.json para detalles.' 1>&2; \n    exit 2; \n  else rm -f .cc-metrics-fail.json >/dev/null 2>&1 || true; fi"
+          }
+        ]
+      }
+    ],
+    "postSubAgent": [
+      {
+        "matcher": "task-dev",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 6,
+            "command": "echo 'Post-SubAgent: Task DoD Validation (timeout: 6s)...'; if [ -n \"$TASK_ID\" ] && [ -f tools/validate-dod.sh ]; then timeout 6s bash tools/validate-dod.sh \"$TASK_ID\" --quick 2>/dev/null && echo \"✅ DoD validation passed for $TASK_ID\" || echo \"⚠️ DoD validation issues for $TASK_ID\"; else echo 'No DoD validation available'; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "pr-flow",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 5,
+            "command": "echo 'Post-SubAgent: PR Convention Validation (timeout: 5s)...'; if git status --porcelain 2>/dev/null | grep -q '^[AMDR]'; then last_commit=$(git log -1 --pretty=format:'%s' 2>/dev/null); if echo \"$last_commit\" | grep -qE '^(feat|fix|docs|style|refactor|test|chore)(\\(.+\\))?: .+'; then echo \"✅ Conventional commit: $last_commit\"; else echo \"⚠️ Non-conventional commit: $last_commit\"; fi; echo 'Changes staged for PR'; else echo 'No staged changes for PR'; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "release-prep",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 4,
+            "command": "echo 'Post-SubAgent: Release Validation (timeout: 4s)...'; if [ -n \"$RELEASE_ID\" ]; then echo \"🚀 Release $RELEASE_ID preparation status:\"; if [ -f tools/progress-dashboard.sh ]; then timeout 3s bash tools/progress-dashboard.sh --release=\"$RELEASE_ID\" 2>/dev/null || echo 'Release progress check timeout'; fi; else echo 'No release context'; fi"
+          }
+        ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 2,
+            "command": "echo 'Post-SubAgent: Workflow Summary (timeout: 2s)...'; echo \"Workflow: ${WORKFLOW_TYPE:-unknown} | Sub-agent: ${SUB_AGENT:-none} | Context: ${TASK_ID:-${RELEASE_ID:-general}}\"; if [ -f .cc-session-start ]; then session_duration=$(($(date +%s) - $(stat -c %Y .cc-session-start 2>/dev/null || date +%s))); echo \"Session: ${session_duration}s\"; fi"
           }
         ]
       }
