@@ -1,1 +1,0 @@
-const   badFormat    =  'test-hooks'  ;
