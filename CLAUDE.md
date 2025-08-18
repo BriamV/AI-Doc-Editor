@@ -23,17 +23,35 @@ yarn run cmd security-scan                # Security audit
 ```
 
 ## 🚨 MANDATORY: Sub-Agent First Workflow
-1. **FIRST**: Use slash commands for complex tasks
+1. **FIRST**: Use CUSTOM slash commands for complex tasks
 2. **SECOND**: Use tools/ scripts for task management  
 3. **LAST**: Direct CLI only if above unavailable
 
+## ⚡ CONSTANT VALIDATION Required
 ```bash
-# Primary Slash Commands
+# ALWAYS validate after branch changes, context switches, or issues
+/health-check                    # Immediate system validation
+tools/progress-dashboard.sh      # Project status verification
+yarn run cmd validate-modified   # Code quality check
+```
+
+```bash
+# Daily Workflow Commands (Tier 1)
 /task-dev T-XX [complete]       # Task development with context
-/review-complete [--scope]      # Multi-agent code review
-/security-audit [--depth=full]  # Security analysis
-/health-check                   # System diagnostics
+/review-complete [--scope]      # Multi-agent code review  
 /commit-smart                   # Intelligent commits
+/pr-flow [--draft]              # Pull request automation
+/health-check                   # System diagnostics
+/docs-update [scope]            # Documentation maintenance
+/auto-workflow [scope]          # Context-aware suggestions
+/context-analyze [--depth]      # Project analysis
+
+# Specialized Commands (Tier 2) - Use as needed
+/security-audit /architecture /debug-analyze /pipeline-check 
+/deploy-validate /adr-create /issue-generate
+
+# Advanced Commands (Tier 3) - Production/Emergency  
+/release-prep /hotfix-flow /search-web /explain-codebase
 
 # Sub-Agent Pattern (Copy-Paste)
 > Use the [AGENT] sub-agent to [SPECIFIC-TASK]
