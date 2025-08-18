@@ -3,7 +3,8 @@
 ---
 description: Create PRs with proper code review delegation using Claude Code sub-agent best practices  
 argument-hint: "[target-branch] [--draft]"
-sub-agent: workflow-architect
+allowed-tools: Bash(git *), Bash(gh *), Read, Grep, Glob
+model: claude-3-5-sonnet-20241022
 ---
 
 ## Purpose
@@ -18,61 +19,32 @@ Create pull requests with automated code review and security validation through 
 /pr-flow --draft                # Create draft PR
 ```
 
+## Context (auto-collected)
+- Current branch: !`git branch --show-current`
+- Recent commits: !`git log --oneline -3`
+- Changed files: !`git diff --name-only HEAD~1..HEAD`
+- PR target: Auto-detect from GitFlow (feature→develop, release/hotfix→main)
+
 ## Implementation
 
-```bash
-# Context detection and branch analysis
-TARGET_BRANCH="${ARGUMENTS[0]}"
-CURRENT_BRANCH=$(git branch --show-current 2>/dev/null)
-DRAFT_FLAG=""
+Parse `$ARGUMENTS` for target branch and draft flag. Auto-detect target branch using GitFlow conventions.
 
-# Handle draft flag
-for arg in "$@"; do
-    [ "$arg" = "--draft" ] && DRAFT_FLAG="--draft"
-done
+Analyze changed files to determine security-sensitive and API files for appropriate sub-agent delegation.
 
-# Auto-detect target branch from GitFlow convention
-[ -z "$TARGET_BRANCH" ] && {
-    case "$CURRENT_BRANCH" in
-        feature/*) TARGET_BRANCH="develop" ;;
-        release/*) TARGET_BRANCH="main" ;;
-        hotfix/*) TARGET_BRANCH="main" ;;
-        *) TARGET_BRANCH="develop" ;;
-    esac
-}
+**Sub-agent delegation for comprehensive code review:**
 
-echo "🔍 Analyzing changes for PR: $CURRENT_BRANCH → $TARGET_BRANCH"
+- **Always required**:
+  > Use the code-reviewer sub-agent to perform a comprehensive quality analysis of all changes in this pull request before creation
 
-# Check for security-sensitive changes  
-SECURITY_FILES=$(git diff --name-only HEAD...$TARGET_BRANCH | grep -E "(auth|oauth|security|crypto|token)" || true)
-API_FILES=$(git diff --name-only HEAD...$TARGET_BRANCH | grep -E "\.(py|js|ts)$" || true)
+- **Security-sensitive files** (auth/oauth/security/crypto/token):
+  > Use the security-auditor sub-agent to perform a thorough security review of authentication and security-related changes before creating this pull request
 
-# Explicit sub-agent delegation for code review using official syntax
-echo "📋 Delegating code review to appropriate sub-agents..."
+- **API/Backend files** (.py/.js/.ts files):
+  > Use the backend-architect sub-agent to validate architectural decisions and API design patterns in this pull request
 
-# Always perform general code review
-echo "> Use the code-reviewer sub-agent to perform a comprehensive quality analysis of all changes in this pull request before creation"
+**Conventional commit validation:**
+Verify the latest commit follows conventional commit format (feat|fix|docs|style|refactor|test|chore).
 
-# Security review for sensitive changes
-[ -n "$SECURITY_FILES" ] && {
-    echo "🔒 Security-sensitive files detected: $SECURITY_FILES"
-    echo "> Use the security-auditor sub-agent to perform a thorough security review of authentication and security-related changes before creating this pull request"
-}
-
-# Backend/API review for Python/JS/TS changes
-[ -n "$API_FILES" ] && {
-    echo "⚡ API/Backend files detected: $API_FILES" 
-    echo "> Use the backend-architect sub-agent to validate architectural decisions and API design patterns in this pull request"
-}
-
-# Generate conventional commit title
-TITLE=$(git log -1 --pretty=format:'%s')
-echo "$TITLE" | grep -qE '^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .+' || {
-    echo "⚠️ Non-conventional commit title: $TITLE"
-}
-
-echo "🚀 Creating PR: $CURRENT_BRANCH → $TARGET_BRANCH"  
-echo "Title: $TITLE"
-echo "Draft: ${DRAFT_FLAG:-false}"
-echo "✅ Sub-agents will complete review before PR creation"
+**PR creation workflow:**
+Generate PR with appropriate title, target branch detection, and draft mode support.
 ```

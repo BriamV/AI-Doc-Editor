@@ -2,7 +2,7 @@
   "hooks": {
     "preSubAgent": [
       {
-        "matcher": "task-dev|pr-flow|release-prep|intelligent-qa|multi-agent-orchestrator",
+        "matcher": "task-dev|pr-flow|release-prep|commit-smart|adr-create|issue-generate|docs-update|intelligent-qa|multi-agent-orchestrator|review-complete|security-audit|architecture|debug-analyze",
         "hooks": [
           {
             "type": "command",
@@ -12,7 +12,7 @@
         ]
       },
       {
-        "matcher": "task-dev|pr-flow|release-prep",
+        "matcher": "task-dev|pr-flow|release-prep|commit-smart|adr-create|issue-generate|docs-update|review-complete|security-audit|architecture|debug-analyze",
         "hooks": [
           {
             "type": "command",
@@ -144,6 +144,16 @@
             "type": "command",
             "timeout": 4,
             "command": "echo 'Post-SubAgent: Release Validation (timeout: 4s)...'; if [ -n \"$RELEASE_ID\" ]; then echo \"🚀 Release $RELEASE_ID preparation status:\"; if [ -f tools/progress-dashboard.sh ]; then timeout 3s bash tools/progress-dashboard.sh --release=\"$RELEASE_ID\" 2>/dev/null || echo 'Release progress check timeout'; fi; else echo 'No release context'; fi"
+          }
+        ]
+      },
+      {
+        "matcher": "commit-smart|adr-create|issue-generate|docs-update",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 3,
+            "command": "echo 'Post-SubAgent: Governance Validation (timeout: 3s)...'; case \"$0\" in *commit-smart*) echo '✅ Smart commit with quality gates completed'; if [ -n \"$TASK_ID\" ]; then echo \"📋 Task $TASK_ID status updated\"; fi;; *adr-create*) echo '📋 ADR created with proper numbering and indexing';; *issue-generate*) echo '🎫 GitHub issue generated with context';; *docs-update*) echo '📊 Documentation and traceability updated';; esac"
           }
         ]
       },

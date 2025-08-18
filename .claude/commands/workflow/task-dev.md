@@ -3,7 +3,8 @@
 ---
 description: Complete task development with explicit sub-agent delegation using Claude Code best practices
 argument-hint: "[task-id] [action]"
-sub-agent: workflow-architect
+allowed-tools: Bash(git branch:*), Bash(bash tools/*), Read, Grep, Glob
+model: claude-3-5-sonnet-20241022
 ---
 
 ## Purpose
@@ -18,47 +19,31 @@ Context-aware task development using proper sub-agent delegation. Analyzes task 
 /task-dev T-25 complete         # Mark complete with DoD validation
 ```
 
+## Context (auto-collected)
+- Current branch: !`git branch --show-current`
+- Modified files: !`git status --porcelain`
+- Task context: !`bash tools/task-navigator.sh $ARGUMENTS`
+
 ## Implementation
 
-```bash
-# Context detection and task ID resolution
-TASK_ID="${ARGUMENTS[0]}"
-ACTION="${ARGUMENTS[1]:-develop}"
+Parse `$ARGUMENTS` for task ID and action parameters. Auto-detect task ID from branch context if not provided.
 
-# Auto-detect task ID from branch if not provided
-[ -z "$TASK_ID" ] && TASK_ID=$(git branch --show-current | grep -o 'T-[0-9]\+')
-[ -z "$TASK_ID" ] && { echo "❌ No task ID found. Use: /task-dev T-XX"; exit 1; }
+Task content analysis for sub-agent selection using tools/task-navigator.sh output.
 
-# Analyze task content to determine sub-agent
-echo "🔍 Analyzing task $TASK_ID..."
-!tools/task-navigator.sh $TASK_ID
+**Sub-agent delegation based on task content analysis:**
 
-# Get task details for sub-agent selection
-TASK_CONTENT=$(bash tools/task-navigator.sh "$TASK_ID" 2>/dev/null | head -10)
+- **Frontend tasks** (React/TypeScript/UI/components):
+  > Use the frontend-developer sub-agent to implement React/TypeScript components and UI functionality for the specified task
 
-# Explicit sub-agent delegation using official Claude Code syntax
-case "$TASK_CONTENT" in
-    *"frontend"*|*"React"*|*"TypeScript"*|*"UI"*|*"component"*)
-        echo "🎨 Frontend task detected"
-        echo "> Use the frontend-developer sub-agent to implement React/TypeScript components and UI functionality for task $TASK_ID"
-        ;;
-    *"backend"*|*"API"*|*"FastAPI"*|*"Python"*|*"endpoint"*)
-        echo "⚡ Backend task detected"  
-        echo "> Use the backend-architect sub-agent to design and implement API endpoints and backend functionality for task $TASK_ID"
-        ;;
-    *"security"*|*"auth"*|*"oauth"*|*"encryption"*|*"audit"*)
-        echo "🔒 Security task detected"
-        echo "> Use the security-auditor sub-agent to implement security requirements and authentication features for task $TASK_ID"
-        ;;
-    *)
-        echo "🚀 General development task"
-        echo "> Use the frontend-developer sub-agent to implement the requirements for task $TASK_ID, coordinating with backend-architect sub-agent if API changes are needed"
-        ;;
-esac
+- **Backend tasks** (API/FastAPI/Python/endpoints):
+  > Use the backend-architect sub-agent to design and implement API endpoints and backend functionality for the specified task
 
-# Handle completion actions
-[ "$ACTION" = "complete" ] && {
-    echo "✅ Marking task $TASK_ID as development complete"
-    bash tools/qa-workflow.sh "$TASK_ID" dev-complete
-}
+- **Security tasks** (auth/oauth/encryption/audit):
+  > Use the security-auditor sub-agent to implement security requirements and authentication features for the specified task
+
+- **General development tasks**:
+  > Use the frontend-developer sub-agent to implement the requirements, coordinating with backend-architect sub-agent if API changes are needed
+
+**Task completion handling:**
+When action parameter is "complete", integrate with tools/qa-workflow.sh for DoD validation.
 ```
