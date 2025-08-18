@@ -1,76 +1,108 @@
 # CLAUDE.md
 
-AI Document Editor - React + TypeScript + Python FastAPI
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+AI Document Editor: React 18 + TypeScript + Python FastAPI + AI integration
+Features: Document generation with RAG, real-time collaboration, OAuth security
 
 ## Tech Stack
 - Frontend: React 18 + TypeScript + Vite + TailwindCSS
-- Backend: Python FastAPI + SQLAlchemy
-- AI: OpenAI GPT-4o + embeddings
-- Desktop: Electron
-- State: Zustand + IndexedDB
+- Backend: Python FastAPI + SQLAlchemy + Alembic  
+- AI: OpenAI GPT-4o + embeddings + LangChain
+- Desktop: Electron + auto-updater
+- State: Zustand + IndexedDB encryption
+- Tools: Git hooks, ESLint, Prettier, Jest, Semgrep
+
+## Development Setup
+```bash
+# Prerequisites: Node.js 18.16.0, Python 3.11+, WSL2 (Windows)
+yarn install && yarn run cmd dev          # Start development
+yarn run cmd build && yarn run cmd test   # Build & test
+yarn run cmd security-scan                # Security audit
+```
 
 ## 🚨 MANDATORY: Sub-Agent First Workflow
-1. **FIRST**: Use slash commands (`/task-dev`, `/review-complete`, `/security-audit`)
-2. **SECOND**: Use tools/ scripts (`task-navigator.sh`, `progress-dashboard.sh`)
-3. **LAST**: Direct CLI commands only if above unavailable
+1. **FIRST**: Use slash commands for complex tasks
+2. **SECOND**: Use tools/ scripts for task management  
+3. **LAST**: Direct CLI only if above unavailable
+
+```bash
+# Primary Slash Commands
+/task-dev T-XX [complete]       # Task development with context
+/review-complete [--scope]      # Multi-agent code review
+/security-audit [--depth=full]  # Security analysis
+/health-check                   # System diagnostics
+/commit-smart                   # Intelligent commits
+
+# Sub-Agent Pattern (Copy-Paste)
+> Use the [AGENT] sub-agent to [SPECIFIC-TASK]
+```
 
 ## Essential Commands
 ```bash
 # Development
 yarn run cmd dev|build|test|security-scan
 
-# Quality (automated via hooks)
-yarn run cmd lint|format|validate-all
+# Quality (automated via hooks - 54% performance optimized)
+yarn run cmd lint|format|validate-all|validate-modified
 
-# Task Management (use slash commands instead)
-/task-dev T-XX                 # NOT: tools/task-navigator.sh T-XX
-/review-complete --scope=api   # NOT: yarn run cmd lint
-/security-audit --depth=full   # NOT: npm audit
+# Multi-tech validation (TypeScript + Python auto-detection)
+yarn run cmd validate-frontend|validate-backend|validate-task T-XX
 ```
 
 ## Project Structure
 - `src/components/` - React components (Chat, Document, Menu)
-- `src/store/` - Zustand stores (docs, auth, config)
+- `src/store/` - Zustand stores (docs, auth, config)  
 - `api/` - Python FastAPI backend
 - `docs/` - Spanish documentation (primary)
 - `.claude/commands/` - 19 production slash commands
+- `tools/` - Task management scripts
 
 ## Quality Assurance
-- **Auto-formatting**: Runs on Edit/Write/MultiEdit via hooks
-- **Performance**: 54% optimized (152s → 70s)
+- **Auto-formatting**: Runs on Edit/Write/MultiEdit via .claude/hooks.json
+- **Performance**: 54% optimized (152s → 70s total timeout)
 - **Validation**: Multi-tech TypeScript + Python detection
+- **Security**: OAuth 2.0, TLS 1.3+, AES-256, GDPR compliance
+
+## Task Management Workflow
+```bash
+tools/progress-dashboard.sh              # Project progress
+tools/task-navigator.sh T-XX             # Task details  
+tools/extract-subtasks.sh T-XX           # Development planning
+tools/validate-dod.sh T-XX               # Definition of Done validation
+tools/qa-workflow.sh T-XX dev-complete   # Mark development complete
+```
+
+## Current Context
+- **Branch**: develop
+- **Phase**: R0.WP3 (Seguridad y Auditoría) 
+- **Language**: Spanish docs, English code
+- **Pattern**: T-XX task identification
+- **Status**: docs/DEVELOPMENT-STATUS.md
+
+## Security & Compliance
+```bash
+npm audit && npx semgrep --config=auto .    # Security scan
+npx tsx scripts/governance.ts --format=all  # Traceability matrix
+docs/adr/ADR-006-security.md               # Security architecture
+```
 
 ## Do Not Touch
 - `docs/Sub Tareas v2.md` - Use tools/task-navigator.sh instead
-- Legacy commands in `.claude/commands/legacy/`
-- Test files `test-*.js` - Temporary debugging files
+- `.claude/commands/legacy/` - Deprecated commands  
+- `test-*.js` - Temporary debugging files
+- `.claude/hooks.json.backup` - Backup configuration
 
-## Workflow Context
-- **Branch**: develop
-- **Current**: R0.WP3 (Seguridad y Auditoría)
-- **Language**: Spanish docs, English code
-- **Task Format**: T-XX pattern recognition
+## Integration Policy
+All enhancements MUST integrate into workflow:
+1. Document in CLAUDE.md with concrete commands
+2. Map to existing tools/scripts  
+3. Test before documenting
+4. Remove redundancies
 
-## Available Slash Commands (19 Total)
-```bash
-# Most Used
-/task-dev T-XX              # Task development with context
-/review-complete            # Code review with sub-agents
-/security-audit             # Security analysis
-/health-check               # System diagnostics
-/commit-smart               # Intelligent commits
-
-# Full list: /auto-workflow for context-aware suggestions
-```
-
-## Sub-Agent Pattern (Copy-Paste)
-```bash
-> Use the [AGENT] sub-agent to [SPECIFIC-TASK]
-
-# Examples:
-> Use the security-auditor sub-agent to analyze OAuth vulnerabilities
-> Use the frontend-developer sub-agent to optimize React components
-```
-
-📋 **For detailed task info**: Use `/task-dev T-XX` instead of manual file searches
-🔍 **For codebase analysis**: Use `/context-analyze` for intelligent insights
+## Quick Reference
+- 📋 **Task details**: `/task-dev T-XX`
+- 🔍 **Codebase analysis**: `/context-analyze`
+- 🚀 **Full command list**: `/auto-workflow`
+- 📊 **Progress**: `tools/progress-dashboard.sh`
