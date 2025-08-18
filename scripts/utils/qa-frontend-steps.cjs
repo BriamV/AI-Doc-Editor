@@ -1,7 +1,7 @@
 /**
  * Pasos QA Gate específicos para Frontend
  * Responsabilidad única: Verificaciones de frontend (TypeScript, ESLint, etc.)
- * 
+ *
  * Métricas objetivo:
  * - LOC: <212 (🟢)
  * - Complejidad ciclomática: ≤10
@@ -31,38 +31,38 @@ class QAFrontendSteps {
         name: 'Frontend: TypeScript compilation',
         category: 'frontend',
         execute: () => this.checkTypeScript(),
-        errorMessage: 'TypeScript failed'
+        errorMessage: 'TypeScript failed',
       },
       {
         name: 'Frontend: ESLint (zero warnings)',
         category: 'frontend',
         execute: () => this.runESLint(),
-        errorMessage: 'ESLint failed'
+        errorMessage: 'ESLint failed',
       },
       {
         name: 'Frontend: Prettier formatting',
         category: 'frontend',
         execute: () => this.checkPrettier(),
-        errorMessage: 'Formatting failed'
+        errorMessage: 'Formatting failed',
       },
       {
         name: 'Frontend: Dependencies check',
         category: 'frontend',
         execute: () => this.checkDependencies(),
-        errorMessage: 'Frontend dependencies check failed'
+        errorMessage: 'Frontend dependencies check failed',
       },
       {
         name: 'Frontend: Unit tests',
         category: 'frontend',
         execute: () => this.runTests(),
-        errorMessage: 'Frontend tests failed'
+        errorMessage: 'Frontend tests failed',
       },
       {
         name: 'Frontend: Build verification',
         category: 'frontend',
         execute: () => this.verifyBuild(),
-        errorMessage: 'Frontend build failed'
-      }
+        errorMessage: 'Frontend build failed',
+      },
     ];
   }
 
@@ -71,9 +71,9 @@ class QAFrontendSteps {
    */
   checkTypeScript() {
     logger.task('Comprobando tipos y errores de TypeScript...');
-    execSync('npx tsc --noEmit', { 
-      cwd: this.rootDir, 
-      stdio: 'inherit' 
+    execSync('./node_modules/.bin/tsc --noEmit', {
+      cwd: this.rootDir,
+      stdio: 'inherit',
     });
   }
 
@@ -82,9 +82,9 @@ class QAFrontendSteps {
    */
   runESLint() {
     logger.task('Ejecutando ESLint...');
-    execSync('npx eslint src/**/*.{js,jsx,ts,tsx}', { 
-      cwd: this.rootDir, 
-      stdio: 'inherit' 
+    execSync('./node_modules/.bin/eslint src/**/*.{js,jsx,ts,tsx}', {
+      cwd: this.rootDir,
+      stdio: 'inherit',
     });
   }
 
@@ -93,12 +93,12 @@ class QAFrontendSteps {
    */
   checkPrettier() {
     logger.task('Verificando formato con Prettier...');
-    const prettierCmd = 'npx prettier --check ' +
-      '"src/**/*.{js,jsx,ts,tsx,css,scss,html}"';
-    
-    execSync(prettierCmd, { 
-      cwd: this.rootDir, 
-      stdio: 'inherit' 
+    const prettierCmd =
+      './node_modules/.bin/prettier --check ' + '"src/**/*.{js,jsx,ts,tsx,css,scss,html}"';
+
+    execSync(prettierCmd, {
+      cwd: this.rootDir,
+      stdio: 'inherit',
     });
   }
 
@@ -107,7 +107,7 @@ class QAFrontendSteps {
    */
   checkDependencies() {
     const deps = this.dependencies.checkFrontendDependencies();
-    
+
     if (this._hasMissingDependencies(deps)) {
       this._reportMissingDependencies(deps);
       this.dependencies.installFrontendDependencies(deps);
@@ -121,27 +121,27 @@ class QAFrontendSteps {
    */
   runTests() {
     logger.task('Ejecutando pruebas unitarias frontend...');
-    
+
     try {
       const testRunner = this._detectTestRunner();
-      
+
       if (testRunner === 'vitest') {
         logger.task('Usando Vitest como test runner...');
-        execSync('npx vitest run --passWithNoTests', { 
-          cwd: this.rootDir, 
-          stdio: 'inherit' 
+        execSync('npx vitest run --passWithNoTests', {
+          cwd: this.rootDir,
+          stdio: 'inherit',
         });
       } else if (testRunner === 'jest') {
         logger.task('Usando Jest como test runner...');
-        execSync('npx jest --passWithNoTests', { 
-          cwd: this.rootDir, 
-          stdio: 'inherit' 
+        execSync('npx jest --passWithNoTests', {
+          cwd: this.rootDir,
+          stdio: 'inherit',
         });
       } else {
         this._handleNoTestRunner();
         return;
       }
-      
+
       logger.success('Pruebas frontend completadas');
     } catch (error) {
       logger.error('Pruebas frontend fallidas');
@@ -154,16 +154,15 @@ class QAFrontendSteps {
    */
   verifyBuild() {
     logger.task('Verificando build frontend (Vite)...');
-    
+
     try {
-      execSync('npx vite build', { 
-        cwd: this.rootDir, 
-        stdio: 'inherit' 
+      execSync('npx vite build', {
+        cwd: this.rootDir,
+        stdio: 'inherit',
       });
     } catch (error) {
       if (this._isBuildDependencyError(error)) {
-        logger.warn('Error de dependencias de build. ' +
-          'Considera ejecutar: yarn install');
+        logger.warn('Error de dependencias de build. ' + 'Considera ejecutar: yarn install');
         throw new Error('Build falló debido a dependencias faltantes');
       }
       throw error;
@@ -178,28 +177,20 @@ class QAFrontendSteps {
 
   _reportMissingDependencies(deps) {
     if (deps.missing.length > 0) {
-      logger.task(
-        `⚠️ Dependencias Frontend faltantes: ${deps.missing.join(', ')}`
-      );
+      logger.task(`⚠️ Dependencias Frontend faltantes: ${deps.missing.join(', ')}`);
       logger.task(`💡 Ejecuta: yarn add ${deps.missing.join(' ')}`);
     }
-    
+
     if (deps.missingDev.length > 0) {
-      logger.task(
-        `⚠️ Dependencias Dev faltantes: ${deps.missingDev.join(', ')}`
-      );
+      logger.task(`⚠️ Dependencias Dev faltantes: ${deps.missingDev.join(', ')}`);
       logger.task(`💡 Ejecuta: yarn add -D ${deps.missingDev.join(' ')}`);
     }
   }
 
   _detectTestRunner() {
-    const hasVitest = fs.existsSync(
-      path.join(this.rootDir, 'node_modules', 'vitest')
-    );
-    const hasJest = fs.existsSync(
-      path.join(this.rootDir, 'node_modules', 'jest')
-    );
-    
+    const hasVitest = fs.existsSync(path.join(this.rootDir, 'node_modules', 'vitest'));
+    const hasJest = fs.existsSync(path.join(this.rootDir, 'node_modules', 'jest'));
+
     if (hasVitest) return 'vitest';
     if (hasJest) return 'jest';
     return null;
@@ -211,8 +202,7 @@ class QAFrontendSteps {
   }
 
   _isBuildDependencyError(error) {
-    return error.message.includes('rollup') || 
-           error.message.includes('MODULE_NOT_FOUND');
+    return error.message.includes('rollup') || error.message.includes('MODULE_NOT_FOUND');
   }
 }
 

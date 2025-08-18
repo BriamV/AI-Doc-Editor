@@ -27,6 +27,11 @@ yarn run cmd security-scan                # Security audit
 2. **SECOND**: Use tools/ scripts for task management  
 3. **LAST**: Direct CLI only if above unavailable
 
+### Sub-Agent Architecture
+- **Custom Commands**: 19 workflow orchestrators in .claude/commands/ that analyze context
+- **Global Sub-Agents**: 40+ Claude Code specialists (security-auditor, frontend-developer, etc.)
+- **Invocation**: Commands auto-select and delegate to appropriate sub-agents
+
 ## ⚡ CONSTANT VALIDATION Required
 ```bash
 # ALWAYS validate after branch changes, context switches, or issues
@@ -53,7 +58,7 @@ yarn run cmd validate-modified   # Code quality check
 # Advanced Commands (Tier 3) - Production/Emergency  
 /release-prep /hotfix-flow /search-web /explain-codebase
 
-# Sub-Agent Pattern (Copy-Paste)
+# Sub-Agent Invocation Pattern (Auto-handled by commands)
 > Use the [AGENT] sub-agent to [SPECIFIC-TASK]
 ```
 
@@ -98,6 +103,11 @@ tools/qa-workflow.sh T-XX dev-complete   # Mark development complete
 - **Language**: Spanish docs, English code
 - **Pattern**: T-XX task identification
 - **Status**: docs/DEVELOPMENT-STATUS.md
+
+## Sub-Agent Architecture
+- **40+ Global Sub-Agents**: Built-in Claude Code specialists (security-auditor, backend-architect, etc.)
+- **Local Project Context**: Single project-aware agent with branch/task understanding
+- **Custom Commands**: Auto-select appropriate global sub-agents based on project context
 
 ## Security & Compliance
 ```bash

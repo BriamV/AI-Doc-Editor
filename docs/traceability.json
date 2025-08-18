@@ -5,7 +5,7 @@
     "taskId": "T-01",
     "taskName": "Configuración de CI/CD",
     "testFile": "tests/auth/oauth.test.js",
-    "status": "Planificado",
+    "status": "En Progreso",
     "release": "R0.0"
   },
   {
@@ -32,7 +32,7 @@
     "taskId": "T-17",
     "taskName": "Validación de API y gobernanza",
     "testFile": "tests/components/editor.test.js",
-    "status": "Completado",
+    "status": "Planificado",
     "release": "R0.2"
   },
   {
@@ -41,7 +41,7 @@
     "taskId": "T-23",
     "taskName": "Endpoint de health-check",
     "testFile": "tests/services/ai-service.test.js",
-    "status": "Completado",
+    "status": "En Progreso",
     "release": "R0.3"
   },
   {
@@ -59,7 +59,7 @@
     "taskId": "T-41",
     "taskName": "Integración con OpenAI",
     "testFile": "tests/utils/encryption.test.js",
-    "status": "Completado",
+    "status": "En Progreso",
     "release": "R0.4"
   },
   {
@@ -68,7 +68,7 @@
     "taskId": "T-43",
     "taskName": "Escaneo de dependencias",
     "testFile": "tests/e2e/document-flow.test.js",
-    "status": "Completado",
+    "status": "Planificado",
     "release": "R1.0"
   },
   {
@@ -77,7 +77,7 @@
     "taskId": "T-44",
     "taskName": "Editor de documentos React",
     "testFile": "tests/auth/oauth.test.js",
-    "status": "Planificado",
+    "status": "Completado",
     "release": "R1.0"
   },
   {
@@ -86,7 +86,7 @@
     "taskId": "T-44",
     "taskName": "Editor de documentos React",
     "testFile": "tests/auth/oauth.test.js",
-    "status": "Planificado",
+    "status": "Completado",
     "release": "R1.1"
   },
   {
