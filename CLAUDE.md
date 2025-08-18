@@ -30,11 +30,17 @@ yarn run cmd electron|electron-pack|electron-dist
 # AUTOMATIC QA: Quality checks run automatically on git commit via .claude/hooks.json
 # OPTIMIZED: 54% performance improvement (152s → 70s total timeout)
 # Complete toolchain: 10/10 tools available (taplo, shfmt included)
+# AUTO-FORMATTING: Fixed hook now reliably formats files on Edit/Write/MultiEdit
 
 # Performance Improvements (2025-08-13):
 # PreToolUse: 52s → 25s (52% reduction)
-# PostToolUse: 100s → 45s (55% reduction)
+# PostToolUse: 100s → 45s (55% reduction)  
 # Total: 152s → 70s (54% improvement)
+
+# Auto-formatting Fix (2025-08-18):
+# Issue: Hooks relied on unreliable JSON stdin input for file detection
+# Fix: Added robust fallback to git detection with proper error handling
+# Result: Auto-formatting now works reliably on every Claude Code tool usage
 
 # Manual QA (if needed):
 yarn run cmd qa-gate                           # Complete QA pipeline
@@ -73,9 +79,22 @@ SWC + lazy loading | Jest testing | OAuth + i18next
 
 ```bash
 # Core Principles
+🤖 SUB-AGENT FIRST: ALWAYS use /command + sub-agents before manual CLI
 Multilingual: SPANISH docs, English code | Verify all metrics from source
 Efficient: Targeted search for large files | Read → Verify → Edit
 Quality: git hooks automatic QA on commit | Use feature branches
+
+# 🚨 MANDATORY: SUB-AGENT PRIORITY WORKFLOW
+1. ✅ FIRST: Use slash commands (/task-dev, /health-check, /commit-smart, etc.)
+2. ✅ SECOND: Use tools/ scripts (task-navigator.sh, progress-dashboard.sh)
+3. ❌ LAST: Direct yarn/npm commands only if sub-agents unavailable
+
+Examples:
+❌ yarn run cmd lint            → ✅ /review-complete --scope=components
+❌ npm audit                    → ✅ /security-audit --depth=full
+❌ git commit -m "message"      → ✅ /commit-smart "message"
+❌ tools/task-navigator.sh T-XX → ✅ /task-dev T-XX
+❌ manual debugging             → ✅ /debug-analyze --trace
 
 # MANDATORY WORKFLOW: Use tools/ directory for ALL task management
 ALWAYS start with: docs/DEVELOPMENT-STATUS.md → tools/progress-dashboard.sh
@@ -90,6 +109,84 @@ NEVER manually search Sub Tareas v2.md - use tools/task-navigator.sh instead
 Auto-detection: TypeScript/React + Python/FastAPI | Windows/Linux/macOS/WSL
 Workflow-aware: feature/T-XX → validate-task | develop → validate-all
 Performance: validate-*-fast (1-8s) | validate-*-full (complete) | scope-specific
+```
+
+## Sub-Agent Workflow Priority
+
+```bash
+# MANDATORY: Always prioritize sub-agents and slash commands over basic CLI
+
+# Priority Hierarchy (Intelligent → Basic)
+1. Slash Commands + Sub-Agents (PREFERRED)
+2. tools/ scripts (context-specific)
+3. yarn run cmd (fallback)
+4. Direct CLI (last resort)
+
+# Why Sub-Agents First?
+✅ Context Intelligence: Analyze branch/task/files for optimal sub-agent selection
+✅ Performance Maintained: 54% optimization (152s → 70s) preserved with intelligence
+✅ Quality Enhancement: Specialized expertise per domain (security, architecture, etc.)
+✅ Workflow Integration: Seamless integration with existing tools/ and git hooks
+
+# Sub-Agent Delegation Pattern
+"> Use the [agent] sub-agent to [specific task description]"
+
+# 9 Specialized Sub-Agents & Their Capabilities
+workflow-architect    # Project orchestration, task management, context analysis
+security-auditor      # Security validation, audit reports, compliance checks
+backend-architect     # API design, system architecture, performance optimization
+code-reviewer         # Code quality, best practices, review automation
+devops-troubleshooter # CI/CD, deployment, infrastructure, health monitoring
+frontend-developer    # UI/UX, component analysis, React/TypeScript optimization
+api-documenter        # Documentation generation, OpenAPI specs, examples
+deployment-engineer   # Deployment validation, environment management
+debugger              # Error analysis, troubleshooting, performance debugging
+
+# Common Workflow Examples
+
+# Task Development (Use /task-dev instead of tools/task-navigator.sh)
+/task-dev T-15                          # ✅ Intelligent task analysis + sub-agent delegation
+# tools/task-navigator.sh T-15          # ❌ Basic script without intelligence
+
+# Code Review (Use /review-complete instead of manual review)
+/review-complete --scope=components     # ✅ code-reviewer sub-agent with expertise
+# git diff --cached | manual review     # ❌ Manual process without standards
+
+# Security Audit (Use /security-audit instead of npm audit)
+/security-audit --depth=full           # ✅ security-auditor with comprehensive analysis
+# npm audit && npx semgrep              # ❌ Basic tools without intelligence
+
+# Architecture Analysis (Use /architecture instead of manual docs)
+/architecture --analyze                 # ✅ backend-architect with system expertise
+# grep -r "architecture" docs/          # ❌ Manual search without analysis
+
+# Deployment Validation (Use /deploy-validate instead of basic checks)
+/deploy-validate staging --test         # ✅ deployment-engineer with validation expertise
+# docker ps && curl health-check        # ❌ Basic checks without intelligence
+
+# Health Monitoring (Use /health-check instead of manual monitoring)
+/health-check --verbose                 # ✅ devops-troubleshooter with comprehensive analysis
+# ps aux | grep node                    # ❌ Basic process check without context
+
+# Commit Generation (Use /commit-smart instead of manual git commit)
+/commit-smart --type=feat auth          # ✅ workflow-architect with conventional commit intelligence
+# git commit -m "fix stuff"             # ❌ Manual commit without standards
+
+# Context Analysis (Use /context-analyze for project understanding)
+/context-analyze --deep                 # ✅ workflow-architect with full project context
+# find . -name "*.md" | head             # ❌ Basic file listing without analysis
+
+# When to Use Basic Commands (Fallback Only)
+Use tools/ scripts and yarn commands ONLY when:
+- Sub-agent functionality is not available for specific use case
+- Debugging sub-agent behavior itself
+- Performance-critical operations requiring direct control
+- Integration testing of basic toolchain
+
+# Integration with Existing Workflow
+# The sub-agent system enhances, not replaces, existing tools
+# Git hooks, QA validation, and traceability remain unchanged
+# Sub-agents provide intelligence layer on top of existing infrastructure
 ```
 
 ## Project Status & Performance
@@ -249,13 +346,45 @@ Tier 2: DEVELOPMENT-STATUS.md, traceability docs
 /search-web [query] [--domain]  # Intelligent web research with context filtering
 /explain-codebase [path] [--detail] # Codebase explanation with architecture mapping
 
-# Sub-Agent Integration (Claude Code 2024-2025 Standards)
+# Sub-Agent Integration & Usage Examples (Claude Code 2024-2025 Standards)
 ✅ Canonical syntax: "> Use the [agent] sub-agent to [specific task description]"
 ✅ Context intelligence: Branch/task/file analysis for optimal sub-agent selection
 ✅ Multi-agent orchestration: Sequential delegation for complex multi-step workflows
 ✅ Scoped tool permissions: Each sub-agent accesses only necessary tools per command
 ✅ Performance optimized: 54% improvement maintained (152s → 70s execution)
 ✅ Full compliance: Frontmatter structure, model specification, argument handling
+
+# Practical Usage Examples
+
+# Development Workflow Integration
+/task-dev T-15                    # → workflow-architect analyzes task + delegates to specialists
+/review-complete --scope=api      # → code-reviewer focuses on API code quality
+/security-audit --depth=full      # → security-auditor comprehensive analysis
+/commit-smart --type=feat auth    # → workflow-architect generates conventional commit
+
+# Multi-Agent Orchestration Examples
+/release-prep R1.0 validate       # → workflow-architect orchestrates:
+                                   #   1. security-auditor: Security validation
+                                   #   2. code-reviewer: Quality gates
+                                   #   3. devops-troubleshooter: CI/CD checks
+                                   #   4. deployment-engineer: Release validation
+
+/pr-flow main --draft             # → workflow-architect orchestrates:
+                                   #   1. code-reviewer: Automated code review
+                                   #   2. security-auditor: Security check
+                                   #   3. api-documenter: Documentation updates
+
+# Context-Aware Sub-Agent Selection
+Branch: feature/T-15-auth         # → Automatically selects security-auditor
+Files: components/*.tsx           # → Automatically selects frontend-developer
+Files: api/*.py                   # → Automatically selects backend-architect
+Error logs present                # → Automatically selects debugger
+
+# Sub-Agent Delegation Pattern in Action
+"> Use the security-auditor sub-agent to analyze authentication implementation"
+"> Use the backend-architect sub-agent to review API design patterns"
+"> Use the frontend-developer sub-agent to optimize React component performance"
+"> Use the workflow-architect sub-agent to orchestrate release preparation"
 
 # Sub-Agent Distribution (9 specialized agents)
 - workflow-architect: 8 commands (workflow, context, orchestration)
@@ -267,4 +396,49 @@ Tier 2: DEVELOPMENT-STATUS.md, traceability docs
 - api-documenter: 3 commands (documentation, specifications)
 - deployment-engineer: 2 commands (deployment, validation)
 - debugger: 2 commands (error analysis, troubleshooting)
+
+# 🎯 QUICK REFERENCE: Sub-Agent Usage Patterns
+
+## Common Development Tasks (USE THESE FIRST!)
+
+```bash
+# Task Development
+/task-dev T-15                    # Auto-detects context, delegates to appropriate sub-agent
+/task-dev T-15 complete           # Mark task complete with DoD validation
+
+# Code Quality
+/review-complete                  # Comprehensive review with context-aware sub-agent selection
+/review-complete --scope=security # Focus on security via security-auditor sub-agent
+/security-audit                  # Full security analysis via security-auditor
+/debug-analyze                   # Intelligent debugging via debugger sub-agent
+
+# CI/CD & Deployment  
+/health-check                     # System health via devops-troubleshooter sub-agent
+/pipeline-check                  # CI/CD validation via devops-troubleshooter
+/deploy-validate production      # Pre-deployment checks via deployment-engineer
+
+# Architecture & Documentation
+/architecture --analyze          # System analysis via backend-architect sub-agent
+/docs-update api                 # Documentation via api-documenter sub-agent
+/adr-create "decision-title"     # Architecture decisions via backend-architect
+
+# Smart Workflows
+/auto-workflow                   # Context-aware suggestions via workflow-architect
+/context-analyze --deep          # Project analysis via workflow-architect
+/commit-smart                    # Intelligent commits via code-reviewer + security-auditor
+```
+
+## Sub-Agent Delegation Pattern (Copy-Paste Ready)
+
+```bash
+# Template for Claude Code interaction:
+> Use the [AGENT-NAME] sub-agent to [SPECIFIC-TASK-DESCRIPTION]
+
+# Examples:
+> Use the security-auditor sub-agent to analyze authentication vulnerabilities in the OAuth implementation
+> Use the frontend-developer sub-agent to review React component architecture and suggest performance optimizations
+> Use the workflow-architect sub-agent to analyze current project context and recommend optimal next steps
+```
+
+🚨 **REMEMBER**: These commands provide intelligent, context-aware analysis that manual commands cannot match!
 ```
