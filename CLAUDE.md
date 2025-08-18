@@ -106,8 +106,8 @@ tools/qa-workflow.sh T-XX dev-complete   # Mark development complete
 
 ## Sub-Agent Architecture
 - **40+ Global Sub-Agents**: Built-in Claude Code specialists (security-auditor, backend-architect, etc.)
-- **Local Project Context**: Single project-aware agent with branch/task understanding
-- **Custom Commands**: Auto-select appropriate global sub-agents based on project context
+- **Local Project Agent**: workflow-architect - Specialized for this project's workflow orchestration
+- **Custom Commands**: Auto-select appropriate sub-agents (global + local) based on project context
 
 ## Security & Compliance
 ```bash
