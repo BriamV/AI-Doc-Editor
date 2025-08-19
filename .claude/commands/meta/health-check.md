@@ -3,7 +3,8 @@
 ---
 description: Health check completo: código + dependencias + pipeline + docs
 argument-hint: "[component] [--fix]"
-allowed-tools: Bash(yarn run cmd *), Bash(npm audit), Bash(bash tools/*), Read, LS, Glob
+allowed-tools: Bash(yarn *), Bash(npm audit), Bash(bash tools/*), Read, LS, Glob
+# ⚠️ Legacy Note: Prefer direct yarn commands over yarn run cmd patterns
 model: claude-3-5-sonnet-20241022
 ---
 
@@ -23,8 +24,9 @@ Performs comprehensive health analysis of code quality, dependencies, CI/CD pipe
 ## Context (auto-collected)
 - Current branch: !`git branch --show-current`
 - Project status: !`bash tools/progress-dashboard.sh --brief`
-- Recent errors: !`yarn run cmd validate-modified 2>&1 | tail -5`
+- Recent errors: !`yarn tsc-check 2>&1 | tail -5`
 - System info: !`node --version && npm --version`
+- Legacy check: !`echo "⚠️ Using direct yarn commands (scripts/cli.cjs deprecated)"`
 
 ## Implementation
 
@@ -37,11 +39,11 @@ Parse `$ARGUMENTS` for component focus and fix mode. Perform comprehensive syste
 
 - **Code quality health**:
   > Use the security-auditor sub-agent to analyze code security health and identify vulnerabilities
-  Integration: yarn run cmd validate-all-fast
+  Integration: yarn qa-gate
 
 - **Dependency health**:
   > Use the devops-troubleshooter sub-agent to analyze dependency vulnerabilities and compatibility issues
-  Integration: npm audit --audit-level=moderate, yarn run cmd audit
+  Integration: npm audit --audit-level=moderate, yarn audit
 
 - **CI/CD pipeline health**:
   > Use the devops-troubleshooter sub-agent to analyze CI/CD pipeline status and deployment readiness
@@ -49,7 +51,7 @@ Parse `$ARGUMENTS` for component focus and fix mode. Perform comprehensive syste
 
 - **Documentation health**:
   > Use the api-documenter sub-agent to analyze documentation completeness and quality
-  Integration: npx tsx scripts/governance.ts --format=json
+  Integration: /docs-update command
 
 - **Full system health** (default):
   > Use the devops-troubleshooter sub-agent to provide comprehensive system health report with prioritized recommendations
@@ -58,5 +60,5 @@ Parse `$ARGUMENTS` for component focus and fix mode. Perform comprehensive syste
 **Auto-fix mode:**
 When --fix flag is used:
 > Use the devops-troubleshooter sub-agent to provide automated fix recommendations with specific commands for identified health issues
-Integration: yarn run cmd lint-fix, yarn run cmd format
+Integration: yarn lint:fix, yarn format
 ```

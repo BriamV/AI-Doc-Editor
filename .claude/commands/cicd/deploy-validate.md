@@ -3,7 +3,7 @@
 ---
 description: Pre-deployment validation with health checks using specialized deployment engineering sub-agents
 argument-hint: "[environment] [--health-check]"
-allowed-tools: Bash(npm run *), Bash(yarn run cmd *), Bash(git *), Read, Grep
+allowed-tools: Bash(npm run *), Bash(yarn *), Bash(git *), Read, Grep
 model: claude-3-5-sonnet-20241022
 ---
 
@@ -22,7 +22,7 @@ Comprehensive pre-deployment validation using sub-agent delegation. Analyzes dep
 ## Context (auto-collected)
 - Current branch: !`git branch --show-current`
 - Build status: !`npm run build >/dev/null 2>&1 && echo "ok" || echo "failed"`
-- Test results: !`yarn run cmd test 2>&1 | tail -3`
+- Test results: !`yarn test 2>&1 | tail -3`
 - Security audit: !`npm audit --audit-level=high --format=json | head -5`
 
 ## Implementation
@@ -49,5 +49,5 @@ When --health-check flag is used:
 > Use the cloud-architect sub-agent to validate infrastructure health for the target environment
 
 **Frontend validation integration:**
-Run frontend validation (yarn run cmd validate-frontend --fast) as part of deployment readiness check.
+Run frontend validation (yarn tsc-check) as part of deployment readiness check.
 ```

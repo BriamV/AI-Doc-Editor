@@ -3,7 +3,8 @@
 ---
 description: Análisis de contexto: branch + task + WP + release + next steps
 argument-hint: "[focus] [--planning]"
-allowed-tools: Bash(bash tools/*), Bash(git *), Bash(npx tsx scripts/*), Read, Grep, Glob
+allowed-tools: Bash(bash tools/*), Bash(git *), Bash(yarn *), Read, Grep, Glob
+# ⚠️ Migration Note: 'yarn run cmd' patterns deprecated, use direct yarn commands
 model: claude-3-5-sonnet-20241022
 ---
 
@@ -23,7 +24,7 @@ Performs intelligent analysis of complete project context including branch state
 - Current branch: !`git branch --show-current`
 - Task context: !`bash tools/task-navigator.sh $(git branch --show-current | grep -o 'T-[0-9]\+')`
 - Project status: !`bash tools/progress-dashboard.sh --brief`
-- Governance: !`npx tsx scripts/governance.ts --format=json | head -5`
+- Governance: !`echo "Use /docs-update command (yarn run cmd traceability deprecated)"`
 
 ## Implementation
 
@@ -44,7 +45,7 @@ Parse `$ARGUMENTS` for focus area and planning mode. Perform comprehensive proje
 
 - **Governance and traceability context**:
   > Use the api-documenter sub-agent to analyze documentation completeness and governance compliance
-  Integration: npx tsx scripts/governance.ts --format=json, docs/traceability.md
+  Integration: yarn run cmd traceability --format=json, docs/traceability.md
 
 - **Complete context analysis** (default):
   > Use the workflow-architect sub-agent to perform comprehensive analysis integrating branch, task, project progress, and development status context

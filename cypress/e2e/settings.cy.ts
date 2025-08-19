@@ -17,7 +17,7 @@ describe('Admin Settings Page', () => {
 
     // Setup IndexedDB mock data before visiting the page
     cy.visit('/', {
-      onBeforeLoad: (win) => {
+      onBeforeLoad: win => {
         // Mock IndexedDB to return our admin user state
         const mockState = {
           state: {
@@ -55,10 +55,10 @@ describe('Admin Settings Page', () => {
     cy.wait(100);
 
     // Check if we're still on /settings (not redirected) or if we can see admin content
-    cy.url().then((url) => {
+    cy.url().then(url => {
       if (url.includes('/settings')) {
         // We're on the settings page, check for admin content
-        cy.get('body').then(($body) => {
+        cy.get('body').then($body => {
           if ($body.text().includes('Admin Settings')) {
             cy.contains('Admin Settings').should('be.visible');
           } else {

@@ -3,7 +3,8 @@
 ---
 description: Update documentation with intelligent content generation using Claude Code sub-agent best practices
 argument-hint: "[scope] [--format=md|api]"
-allowed-tools: Bash(bash tools/*), Bash(npx tsx scripts/*), Read, Write, Edit, Grep, Glob
+allowed-tools: Bash(bash tools/*), Bash(yarn *), Read, Write, Edit, Grep, Glob
+# ⚠️ Migration Note: 'yarn run cmd' patterns deprecated, using direct yarn commands
 model: claude-3-5-sonnet-20241022
 ---
 
@@ -49,5 +50,10 @@ Parse `$ARGUMENTS` for documentation scope and format parameters. Auto-detect sc
 1. Check documentation consistency with recent codebase changes
 2. Update traceability using tools/status-updater.sh when task context available
 3. Update DEVELOPMENT-STATUS.md for API/technical changes
-4. Generate governance reports using scripts/governance.ts
+4. Generate governance reports using direct commands (scripts/governance.ts deprecated)
+
+**⚠️ Legacy Migration:**
+- OLD: yarn run cmd traceability --format=json
+- NEW: Use /docs-update command with sub-agent delegation
+- scripts/governance.ts functionality integrated into slash commands
 ```

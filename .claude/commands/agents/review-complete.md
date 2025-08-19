@@ -3,7 +3,7 @@
 ---
 description: Comprehensive code review with specialized sub-agent delegation
 argument-hint: "[scope] [--draft]"
-allowed-tools: Bash(git *), Bash(yarn run cmd *), Bash(bash tools/*), Read, Grep, Glob
+allowed-tools: Bash(git *), Bash(yarn *), Bash(bash tools/*), Read, Grep, Glob
 model: claude-3-5-sonnet-20241022
 ---
 
@@ -43,5 +43,5 @@ Parse `$ARGUMENTS` for review scope and draft flag. Auto-detect scope from chang
   > Use the code-reviewer sub-agent to perform comprehensive code quality analysis and best practices review
 
 **Quality gates integration:**
-When not in draft mode, run validation tools (yarn run cmd validate-modified) and DoD validation (tools/validate-dod.sh).
+When not in draft mode, run validation tools (yarn qa-gate) and DoD validation (tools/validate-dod.sh).
 ```

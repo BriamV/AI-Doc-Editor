@@ -68,7 +68,7 @@ Phase 2 of the comprehensive slash commands system focusing on intelligent gover
 **Integration Points**:
 - `@docs/DEVELOPMENT-STATUS.md` - Status tracking
 - `@docs/traceability/README.md` - Traceability matrix
-- `!npx tsx scripts/governance.ts --format=all` - Matrix generation
+- `!yarn run cmd traceability --format=all` - Matrix generation (scripts/ legacy)
 - `tools/progress-dashboard.sh` - Current progress analysis
 - Sub-agents: `workflow-architect`, `api-documenter`
 

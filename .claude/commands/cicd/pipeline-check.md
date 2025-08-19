@@ -3,7 +3,7 @@
 ---
 description: Validate CI/CD pipeline status with automated troubleshooting through specialized sub-agent delegation
 argument-hint: "[workflow] [--validate]"
-allowed-tools: Bash(gh *), Bash(git *), Bash(yarn run cmd *), Read, Grep
+allowed-tools: Bash(gh *), Bash(git *), Bash(yarn *), Read, Grep
 model: claude-3-5-sonnet-20241022
 ---
 
@@ -22,7 +22,7 @@ Pre-push pipeline validation and health check using sub-agent delegation. Analyz
 ## Context (auto-collected)
 - Current branch: !`git branch --show-current`
 - Workflow status: !`gh run list --workflow=ci.yml --limit=3 --json conclusion,status`
-- Local validation: !`yarn run cmd validate-staged 2>&1 | head -5`
+- Local validation: !`yarn qa-gate 2>&1 | head -5`
 - Recent commits: !`git log --oneline -3`
 
 ## Implementation
@@ -44,5 +44,5 @@ Parse `$ARGUMENTS` for workflow name and validate flag. Auto-detect workflow fro
   > Use the devops-troubleshooter sub-agent to diagnose current pipeline status and ensure CI/CD reliability
 
 **Local validation integration:**
-Run validation tools (yarn run cmd validate-staged) to ensure local changes meet pipeline requirements.
+Run validation tools (yarn qa-gate) to ensure local changes meet pipeline requirements.
 ```

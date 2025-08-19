@@ -23,7 +23,7 @@
     "taskId": "T-17",
     "taskName": "Validación de API y gobernanza",
     "testFile": "tests/components/editor.test.js",
-    "status": "Completado",
+    "status": "Planificado",
     "release": "R0.1"
   },
   {
@@ -32,7 +32,7 @@
     "taskId": "T-17",
     "taskName": "Validación de API y gobernanza",
     "testFile": "tests/components/editor.test.js",
-    "status": "Planificado",
+    "status": "Completado",
     "release": "R0.2"
   },
   {
@@ -41,7 +41,7 @@
     "taskId": "T-23",
     "taskName": "Endpoint de health-check",
     "testFile": "tests/services/ai-service.test.js",
-    "status": "En Progreso",
+    "status": "Completado",
     "release": "R0.3"
   },
   {
@@ -50,7 +50,7 @@
     "taskId": "T-41",
     "taskName": "Integración con OpenAI",
     "testFile": "tests/utils/encryption.test.js",
-    "status": "En Progreso",
+    "status": "Planificado",
     "release": "R0.3"
   },
   {
@@ -59,7 +59,7 @@
     "taskId": "T-41",
     "taskName": "Integración con OpenAI",
     "testFile": "tests/utils/encryption.test.js",
-    "status": "En Progreso",
+    "status": "Planificado",
     "release": "R0.4"
   },
   {

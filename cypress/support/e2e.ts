@@ -5,6 +5,3 @@
 
 // Este archivo puede usarse para añadir comandos personalizados de Cypress en el futuro.
 export {};
-
-
-

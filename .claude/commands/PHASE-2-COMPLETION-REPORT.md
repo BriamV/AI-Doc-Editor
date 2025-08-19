@@ -10,7 +10,7 @@ All governance commands follow the established pattern from `.claude/commands/wo
 - **Same Frontmatter**: `sub-agent: workflow-architect` 
 - **Same Structure**: Purpose, Usage, Implementation sections
 - **Same Sub-Agent Syntax**: `echo "> Use the [agent] sub-agent to [task]"`
-- **Same Integration**: `!tools/`, `!yarn run cmd`, `@docs/` patterns
+- **Same Integration**: `!tools/`, `!yarn`, `@docs/` patterns
 - **Same Length**: ≤50 lines implementation section
 
 #### 1. commit-smart.md ✅

@@ -1,5 +1,11 @@
 # Development Tools - AI-Doc-Editor
 
+## ⚠️ Status Notice
+
+**Current Status**: Functional but transitioning to slash commands  
+**Preference**: Use `.claude/commands/` slash commands for complex workflows  
+**Timeline**: tools/ will remain functional, gradually replaced by integrated sub-agent commands  
+
 ## Overview
 
 Scripts para gestión eficiente de "Sub Tareas v2.md" y desarrollo basado en subtareas. Estos tools resuelven los problemas de:
@@ -175,7 +181,8 @@ bash tools/qa-workflow.sh T-02 qa-passed      # Mark QA passed
 bash tools/qa-workflow.sh T-02 mark-complete  # Mark fully complete
 
 # 6. Governance Update
-yarn run cmd governance --format=all          # Update traceability
+# DEPRECATED: yarn run cmd governance --format=all
+/docs-update                                  # Use slash command instead
 ```
 
 ### **QA Workflow States Transition**
@@ -268,6 +275,32 @@ tools/
 - **Context Switching**: High → Low (direct navigation)
 - **Tool Integration**: None → Command-line + future IDE integration
 - **Feedback Loop**: Delayed → Immediate status visibility
+
+## Migration Path
+
+### Current: Bash Tools (Still Functional)
+```bash
+tools/progress-dashboard.sh              # Project progress
+tools/task-navigator.sh T-XX             # Task details  
+tools/extract-subtasks.sh T-XX           # Development planning
+tools/validate-dod.sh T-XX               # Definition of Done validation
+tools/qa-workflow.sh T-XX dev-complete   # Mark development complete
+```
+
+### Preferred: Slash Commands (Integrated Sub-Agents)
+```bash
+/context-analyze                         # Project progress analysis
+/task-dev T-XX                          # Task development with context  
+/review-complete --scope T-XX           # Validation and review
+/commit-smart                           # Mark development complete
+/health-check                           # System diagnostics
+```
+
+### Migration Benefits
+- **Context Awareness**: Slash commands auto-detect project state
+- **Sub-Agent Integration**: Specialized AI agents for different tasks
+- **Performance**: Direct integration with Claude Code capabilities
+- **Maintenance**: Reduced shell script maintenance overhead
 
 ## Next Phase Enhancements
 

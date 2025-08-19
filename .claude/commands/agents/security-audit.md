@@ -3,7 +3,7 @@
 ---
 description: Comprehensive security audit with security-auditor sub-agent
 argument-hint: "[scope] [--quick]"
-allowed-tools: Bash(npm audit), Bash(npx semgrep), Bash(yarn run cmd *), Bash(bash tools/*), Read, Grep
+allowed-tools: Bash(npm audit), Bash(npx semgrep), Bash(yarn *), Bash(bash tools/*), Read, Grep
 model: claude-3-5-sonnet-20241022
 ---
 
@@ -36,5 +36,5 @@ Parse `$ARGUMENTS` for security scope and quick flag. Auto-detect scope from rec
 - npm audit --audit-level moderate
 - npx semgrep --config=auto . --severity=ERROR
 - tools/validate-auth.sh (if available)
-- yarn run cmd security-scan
+- yarn security-scan
 ```

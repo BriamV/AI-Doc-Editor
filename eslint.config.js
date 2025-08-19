@@ -6,6 +6,7 @@ import tseslint from '@typescript-eslint/eslint-plugin';
 import tsparser from '@typescript-eslint/parser';
 import react from 'eslint-plugin-react';
 import prettier from 'eslint-plugin-prettier';
+import security from 'eslint-plugin-security';
 
 export default [
   {
@@ -46,6 +47,7 @@ export default [
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
       prettier: prettier,
+      security: security,
     },
     rules: {
       ...js.configs.recommended.rules,
@@ -61,8 +63,26 @@ export default [
         { argsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
       ],
       'prettier/prettier': 'error',
-      // Complexity rule for Claude hooks design metrics validation
+      // Quality Gates: Complexity and file size limits
       'complexity': ['error', 15],
+      'max-lines': ['error', { max: 300, skipBlankLines: true, skipComments: true }],
+      'max-lines-per-function': ['warn', { max: 50, skipBlankLines: true, skipComments: true }],
+      'max-depth': ['warn', 4],
+      'max-params': ['warn', 4],
+      // Security rules for vulnerability prevention
+      'security/detect-unsafe-regex': 'error',
+      'security/detect-buffer-noassert': 'error',
+      'security/detect-child-process': 'warn',
+      'security/detect-disable-mustache-escape': 'error',
+      'security/detect-eval-with-expression': 'error',
+      'security/detect-no-csrf-before-method-override': 'error',
+      'security/detect-non-literal-fs-filename': 'warn',
+      'security/detect-non-literal-regexp': 'warn',
+      'security/detect-non-literal-require': 'warn',
+      'security/detect-object-injection': 'warn',
+      'security/detect-possible-timing-attacks': 'warn',
+      'security/detect-pseudoRandomBytes': 'error',
+      'security/detect-bidi-characters': 'error',
     },
     settings: {
       react: {
