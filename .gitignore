@@ -8,6 +8,10 @@ pnpm-debug.log*
 lerna-debug.log*
 dev-debug.log
 
+# Code quality reports
+eslint-report.json
+*.eslint.json
+
 # Dependency directories
 node_modules/
 
