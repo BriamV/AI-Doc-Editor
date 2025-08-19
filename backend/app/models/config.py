@@ -1,4 +1,5 @@
 """System configuration models."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -7,6 +8,7 @@ from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
+
 
 class SystemConfiguration(Base):
     """SQLAlchemy model for system configuration key-value pairs."""

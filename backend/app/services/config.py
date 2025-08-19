@@ -1,4 +1,5 @@
 """Service for managing system configurations."""
+
 from __future__ import annotations
 
 from sqlalchemy import select, insert, update
@@ -33,8 +34,6 @@ class ConfigService:
                 .values(value=value)
             )
         else:
-            await self.session.execute(
-                insert(SystemConfiguration).values(key=key, value=value)
-            )
+            await self.session.execute(insert(SystemConfiguration).values(key=key, value=value))
         await self.session.commit()
         return ConfigEntry(key=key, value=value)
