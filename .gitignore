@@ -76,3 +76,4 @@ backend/.coverage
 .cc-session-start
 .cc-metrics-fail.json
 .cc-refactor-attempts
+venv/
