@@ -89,7 +89,7 @@
           {
             "type": "command",
             "timeout": 8,
-            "command": "echo 'Quality Gate: ESLint security check (timeout: 8s)...'; if [ -f yarn.lock ]; then ESLINT_CMD='./node_modules/.bin/eslint'; elif command -v npx >/dev/null 2>&1; then ESLINT_CMD='npx eslint'; else echo '⚠️ ESLint not available'; exit 0; fi; changed_files=$(git status --porcelain 2>/dev/null | grep -E '\\.(ts|tsx|js|jsx)$' | awk '{print $2}' | head -5); if [ -n \"$changed_files\" ]; then echo \"Checking files: $changed_files\"; echo \"$changed_files\" | xargs $ESLINT_CMD --no-error-on-unmatched-pattern --rule '{\"security/detect-unsafe-regex\":[\"error\"]}' --rule '{\"security/detect-eval-with-expression\":[\"error\"]}' --rule '{\"complexity\":[\"error\",15]}' --rule '{\"max-lines\":[\"error\",{\"max\":300}]}' 2>/dev/null && echo '✅ Security & complexity check passed' || echo '❌ Security or complexity issues detected'; else echo 'No JavaScript/TypeScript files changed'; fi"
+            "command": "echo 'Quality Gate: ESLint check with granular config (timeout: 8s)...'; if [ -f yarn.lock ]; then ESLINT_CMD='./node_modules/.bin/eslint'; elif command -v npx >/dev/null 2>&1; then ESLINT_CMD='npx eslint'; else echo '⚠️ ESLint not available'; exit 0; fi; changed_files=$(git status --porcelain 2>/dev/null | grep -E '\\.(ts|tsx|js|jsx)$' | awk '{print $2}' | head -5); if [ -n \"$changed_files\" ]; then echo \"Checking files: $changed_files\"; echo \"$changed_files\" | xargs $ESLINT_CMD --max-warnings=0 2>/dev/null && echo '✅ ESLint check passed with granular config' || echo '❌ ESLint issues detected'; else echo 'No JavaScript/TypeScript files changed'; fi"
           }
         ]
       },
