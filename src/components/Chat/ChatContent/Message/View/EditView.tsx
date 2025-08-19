@@ -7,6 +7,7 @@ import ClearPromptConfig from '@components/Chat/ClearPromptConfig';
 import EditViewSubmitButton from './EditViewSubmitButton';
 import EditViewActionButtons from './EditViewActionButtons';
 import { useEditViewLogic } from './useEditViewLogic';
+import { DocumentInterface } from '@type/document';
 
 interface EditViewProps {
   content: string;
@@ -14,6 +15,50 @@ interface EditViewProps {
   messageIndex: number;
   sticky?: boolean;
 }
+
+// Header controls for sticky view
+const StickyHeader = ({
+  chats,
+  currentChatIndex,
+}: {
+  chats: DocumentInterface[] | null;
+  currentChatIndex: number;
+}) => (
+  <div className="flex w-full">
+    <IncludeSelectionSend />
+    {}
+    {chats && chats[currentChatIndex].messageCurrent.config != null && <ClearPromptConfig />}
+  </div>
+);
+
+// Text area component
+const EditTextArea = ({
+  textareaRef,
+  sticky,
+  _content,
+  _setContent,
+  placeholder,
+  handleKeyDown,
+}: {
+  textareaRef: React.RefObject<HTMLTextAreaElement>;
+  sticky?: boolean;
+  _content: string;
+  _setContent: React.Dispatch<React.SetStateAction<string>>;
+  placeholder: string;
+  handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+}) => (
+  <textarea
+    ref={textareaRef}
+    className={`m-0 text-grey-300 resize-none bg-transparent overflow-y-hidden focus:ring-0 focus-visible:ring-0 flex w-full placeholder:text-gray-300
+    ${sticky ? 'pr-10 p-1' : 'text-sm'}
+    `}
+    onChange={e => _setContent(e.target.value)}
+    value={_content}
+    placeholder={placeholder}
+    onKeyDown={handleKeyDown}
+    rows={1}
+  />
+);
 
 const EditView = ({ content, setIsEdit, messageIndex, sticky }: EditViewProps) => {
   const { t } = useTranslation();
@@ -34,12 +79,7 @@ const EditView = ({ content, setIsEdit, messageIndex, sticky }: EditViewProps) =
 
   return (
     <>
-      {sticky && (
-        <div className="flex w-full">
-          <IncludeSelectionSend />
-          {chats && chats[currentChatIndex].messageCurrent.config != null && <ClearPromptConfig />}
-        </div>
-      )}
+      {sticky && <StickyHeader chats={chats ?? null} currentChatIndex={currentChatIndex} />}
       <div
         className={`w-full ${
           sticky
@@ -47,22 +87,19 @@ const EditView = ({ content, setIsEdit, messageIndex, sticky }: EditViewProps) =
             : ''
         }`}
       >
-        <textarea
-          ref={textareaRef}
-          className={`m-0 text-grey-300 resize-none bg-transparent overflow-y-hidden focus:ring-0 focus-visible:ring-0 flex w-full placeholder:text-gray-300
-          ${sticky ? 'pr-10 p-1' : 'text-sm'}
-          `}
-          onChange={e => _setContent(e.target.value)}
-          value={_content}
+        <EditTextArea
+          textareaRef={textareaRef}
+          sticky={sticky}
+          _content={_content}
+          _setContent={_setContent}
           placeholder={t('submitPlaceholder') as string}
-          onKeyDown={handleKeyDown}
-          rows={1}
+          handleKeyDown={handleKeyDown}
         />
         {sticky && (
           <EditViewSubmitButton generating={generating} handleSaveAndSubmit={handleSaveAndSubmit} />
         )}
       </div>
-      {sticky || (
+      {!sticky && (
         <EditViewActionButtons
           sticky={sticky}
           generating={generating}

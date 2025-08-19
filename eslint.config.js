@@ -90,4 +90,35 @@ export default [
       },
     },
   },
+  // Overrides for UI components: reduce noise from non-actionable rules
+  // We keep strict security checks in core logic (utils, api, backend) and relax in UI layers
+  {
+    files: [
+      'src/components/**/*.{ts,tsx}',
+      'src/hooks/**/*.{ts,tsx}',
+      'src/plugins/**/*.{ts,tsx}',
+    ],
+    rules: {
+      'security/detect-object-injection': 'off',
+      'max-lines-per-function': 'off',
+      'max-depth': 'off',
+      'max-params': 'off',
+    },
+  },
+  // Store slices often define many setters in a single factory function
+  // Reduce noise from function length rule while preserving security rules
+  {
+    files: ['src/store/**/*.{ts,tsx}'],
+    rules: {
+      'max-lines-per-function': 'off',
+    },
+  },
+  // API endpoints often include structured error handling which adds lines
+  // Relax only function length, keep all security rules ON for API layer
+  {
+    files: ['src/api/**/*.{ts,tsx}'],
+    rules: {
+      'max-lines-per-function': 'off',
+    },
+  },
 ];

@@ -20,6 +20,27 @@ const useSubmitPromptAdjust = () => {
   const { updateMessageContent } = useMessageHistory();
   const { generateAndSetTitle } = useTitleGeneration();
 
+  // Helper function to clean text selection
+  const cleanTextSelection = (selection: string): string => {
+    let cleaned = selection;
+    if (selection.startsWith('\n')) {
+      cleaned = selection.substring(1);
+    }
+    if (cleaned.endsWith('\n')) {
+      cleaned = cleaned.substring(0, cleaned.length - 1);
+    }
+    return cleaned;
+  };
+
+  // Build the final prompt with optional selection
+  const buildFinalPrompt = (prompt: string, includeSelection: boolean): string => {
+    if (!includeSelection) return prompt;
+
+    const currentSelection = useStore.getState().currentSelection;
+    const cleanSelection = cleanTextSelection(currentSelection);
+    return prompt + '\n\n' + cleanSelection + '\n\n';
+  };
+
   //   const chatMessages: MessageInterface[] = [
   //     {
   //         role: 'system',
@@ -27,18 +48,13 @@ const useSubmitPromptAdjust = () => {
   //     },
   // ];
 
+  // Initialize chat messages for a new conversation
   const initializeChatMessages = (
     prompt: string,
     includeSelection: boolean,
     modifiedConfig: ConfigInterface
   ): void => {
-    const currentSelection = useStore.getState().currentSelection;
-    let finalPrompt = prompt;
-
-    if (includeSelection) {
-      const cleanSelection = cleanTextSelection(currentSelection);
-      finalPrompt = prompt + '\n\n' + cleanSelection + '\n\n';
-    }
+    const finalPrompt = buildFinalPrompt(prompt, includeSelection);
 
     const chatMessages: MessageInterface[] = [
       {
@@ -51,16 +67,90 @@ const useSubmitPromptAdjust = () => {
       },
     ];
 
-    let resetChats = useStore.getState().chats;
-    if (resetChats) {
-      resetChats[currentChatIndex].messageCurrent = generateDefaultMessage(
-        modifiedConfig,
-        chatMessages
-      );
-      setChats(resetChats);
-    }
+    const stateChats = useStore.getState().chats;
+    if (!Array.isArray(stateChats)) return;
+    if (currentChatIndex < 0 || currentChatIndex >= stateChats.length) return;
+
+    const next = stateChats.map((c, i) =>
+      i === currentChatIndex
+        ? {
+            ...c,
+            messageCurrent: generateDefaultMessage(modifiedConfig, chatMessages),
+          }
+        : c
+    );
+    setChats(next);
   };
 
+  // Prepare chat state for submission
+  const prepareSubmissionState = (): DocumentInterface[] => {
+    const chats = useStore.getState().chats;
+    if (!Array.isArray(chats)) throw new Error('No chats available');
+    if (currentChatIndex < 0 || currentChatIndex >= chats.length)
+      throw new Error('Invalid chat index');
+
+    const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
+
+    const chat = updatedChats[currentChatIndex];
+    if (!chat?.messageCurrent?.messages) throw new Error('Invalid chat messages');
+
+    chat.messageCurrent.messages.push({
+      role: 'assistant',
+      content: '',
+    });
+
+    return updatedChats;
+  };
+
+  // Process message tokens and validate
+  const prepareMessages = (
+    chats: DocumentInterface[],
+    modifiedConfig: ConfigInterface,
+    defaultChatConfig: ConfigInterface
+  ) => {
+    if (
+      !Array.isArray(chats) ||
+      currentChatIndex < 0 ||
+      currentChatIndex >= chats.length ||
+      !chats[currentChatIndex]?.messageCurrent?.messages ||
+      chats[currentChatIndex].messageCurrent.messages.length === 0
+    ) {
+      throw new Error('No messages submitted!');
+    }
+
+    const maxTokens =
+      modifiedConfig.max_completion_tokens || defaultChatConfig.max_completion_tokens;
+    const model = modifiedConfig.model || defaultChatConfig.model;
+
+    const messages = limitMessageTokens(
+      chats[currentChatIndex].messageCurrent.messages,
+      maxTokens,
+      model
+    );
+
+    if (messages.length === 0) {
+      throw new Error('Message exceed max token!');
+    }
+
+    return messages;
+  };
+
+  // Update token usage after successful completion
+  const updateTokenUsage = (modifiedConfig: ConfigInterface) => {
+    const currChats = useStore.getState().chats;
+    const countTotalTokens = useStore.getState().countTotalTokens;
+
+    if (!Array.isArray(currChats) || !countTotalTokens) return;
+    if (currentChatIndex < 0 || currentChatIndex >= currChats.length) return;
+
+    const model = modifiedConfig.model;
+    const messages = currChats[currentChatIndex]?.messageCurrent?.messages;
+    if (!Array.isArray(messages) || messages.length === 0) return;
+
+    updateTotalTokenUsed(model, messages.slice(0, -1), messages[messages.length - 1]);
+  };
+
+  // Main submission handler
   const handleSubmit = async ({
     prompt,
     includeSelection,
@@ -76,77 +166,50 @@ const useSubmitPromptAdjust = () => {
 
     initializeChatMessages(prompt, includeSelection, modifiedConfig);
 
-    if (generating || !chats) return;
-
-    const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
-
-    updatedChats[currentChatIndex].messageCurrent.messages.push({
-      role: 'assistant',
-      content: '',
-    });
-
-    setChats(updatedChats);
-    setGenerating(true);
+    if (generating || !Array.isArray(chats)) return;
 
     try {
-      let stream;
-      if (chats[currentChatIndex].messageCurrent.messages.length === 0)
-        throw new Error('No messages submitted!');
-      const finalPrompt = includeSelection
-        ? prompt + '\n\n' + cleanTextSelection(useStore.getState().currentSelection) + '\n\n'
-        : prompt;
-      chats[0].messageCurrent.messages[0].content = finalPrompt;
+      const updatedChats = prepareSubmissionState();
+      setGenerating(true);
 
-      const messages = limitMessageTokens(
-        chats[currentChatIndex].messageCurrent.messages,
-        modifiedConfig.max_completion_tokens
-          ? modifiedConfig.max_completion_tokens
-          : defaultChatConfig.max_completion_tokens,
-        modifiedConfig.model ? modifiedConfig.model : defaultChatConfig.model
-      );
-      if (messages.length === 0) throw new Error('Message exceed max token!');
+      // Update first message with final prompt
+      const finalPrompt = buildFinalPrompt(prompt, includeSelection);
+      const withFinalPrompt = updatedChats.map((c, i) => {
+        if (i !== 0) return c; // preserva comportamiento existente
+        const msgs = c?.messageCurrent?.messages;
+        if (!Array.isArray(msgs) || msgs.length === 0) return c;
+        const first = { ...msgs[0], content: finalPrompt };
+        return {
+          ...c,
+          messageCurrent: {
+            ...c.messageCurrent,
+            messages: [first, ...msgs.slice(1)],
+          },
+        };
+      });
+      setChats(withFinalPrompt);
 
       // Ensure model is set
-      if (!modifiedConfig.model) {
-        modifiedConfig.model = defaultChatConfig.model;
-      }
+      const effectiveConfig: ConfigInterface = {
+        ...modifiedConfig,
+        model: modifiedConfig.model || defaultChatConfig.model,
+      };
 
-      stream = await getValidatedStream(messages, modifiedConfig);
+      const messages = prepareMessages(withFinalPrompt, effectiveConfig, defaultChatConfig);
+      const stream = await getValidatedStream(messages, effectiveConfig);
 
       if (stream) {
         await processStream(stream, updateMessageContent);
       }
 
-      // update tokens used in chatting
-      const currChats = useStore.getState().chats;
-      const countTotalTokens = useStore.getState().countTotalTokens;
-
-      if (currChats && countTotalTokens) {
-        const model = modifiedConfig.model;
-        const messages = currChats[currentChatIndex].messageCurrent.messages;
-        updateTotalTokenUsed(model, messages.slice(0, -1), messages[messages.length - 1]);
-      }
-
-      // generate title for new chats
-      await generateAndSetTitle(modifiedConfig);
+      updateTokenUsage(effectiveConfig);
+      await generateAndSetTitle(effectiveConfig);
     } catch (e: unknown) {
       const err = (e as Error).message;
       console.log(err);
       setError(err);
     }
     setGenerating(false);
-  };
-
-  // Helper function to clean text selection
-  const cleanTextSelection = (selection: string): string => {
-    let cleaned = selection;
-    if (selection.startsWith('\n')) {
-      cleaned = selection.substring(1);
-    }
-    if (cleaned.endsWith('\n')) {
-      cleaned = cleaned.substring(0, cleaned.length - 1);
-    }
-    return cleaned;
   };
 
   return { handleSubmit, error };

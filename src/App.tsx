@@ -14,18 +14,10 @@ import Toast from '@components/Toast';
 import { HealthStatus } from '@components/Health';
 import FAQs from '@components/FAQs/FAQs';
 
-function App() {
-  const initialiseNewDocument = useInitialiseNewDocument();
-  const setChats = useStore(state => state.setChats);
-  const setTheme = useStore(state => state.setTheme);
-  const setApiKey = useStore(state => state.setApiKey);
-  const setCurrentChatIndex = useStore(state => state.setCurrentChatIndex);
-
-  // a useEffect that resets the .edited variables of all items in chats to false
-
+// Custom hook for managing chat state reset
+const useChatReset = () => {
   useEffect(() => {
     const chats = useStore.getState().chats;
-
     if (chats && chats.length > 0) {
       const newChats = chats.map(chat => {
         chat.edited = false;
@@ -34,34 +26,33 @@ function App() {
       useStore.getState().setChats(newChats);
     }
   }, []);
+};
 
-  // useEffect(() => {
-  //    document.documentElement.lang = i18n.language;
-  //   i18n.on('languageChanged', (lng) => {
-  //     document.documentElement.lang = lng;
-  //   });
-  // }, []);
-
+// Custom hook for legacy storage migration
+const useLegacyStorageMigration = (config: {
+  initialiseNewDocument: () => void;
+  setApiKey: (apiKey: string) => void;
+  setChats: (chats: DocumentInterface[]) => void;
+  setCurrentChatIndex: (index: number) => void;
+  setTheme: (theme: Theme) => void;
+}) => {
+  const { initialiseNewDocument, setApiKey, setChats, setCurrentChatIndex, setTheme } = config;
   useEffect(() => {
-    // legacy local storage
     const oldChats = localStorage.getItem('chats');
     const apiKey = localStorage.getItem('apiKey');
     const theme = localStorage.getItem('theme');
 
     if (apiKey) {
-      // legacy local storage
       setApiKey(apiKey);
       localStorage.removeItem('apiKey');
     }
 
     if (theme) {
-      // legacy local storage
       setTheme(theme as Theme);
       localStorage.removeItem('theme');
     }
 
     if (oldChats) {
-      // legacy local storage
       try {
         const chats: DocumentInterface[] = JSON.parse(oldChats);
         if (chats.length > 0) {
@@ -76,7 +67,6 @@ function App() {
       }
       localStorage.removeItem('chats');
     } else {
-      // existing local storage
       const chats = useStore.getState().chats;
       const currentChatIndex = useStore.getState().currentChatIndex;
       if (!chats || chats.length === 0) {
@@ -87,24 +77,41 @@ function App() {
       }
     }
   }, [initialiseNewDocument, setApiKey, setChats, setCurrentChatIndex, setTheme]);
+};
 
-  function Home() {
-    return (
-      <>
-        <DocumentMenu />
-        <Document />
-        <AIMenu />
-        <ApiPopup />
-        <Toast />
-        {/* Health Status - Development only */}
-        {import.meta.env.MODE === 'development' && (
-          <div className="fixed bottom-4 right-4 z-50 max-w-sm">
-            <HealthStatus showDetails={true} autoRefresh={true} />
-          </div>
-        )}
-      </>
-    );
-  }
+function Home() {
+  return (
+    <>
+      <DocumentMenu />
+      <Document />
+      <AIMenu />
+      <ApiPopup />
+      <Toast />
+      {/* Health Status - Development only */}
+      {import.meta.env.MODE === 'development' && (
+        <div className="fixed bottom-4 right-4 z-50 max-w-sm">
+          <HealthStatus showDetails={true} autoRefresh={true} />
+        </div>
+      )}
+    </>
+  );
+}
+
+function App() {
+  const initialiseNewDocument = useInitialiseNewDocument();
+  const setChats = useStore(state => state.setChats);
+  const setTheme = useStore(state => state.setTheme);
+  const setApiKey = useStore(state => state.setApiKey);
+  const setCurrentChatIndex = useStore(state => state.setCurrentChatIndex);
+
+  useChatReset();
+  useLegacyStorageMigration({
+    initialiseNewDocument,
+    setApiKey,
+    setChats,
+    setCurrentChatIndex,
+    setTheme,
+  });
 
   return (
     <div className="w-full h-full relative">

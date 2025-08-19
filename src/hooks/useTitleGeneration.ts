@@ -28,14 +28,18 @@ const useTitleGeneration = (): TitleGenerationResult => {
       if (apiEndpoint === officialAPIEndpoint) {
         throw new Error(t('noApiKeyWarning') as string);
       }
-      data = await getChatCompletion(useStore.getState().apiEndpoint, message, _defaultChatConfig);
+      data = await getChatCompletion({
+        endpoint: useStore.getState().apiEndpoint,
+        messages: message,
+        config: _defaultChatConfig,
+      });
     } else {
-      data = await getChatCompletion(
-        useStore.getState().apiEndpoint,
-        message,
-        _defaultChatConfig,
-        apiKey
-      );
+      data = await getChatCompletion({
+        endpoint: useStore.getState().apiEndpoint,
+        messages: message,
+        config: _defaultChatConfig,
+        apiKey,
+      });
     }
 
     return data.choices[0].message.content;

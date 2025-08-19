@@ -30,11 +30,8 @@ export const PromptPopup = ({
   const [isSelectionChecked, setIsSelectionChecked] = useState<boolean>(prompt.includeSelection);
 
   const updateChecked = useCallback(() => {
-    if (_prompts[index].config == null) {
-      setIsChecked(true);
-    } else {
-      setIsChecked(false);
-    }
+    const cfg = _prompts?.[index]?.config;
+    setIsChecked(cfg == null);
   }, [_prompts, index]);
 
   useEffect(() => {
@@ -42,19 +39,12 @@ export const PromptPopup = ({
   }, [prompts, prompt.config, updateChecked]);
 
   function handleIndividualPromptConfig() {
-    if (prompt.config == null) {
-      let tempPrompts = _prompts;
-      let tempPromptConfig = _defaultChatConfig;
-      tempPrompts[index].config = tempPromptConfig;
-      _setPrompts(tempPrompts);
-      setPrompts(tempPrompts);
-      updateChecked();
-    } else {
-      // set to null
-      let tempPrompts = _prompts;
-      tempPrompts[index].config = null;
-      _setPrompts(tempPrompts);
-      setPrompts(tempPrompts);
+    const next = _prompts?.map((p, i) =>
+      i === index ? { ...p, config: p.config == null ? _defaultChatConfig : null } : p
+    );
+    if (next) {
+      _setPrompts(next);
+      setPrompts(next);
       updateChecked();
     }
   }
@@ -77,10 +67,10 @@ export const PromptPopup = ({
   };
 
   function handleSelectionChecked() {
-    setIsSelectionChecked(!isSelectionChecked);
-    let tempPrompts = prompts;
-    tempPrompts[index].includeSelection = !isSelectionChecked;
-    setPrompts(tempPrompts);
+    const newChecked = !isSelectionChecked;
+    setIsSelectionChecked(newChecked);
+    const next = prompts?.map((p, i) => (i === index ? { ...p, includeSelection: newChecked } : p));
+    if (next) setPrompts(next);
   }
 
   return (
@@ -94,12 +84,14 @@ export const PromptPopup = ({
               onFocus={handleOnFocus}
               onBlur={handleOnBlur}
               onChange={e => {
-                let tempPrompts = _prompts;
-                _setName(e.target.value);
-                tempPrompts[index].name = e.target.value;
-                setPrompts(tempPrompts);
-                _setPrompts(tempPrompts);
-                _updatePrompt(index, prompt);
+                const value = e.target.value;
+                _setName(value);
+                const next = _prompts?.map((p, i) => (i === index ? { ...p, name: value } : p));
+                if (next) {
+                  setPrompts(next);
+                  _setPrompts(next);
+                  _updatePrompt(index, next[index]);
+                }
               }}
               onInput={handleInput}
               value={_name}
@@ -115,12 +107,14 @@ export const PromptPopup = ({
               onFocus={handleOnFocus}
               onBlur={handleOnBlur}
               onChange={e => {
-                let tempPrompts = _prompts;
-                _setPrompt(e.target.value);
-                tempPrompts[index].prompt = e.target.value;
-                setPrompts(tempPrompts);
-                _setPrompts(tempPrompts);
-                _updatePrompt(index, prompt);
+                const value = e.target.value;
+                _setPrompt(value);
+                const next = _prompts?.map((p, i) => (i === index ? { ...p, prompt: value } : p));
+                if (next) {
+                  setPrompts(next);
+                  _setPrompts(next);
+                  _updatePrompt(index, next[index]);
+                }
               }}
               onInput={handleInput}
               value={_prompt}

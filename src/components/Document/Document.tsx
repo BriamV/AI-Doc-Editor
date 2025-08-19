@@ -90,18 +90,22 @@ const Document = () => {
   function onChange(change: EditorState) {
     if (chats) {
       let temp = chats;
+
       if (temp[currentChatIndex].editorState !== JSON.stringify(change)) {
         chats[currentChatIndex].edited = true;
       }
+
       chats[currentChatIndex].editorState = JSON.stringify(change);
       setChats(temp);
     }
     change.read(() => {
       if (chats) {
         let temp = chats;
+
         if (temp[currentChatIndex].editorState !== JSON.stringify(change)) {
           chats[currentChatIndex].edited = true;
         }
+
         chats[currentChatIndex].editorState = JSON.stringify(change);
         setChats(temp);
       }

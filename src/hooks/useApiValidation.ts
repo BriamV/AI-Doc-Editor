@@ -29,16 +29,20 @@ const useApiValidation = () => {
 
     if (!apiKey || apiKey.length === 0) {
       // other endpoints without API key
-      return await getChatCompletionStream(useStore.getState().apiEndpoint, messages, config);
-    } else {
-      // own apikey
-      return await getChatCompletionStream(
-        useStore.getState().apiEndpoint,
+      return await getChatCompletionStream({
+        endpoint: useStore.getState().apiEndpoint,
         messages,
         config,
-        apiKey
-      );
+      });
     }
+
+    // own apikey
+    return await getChatCompletionStream({
+      endpoint: useStore.getState().apiEndpoint,
+      messages,
+      config,
+      apiKey,
+    });
   };
 
   return {
