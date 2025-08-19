@@ -170,6 +170,19 @@ All enhancements MUST integrate into workflow:
 3. Test before documenting
 4. Remove redundancies
 
+## 🔨 POST-BUILD VALIDATION Protocol
+**MANDATORY after package.json changes or new scripts:**
+```bash
+# ✅ ALWAYS run after modifying package.json or adding scripts
+yarn install --frozen-lockfile          # Verify dependencies
+yarn build                              # Ensure build doesn't break
+yarn tsc-check                          # TypeScript validation
+yarn quality-gate                       # Full quality pipeline
+# ✅ Multi-tech validation (Python + TypeScript + Frontend)
+# ✅ Autofix priorized: Use --fix flags when available
+# ✅ Validate CI/CD integration works end-to-end
+```
+
 ## CLAUDE.md Editing Rules
 ```bash
 # ✅ MANDATORY: Follow existing structure and style
