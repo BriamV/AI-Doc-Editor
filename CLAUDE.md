@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 AI Document Editor: React 18 + TypeScript + Python FastAPI + AI integration
 Features: Document generation with RAG, real-time collaboration, OAuth security
+Repository: https://github.com/BriamV/AI-Doc-Editor/
 
 ## Tech Stack
 - Frontend: React 18 + TypeScript + Vite + TailwindCSS
@@ -17,15 +18,20 @@ Features: Document generation with RAG, real-time collaboration, OAuth security
 ## Development Setup
 ```bash
 # Prerequisites: Node.js 18.16.0, Python 3.11+, WSL2 (Windows)
-yarn install && yarn run cmd dev          # Start development
-yarn run cmd build && yarn run cmd test   # Build & test
-yarn run cmd security-scan                # Security audit
+yarn install && yarn dev                  # Start development
+yarn build && yarn test                   # Build & test
+yarn security-scan                        # Security audit
+
+# ⚠️  LEGACY MIGRATION WARNING:
+# scripts/cli.cjs and 'yarn run cmd' commands are DEPRECATED
+# Use direct yarn commands instead (see Essential Commands section)
 ```
 
 ## 🚨 MANDATORY: Sub-Agent First Workflow
-1. **FIRST**: Use CUSTOM slash commands for complex tasks
-2. **SECOND**: Use tools/ scripts for task management  
+1. **FIRST**: Use CUSTOM slash commands (.claude/commands/) for complex tasks
+2. **SECOND**: Use direct yarn commands (yarn dev, yarn build, yarn test)  
 3. **LAST**: Direct CLI only if above unavailable
+4. **NEVER**: Use scripts/cli.cjs (DEPRECATED - marked for removal)
 
 ### Sub-Agent Architecture
 - **Custom Commands**: 19 workflow orchestrators in .claude/commands/ that analyze context
@@ -64,14 +70,20 @@ yarn run cmd validate-modified   # Code quality check
 
 ## Essential Commands
 ```bash
-# Development
-yarn run cmd dev|build|test|security-scan
+# Development (PREFERRED - Direct commands)
+yarn dev|build|test|security-scan
 
 # Quality (automated via hooks - 54% performance optimized)
-yarn run cmd lint|format|validate-all|validate-modified
+yarn lint|format|tsc-check
 
 # Multi-tech validation (TypeScript + Python auto-detection)
-yarn run cmd validate-frontend|validate-backend|validate-task T-XX
+yarn tsc-check  # Frontend validation
+# Backend validation via Python venv activation
+
+# ⚠️  LEGACY DEPRECATION NOTICE:
+# OLD: yarn run cmd <command>  <- DEPRECATED, will be removed
+# NEW: yarn <command>          <- Use this instead
+# Migration: All 'yarn run cmd' references should use direct yarn commands
 ```
 
 ## Project Structure
@@ -90,6 +102,13 @@ yarn run cmd validate-frontend|validate-backend|validate-task T-XX
 
 ## Task Management Workflow
 ```bash
+# Use custom slash commands for workflow automation (PREFERRED)
+/context-analyze                         # Project progress analysis
+/task-dev T-XX                          # Task development with context  
+/review-complete --scope T-XX           # Validation and review
+/commit-smart                           # Mark development complete
+
+# Legacy bash tools (still functional but use slash commands when possible)
 tools/progress-dashboard.sh              # Project progress
 tools/task-navigator.sh T-XX             # Task details  
 tools/extract-subtasks.sh T-XX           # Development planning
@@ -111,9 +130,14 @@ tools/qa-workflow.sh T-XX dev-complete   # Mark development complete
 
 ## Security & Compliance
 ```bash
-npm audit && npx semgrep --config=auto .    # Security scan
-npx tsx scripts/governance.ts --format=all  # Traceability matrix
-docs/adr/ADR-006-security.md               # Security architecture
+# PREFERRED: Direct commands
+yarn security-scan                         # Security scan (audit + semgrep)
+/docs-update                               # Traceability matrix via commands
+docs/adr/ADR-006-security.md              # Security architecture
+
+# ⚠️  LEGACY: Avoid these deprecated patterns
+# yarn run cmd security-scan  <- DEPRECATED
+# yarn run cmd traceability   <- Use /docs-update instead
 ```
 
 ## Do Not Touch
@@ -121,6 +145,13 @@ docs/adr/ADR-006-security.md               # Security architecture
 - `.claude/commands/legacy/` - Deprecated commands  
 - `test-*.js` - Temporary debugging files
 - `.claude/hooks.json.backup` - Backup configuration
+
+## ⚠️  Legacy Components (Marked for Deprecation)
+- `scripts/` - **DEPRECATED** - All CLI functionality moved to direct yarn commands
+  - `scripts/cli.cjs` - Legacy CLI wrapper, use direct yarn commands instead
+  - `yarn run cmd <command>` - Replace with `yarn <command>`
+- Migration completed: All package.json scripts now use direct commands
+- Timeline: scripts/ will be removed in next major cleanup phase
 
 ## Integration Policy
 All enhancements MUST integrate into workflow:
