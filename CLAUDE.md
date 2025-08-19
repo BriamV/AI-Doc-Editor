@@ -13,7 +13,14 @@ Repository: https://github.com/BriamV/AI-Doc-Editor/
 - AI: OpenAI GPT-4o + embeddings + LangChain
 - Desktop: Electron + auto-updater
 - State: Zustand + IndexedDB encryption
-- Tools: Git hooks, ESLint, Prettier, Jest, Semgrep
+- Tools: Multi-stack quality ecosystem (40+ tools integrated)
+  - **Frontend**: ESLint, Prettier, Jest, TSC
+  - **Python**: Black, Ruff, Radon, MyPy, pip-audit
+  - **Security**: Semgrep, git-secrets, yarn audit
+  - **Docs**: markdownlint, yamlfix, yamllint, spectral
+  - **Shell**: shellcheck, shfmt
+  - **Config**: taplo (TOML), prettier (JSON/XML/CSS)
+  - **Infrastructure**: Docker, GitHub Actions, Claude Code hooks
 
 ## Development Setup
 ```bash
@@ -77,8 +84,10 @@ yarn dev|build|test|security-scan
 yarn lint|format|tsc-check
 
 # Multi-tech validation (TypeScript + Python auto-detection)
-yarn tsc-check  # Frontend validation
-# Backend validation via Python venv activation
+yarn tsc-check        # Frontend TypeScript validation
+yarn python-quality   # Backend Python validation (format + lint + complexity)
+yarn python-format    # Python autofix formatting (Black)
+yarn python-lint      # Python autofix linting (Ruff)
 
 # ⚠️  LEGACY DEPRECATION NOTICE:
 # OLD: yarn run cmd <command>  <- DEPRECATED, will be removed
@@ -89,16 +98,47 @@ yarn tsc-check  # Frontend validation
 ## Project Structure
 - `src/components/` - React components (Chat, Document, Menu)
 - `src/store/` - Zustand stores (docs, auth, config)  
-- `api/` - Python FastAPI backend
+- `backend/` - Python FastAPI backend + .venv
 - `docs/` - Spanish documentation (primary)
 - `.claude/commands/` - 19 production slash commands
 - `tools/` - Task management scripts
 
+## 🔧 Quality Tools Ecosystem (40+ Tools)
+**Hooks-Integrated Multi-Stack Pipeline:**
+```bash
+# Frontend Quality
+eslint, prettier, jest, tsc              # TypeScript/JavaScript
+
+# Python Backend Quality  
+black, ruff, radon, mypy, pip-audit      # Python quality gates
+
+# Security & Secrets
+semgrep, git-secrets, yarn audit         # Security scanning
+
+# Documentation
+markdownlint, yamlfix, yamllint, spectral # Docs quality
+
+# Configuration & Shell
+taplo, shellcheck, shfmt                 # Config + shell scripts
+
+# Multi-Format Support
+prettier (JSON/XML/CSS/HTML)             # Universal formatting
+```
+**Auto-Detection**: Windows/Linux/WSL + multi-venv support
+
 ## Quality Assurance
-- **Auto-formatting**: Runs on Edit/Write/MultiEdit via .claude/hooks.json
+- **Multi-Stack Pipeline**: 40+ tools integrated via .claude/hooks.json
+- **Auto-formatting**: Real-time format on Edit/Write/MultiEdit
+  - TypeScript/JavaScript: ESLint + Prettier
+  - Python: Black + Ruff (autofix)
+  - Docs: markdownlint + yamlfix
+  - Shell: shellcheck + shfmt
+  - Config: taplo (TOML) + prettier (JSON/XML/CSS)
+- **Design Metrics**: Complexity (CC≤15) + LOC (≤300) validation
+- **Security Gates**: Semgrep + git-secrets + dependency audits
 - **Performance**: 54% optimized (152s → 70s total timeout)
-- **Validation**: Multi-tech TypeScript + Python detection
-- **Security**: OAuth 2.0, TLS 1.3+, AES-256, GDPR compliance
+- **Multi-OS**: Windows/Linux/WSL auto-detection
+- **Compliance**: OAuth 2.0, TLS 1.3+, AES-256, GDPR
 
 ## Task Management Workflow
 ```bash
