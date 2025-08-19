@@ -128,6 +128,16 @@ tools/qa-workflow.sh T-XX dev-complete   # Mark development complete
 - **Local Project Agent**: workflow-architect - Specialized for this project's workflow orchestration
 - **Custom Commands**: Auto-select appropriate sub-agents (global + local) based on project context
 
+## GitHub Issues Management
+```bash
+# ✅ ALWAYS specify target repository (this repo has forks)
+gh issue view <NUMBER> --repo BriamV/AI-Doc-Editor          # View issue
+gh issue close <NUMBER> --repo BriamV/AI-Doc-Editor -c "..." # Close issue
+
+# ❌ NEVER use without --repo flag (targets wrong repository)
+gh issue view <NUMBER>                                      # WRONG
+```
+
 ## Security & Compliance
 ```bash
 # PREFERRED: Direct commands
