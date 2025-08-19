@@ -170,6 +170,16 @@ All enhancements MUST integrate into workflow:
 3. Test before documenting
 4. Remove redundancies
 
+## CLAUDE.md Editing Rules
+```bash
+# ✅ MANDATORY: Follow existing structure and style
+# ✅ CONCISO: Max 3-5 lines per concept
+# ✅ CLARO: Specific commands, not explanations
+# ✅ DIRECTO: What to do (✅) and NOT do (❌)
+# ✅ ESPECÍFICO: Use placeholders (<NUMBER>, <FILE>)
+# ❌ NO extensive documentation - keep compact
+```
+
 ## Quick Reference
 - 📋 **Task details**: `/task-dev T-XX`
 - 🔍 **Codebase analysis**: `/context-analyze`
