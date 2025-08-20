@@ -76,6 +76,10 @@ npm-licenses.json
 .coverage
 backend/.coverage
 
+# Test coverage reports
+coverage/
+nyc_output/
+
 # Temporary Claude session files
 .cc-session-start
 .cc-metrics-fail.json
