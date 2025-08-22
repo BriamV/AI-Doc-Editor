@@ -49,26 +49,8 @@ if (!global.fetch) {
   );
 }
 
-// Mock window.location for tests with proper structure
-if (typeof window !== 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  delete (window as any).location;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (window as any).location = {
-    href: 'http://localhost:3000',
-    origin: 'http://localhost:3000',
-    protocol: 'http:',
-    host: 'localhost:3000',
-    hostname: 'localhost',
-    port: '3000',
-    pathname: '/',
-    search: '',
-    hash: '',
-    assign: jest.fn(),
-    replace: jest.fn(),
-    reload: jest.fn(),
-  };
-}
+// Mock window.location for tests - keep it simple to avoid JSDOM issues
+// The navigation error will be suppressed by console filtering below
 
 // Store original console methods
 const originalError = console.error;
@@ -86,6 +68,14 @@ const setupConsoleFiltering = () => {
         message.includes('Warning: componentWillMount') ||
         message.includes('act(...) is not supported') ||
         message.includes('Not implemented: navigation'))
+    ) {
+      return;
+    }
+    // Also suppress Error objects with navigation type
+    if (
+      args[0] instanceof Error &&
+      args[0].message &&
+      args[0].message.includes('Not implemented: navigation')
     ) {
       return;
     }
