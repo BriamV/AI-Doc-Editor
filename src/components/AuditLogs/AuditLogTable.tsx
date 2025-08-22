@@ -42,7 +42,7 @@ const AuditLogTable: React.FC<AuditLogTableProps> = ({ logs, isLoading }) => {
     } else {
       selectAllLogs();
     }
-  }, [selectedLogs.size, logs?.length, clearSelection, selectAllLogs]);
+  }, [selectedLogs.size, logs, clearSelection, selectAllLogs]);
 
   if (isLoading && (!logs || logs.length === 0)) {
     return <LoadingState />;
@@ -83,7 +83,7 @@ const AuditLogTable: React.FC<AuditLogTableProps> = ({ logs, isLoading }) => {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table 
+        <table
           className="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
           data-testid="audit-log-table"
         >
