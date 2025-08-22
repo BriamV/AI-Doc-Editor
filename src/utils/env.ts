@@ -10,11 +10,13 @@
 export const getEnvVar = (key: string): string | undefined => {
   // In test environment, use process.env which is set up in jest.setup.ts
   if (typeof jest !== 'undefined' || process.env.NODE_ENV === 'test') {
+    // eslint-disable-next-line security/detect-object-injection
     return process.env[key];
   }
-  
+
   // In non-test environment, fallback to process.env
   // Note: In production Vite builds, these calls should be replaced
   // with direct import.meta.env references for optimal tree-shaking
+  // eslint-disable-next-line security/detect-object-injection
   return process.env[key];
 };
