@@ -11,7 +11,7 @@ import LoadingState from './components/LoadingState';
 import EmptyState from './components/EmptyState';
 
 interface AuditLogTableProps {
-  logs: AuditLogEntry[];
+  logs: AuditLogEntry[] | null;
   isLoading: boolean;
 }
 
@@ -37,18 +37,18 @@ const AuditLogTable: React.FC<AuditLogTableProps> = ({ logs, isLoading }) => {
   );
 
   const handleSelectAll = useCallback(() => {
-    if (selectedLogs.size === logs.length) {
+    if (!logs || selectedLogs.size === logs.length) {
       clearSelection();
     } else {
       selectAllLogs();
     }
-  }, [selectedLogs.size, logs.length, clearSelection, selectAllLogs]);
+  }, [selectedLogs.size, logs?.length, clearSelection, selectAllLogs]);
 
-  if (isLoading && logs.length === 0) {
+  if (isLoading && (!logs || logs.length === 0)) {
     return <LoadingState />;
   }
 
-  if (logs.length === 0) {
+  if (!logs || logs.length === 0) {
     return <EmptyState />;
   }
 
@@ -61,12 +61,12 @@ const AuditLogTable: React.FC<AuditLogTableProps> = ({ logs, isLoading }) => {
             <label className="flex items-center">
               <input
                 type="checkbox"
-                checked={selectedLogs.size === logs.length && logs.length > 0}
+                checked={logs && selectedLogs.size === logs.length && logs.length > 0}
                 onChange={handleSelectAll}
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                Select all ({logs.length})
+                Select all ({logs?.length || 0})
               </span>
             </label>
           </div>
@@ -83,10 +83,13 @@ const AuditLogTable: React.FC<AuditLogTableProps> = ({ logs, isLoading }) => {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <table 
+          className="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
+          data-testid="audit-log-table"
+        >
           <TableHeader sortConfig={sortConfig} onSort={handleSort} />
           <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-            {logs.map(log => (
+            {logs?.map(log => (
               <TableRow
                 key={log.id}
                 log={log}
