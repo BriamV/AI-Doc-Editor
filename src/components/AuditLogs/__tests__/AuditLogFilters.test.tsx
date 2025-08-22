@@ -28,7 +28,12 @@ const defaultMockState = {
 };
 
 describe('AuditLogFilters Component', () => {
-  let mockStore: any;
+  let mockStore: typeof defaultMockState & {
+    setFilters: jest.Mock;
+    clearFilters: jest.Mock;
+    fetchActionTypes: jest.Mock;
+    fetchUsers: jest.Mock;
+  };
   const user = userEvent.setup();
 
   beforeEach(() => {
@@ -60,7 +65,7 @@ describe('AuditLogFilters Component', () => {
     // Click expand button to show filters
     const expandButton = screen.getByRole('button', { name: /expand/i });
     await user.click(expandButton);
-    
+
     // Wait for filters to be visible
     await waitFor(() => {
       expect(screen.getByPlaceholderText(/search.*descriptions/i)).toBeInTheDocument();
@@ -84,47 +89,50 @@ describe('AuditLogFilters Component', () => {
 
   test('calls setFilters when filter values change', async () => {
     render(<AuditLogFilters />);
-    
+
     // Expand filters
     const expandButton = screen.getByRole('button', { name: /expand/i });
     await user.click(expandButton);
-    
+
     // Wait for search input to be visible
     await waitFor(() => {
       const searchInput = screen.getByPlaceholderText(/search.*descriptions/i);
       expect(searchInput).toBeInTheDocument();
     });
-    
+
     // Type in search input
     const searchInput = screen.getByPlaceholderText(/search.*descriptions/i);
     await user.type(searchInput, 'test@example.com');
-    
+
     // Wait for debounced filter update
-    await waitFor(() => {
-      expect(mockStore.setFilters).toHaveBeenCalled();
-    }, { timeout: 1500 });
+    await waitFor(
+      () => {
+        expect(mockStore.setFilters).toHaveBeenCalled();
+      },
+      { timeout: 1500 }
+    );
   });
 
   test('calls clearFilters when clear button is clicked', async () => {
     render(<AuditLogFilters />);
-    
+
     // Expand filters first
     const expandButton = screen.getByRole('button', { name: /expand/i });
     await user.click(expandButton);
-    
+
     // Look for clear button - may be an X button or clear text
     await waitFor(() => {
       // The clear button is likely an X icon button based on the HTML structure
       const clearButtons = screen.getAllByRole('button');
       expect(clearButtons.length).toBeGreaterThan(1); // Should have multiple buttons including clear
     });
-    
+
     // Find the clear button (likely the X icon)
     const buttons = screen.getAllByRole('button');
-    const clearButton = buttons.find(button => 
-      button.innerHTML.includes('path') && button.innerHTML.includes('17.4141') // X icon path
+    const clearButton = buttons.find(
+      button => button.innerHTML.includes('path') && button.innerHTML.includes('17.4141') // X icon path
     );
-    
+
     if (clearButton) {
       await user.click(clearButton);
       expect(mockStore.clearFilters).toHaveBeenCalled();
@@ -136,11 +144,11 @@ describe('AuditLogFilters Component', () => {
 
   test('displays available action types in dropdown', () => {
     render(<AuditLogFilters />);
-    
+
     // Check if action types are available (may be in select or list)
-    const actionElements = screen.queryAllByText('login_success') ||
-                          screen.queryAllByDisplayValue('login_success');
-    
+    const actionElements =
+      screen.queryAllByText('login_success') || screen.queryAllByDisplayValue('login_success');
+
     if (actionElements.length > 0) {
       expect(actionElements[0]).toBeInTheDocument();
     }
@@ -148,11 +156,12 @@ describe('AuditLogFilters Component', () => {
 
   test('displays available users in dropdown', () => {
     render(<AuditLogFilters />);
-    
+
     // Check if users are available (may be in select or list)
-    const userElements = screen.queryAllByText('test@example.com') ||
-                        screen.queryAllByDisplayValue('test@example.com');
-    
+    const userElements =
+      screen.queryAllByText('test@example.com') ||
+      screen.queryAllByDisplayValue('test@example.com');
+
     if (userElements.length > 0) {
       expect(userElements[0]).toBeInTheDocument();
     }
@@ -185,7 +194,7 @@ describe('AuditLogFilters Component', () => {
     });
 
     expect(() => render(<AuditLogFilters />)).not.toThrow();
-    
+
     // Should still render the basic structure
     expect(screen.getByText('Filters')).toBeInTheDocument();
   });

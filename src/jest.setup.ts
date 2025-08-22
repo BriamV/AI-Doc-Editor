@@ -33,6 +33,7 @@ Object.defineProperty(globalThis, 'import', {
 });
 
 // Also set on global for broader compatibility
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).import = {
   meta: mockImportMeta,
 };
@@ -50,7 +51,9 @@ if (!global.fetch) {
 
 // Mock window.location for tests with proper structure
 if (typeof window !== 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   delete (window as any).location;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).location = {
     href: 'http://localhost:3000',
     origin: 'http://localhost:3000',
@@ -74,6 +77,7 @@ const originalWarn = console.warn;
 // Setup console filtering (will be applied in setupTests.ts)
 const setupConsoleFiltering = () => {
   // Suppress specific warnings/errors in tests
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   console.error = (...args: any[]) => {
     const message = args[0];
     if (
@@ -88,12 +92,13 @@ const setupConsoleFiltering = () => {
     originalError.apply(console, args);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   console.warn = (...args: any[]) => {
     const message = args[0];
     if (
       typeof message === 'string' &&
       (message.includes('componentWillReceiveProps') ||
-       message.includes('ts-jest[ts-jest-transformer]'))
+        message.includes('ts-jest[ts-jest-transformer]'))
     ) {
       return;
     }
@@ -107,7 +112,9 @@ const restoreConsole = () => {
 };
 
 // Export setup functions for use in setupTests.ts
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).setupConsoleFiltering = setupConsoleFiltering;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).restoreConsole = restoreConsole;
 
 // Mock IndexedDB for browser storage tests
@@ -117,10 +124,15 @@ if (typeof global !== 'undefined') {
     deleteDatabase: jest.fn().mockReturnValue(Promise.resolve()),
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (global as any).indexedDB = mockIDB;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (global as any).IDBDatabase = jest.fn();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (global as any).IDBObjectStore = jest.fn();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (global as any).IDBRequest = jest.fn();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (global as any).IDBKeyRange = {
     bound: jest.fn(),
     only: jest.fn(),

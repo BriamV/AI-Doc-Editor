@@ -3,7 +3,12 @@
  * Provides jest-compatible Zustand store mocking
  */
 
-import { AuditLogEntry, AuditLogFilters, AuditLogSortConfig, AuditLogPagination } from '../audit-slice';
+import {
+  AuditLogEntry,
+  AuditLogFilters,
+  AuditLogSortConfig,
+  AuditLogPagination,
+} from '../audit-slice';
 
 // Mock audit log data for tests
 export const mockAuditLogs: AuditLogEntry[] = [
@@ -60,11 +65,11 @@ const mockStoreState = {
     total: 0,
     totalPages: 0,
   } as AuditLogPagination,
-  
+
   // UI state
   expandedRows: new Set<string>(),
   selectedLogs: new Set<string>(),
-  
+
   // Reference data
   actionTypes: ['login_success', 'login_failure', 'document_create'],
   users: [
@@ -87,7 +92,7 @@ const mockStoreState = {
     security_events: 15,
     failed_logins: 8,
   },
-  
+
   // Actions
   fetchAuditLogs: jest.fn().mockResolvedValue(undefined),
   setFilters: jest.fn(),
@@ -108,7 +113,7 @@ const mockStoreState = {
 // Create store mock that can be updated by tests
 const createStoreMock = (initialState = {}) => {
   const state = { ...mockStoreState, ...initialState };
-  
+
   return jest.fn(() => state);
 };
 

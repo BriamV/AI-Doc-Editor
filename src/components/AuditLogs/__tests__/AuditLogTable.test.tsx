@@ -32,9 +32,15 @@ const defaultMockState = {
 };
 
 describe('AuditLogTable Component', () => {
-  let mockStore: any;
+  let mockStore: typeof defaultMockState & {
+    setSortConfig: jest.Mock;
+    toggleRowExpansion: jest.Mock;
+    toggleLogSelection: jest.Mock;
+    selectAllLogs: jest.Mock;
+    clearSelection: jest.Mock;
+  };
   const user = userEvent.setup();
-  
+
   const defaultProps = {
     logs: mockAuditLogs,
     isLoading: false,
@@ -60,9 +66,10 @@ describe('AuditLogTable Component', () => {
     render(<AuditLogTable {...defaultProps} />);
 
     // Check if table or table-like structure is present
-    const tableElement = screen.getByTestId('audit-log-table') || 
-                        screen.getByRole('table') ||
-                        document.querySelector('[data-testid="audit-log-table"]');
+    const tableElement =
+      screen.getByTestId('audit-log-table') ||
+      screen.getByRole('table') ||
+      document.querySelector('[data-testid="audit-log-table"]');
     expect(tableElement).toBeInTheDocument();
 
     // Check for key table headers (flexible matching)
@@ -76,18 +83,21 @@ describe('AuditLogTable Component', () => {
     render(<AuditLogTable logs={[]} isLoading={true} />);
 
     // Loading state shows skeleton animation or loading text
-    const loadingElement = document.querySelector('.animate-pulse') ||
-                          screen.queryByText(/loading/i) ||
-                          screen.queryByRole('progressbar');
+    const loadingElement =
+      document.querySelector('.animate-pulse') ||
+      screen.queryByText(/loading/i) ||
+      screen.queryByRole('progressbar');
     expect(loadingElement).toBeInTheDocument();
   });
 
   test('shows empty state when no logs', () => {
     render(<AuditLogTable logs={[]} isLoading={false} />);
 
-    expect(screen.getByText(/no audit logs/i) || 
-           screen.getByText(/no data/i) ||
-           screen.getByText(/empty/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/no audit logs/i) ||
+        screen.getByText(/no data/i) ||
+        screen.getByText(/empty/i)
+    ).toBeInTheDocument();
   });
 
   test('displays audit log entries correctly', () => {
@@ -95,19 +105,21 @@ describe('AuditLogTable Component', () => {
 
     // Check if audit log data is displayed (case insensitive)
     expect(screen.getByText('test@example.com')).toBeInTheDocument();
-    expect(screen.getByText(/login.*success/i) || 
-           screen.getByText('login_success')).toBeInTheDocument();
-    expect(screen.getByText(/document.*create/i) || 
-           screen.getByText('document_create')).toBeInTheDocument();
+    expect(
+      screen.getByText(/login.*success/i) || screen.getByText('login_success')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/document.*create/i) || screen.getByText('document_create')
+    ).toBeInTheDocument();
   });
 
   test('handles row selection', async () => {
     render(<AuditLogTable {...defaultProps} />);
-    
+
     // Look for checkbox or selection button
-    const selectCheckbox = screen.queryByRole('checkbox') ||
-                          screen.queryByTestId(/select.*audit-1/i);
-    
+    const selectCheckbox =
+      screen.queryByRole('checkbox') || screen.queryByTestId(/select.*audit-1/i);
+
     if (selectCheckbox) {
       await user.click(selectCheckbox);
       expect(mockStore.toggleLogSelection).toHaveBeenCalledWith('audit-1');
@@ -116,12 +128,13 @@ describe('AuditLogTable Component', () => {
 
   test('handles row expansion', async () => {
     render(<AuditLogTable {...defaultProps} />);
-    
+
     // Look for expand button
-    const expandButton = screen.queryByTestId(/expand.*audit-1/i) ||
-                        screen.queryByRole('button', { name: /expand/i }) ||
-                        document.querySelector('[data-testid*="expand"]');
-    
+    const expandButton =
+      screen.queryByTestId(/expand.*audit-1/i) ||
+      screen.queryByRole('button', { name: /expand/i }) ||
+      document.querySelector('[data-testid*="expand"]');
+
     if (expandButton) {
       await user.click(expandButton);
       expect(mockStore.toggleRowExpansion).toHaveBeenCalledWith('audit-1');
@@ -130,11 +143,11 @@ describe('AuditLogTable Component', () => {
 
   test('handles sorting', async () => {
     render(<AuditLogTable {...defaultProps} />);
-    
+
     // Look for sortable header
-    const timestampHeader = screen.queryByTestId(/sort.*timestamp/i) ||
-                           screen.queryByText(/timestamp/i);
-    
+    const timestampHeader =
+      screen.queryByTestId(/sort.*timestamp/i) || screen.queryByText(/timestamp/i);
+
     if (timestampHeader && timestampHeader.tagName === 'BUTTON') {
       await user.click(timestampHeader);
       expect(mockStore.setSortConfig).toHaveBeenCalled();
@@ -148,13 +161,13 @@ describe('AuditLogTable Component', () => {
       expandedRows: new Set(['audit-1']),
     };
     mockUseStore.mockReturnValue(mockStoreWithExpanded);
-    
+
     render(<AuditLogTable {...defaultProps} />);
-    
+
     // Check for expanded details
-    const expandedDetails = screen.queryByTestId(/expanded.*audit-1/i) ||
-                           screen.queryByText(/oauth/i);
-    
+    const expandedDetails =
+      screen.queryByTestId(/expanded.*audit-1/i) || screen.queryByText(/oauth/i);
+
     if (expandedDetails) {
       expect(expandedDetails).toBeInTheDocument();
     }
@@ -167,13 +180,14 @@ describe('AuditLogTable Component', () => {
       selectedLogs: new Set(['audit-1']),
     };
     mockUseStore.mockReturnValue(mockStoreWithSelection);
-    
+
     render(<AuditLogTable {...defaultProps} />);
-    
+
     // Check for selected state (checkboxes should be checked)
-    const selectedCheckbox = screen.queryByRole('checkbox', { checked: true }) ||
-                             document.querySelector('input[type="checkbox"]:checked');
-    
+    const selectedCheckbox =
+      screen.queryByRole('checkbox', { checked: true }) ||
+      document.querySelector('input[type="checkbox"]:checked');
+
     if (selectedCheckbox) {
       expect(selectedCheckbox).toBeInTheDocument();
     }
@@ -182,10 +196,10 @@ describe('AuditLogTable Component', () => {
   test('handles error state gracefully', () => {
     // Test with invalid/null data
     const propsWithNullData = {
-      logs: null as any,
+      logs: null as unknown as AuditLogEntry[],
       isLoading: false,
     };
-    
+
     expect(() => render(<AuditLogTable {...propsWithNullData} />)).not.toThrow();
   });
 });

@@ -219,7 +219,7 @@ describe('Audit Slice Store', () => {
 
   test('handles concurrent fetch requests', async () => {
     const { result } = renderHook(() => useStore());
-    
+
     // Start multiple requests
     const promises = [
       result.current.fetchAuditLogs(),

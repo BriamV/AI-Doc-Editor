@@ -5,16 +5,20 @@ import '@testing-library/jest-dom';
  */
 
 // Create mock Zustand stores for testing
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockStore = (initialState: any) => {
   let state = initialState;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   const listeners = new Set<Function>();
 
   return {
     getState: () => state,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setState: (newState: any) => {
       state = typeof newState === 'function' ? newState(state) : { ...state, ...newState };
       listeners.forEach(listener => listener());
     },
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     subscribe: (listener: Function) => {
       listeners.add(listener);
       return () => listeners.delete(listener);
@@ -24,6 +28,7 @@ const createMockStore = (initialState: any) => {
 };
 
 // Make createMockStore available globally for tests
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).createMockStore = createMockStore;
 
 // Mock window.matchMedia for responsive tests
@@ -42,6 +47,7 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Mock ResizeObserver for component tests
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
@@ -49,6 +55,7 @@ Object.defineProperty(window, 'matchMedia', {
 }));
 
 // Mock IntersectionObserver for scroll-based components
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).IntersectionObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
@@ -56,19 +63,25 @@ Object.defineProperty(window, 'matchMedia', {
 }));
 
 // Apply console filtering if available
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 if ((global as any).setupConsoleFiltering) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (global as any).setupConsoleFiltering();
 }
 
 // Setup beforeAll and afterAll for console restoration
 beforeAll(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if ((global as any).setupConsoleFiltering) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (global as any).setupConsoleFiltering();
   }
 });
 
 afterAll(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if ((global as any).restoreConsole) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (global as any).restoreConsole();
   }
 });
