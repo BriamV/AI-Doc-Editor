@@ -76,7 +76,7 @@ describe('AuditLogTable Component', () => {
     expect(screen.getByText('Timestamp') || screen.getByText(/timestamp/i)).toBeInTheDocument();
     expect(screen.getByText('Action') || screen.getByText(/action/i)).toBeInTheDocument();
     expect(screen.getByText('Status') || screen.getByText(/status/i)).toBeInTheDocument();
-    
+
     // Check for table structure rather than ambiguous text
     expect(tableElement.querySelector('thead')).toBeInTheDocument();
     expect(tableElement.querySelector('tbody')).toBeInTheDocument();
@@ -109,21 +109,21 @@ describe('AuditLogTable Component', () => {
     // Check if audit log data is displayed - use more specific queries
     const emailElements = screen.getAllByText('test@example.com');
     expect(emailElements.length).toBeGreaterThan(0);
-    
+
     // Check for audit log content - be more flexible since we don't know exact rendering format
     expect(
       screen.queryByText('login_success') ||
-      screen.queryByText(/login.*success/i) ||
-      screen.queryByText(/success/i)
+        screen.queryByText(/login.*success/i) ||
+        screen.queryByText(/success/i)
     ).toBeInTheDocument();
-    
+
     // Use getAllByText and check that we have at least one element
-    const documentCreateElements = 
-      screen.queryAllByText('document_create').concat(
-      screen.queryAllByText(/document.*create/i)).concat(
-      screen.queryAllByText(/create/i));
+    const documentCreateElements = screen
+      .queryAllByText('document_create')
+      .concat(screen.queryAllByText(/document.*create/i))
+      .concat(screen.queryAllByText(/create/i));
     expect(documentCreateElements.length).toBeGreaterThan(0);
-    
+
     // Verify that we have actual audit log rows with data
     const table = screen.getByTestId('audit-log-table');
     const rows = table.querySelectorAll('tbody tr');
@@ -135,10 +135,12 @@ describe('AuditLogTable Component', () => {
 
     // Look for checkbox or selection button - use getAllByRole to handle multiple checkboxes
     const allCheckboxes = screen.queryAllByRole('checkbox');
-    const selectCheckbox = allCheckboxes.find(checkbox => 
-      checkbox.getAttribute('data-testid')?.includes('select') ||
-      checkbox.closest('tr')?.getAttribute('data-testid')?.includes('audit-1')
-    ) || allCheckboxes[1]; // Skip the "select all" checkbox (index 0) if present
+    const selectCheckbox =
+      allCheckboxes.find(
+        checkbox =>
+          checkbox.getAttribute('data-testid')?.includes('select') ||
+          checkbox.closest('tr')?.getAttribute('data-testid')?.includes('audit-1')
+      ) || allCheckboxes[1]; // Skip the "select all" checkbox (index 0) if present
 
     if (selectCheckbox) {
       await user.click(selectCheckbox);
