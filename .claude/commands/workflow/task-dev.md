@@ -3,7 +3,7 @@
 ---
 description: Complete task development with mandatory task-planner validation, then sub-agent delegation using Claude Code best practices
 argument-hint: "[task-id] [action]"
-allowed-tools: Bash(git branch:*), Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(bash tools/*)
+allowed-tools: Bash(git branch:*), Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(bash tools/*), Bash(powershell -ExecutionPolicy Bypass tools/*)
 model: claude-3-5-sonnet-20241022
 ---
 
@@ -23,7 +23,7 @@ Context-aware task development using **mandatory task-planner validation** follo
 - Current branch: !`git branch --show-current`
 - Staged/Unstaged diff: !`git diff --name-status HEAD`
 - Recent commits: !`git log --oneline -8`
-- Task details: !`bash tools/task-navigator.sh $ARGUMENTS`
+- Task details: !`powershell -ExecutionPolicy Bypass tools/universal-runner.ps1 task-navigator $ARGUMENTS`
 
 ## Implementation Workflow
 
@@ -70,10 +70,10 @@ Based on task-planner analysis and content classification:
   > Sequence multiple specialists as needed, ensuring atomic commits with `${TASK_ID}:` prefix
 
 **Phase 5: Quality Assurance & Governance Integration**
-- Run `bash tools/qa-workflow.sh ${TASK_ID} dev-verify` (tests, lint, file count validation)
+- Run `powershell -ExecutionPolicy Bypass tools/universal-runner.ps1 qa-workflow ${TASK_ID} dev-verify` (tests, lint, file count validation)
 - Execute context-aware validation: `yarn run cmd validate-task` (auto-detects current task/workflow)
 - If `ACTION="complete"`: 
-  - Execute `bash tools/qa-workflow.sh ${TASK_ID} dev-complete` with diff summary and DoD confirmation
+  - Execute `powershell -ExecutionPolicy Bypass tools/universal-runner.ps1 qa-workflow ${TASK_ID} dev-complete` with diff summary and DoD confirmation
   - **Governance Integration**: Use existing governance commands for proper workflow
     - `/commit-smart` for conventional commits with quality gates
     - `/docs-update` for automatic traceability and status updates  

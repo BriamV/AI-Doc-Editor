@@ -5,6 +5,7 @@ import Document from '@components/Document/Document';
 import DocumentMenu from '@components/Menu/DocumentMenu';
 import AIMenu from '@components/Menu/AIMenu/AIMenu';
 import Settings from './pages/Settings';
+import AuditLogs from './pages/AuditLogs';
 
 import useInitialiseNewDocument from '@hooks/useInitialiseNewDocument';
 import { DocumentInterface } from '@type/document';
@@ -120,6 +121,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/faqs" element={<FAQs />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/admin/audit-logs" element={<AuditLogs />} />
         </Routes>
       </BrowserRouter>
     </div>

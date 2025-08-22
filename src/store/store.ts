@@ -6,6 +6,7 @@ import { AuthSlice, createAuthSlice } from './auth-slice';
 import { ConfigSlice, createConfigSlice } from './config-slice';
 import { PromptSlice, createPromptSlice } from './prompt-slice';
 import { ToastSlice, createToastSlice } from './toast-slice';
+import { AuditSlice, createAuditSlice } from './audit-slice';
 import { get, set } from 'idb-keyval';
 // import {
 //   LocalStorageInterfaceV0ToV1,
@@ -33,7 +34,8 @@ export type StoreState = DocumentSlice &
   AuthSlice &
   ConfigSlice &
   PromptSlice &
-  ToastSlice;
+  ToastSlice &
+  AuditSlice;
 
 export type StoreSlice<T> = (
   set: StoreApi<StoreState>['setState'],
@@ -94,6 +96,7 @@ const useStore = create<StoreState>()(
       ...createConfigSlice(set, get),
       ...createPromptSlice(set, get),
       ...createToastSlice(set, get),
+      ...createAuditSlice(set, get),
     }),
     {
       name: 'fthr-write',
