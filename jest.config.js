@@ -8,9 +8,6 @@ export default {
     '.*\\.disabled\\..*',
     '.*\\.skip\\..*',
   ],
-  transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest',
-  },
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   moduleNameMapper: {
     '^@components/(.*)$': '<rootDir>/src/components/$1',
@@ -31,4 +28,24 @@ export default {
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
+  // Transform configuration
+  transform: {
+    '^.+\\.(ts|tsx)$': ['ts-jest'],
+  },
+  // Additional Jest configuration
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+  globals: {
+    'ts-jest': {
+      isolatedModules: true,
+    },
+  },
+  // Mock import.meta.env for Vite compatibility
+  setupFiles: ['<rootDir>/src/jest.setup.ts'],
+  // Clear mocks between tests
+  clearMocks: true,
+  restoreMocks: true,
+  // Transform ignore patterns
+  transformIgnorePatterns: [
+    'node_modules/(?!(.*\\.mjs$|@testing-library))',
+  ],
 };
