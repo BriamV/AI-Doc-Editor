@@ -3,7 +3,7 @@
  * Provides jest-compatible Zustand store mocking
  */
 
-import { AuditLogEntry, AuditFilters, SortConfig, PaginationConfig } from '../audit-slice';
+import { AuditLogEntry, AuditLogFilters, AuditLogSortConfig, AuditLogPagination } from '../audit-slice';
 
 // Mock audit log data for tests
 export const mockAuditLogs: AuditLogEntry[] = [
@@ -49,19 +49,17 @@ const mockStoreState = {
   auditLogs: [] as AuditLogEntry[],
   isLoading: false,
   error: null as string | null,
-  filters: {} as AuditFilters,
+  filters: {} as AuditLogFilters,
   sortConfig: {
     field: 'timestamp' as keyof AuditLogEntry,
     direction: 'desc' as const,
-  } as SortConfig,
+  } as AuditLogSortConfig,
   pagination: {
     page: 1,
     pageSize: 25,
-    totalCount: 0,
+    total: 0,
     totalPages: 0,
-    hasNext: false,
-    hasPrevious: false,
-  } as PaginationConfig,
+  } as AuditLogPagination,
   
   // UI state
   expandedRows: new Set<string>(),

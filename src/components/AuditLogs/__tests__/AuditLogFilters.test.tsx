@@ -3,12 +3,12 @@
  * Tests filter controls, date pickers, dropdowns, and user input
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import AuditLogFilters from '../AuditLogFilters';
 import useStore from '../../../store/store';
-import { createStoreMock } from '../../../store/__mocks__/store';
+// Mock utilities available if needed in future tests
 
 // Mock the store
 jest.mock('../../../store/store');

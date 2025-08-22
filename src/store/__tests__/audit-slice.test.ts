@@ -5,7 +5,6 @@
 
 import { act, renderHook, waitFor } from '@testing-library/react';
 import useStore from '../store';
-import { AuditLogEntry } from '../audit-slice';
 import { mockAuditLogs } from '../__mocks__/store';
 
 // Mock fetch globally
@@ -146,7 +145,7 @@ describe('Audit Slice Store', () => {
     const { result } = renderHook(() => useStore());
 
     act(() => {
-      result.current.selectAllLogs(['audit-1', 'audit-2']);
+      result.current.selectAllLogs();
     });
 
     expect(result.current.selectedLogs.has('audit-1')).toBe(true);

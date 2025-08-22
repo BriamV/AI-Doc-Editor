@@ -23,17 +23,19 @@ process.env.VITE_ENVIRONMENT = 'test';
 process.env.VITE_OPENAI_API_KEY = 'test-openai-key';
 process.env.MODE = 'test';
 
-// Define import.meta globally for Jest
-(global as any).importMeta = mockImportMeta;
+// Define import.meta globally for Jest - more robust approach
+Object.defineProperty(globalThis, 'import', {
+  value: {
+    meta: mockImportMeta,
+  },
+  writable: true,
+  configurable: true,
+});
 
-// Mock import.meta in modules using Object.defineProperty
-if (typeof globalThis.import === 'undefined') {
-  Object.defineProperty(globalThis, 'import', {
-    value: {
-      meta: mockImportMeta,
-    },
-  });
-}
+// Also set on global for broader compatibility
+(global as any).import = {
+  meta: mockImportMeta,
+};
 
 // Mock fetch globally if not available
 if (!global.fetch) {
@@ -126,3 +128,6 @@ if (typeof global !== 'undefined') {
     upperBound: jest.fn(),
   };
 }
+
+// Export to make this file a module for TypeScript
+export {};
