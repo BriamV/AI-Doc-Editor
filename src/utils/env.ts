@@ -23,7 +23,7 @@ export const getEnvVar = (key: string): string | undefined => {
       // eslint-disable-next-line security/detect-object-injection
       return process.env[key];
     }
-    
+
     // In non-test Node.js environment, fallback to process.env
     // eslint-disable-next-line security/detect-object-injection
     return process.env[key];
