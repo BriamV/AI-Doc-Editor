@@ -30,12 +30,7 @@ export default {
   coverageReporters: ['text', 'lcov', 'html'],
   // Transform configuration with modern ts-jest syntax
   transform: {
-    '^.+\\.(ts|tsx)$': [
-      'ts-jest',
-      {
-        isolatedModules: true,
-      },
-    ],
+    '^.+\\.(ts|tsx)$': ['ts-jest'],
   },
   // Additional Jest configuration
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
