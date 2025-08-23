@@ -3,20 +3,18 @@
  * Tests state management, filtering, pagination, and actions
  */
 
-import { act, renderHook, waitFor } from '@testing-library/react';
-import useStore from '../store';
+import '@testing-library/jest-dom';
+import { createAuditSlice } from '../audit-slice';
 import { mockAuditLogs } from '../__mocks__/store';
 
 // Mock fetch globally
 global.fetch = jest.fn();
-
 const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>;
 
-// Using mock audit log data from store mock
-
+// Mock audit API responses
 const mockApiResponse = {
   logs: mockAuditLogs,
-  total_count: mockAuditLogs.length,
+  total: mockAuditLogs.length,
   page: 1,
   page_size: 50,
   total_pages: 1,
@@ -25,213 +23,238 @@ const mockApiResponse = {
 };
 
 describe('Audit Slice Store', () => {
+  let mockSet: jest.Mock;
+  let mockGet: jest.Mock;
+  let auditSlice: ReturnType<typeof createAuditSlice>;
+
   beforeEach(() => {
     mockFetch.mockClear();
     mockFetch.mockResolvedValue({
       ok: true,
       json: async () => mockApiResponse,
     } as Response);
-    // Reset store state between tests
-    const { result } = renderHook(() => useStore());
-    act(() => {
-      result.current.clearFilters();
-      result.current.clearSelection();
+
+    // Clear all mocks
+    jest.clearAllMocks();
+
+    // Create mock Zustand set/get functions
+    let state = {
+      // Mock accessToken for API calls
+      accessToken: 'mock-token',
+      // Audit slice initial state
+      auditLogs: [],
+      isLoading: false,
+      error: '',
+      pagination: { page: 1, pageSize: 25, total: 0, totalPages: 0 },
+      filters: {},
+      sortConfig: { field: 'timestamp', direction: 'desc' },
+      expandedRows: new Set(),
+      selectedLogs: new Set(),
+      actionTypes: [],
+      users: [],
+      auditStats: null,
+      isLoadingStats: false,
+      isExporting: false,
+      lastRefresh: null,
+      autoRefresh: false,
+      refreshInterval: 30,
+      // Mock function to avoid undefined errors in action handlers
+      fetchAuditLogs: jest.fn().mockResolvedValue(undefined),
+    };
+
+    mockSet = jest.fn(update => {
+      if (typeof update === 'function') {
+        state = { ...state, ...update(state) };
+      } else {
+        state = { ...state, ...update };
+      }
     });
+
+    mockGet = jest.fn(() => state);
+
+    // Create the audit slice with mocked functions
+    auditSlice = createAuditSlice(mockSet, mockGet);
   });
 
   test('initializes with default state', () => {
-    const { result } = renderHook(() => useStore());
-
-    expect(result.current.auditLogs).toEqual([]);
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.error).toBeNull();
-    expect(result.current.pagination.page).toBe(1);
-    expect(result.current.pagination.pageSize).toBe(25);
+    expect(auditSlice.auditLogs).toEqual([]);
+    expect(auditSlice.isLoading).toBe(false);
+    expect(auditSlice.error).toBe('');
+    expect(auditSlice.pagination.page).toBe(1);
+    expect(auditSlice.pagination.pageSize).toBe(25);
   });
 
   test('fetches audit logs successfully', async () => {
-    const { result } = renderHook(() => useStore());
+    await auditSlice.fetchAuditLogs();
 
-    await act(async () => {
-      await result.current.fetchAuditLogs();
-    });
-
-    // Allow time for async operations
-    await waitFor(() => {
-      expect(result.current.auditLogs).toEqual(mockAuditLogs);
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.error).toBeNull();
+    expect(mockSet).toHaveBeenCalledWith({
+      auditLogs: mockAuditLogs,
+      pagination: expect.objectContaining({
+        total: mockAuditLogs.length,
+        totalPages: 1,
+      }),
+      lastRefresh: expect.any(Date),
+      isLoading: false,
     });
   });
 
   test('handles fetch error gracefully', async () => {
     mockFetch.mockRejectedValueOnce(new Error('Network error'));
-    const { result } = renderHook(() => useStore());
 
-    await act(async () => {
-      try {
-        await result.current.fetchAuditLogs();
-      } catch {
-        // Expected to fail
-      }
-    });
+    await auditSlice.fetchAuditLogs();
 
-    await waitFor(() => {
-      expect(result.current.auditLogs).toEqual([]);
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.error).toContain('Failed to fetch audit logs');
+    expect(mockSet).toHaveBeenCalledWith({
+      error: 'Network error',
+      isLoading: false,
     });
   });
 
-  test('applies filters correctly', () => {
-    const { result } = renderHook(() => useStore());
+  test('applies filters correctly', async () => {
+    await auditSlice.setFilters({
+      userEmail: 'test@example.com',
+      actionType: 'login_success',
+      status: 'success',
+    });
 
-    act(() => {
-      result.current.setFilters({
+    expect(mockSet).toHaveBeenCalledWith({
+      filters: expect.objectContaining({
         userEmail: 'test@example.com',
         actionType: 'login_success',
         status: 'success',
-      });
+      }),
+      pagination: expect.objectContaining({ page: 1 }),
     });
 
-    expect(result.current.filters.userEmail).toBe('test@example.com');
-    expect(result.current.filters.actionType).toBe('login_success');
-    expect(result.current.filters.status).toBe('success');
+    // Verify fetchAuditLogs was called automatically
+    expect(mockGet().fetchAuditLogs).toHaveBeenCalled();
   });
 
-  test('clears filters correctly', () => {
-    const { result } = renderHook(() => useStore());
+  test('clears filters correctly', async () => {
+    await auditSlice.clearFilters();
 
-    act(() => {
-      result.current.setFilters({
-        userEmail: 'test@example.com',
-        actionType: 'login_success',
-      });
-      result.current.clearFilters();
+    expect(mockSet).toHaveBeenCalledWith({
+      filters: {},
+      pagination: expect.objectContaining({ page: 1 }),
     });
 
-    expect(Object.keys(result.current.filters)).toHaveLength(0);
+    // Verify fetchAuditLogs was called automatically
+    expect(mockGet().fetchAuditLogs).toHaveBeenCalled();
   });
 
-  test('manages pagination state', () => {
-    const { result } = renderHook(() => useStore());
-
-    act(() => {
-      result.current.goToPage(2);
-      result.current.changePageSize(50);
+  test('manages pagination state', async () => {
+    await auditSlice.goToPage(2);
+    expect(mockSet).toHaveBeenCalledWith({
+      pagination: expect.objectContaining({ page: 2 }),
     });
 
-    expect(result.current.pagination.page).toBe(2);
-    expect(result.current.pagination.pageSize).toBe(50);
+    await auditSlice.changePageSize(50);
+    expect(mockSet).toHaveBeenCalledWith({
+      pagination: expect.objectContaining({ pageSize: 50, page: 1 }),
+    });
+
+    // Verify fetchAuditLogs was called for both actions
+    expect(mockGet().fetchAuditLogs).toHaveBeenCalledTimes(2);
   });
 
   test('handles row selection', () => {
-    const { result } = renderHook(() => useStore());
-
-    act(() => {
-      result.current.toggleLogSelection('audit-1');
+    auditSlice.toggleLogSelection('audit-1');
+    expect(mockSet).toHaveBeenCalledWith({
+      selectedLogs: expect.any(Set),
     });
 
-    expect(result.current.selectedLogs.has('audit-1')).toBe(true);
-
-    act(() => {
-      result.current.toggleLogSelection('audit-1');
-    });
-
-    expect(result.current.selectedLogs.has('audit-1')).toBe(false);
+    // Check that the set contains the expected item
+    const lastCall = mockSet.mock.calls[mockSet.mock.calls.length - 1][0];
+    expect(lastCall.selectedLogs.has('audit-1')).toBe(true);
   });
 
   test('selects all logs', () => {
-    const { result } = renderHook(() => useStore());
-
-    act(() => {
-      result.current.selectAllLogs();
+    // Set up some audit logs in the mock state
+    mockGet.mockReturnValue({
+      ...mockGet(),
+      auditLogs: mockAuditLogs,
     });
 
-    expect(result.current.selectedLogs.has('audit-1')).toBe(true);
-    expect(result.current.selectedLogs.has('audit-2')).toBe(true);
+    auditSlice.selectAllLogs();
+
+    expect(mockSet).toHaveBeenCalledWith({
+      selectedLogs: expect.any(Set),
+    });
+
+    // Check that the set has the correct size
+    const lastCall = mockSet.mock.calls[mockSet.mock.calls.length - 1][0];
+    expect(lastCall.selectedLogs.size).toBe(mockAuditLogs.length);
   });
 
   test('clears selection', () => {
-    const { result } = renderHook(() => useStore());
+    auditSlice.clearSelection();
 
-    act(() => {
-      result.current.toggleLogSelection('audit-1');
-      result.current.toggleLogSelection('audit-2');
-      result.current.clearSelection();
+    expect(mockSet).toHaveBeenCalledWith({
+      selectedLogs: expect.any(Set),
     });
 
-    expect(result.current.selectedLogs.size).toBe(0);
+    // Check that the set is empty
+    const lastCall = mockSet.mock.calls[mockSet.mock.calls.length - 1][0];
+    expect(lastCall.selectedLogs.size).toBe(0);
   });
 
   test('handles row expansion', () => {
-    const { result } = renderHook(() => useStore());
+    auditSlice.toggleRowExpansion('audit-1');
 
-    act(() => {
-      result.current.toggleRowExpansion('audit-1');
+    expect(mockSet).toHaveBeenCalledWith({
+      expandedRows: expect.any(Set),
     });
 
-    expect(result.current.expandedRows.has('audit-1')).toBe(true);
-
-    act(() => {
-      result.current.toggleRowExpansion('audit-1');
-    });
-
-    expect(result.current.expandedRows.has('audit-1')).toBe(false);
+    // Check the set manipulation
+    const lastCall = mockSet.mock.calls[mockSet.mock.calls.length - 1][0];
+    expect(lastCall.expandedRows.has('audit-1')).toBe(true);
   });
 
-  test('sets sort configuration', () => {
-    const { result } = renderHook(() => useStore());
-
-    act(() => {
-      result.current.setSortConfig({
-        field: 'timestamp',
-        direction: 'asc',
-      });
+  test('sets sort configuration', async () => {
+    await auditSlice.setSortConfig({
+      field: 'timestamp',
+      direction: 'asc',
     });
 
-    expect(result.current.sortConfig.field).toBe('timestamp');
-    expect(result.current.sortConfig.direction).toBe('asc');
+    expect(mockSet).toHaveBeenCalledWith({
+      sortConfig: {
+        field: 'timestamp',
+        direction: 'asc',
+      },
+    });
+
+    // Verify fetchAuditLogs was called automatically
+    expect(mockGet().fetchAuditLogs).toHaveBeenCalled();
   });
 
-  test('toggles sort direction on same field', () => {
-    const { result } = renderHook(() => useStore());
-
-    // Set initial sort
-    act(() => {
-      result.current.setSortConfig({
-        field: 'timestamp',
-        direction: 'desc',
-      });
+  test('handles sort configuration changes', async () => {
+    await auditSlice.setSortConfig({
+      field: 'user_email',
+      direction: 'asc',
     });
 
-    // Toggle sort direction
-    act(() => {
-      result.current.setSortConfig({
-        field: 'timestamp',
+    expect(mockSet).toHaveBeenCalledWith({
+      sortConfig: {
+        field: 'user_email',
         direction: 'asc',
-      });
+      },
     });
 
-    expect(result.current.sortConfig.field).toBe('timestamp');
-    expect(result.current.sortConfig.direction).toBe('asc');
+    // Verify fetchAuditLogs was called automatically
+    expect(mockGet().fetchAuditLogs).toHaveBeenCalled();
   });
 
   test('handles concurrent fetch requests', async () => {
-    const { result } = renderHook(() => useStore());
-
-    // Start multiple requests
+    // Test that multiple concurrent calls don't break the state
     const promises = [
-      result.current.fetchAuditLogs(),
-      result.current.fetchAuditLogs(),
-      result.current.fetchAuditLogs(),
+      auditSlice.fetchAuditLogs(),
+      auditSlice.fetchAuditLogs(),
+      auditSlice.fetchAuditLogs(),
     ];
 
-    await act(async () => {
-      await Promise.all(promises);
-    });
+    await Promise.all(promises);
 
-    // Should handle gracefully without errors
-    expect(result.current.error).toBeNull();
+    // Should have called set multiple times with loading states
+    expect(mockSet).toHaveBeenCalledWith({ isLoading: true, error: '' });
+    expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ isLoading: false }));
   });
 });

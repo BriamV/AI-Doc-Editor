@@ -9,6 +9,7 @@ to eliminate N+1 patterns and improve dashboard performance.
 """
 
 from alembic import op
+from sqlalchemy import text
 
 
 # revision identifiers, used by Alembic.
@@ -64,22 +65,20 @@ def upgrade():
     
     # Partial index for failed logins (most selective)
     # Only indexes failed login attempts for efficiency
-    op.execute("""
+    op.execute(text("""
         CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_audit_failed_logins_partial
         ON audit_logs (timestamp, user_email)
         WHERE action_type = 'login_failure' AND status = 'failure'
-    """)
+    """))
     
     # Partial index for security actions
     # Only indexes security-related actions for faster security metrics
-    security_actions = ['unauthorized_access', 'permission_denied', 'suspicious_activity']
-    security_condition = " OR ".join([f"action_type = '{action}'" for action in security_actions])
-    
-    op.execute(f"""
+    # Using safe SQL construction to prevent injection vulnerabilities
+    op.execute(text("""
         CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_audit_security_partial
         ON audit_logs (timestamp, action_type, user_id)
-        WHERE {security_condition}
-    """)
+        WHERE action_type IN ('unauthorized_access', 'permission_denied', 'suspicious_activity')
+    """))
 
 
 def downgrade():
@@ -94,5 +93,5 @@ def downgrade():
     op.drop_index('idx_audit_dashboard_covering', 'audit_logs')
     
     # Drop partial indexes
-    op.execute("DROP INDEX IF EXISTS idx_audit_failed_logins_partial")
-    op.execute("DROP INDEX IF EXISTS idx_audit_security_partial")
+    op.execute(text("DROP INDEX IF EXISTS idx_audit_failed_logins_partial"))
+    op.execute(text("DROP INDEX IF EXISTS idx_audit_security_partial"))

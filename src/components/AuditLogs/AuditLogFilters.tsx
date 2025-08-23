@@ -13,7 +13,6 @@ import {
   User,
   Activity,
   Network_3,
-  Checkmark,
   Error,
 } from '@carbon/icons-react';
 
@@ -181,18 +180,9 @@ const AuditLogFilters: React.FC = () => {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">All statuses</option>
-              <option value="success">
-                <Checkmark className="inline h-4 w-4 mr-1" />
-                Success
-              </option>
-              <option value="failure">
-                <Error className="inline h-4 w-4 mr-1" />
-                Failure
-              </option>
-              <option value="error">
-                <Error className="inline h-4 w-4 mr-1" />
-                Error
-              </option>
+              <option value="success">✓ Success</option>
+              <option value="failure">✗ Failure</option>
+              <option value="error">✗ Error</option>
             </select>
           </div>
 

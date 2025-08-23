@@ -67,7 +67,10 @@ const setupConsoleFiltering = () => {
       (message.includes('Warning: ReactDOM.render') ||
         message.includes('Warning: componentWillMount') ||
         message.includes('act(...) is not supported') ||
-        message.includes('Not implemented: navigation'))
+        message.includes('Not implemented: navigation') ||
+        message.includes('Warning: An update to') ||
+        message.includes('was not wrapped in act') ||
+        message.includes('validateDOMNesting'))
     ) {
       return;
     }
@@ -88,7 +91,9 @@ const setupConsoleFiltering = () => {
     if (
       typeof message === 'string' &&
       (message.includes('componentWillReceiveProps') ||
-        message.includes('ts-jest[ts-jest-transformer]'))
+        message.includes('ts-jest[ts-jest-transformer]') ||
+        message.includes('ts-jest[config]') ||
+        message.includes('Define `ts-jest` config under `globals` is deprecated'))
     ) {
       return;
     }

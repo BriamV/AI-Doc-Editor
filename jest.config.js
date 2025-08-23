@@ -28,17 +28,17 @@ export default {
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
-  // Transform configuration
+  // Transform configuration with modern ts-jest syntax
   transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest'],
+    '^.+\\.(ts|tsx)$': [
+      'ts-jest',
+      {
+        isolatedModules: true,
+      },
+    ],
   },
   // Additional Jest configuration
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
-  globals: {
-    'ts-jest': {
-      isolatedModules: true,
-    },
-  },
   // Mock import.meta.env for Vite compatibility
   setupFiles: ['<rootDir>/src/jest.setup.ts'],
   // Clear mocks between tests
