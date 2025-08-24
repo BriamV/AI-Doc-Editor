@@ -95,7 +95,10 @@ const AuditLogPagination: React.FC = () => {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700" data-testid="pagination">
+    <div
+      className="bg-white dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700"
+      data-testid="pagination"
+    >
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
         {/* Results info */}
         <div className="text-sm text-gray-700 dark:text-gray-300">
