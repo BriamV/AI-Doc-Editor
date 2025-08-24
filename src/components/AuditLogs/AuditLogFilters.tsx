@@ -67,7 +67,7 @@ const AuditLogFilters: React.FC = () => {
   };
 
   return (
-    <div className="border-b border-gray-200 dark:border-gray-700">
+    <div className="border-b border-gray-200 dark:border-gray-700" data-testid="filters-panel">
       {/* Filter header */}
       <div className="px-6 py-4">
         <div className="flex items-center justify-between">
@@ -86,6 +86,7 @@ const AuditLogFilters: React.FC = () => {
               <button
                 onClick={handleClearFilters}
                 className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                data-testid="clear-filters"
               >
                 Clear all
               </button>
@@ -116,6 +117,7 @@ const AuditLogFilters: React.FC = () => {
                 value={localFilters.search || ''}
                 onChange={e => handleFilterChange('search', e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                data-testid="filter-search"
               />
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               {localFilters.search && (
@@ -139,6 +141,7 @@ const AuditLogFilters: React.FC = () => {
               value={localFilters.userEmail || ''}
               onChange={e => handleFilterChange('userEmail', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              data-testid="filter-user-email"
             >
               <option value="">All users</option>
               {users.map(user => (
@@ -159,6 +162,7 @@ const AuditLogFilters: React.FC = () => {
               value={localFilters.actionType || ''}
               onChange={e => handleFilterChange('actionType', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              data-testid="filter-action-type"
             >
               <option value="">All actions</option>
               {actionTypes.map(actionType => (
@@ -178,6 +182,7 @@ const AuditLogFilters: React.FC = () => {
               value={localFilters.status || ''}
               onChange={e => handleFilterChange('status', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              data-testid="filter-status"
             >
               <option value="">All statuses</option>
               <option value="success">✓ Success</option>
@@ -234,6 +239,7 @@ const AuditLogFilters: React.FC = () => {
           <button
             onClick={() => handleFilterChange('status', 'failure')}
             className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-800"
+            data-testid="quick-filter-failures"
           >
             <Error className="h-3 w-3 mr-1" />
             Failed Actions

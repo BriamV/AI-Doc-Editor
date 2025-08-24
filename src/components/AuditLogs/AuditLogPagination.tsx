@@ -80,6 +80,7 @@ const AuditLogPagination: React.FC = () => {
               value={pageSize}
               onChange={e => handlePageSizeChange(Number(e.target.value))}
               className="text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              data-testid="page-size-select"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
@@ -94,7 +95,7 @@ const AuditLogPagination: React.FC = () => {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+    <div className="bg-white dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700" data-testid="pagination">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
         {/* Results info */}
         <div className="text-sm text-gray-700 dark:text-gray-300">
@@ -112,6 +113,7 @@ const AuditLogPagination: React.FC = () => {
               value={pageSize}
               onChange={e => handlePageSizeChange(Number(e.target.value))}
               className="text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              data-testid="page-size-select"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
@@ -129,6 +131,7 @@ const AuditLogPagination: React.FC = () => {
               disabled={page === 1}
               className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               title="First page"
+              data-testid="first-page"
             >
               <SkipBack className="h-4 w-4" />
             </button>
@@ -139,6 +142,7 @@ const AuditLogPagination: React.FC = () => {
               disabled={page === 1}
               className="relative inline-flex items-center px-2 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Previous page"
+              data-testid="previous-page"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -173,6 +177,7 @@ const AuditLogPagination: React.FC = () => {
               disabled={page === totalPages}
               className="relative inline-flex items-center px-2 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Next page"
+              data-testid="next-page"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -183,6 +188,7 @@ const AuditLogPagination: React.FC = () => {
               disabled={page === totalPages}
               className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Last page"
+              data-testid="last-page"
             >
               <SkipForward className="h-4 w-4" />
             </button>
