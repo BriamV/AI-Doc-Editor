@@ -110,11 +110,36 @@ jobs:
           echo "🔒 Running yarn audit for Node.js dependencies..."
           yarn audit --level critical || (echo "❌ Critical vulnerabilities found" && exit 1)
 
+      - name: Setup Python for E2E Tests (Node 20 only)
+        if: matrix.node-version == '20.x'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup Backend for E2E Tests (Node 20 only)
+        if: matrix.node-version == '20.x'
+        run: |
+          echo "--- Setting up Python backend for E2E tests ---"
+          cd backend
+          python -m venv .venv
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
       - name: E2E Tests (Node 20 only)
         if: matrix.node-version == '20.x'
         run: |
-          yarn dev &
+          # Start backend with virtual environment in background
+          cd backend
+          source .venv/bin/activate
+          python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 &
+          cd ..
+          # Start frontend
+          yarn vite &
+          # Wait for both services to be ready
           npx wait-on http://localhost:5173
+          npx wait-on http://localhost:8000
+          # Run E2E tests
           yarn test:e2e
 
   python-quality-gate:
