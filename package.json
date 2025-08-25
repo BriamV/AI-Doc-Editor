@@ -12,7 +12,7 @@
     "//-- SETUP & DEVELOPMENT --//": "",
     "install:frozen": "yarn install --frozen-lockfile",
     "setup": "yarn install:frozen",
-    "dev": "concurrently \"vite\" \"cd backend && python -m uvicorn main:app --reload\"",
+    "dev": "concurrently \"vite\" \"cd backend && python -m uvicorn app.main:app --reload\"",
     "build": "vite build",
     "preview": "vite preview",
     "//-- TESTING --//": "",

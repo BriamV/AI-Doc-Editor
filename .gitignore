@@ -89,3 +89,6 @@ venv/
 # Cypress test artifacts
 cypress/screenshots/
 cypress/videos/
+
+# Playwright MCP artifacts
+.playwright-mcp/
