@@ -121,7 +121,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/faqs" element={<FAQs />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/audit-logs" element={<AuditLogs />} />
+          <Route path="/admin/audit-logs" element={<AuditLogs />} />
         </Routes>
       </BrowserRouter>
     </div>
