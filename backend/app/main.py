@@ -123,6 +123,7 @@ async def rate_limit_handler(request: Request, exc):
 
 
 @app.get("/")
+@app.head("/")
 async def root(request: Request):
     """Root endpoint with security-aware response"""
     client_ip = request.client.host if request.client else "unknown"

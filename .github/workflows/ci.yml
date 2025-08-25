@@ -136,9 +136,9 @@ jobs:
           cd ..
           # Start frontend
           yarn vite &
-          # Wait for both services to be ready
-          npx wait-on http://localhost:5173
-          npx wait-on http://localhost:8000
+          # Wait for both services to be ready with timeout and retry limits
+          npx wait-on http://localhost:5173 --timeout 60000 --interval 1000
+          npx wait-on http://localhost:8000/api/healthz --timeout 60000 --interval 1000
           # Run E2E tests
           yarn test:e2e
 
