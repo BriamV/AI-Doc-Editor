@@ -129,7 +129,7 @@ describe('Audit Log Viewer E2E Tests', () => {
       cy.login(regularUser);
       
       // Try to access audit logs page
-      cy.visit('/audit-logs');
+      cy.visit('/admin/audit-logs');
       
       // Should be redirected or show access denied message
       cy.contains('Access Denied').should('be.visible');
@@ -142,7 +142,7 @@ describe('Audit Log Viewer E2E Tests', () => {
       cy.login(adminUser);
       
       // Access audit logs page
-      cy.visit('/audit-logs');
+      cy.visit('/admin/audit-logs');
       
       // Should load successfully
       cy.contains('Audit Logs').should('be.visible');
@@ -157,7 +157,7 @@ describe('Audit Log Viewer E2E Tests', () => {
   describe('Audit Log Viewer Interface', () => {
     beforeEach(() => {
       cy.login(adminUser);
-      cy.visit('/audit-logs');
+      cy.visit('/admin/audit-logs');
       cy.wait('@getAuditLogs');
     });
 
@@ -223,7 +223,7 @@ describe('Audit Log Viewer E2E Tests', () => {
   describe('Filtering Functionality', () => {
     beforeEach(() => {
       cy.login(adminUser);
-      cy.visit('/audit-logs');
+      cy.visit('/admin/audit-logs');
       cy.wait('@getAuditLogs');
     });
 
@@ -327,7 +327,7 @@ describe('Audit Log Viewer E2E Tests', () => {
   describe('Sorting Functionality', () => {
     beforeEach(() => {
       cy.login(adminUser);
-      cy.visit('/audit-logs');
+      cy.visit('/admin/audit-logs');
       cy.wait('@getAuditLogs');
     });
 
@@ -384,7 +384,7 @@ describe('Audit Log Viewer E2E Tests', () => {
       }).as('getAuditLogsWithPagination');
 
       cy.login(adminUser);
-      cy.visit('/audit-logs');
+      cy.visit('/admin/audit-logs');
       cy.wait('@getAuditLogsWithPagination');
     });
 
@@ -430,7 +430,7 @@ describe('Audit Log Viewer E2E Tests', () => {
   describe('Row Selection and Export', () => {
     beforeEach(() => {
       cy.login(adminUser);
-      cy.visit('/audit-logs');
+      cy.visit('/admin/audit-logs');
       cy.wait('@getAuditLogs');
     });
 
@@ -501,7 +501,7 @@ describe('Audit Log Viewer E2E Tests', () => {
   describe('Real-time Refresh', () => {
     beforeEach(() => {
       cy.login(adminUser);
-      cy.visit('/audit-logs');
+      cy.visit('/admin/audit-logs');
       cy.wait('@getAuditLogs');
     });
 
@@ -549,7 +549,7 @@ describe('Audit Log Viewer E2E Tests', () => {
         body: { error: 'Internal server error' }
       }).as('getAuditLogsError');
       
-      cy.visit('/audit-logs');
+      cy.visit('/admin/audit-logs');
       cy.wait('@getAuditLogsError');
       
       // Should show error message
@@ -561,7 +561,7 @@ describe('Audit Log Viewer E2E Tests', () => {
       // Mock initial error then success
       cy.intercept('GET', '/api/audit/logs*', { statusCode: 500 }).as('getAuditLogsError');
       
-      cy.visit('/audit-logs');
+      cy.visit('/admin/audit-logs');
       cy.wait('@getAuditLogsError');
       
       // Mock successful retry
@@ -587,7 +587,7 @@ describe('Audit Log Viewer E2E Tests', () => {
       // Mock network error
       cy.intercept('GET', '/api/audit/logs*', { forceNetworkError: true }).as('getAuditLogsNetworkError');
       
-      cy.visit('/audit-logs');
+      cy.visit('/admin/audit-logs');
       cy.wait('@getAuditLogsNetworkError');
       
       // Should show network error message
@@ -599,7 +599,7 @@ describe('Audit Log Viewer E2E Tests', () => {
   describe('Responsive Design', () => {
     beforeEach(() => {
       cy.login(adminUser);
-      cy.visit('/audit-logs');
+      cy.visit('/admin/audit-logs');
       cy.wait('@getAuditLogs');
     });
 

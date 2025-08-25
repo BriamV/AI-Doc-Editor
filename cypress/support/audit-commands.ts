@@ -116,45 +116,38 @@ declare global {
 
 /**
  * Login command with support for different user roles
+ * Uses window.app.login test interface instead of form-based login
  */
 Cypress.Commands.add('login', (user: { email: string; password: string; role: string }) => {
-  // Mock authentication API
-  cy.intercept('POST', '/api/auth/login', {
-    statusCode: 200,
-    body: {
-      access_token: 'mock-jwt-token',
-      token_type: 'bearer',
-      user: {
-        email: user.email,
-        role: user.role,
-        name: user.email.split('@')[0]
-      }
-    }
-  }).as('login');
-
-  // Mock user profile API
+  // Mock user profile API for backend calls
   cy.intercept('GET', '/api/auth/me', {
     statusCode: 200,
     body: {
       email: user.email,
       role: user.role,
-      name: user.email.split('@')[0]
+      name: user.email.split('@')[0],
+      id: 1
     }
   }).as('getProfile');
 
-  // Perform login
-  cy.visit('/login');
-  cy.get('[data-testid="email-input"]').type(user.email);
-  cy.get('[data-testid="password-input"]').type(user.password);
-  cy.get('[data-testid="login-button"]').click();
-  
-  cy.wait('@login');
-  
-  // Store auth token in localStorage
+  // Use window.app.login test interface exposed in main.tsx
+  cy.visit('/');
   cy.window().then((window) => {
+    // Use the test helper interface for authentication
+    (window as any).app.login({
+      id: 1,
+      email: user.email,
+      role: user.role,
+      name: user.email.split('@')[0]
+    });
+    
+    // Store auth token in localStorage for API calls
     window.localStorage.setItem('auth_token', 'mock-jwt-token');
     window.localStorage.setItem('user_role', user.role);
   });
+  
+  // Wait for authentication state to be processed
+  cy.wait(100);
 });
 
 /**
