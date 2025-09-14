@@ -69,15 +69,15 @@ jobs:
           GIT_TERMINAL_PROMPT: "0"
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
-          # Verificar si package.json o yarn.lock han sido modificados
-          if git diff --name-only HEAD^ HEAD | grep -q -E "package\.json|yarn\.lock"; then
-            echo "📜 Cambios detectados en package.json o yarn.lock -> regeneración completa"
-            # Regenerar yarn.lock completamente para asegurar que no haya referencias SSH
-            yarn install --network-timeout 600000 --update-checksums
+          echo "📦 Installing dependencies with optimized configuration..."
+
+          # Use frozen lockfile for CI stability, with fallback to regular install for PR builds
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "🔄 PR build - allowing lockfile updates if needed"
+            yarn install --network-timeout 600000 --prefer-offline
           else
-            echo "📜 Sin cambios -> usando configuración optimizada"
-            # Usar lockfile existente pero asegurándonos de que no haya problemas de autenticación
-            yarn install --network-timeout 600000
+            echo "🔒 Main/develop build - using frozen lockfile"
+            yarn install --frozen-lockfile --network-timeout 600000 --prefer-offline
           fi
 
       - name: Type check
@@ -253,7 +253,13 @@ jobs:
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        env:
+          GIT_TERMINAL_PROMPT: "0"
+          npm_config_registry: "https://registry.npmjs.org/"
+        run: |
+          # Configure HTTPS for git operations
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          yarn install --network-timeout 600000 --prefer-offline
 
       - name: Generate coverage report
         run: yarn test:coverage

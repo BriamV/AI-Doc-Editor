@@ -24,19 +24,51 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check PR size
-        uses: pascalgn/size-label-action@v0.4.3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR size with fallback for large PRs
+        run: |
+          PR_NUMBER="${{ github.event.number }}"
+          echo "Checking size for PR #$PR_NUMBER"
+
+          # Get PR diff stats using GitHub API with error handling
+          if curl -s -f -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER" \
+            -o pr_info.json; then
+
+            ADDITIONS=$(jq -r '.additions' pr_info.json)
+            DELETIONS=$(jq -r '.deletions' pr_info.json)
+            TOTAL_CHANGES=$((ADDITIONS + DELETIONS))
+
+            echo "✅ PR Stats - Additions: $ADDITIONS, Deletions: $DELETIONS, Total: $TOTAL_CHANGES"
+
+            # Determine size label based on total changes
+            if [ $TOTAL_CHANGES -lt 20 ]; then
+              SIZE_LABEL="XS"
+            elif [ $TOTAL_CHANGES -lt 100 ]; then
+              SIZE_LABEL="S"
+            elif [ $TOTAL_CHANGES -lt 500 ]; then
+              SIZE_LABEL="M"
+            elif [ $TOTAL_CHANGES -lt 1000 ]; then
+              SIZE_LABEL="L"
+            else
+              SIZE_LABEL="XL"
+            fi
+
+            echo "📊 PR Size: $SIZE_LABEL ($TOTAL_CHANGES changes)"
+
+            # Add label using GitHub CLI
+            gh pr edit $PR_NUMBER --add-label "size/$SIZE_LABEL" || true
+
+          else
+            echo "⚠️ Could not get PR diff stats from API (likely too large), marking as XL"
+            gh pr edit $PR_NUMBER --add-label "size/XL" || true
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          sizes: >
-            {
-              "0": "XS",
-              "20": "S", 
-              "100": "M",
-              "500": "L",
-              "1000": "XL"
-            }
 
   security-check:
     name: Security Scan
