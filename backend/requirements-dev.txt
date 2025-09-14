@@ -1,0 +1,19 @@
+# Developer tooling for Python backend
+# Installed into the local venv at backend/.venv
+
+# Formatters / Linters
+black
+ruff
+isort
+flake8
+
+# Static analysis / complexity
+radon
+mypy
+pylint
+bandit
+safety
+
+# Security/code scanning CLI
+semgrep
+

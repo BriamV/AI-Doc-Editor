@@ -84,6 +84,9 @@ jobs:
           node-version: '20.x'
           cache: 'yarn'
 
+      - name: Enable Corepack (Yarn 4)
+        run: corepack enable
+
       - name: Checkout with full history for diff
         uses: actions/checkout@v4
         with:
@@ -119,7 +122,7 @@ jobs:
           echo "🗑️ Limpiando caché de Yarn para eliminar referencias previas..."
           yarn cache clean
 
-      - name: Install dependencies
+      - name: Install dependencies (Yarn 4)
         env:
           # Variables de entorno críticas para la instalación
           GIT_TERMINAL_PROMPT: "0"
@@ -127,19 +130,17 @@ jobs:
         run: |
           # Verificar si package.json o yarn.lock han sido modificados
           if git diff --name-only HEAD^ HEAD | grep -q -E "package\.json|yarn\.lock"; then
-            echo "📜 Cambios detectados en package.json o yarn.lock -> regeneración completa"
-            # Regenerar yarn.lock completamente para asegurar que no haya referencias SSH
-            yarn install --network-timeout 600000 --update-checksums
+            echo "📜 Cambios detectados en package.json o yarn.lock -> permitiendo actualización de lockfile"
+            yarn install
           else
-            echo "📜 Sin cambios -> usando configuración optimizada"
-            # Usar lockfile existente pero asegurándonos de que no haya problemas de autenticación
-            yarn install --network-timeout 600000
+            echo "📜 Sin cambios -> instalación inmutable"
+            yarn install --immutable
           fi
 
       - name: Run yarn audit
         run: |
-          echo "🔒 Running yarn audit for security vulnerabilities..."
-          yarn audit --level moderate --summary || {
+          echo "🔒 Running yarn npm audit for security vulnerabilities..."
+          yarn npm audit --severity moderate || {
             echo "⚠️ Security vulnerabilities found. Details above."
             echo "📋 Review and address critical/high vulnerabilities before production."
             exit 0

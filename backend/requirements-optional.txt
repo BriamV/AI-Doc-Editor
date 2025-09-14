@@ -1,0 +1,5 @@
+# Optional database drivers
+
+# PostgreSQL async driver (fails to build on CPython 3.13/Windows)
+asyncpg==0.29.0
+
