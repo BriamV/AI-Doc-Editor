@@ -89,6 +89,10 @@ yarn python-quality   # Backend Python validation (format + lint + complexity)
 yarn python-format    # Python autofix formatting (Black)
 yarn python-lint      # Python autofix linting (Ruff)
 
+# Environment validation & diagnostics (NEW - Unified Multiplatform)
+yarn env-validate     # Comprehensive environment diagnostics
+yarn env-info         # Detailed platform and tool information
+
 # ⚠️  LEGACY DEPRECATION NOTICE:
 # OLD: yarn run cmd <command>  <- DEPRECATED, will be removed
 # NEW: yarn <command>          <- Use this instead
@@ -102,6 +106,7 @@ yarn python-lint      # Python autofix linting (Ruff)
 - `docs/` - Spanish documentation (primary)
 - `.claude/commands/` - 19 production slash commands
 - `tools/` - Task management scripts
+- `scripts/multiplatform.cjs` - **NEW** Unified cross-platform validator
 
 ## 🔧 Quality Tools Ecosystem (40+ Tools)
 **Hooks-Integrated Multi-Stack Pipeline:**
@@ -125,6 +130,7 @@ taplo, shellcheck, shfmt                 # Config + shell scripts
 prettier (JSON/XML/CSS/HTML)             # Universal formatting
 ```
 **Auto-Detection**: Windows/Linux/WSL + multi-venv support
+**Unified Validator**: `scripts/multiplatform.cjs` consolidates all cross-platform logic
 
 ## Quality Assurance
 - **Multi-Stack Pipeline**: 40+ tools integrated via .claude/hooks.json
