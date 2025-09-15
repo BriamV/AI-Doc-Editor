@@ -57,6 +57,19 @@ def mock_request():
 class TestAuditLogCreation:
     """Test audit log creation with various scenarios"""
 
+    async def _verify_login_log(self, audit_id: str, user_id: str, user_email: str):
+        """Shared verification for login audit log persisted values"""
+        async with AsyncSessionLocal() as session:
+            log = await session.get(AuditLog, audit_id)
+            assert log is not None
+            assert log.action_type == AuditActionType.LOGIN_SUCCESS.value
+            assert log.user_id == user_id
+            assert log.user_email == user_email
+            assert log.ip_address == "192.168.1.100"
+            assert log.status == "success"
+            assert log.record_hash is not None
+            assert json.loads(log.details)["login_method"] == "oauth"
+
     @pytest.mark.asyncio
     async def test_create_login_audit_log(self, audit_service, clean_audit_logs, mock_request):
         """Test creating login success audit log"""
@@ -83,16 +96,7 @@ class TestAuditLogCreation:
         assert len(audit_id) == 36  # UUID length
 
         # Verify log was created in database
-        async with AsyncSessionLocal() as session:
-            log = await session.get(AuditLog, audit_id)
-            assert log is not None
-            assert log.action_type == AuditActionType.LOGIN_SUCCESS.value
-            assert log.user_id == user_id
-            assert log.user_email == user_email
-            assert log.ip_address == "192.168.1.100"
-            assert log.status == "success"
-            assert log.record_hash is not None
-            assert json.loads(log.details)["login_method"] == "oauth"
+        await self._verify_login_log(audit_id, user_id, user_email)
 
     @pytest.mark.asyncio
     async def test_create_document_audit_log(self, audit_service, clean_audit_logs):
