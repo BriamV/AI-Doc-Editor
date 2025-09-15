@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [20.x, 22.x]
 
     steps:
       - name: Checkout code
@@ -27,9 +27,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'yarn'
+          cache-dependency-path: 'yarn.lock'
 
       - name: Enable Corepack (Yarn 4)
-        run: corepack enable
+        run: |
+          corepack enable
+          corepack prepare yarn@4.5.1 --activate
 
       - name: Checkout with full history for diff
         uses: actions/checkout@v4
@@ -77,10 +80,10 @@ jobs:
           # Use immutable install for main/develop, allow updates in PRs
           if [ "${{ github.event_name }}" == "pull_request" ]; then
             echo "🔄 PR build - allowing lockfile updates if needed"
-            yarn install
+            yarn install --check-cache
           else
             echo "🔒 Main/develop build - immutable install"
-            yarn install --immutable
+            yarn install --immutable --check-cache
           fi
 
       - name: Type check
@@ -97,7 +100,7 @@ jobs:
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
-        if: matrix.node-version == '20.x' && env.CODECOV_TOKEN != ''
+        if: matrix.node-version == '20.x'
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
@@ -113,7 +116,7 @@ jobs:
       - name: Run yarn audit (Node.js dependencies)
         run: |
           echo "🔒 Running yarn npm audit for Node.js dependencies..."
-          yarn npm audit --severity critical || (echo "❌ Critical vulnerabilities found" && exit 1)
+          yarn npm audit --all --recursive --severity critical || (echo "❌ Critical vulnerabilities found" && exit 1)
 
       - name: Setup Python for E2E Tests (Node 20 only)
         if: matrix.node-version == '20.x'
@@ -257,7 +260,9 @@ jobs:
         run: |
           # Configure HTTPS for git operations
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          yarn install --network-timeout 600000 --prefer-offline
+          corepack enable
+          corepack prepare yarn@4.5.1 --activate
+          yarn install --immutable --check-cache
 
       - name: Generate coverage report
         run: yarn test:coverage
