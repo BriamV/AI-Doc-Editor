@@ -41,7 +41,7 @@
     "python-format:check": "node scripts/multiplatform.cjs tool black --check --diff --line-length=100 backend",
     "python-lint": "node scripts/multiplatform.cjs tool ruff check backend --output-format=github",
     "python-lint:fix": "node scripts/multiplatform.cjs tool ruff check backend --fix",
-    "python-complexity": "node scripts/multiplatform.cjs tool radon cc backend --min=B",
+    "python-complexity": "node scripts/python-cc-gate.cjs",
     "python-quality": "yarn run python-format:check && yarn run python-lint && yarn run python-complexity",
     "env-validate": "node scripts/multiplatform.cjs validate",
     "env-info": "node scripts/multiplatform.cjs info",
