@@ -12,6 +12,8 @@ dev-debug.log
 # Code quality reports
 eslint-report.json
 *.eslint.json
+eslint-report*.txt
+*.lint-report.*
 
 # Dependency directories
 node_modules/
