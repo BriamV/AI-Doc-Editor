@@ -35,12 +35,14 @@ const TableRow: React.FC<TableRowProps> = ({
         className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${
           isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''
         }`}
+        data-testid={`audit-row-${log.id}`}
       >
         {/* Expand button */}
         <td className="px-6 py-4 whitespace-nowrap">
           <button
             onClick={() => onToggleExpansion(log.id)}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            data-testid={`expand-${log.id}`}
           >
             {isExpanded ? (
               <ChevronDown className="h-4 w-4" />
@@ -57,6 +59,7 @@ const TableRow: React.FC<TableRowProps> = ({
             checked={isSelected}
             onChange={() => onToggleSelection(log.id)}
             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            data-testid={`select-${log.id}`}
           />
         </td>
 

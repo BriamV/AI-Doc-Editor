@@ -75,8 +75,11 @@ const AuditLogFilters: React.FC = () => {
             <Filter className="h-5 w-5 text-gray-400" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">Filters</h3>
             {activeFiltersCount > 0 && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                {activeFiltersCount} active
+              <span
+                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                data-testid="active-filters-count"
+              >
+                {activeFiltersCount} filters active
               </span>
             )}
           </div>
@@ -203,6 +206,7 @@ const AuditLogFilters: React.FC = () => {
               value={localFilters.ipAddress || ''}
               onChange={e => handleFilterChange('ipAddress', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              data-testid="filter-ip-address"
             />
           </div>
 
@@ -217,6 +221,7 @@ const AuditLogFilters: React.FC = () => {
               value={localFilters.dateFrom || ''}
               onChange={e => handleFilterChange('dateFrom', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              data-testid="filter-date-from"
             />
           </div>
 
@@ -230,8 +235,20 @@ const AuditLogFilters: React.FC = () => {
               value={localFilters.dateTo || ''}
               onChange={e => handleFilterChange('dateTo', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              data-testid="filter-date-to"
             />
           </div>
+        </div>
+
+        {/* Apply filters button */}
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={() => setFilters(localFilters)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors"
+            data-testid="apply-filters"
+          >
+            Apply Filters
+          </button>
         </div>
 
         {/* Quick filter buttons */}
@@ -262,23 +279,23 @@ const AuditLogFilters: React.FC = () => {
           <button
             onClick={() => {
               const today = new Date();
-              const yesterday = new Date(today);
-              yesterday.setDate(yesterday.getDate() - 1);
+              const todayStr = today.toISOString().slice(0, 16);
               setLocalFilters({
                 ...localFilters,
-                dateFrom: yesterday.toISOString().slice(0, 16),
-                dateTo: today.toISOString().slice(0, 16),
+                dateFrom: todayStr,
+                dateTo: todayStr,
               });
               setFilters({
                 ...localFilters,
-                dateFrom: yesterday.toISOString().slice(0, 16),
-                dateTo: today.toISOString().slice(0, 16),
+                dateFrom: todayStr,
+                dateTo: todayStr,
               });
             }}
             className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
+            data-testid="quick-date-today"
           >
             <Calendar className="h-3 w-3 mr-1" />
-            Last 24h
+            Today
           </button>
         </div>
       </div>

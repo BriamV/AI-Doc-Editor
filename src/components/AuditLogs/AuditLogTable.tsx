@@ -64,6 +64,7 @@ const AuditLogTable: React.FC<AuditLogTableProps> = ({ logs, isLoading }) => {
                 checked={logs && selectedLogs.size === logs.length && logs.length > 0}
                 onChange={handleSelectAll}
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                data-testid="select-all-rows"
               />
               <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                 Select all ({logs?.length || 0})

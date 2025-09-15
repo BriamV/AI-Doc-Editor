@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef } from 'react';
 import useStore from '@store/store';
 import MobileBar from '../MobileBar';
 import { InitialEditorStateType } from '@lexical/react/LexicalComposer';
@@ -77,13 +77,6 @@ const Document = () => {
       LinkNode,
     ],
   };
-
-  const [refresh, setRefresh] = useState(false);
-
-  useEffect(() => {
-    // Force a refresh only when currentChatIndex changes to avoid infinite update loop
-    setRefresh(prev => !prev);
-  }, [currentChatIndex]);
 
   function onChange(change: EditorState) {
     if (!chats) return;

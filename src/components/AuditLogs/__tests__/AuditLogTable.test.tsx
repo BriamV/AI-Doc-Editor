@@ -133,34 +133,21 @@ describe('AuditLogTable Component', () => {
   test('handles row selection', async () => {
     render(<AuditLogTable {...defaultProps} />);
 
-    // Look for checkbox or selection button - use getAllByRole to handle multiple checkboxes
-    const allCheckboxes = screen.queryAllByRole('checkbox');
-    const selectCheckbox =
-      allCheckboxes.find(
-        checkbox =>
-          checkbox.getAttribute('data-testid')?.includes('select') ||
-          checkbox.closest('tr')?.getAttribute('data-testid')?.includes('audit-1')
-      ) || allCheckboxes[1]; // Skip the "select all" checkbox (index 0) if present
+    // Look for the specific selection checkbox for audit-1
+    const selectCheckbox = screen.getByTestId('select-audit-1');
 
-    if (selectCheckbox) {
-      await user.click(selectCheckbox);
-      expect(mockStore.toggleLogSelection).toHaveBeenCalledWith('audit-1');
-    }
+    await user.click(selectCheckbox);
+    expect(mockStore.toggleLogSelection).toHaveBeenCalledWith('audit-1');
   });
 
   test('handles row expansion', async () => {
     render(<AuditLogTable {...defaultProps} />);
 
-    // Look for expand button
-    const expandButton =
-      screen.queryByTestId(/expand.*audit-1/i) ||
-      screen.queryByRole('button', { name: /expand/i }) ||
-      document.querySelector('[data-testid*="expand"]');
+    // Look for the specific expand button for audit-1
+    const expandButton = screen.getByTestId('expand-audit-1');
 
-    if (expandButton) {
-      await user.click(expandButton);
-      expect(mockStore.toggleRowExpansion).toHaveBeenCalledWith('audit-1');
-    }
+    await user.click(expandButton);
+    expect(mockStore.toggleRowExpansion).toHaveBeenCalledWith('audit-1');
   });
 
   test('handles sorting', async () => {
@@ -186,13 +173,14 @@ describe('AuditLogTable Component', () => {
 
     render(<AuditLogTable {...defaultProps} />);
 
-    // Check for expanded details
+    // Check for expanded details - look for content that appears in expanded row
     const expandedDetails =
-      screen.queryByTestId(/expanded.*audit-1/i) || screen.queryByText(/oauth/i);
+      screen.queryByText('Log Details') ||
+      screen.queryByText('Technical Details') ||
+      screen.queryByText('oauth') ||
+      screen.queryByText('google');
 
-    if (expandedDetails) {
-      expect(expandedDetails).toBeInTheDocument();
-    }
+    expect(expandedDetails).toBeInTheDocument();
   });
 
   test('shows selected rows', () => {

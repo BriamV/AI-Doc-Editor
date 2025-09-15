@@ -21,6 +21,20 @@ interface FetchLogsResponse {
   total: number;
 }
 
+interface RawLogsResponse {
+  logs?: AuditLogEntry[];
+  total?: number;
+  total_count?: number;
+}
+
+interface RawActionsResponse {
+  actions?: string[];
+}
+
+interface RawUsersResponse {
+  users?: Array<{ id: string; email: string; name: string }>;
+}
+
 // Safely parse JSON only when response is JSON
 const parseJsonSafe = async <T = unknown>(response: Response): Promise<T> => {
   const contentType = response.headers.get('content-type') || '';
@@ -32,52 +46,101 @@ const parseJsonSafe = async <T = unknown>(response: Response): Promise<T> => {
   );
 };
 
-// Normalize stats coming from backend or test mocks into our internal AuditLogStats shape
-const normalizeStats = (raw: any): AuditLogStats => {
-  // If already in expected shape, return as-is
-  if (
-    raw &&
-    typeof raw.totalLogs === 'number' &&
-    raw.logsByAction &&
-    raw.logsByUser &&
-    raw.logsByStatus &&
-    raw.logsByDate &&
-    typeof raw.recentActions === 'number'
-  ) {
-    return raw as AuditLogStats;
-  }
+// Raw stats interface for type safety
+interface RawStatsResponse {
+  totalLogs?: number;
+  logsByAction?: Record<string, number>;
+  logsByUser?: Record<string, number>;
+  logsByStatus?: Record<string, number>;
+  logsByDate?: Record<string, number>;
+  total_events?: number;
+  top_actions?: Array<{ action_type?: string; count?: number }>;
+  top_users?: Array<{ user_email?: string; count?: number }>;
+  failed_logins?: number;
+  security_events?: number;
+  [key: string]: unknown;
+}
 
-  // Cypress/mock alternative shape (e.g., total_events, top_actions, top_users, security_events, failed_logins)
-  const totalLogs = Number(raw?.total_events ?? 0);
+// Helper function to check if object is already in AuditLogStats shape
+const isAuditLogStats = (raw: unknown): raw is AuditLogStats => {
+  return (
+    raw !== null &&
+    typeof raw === 'object' &&
+    'totalLogs' in raw &&
+    typeof (raw as RawStatsResponse).totalLogs === 'number' &&
+    'logsByAction' in raw &&
+    Boolean((raw as RawStatsResponse).logsByAction) &&
+    'logsByUser' in raw &&
+    Boolean((raw as RawStatsResponse).logsByUser) &&
+    'logsByStatus' in raw &&
+    Boolean((raw as RawStatsResponse).logsByStatus) &&
+    'logsByDate' in raw &&
+    Boolean((raw as RawStatsResponse).logsByDate) &&
+    'recentActions' in raw &&
+    typeof (raw as RawStatsResponse).recentActions === 'number'
+  );
+};
+
+// Helper function to build logsByAction from top_actions array
+const buildLogsByAction = (topActions: unknown): Record<string, number> => {
   const logsByAction: Record<string, number> = {};
-  if (Array.isArray(raw?.top_actions)) {
-    raw.top_actions.forEach((item: any) => {
+  if (Array.isArray(topActions)) {
+    topActions.forEach((item: { action_type?: string; count?: number }) => {
       if (item?.action_type) logsByAction[item.action_type] = Number(item?.count ?? 0);
     });
   }
+  return logsByAction;
+};
+
+// Helper function to build logsByUser from top_users array
+const buildLogsByUser = (topUsers: unknown): Record<string, number> => {
   const logsByUser: Record<string, number> = {};
-  if (Array.isArray(raw?.top_users)) {
-    raw.top_users.forEach((item: any) => {
+  if (Array.isArray(topUsers)) {
+    topUsers.forEach((item: { user_email?: string; count?: number }) => {
       if (item?.user_email) logsByUser[item.user_email] = Number(item?.count ?? 0);
     });
   }
-  // Build status summary if present
+  return logsByUser;
+};
+
+// Helper function to build logsByStatus from failed_logins and security_events
+const buildLogsByStatus = (
+  failedLogins: unknown,
+  securityEvents: unknown,
+  totalLogs: number
+): Record<string, number> => {
   const logsByStatus: Record<string, number> = {};
-  if (typeof raw?.failed_logins === 'number') {
-    logsByStatus.failure = Number(raw.failed_logins);
+  if (typeof failedLogins === 'number') {
+    logsByStatus.failure = Number(failedLogins);
   }
-  if (typeof raw?.security_events === 'number') {
-    logsByStatus.error = Number(raw.security_events);
+  if (typeof securityEvents === 'number') {
+    logsByStatus.error = Number(securityEvents);
   }
   // Heuristic: success = total - failures - errors (non-negative)
   const success = Math.max(0, totalLogs - (logsByStatus.failure ?? 0) - (logsByStatus.error ?? 0));
   if (success || totalLogs) logsByStatus.success = success;
+  return logsByStatus;
+};
 
-  // We don't have per-date buckets from mocks; keep empty
-  const logsByDate: Record<string, number> = {};
+// Normalize stats coming from backend or test mocks into our internal AuditLogStats shape
+const normalizeStats = (raw: RawStatsResponse | unknown): AuditLogStats => {
+  // If already in expected shape, return as-is
+  if (isAuditLogStats(raw)) {
+    return raw;
+  }
 
-  // recentActions: approximate with events_today if provided
-  const recentActions = Number(raw?.events_today ?? 0);
+  // Cypress/mock alternative shape (e.g., total_events, top_actions, top_users, security_events, failed_logins)
+  const rawData = raw as RawStatsResponse;
+  const totalLogs = Number(rawData?.total_events ?? 0);
+  const logsByAction = buildLogsByAction(rawData?.top_actions);
+  const logsByUser = buildLogsByUser(rawData?.top_users);
+  const logsByStatus = buildLogsByStatus(
+    rawData?.failed_logins,
+    rawData?.security_events,
+    totalLogs
+  );
+  const logsByDate: Record<string, number> = {}; // We don't have per-date buckets from mocks; keep empty
+  const recentActions = Number(rawData?.events_today ?? 0);
 
   return { totalLogs, logsByAction, logsByUser, logsByStatus, logsByDate, recentActions };
 };
@@ -128,13 +191,13 @@ export const fetchAuditLogs = async ({
       throw new Error(`Failed to fetch audit logs: ${response.status} ${response.statusText}`);
     }
 
-    const data = await parseJsonSafe<any>(response);
+    const data = await parseJsonSafe<RawLogsResponse>(response);
     // Normalize shape: Cypress mocks use total_count; backend may return total
     const totalFromBackend = typeof data.total === 'number' ? data.total : Number(data.total ?? 0);
     const totalFromMocks = Number(data.total_count ?? 0);
     const totalArrayFallback = Array.isArray(data.logs) ? data.logs.length : 0;
     const total = totalFromBackend || totalFromMocks || totalArrayFallback;
-    return { logs: data.logs ?? [], total } as FetchLogsResponse;
+    return { logs: data.logs ?? [], total };
   } catch (err) {
     console.warn('Audit logs fetch failed, returning empty list:', err);
     return { logs: [], total: 0 };
@@ -155,7 +218,7 @@ export const fetchAuditStats = async (accessToken: string): Promise<AuditLogStat
       throw new Error(`Failed to fetch audit stats: ${response.status} ${response.statusText}`);
     }
 
-    const data = await parseJsonSafe<any>(response);
+    const data = await parseJsonSafe<RawStatsResponse>(response);
     return normalizeStats(data);
   } catch (err) {
     console.warn('Audit stats fetch failed, returning fallback:', err);
@@ -184,7 +247,7 @@ export const fetchActionTypes = async (accessToken: string): Promise<string[]> =
       throw new Error(`Failed to fetch action types: ${response.status} ${response.statusText}`);
     }
 
-    const data = await parseJsonSafe<any>(response);
+    const data = await parseJsonSafe<RawActionsResponse>(response);
     return Array.isArray(data.actions) ? data.actions : [];
   } catch (err) {
     console.warn('Audit action types fetch failed, returning empty list:', err);
@@ -208,7 +271,7 @@ export const fetchUsers = async (
       throw new Error(`Failed to fetch users: ${response.status} ${response.statusText}`);
     }
 
-    const data = await parseJsonSafe<any>(response);
+    const data = await parseJsonSafe<RawUsersResponse>(response);
     return Array.isArray(data.users) ? data.users : [];
   } catch (err) {
     console.warn('Users fetch failed, returning empty list:', err);
