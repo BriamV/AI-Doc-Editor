@@ -92,7 +92,13 @@ nyc_output/
 .cc-refactor-attempts
 venv/
 
-# Cypress test artifacts
+# E2E Test Artifacts
+# Playwright artifacts (primary E2E framework)
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Cypress test artifacts (legacy - deprecated)
 cypress/screenshots/
 cypress/videos/
 

@@ -169,7 +169,13 @@ const App: React.FC = () => {
 
   return (
     <div className="w-full h-full relative">
-      <RouterProvider router={router} future={{ v7_startTransition: true }} />
+      <RouterProvider
+        router={router}
+        future={{
+          v7_startTransition: true,
+          v7_normalizeFormMethod: true
+        }}
+      />
     </div>
   );
 };

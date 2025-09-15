@@ -77,6 +77,8 @@ const AuditLogPagination: React.FC = () => {
           <div className="flex items-center space-x-2">
             <label className="text-sm text-gray-700 dark:text-gray-300">Show:</label>
             <select
+              id="audit-log-page-size"
+              name="audit-log-page-size"
               value={pageSize}
               onChange={e => handlePageSizeChange(Number(e.target.value))}
               className="text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -101,7 +103,7 @@ const AuditLogPagination: React.FC = () => {
     >
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
         {/* Results info */}
-        <div className="text-sm text-gray-700 dark:text-gray-300">
+        <div className="text-sm text-gray-700 dark:text-gray-300" data-testid="page-info">
           Showing <span className="font-medium">{startItem}</span> to{' '}
           <span className="font-medium">{endItem}</span> of{' '}
           <span className="font-medium">{total}</span> results
@@ -113,6 +115,8 @@ const AuditLogPagination: React.FC = () => {
           <div className="flex items-center space-x-2">
             <label className="text-sm text-gray-700 dark:text-gray-300">Show:</label>
             <select
+              id="audit-log-page-size"
+              name="audit-log-page-size"
               value={pageSize}
               onChange={e => handlePageSizeChange(Number(e.target.value))}
               className="text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -145,10 +149,31 @@ const AuditLogPagination: React.FC = () => {
               disabled={page === 1}
               className="relative inline-flex items-center px-2 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Previous page"
-              data-testid="previous-page"
+              data-testid="prev-page"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
+
+            {/* Go to page input */}
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-700 dark:text-gray-300">Go to:</span>
+              <input
+                type="number"
+                min="1"
+                max={totalPages}
+                defaultValue={page}
+                className="w-16 text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                data-testid="goto-page-input"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const newPage = parseInt((e.target as HTMLInputElement).value);
+                    if (newPage >= 1 && newPage <= totalPages) {
+                      handlePageChange(newPage);
+                    }
+                  }
+                }}
+              />
+            </div>
 
             {/* Page numbers */}
             <div className="flex items-center space-x-1">
@@ -202,7 +227,7 @@ const AuditLogPagination: React.FC = () => {
       {/* Mobile-friendly pagination info */}
       <div className="sm:hidden mt-4">
         <div className="text-center">
-          <span className="text-sm text-gray-700 dark:text-gray-300">
+          <span className="text-sm text-gray-700 dark:text-gray-300" data-testid="page-info">
             Page {page} of {totalPages}
           </span>
         </div>

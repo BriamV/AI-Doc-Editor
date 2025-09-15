@@ -61,6 +61,8 @@ const AuditLogTable: React.FC<AuditLogTableProps> = ({ logs, isLoading }) => {
             <label className="flex items-center">
               <input
                 type="checkbox"
+                id="select-all-audit-logs"
+                name="select-all-audit-logs"
                 checked={logs && selectedLogs.size === logs.length && logs.length > 0}
                 onChange={handleSelectAll}
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"

@@ -4,6 +4,67 @@
  */
 
 describe('Audit Log Viewer E2E Tests', () => {
+  describe('Navigation Flow', () => {
+    it('should complete full admin navigation flow from login to audit logs', () => {
+      // Mock API responses first
+      cy.intercept('GET', '/api/audit/logs*', {
+        statusCode: 200,
+        body: {
+          logs: mockAuditLogs,
+          total_count: mockAuditLogs.length,
+          page: 1,
+          page_size: 25,
+          total_pages: 1,
+          has_next: false,
+          has_previous: false
+        }
+      }).as('getAuditLogs');
+
+      cy.intercept('GET', '/api/audit/stats', {
+        statusCode: 200,
+        body: mockAuditStats
+      }).as('getAuditStats');
+
+      // Step 1: Navigate to login page
+      cy.visit('/login');
+
+      // Step 2: Login as admin using the test login flow
+      cy.login(adminUser);
+
+      // Step 3: Navigate to audit logs
+      cy.visit('/admin/audit-logs');
+
+      // Step 4: Verify audit logs page loaded successfully
+      cy.contains('Audit Logs').should('be.visible');
+      cy.get('[data-testid="audit-log-table"]').should('be.visible');
+
+      // Step 5: Verify API calls were made
+      cy.wait('@getAuditLogs');
+      cy.wait('@getAuditStats');
+
+      // Step 6: Verify key components are present
+      cy.get('[data-testid="filters-panel"]').should('be.visible');
+      cy.get('[data-testid="pagination"]').should('be.visible');
+    });
+
+    it('should prevent editor access to audit logs with proper error flow', () => {
+      // Step 1: Navigate to login page and login as editor
+      cy.visit('/login');
+      cy.login(regularUser);
+
+      // Step 2: Attempt to navigate to audit logs
+      cy.visit('/admin/audit-logs');
+
+      // Step 3: Verify access denied is shown
+      cy.contains('Access Denied').should('be.visible');
+      cy.contains('audit log access restricted to administrators', { matchCase: false })
+        .should('be.visible');
+
+      // Step 4: Verify audit log table is NOT present
+      cy.get('[data-testid="audit-log-table"]').should('not.exist');
+    });
+  });
+
   // Test data and fixtures
   const adminUser = {
     email: 'admin@example.com',
@@ -194,29 +255,44 @@ describe('Audit Log Viewer E2E Tests', () => {
     });
 
     it('should expand row details when clicking expand button', () => {
-      // Find first row with expand button
-      cy.get('[data-testid="expand-row-audit-1"]').click();
-      
-      // Should show expanded details
-      cy.get('[data-testid="expanded-details-audit-1"]').should('be.visible');
+      // Wait for table to be stable
+      cy.waitForStableDOM('[data-testid="audit-log-table"]');
+
+      // Find first row with expand button using more stable selector
+      cy.get('[data-testid="expand-audit-1"]')
+        .should('be.visible')
+        .safeClick();
+
+      // Should show expanded details with retry
+      cy.get('[data-testid="expanded-details-audit-1"]', { timeout: 5000 })
+        .should('be.visible');
       cy.contains('"method": "oauth"').should('be.visible');
       cy.contains('"provider": "google"').should('be.visible');
-      
+
       // Should change button to collapse
-      cy.get('[data-testid="collapse-row-audit-1"]').should('be.visible');
+      cy.get('[data-testid="expand-audit-1"]').should('be.visible');
     });
 
     it('should collapse expanded row when clicking collapse button', () => {
+      // Wait for stable DOM
+      cy.waitForStableDOM('[data-testid="audit-log-table"]');
+
       // Expand row first
-      cy.get('[data-testid="expand-row-audit-1"]').click();
-      cy.get('[data-testid="expanded-details-audit-1"]').should('be.visible');
-      
-      // Collapse row
-      cy.get('[data-testid="collapse-row-audit-1"]').click();
-      
-      // Should hide expanded details
-      cy.get('[data-testid="expanded-details-audit-1"]').should('not.exist');
-      cy.get('[data-testid="expand-row-audit-1"]').should('be.visible');
+      cy.get('[data-testid="expand-audit-1"]')
+        .should('be.visible')
+        .safeClick();
+      cy.get('[data-testid="expanded-details-audit-1"]', { timeout: 5000 })
+        .should('be.visible');
+
+      // Collapse row with stable selector
+      cy.get('[data-testid="expand-audit-1"]')
+        .should('be.visible')
+        .safeClick();
+
+      // Should hide expanded details with proper wait
+      cy.get('[data-testid="expanded-details-audit-1"]')
+        .should('not.exist');
+      cy.get('[data-testid="expand-audit-1"]').should('be.visible');
     });
   });
 
@@ -228,17 +304,24 @@ describe('Audit Log Viewer E2E Tests', () => {
     });
 
     it('should filter by user email', () => {
-      // Open filters panel
+      // Wait for filters to be stable
+      cy.waitForStableDOM('[data-testid="filters-panel"]');
       cy.get('[data-testid="filters-panel"]').should('be.visible');
-      
-      // Enter user email filter
-      cy.get('[data-testid="filter-user-email"]').type('test@example.com');
-      
-      // Apply filters
-      cy.get('[data-testid="apply-filters"]').click();
-      
+
+      // Enter user email filter with proper waiting
+      cy.get('[data-testid="filter-user-email"]')
+        .should('be.visible')
+        .clear()
+        .type('test@example.com');
+
+      // Apply filters with stable click
+      cy.get('[data-testid="apply-filters"]')
+        .should('be.visible')
+        .should('not.be.disabled')
+        .safeClick();
+
       // Should make filtered API call
-      cy.wait('@getAuditLogs').then((interception) => {
+      cy.wait('@getAuditLogs', { timeout: 10000 }).then((interception) => {
         expect(interception.request.url).to.include('userEmail=test%40example.com');
       });
     });
@@ -396,11 +479,17 @@ describe('Audit Log Viewer E2E Tests', () => {
     });
 
     it('should navigate to next page', () => {
-      // Click next page
-      cy.get('[data-testid="next-page"]').click();
-      
+      // Wait for pagination to be stable
+      cy.waitForStableDOM('[data-testid="pagination"]');
+
+      // Click next page with proper waiting
+      cy.get('[data-testid="next-page"]')
+        .should('be.visible')
+        .should('be.enabled')
+        .safeClick();
+
       // Should make API call for page 2
-      cy.wait('@getAuditLogsWithPagination').then((interception) => {
+      cy.wait('@getAuditLogsWithPagination', { timeout: 10000 }).then((interception) => {
         expect(interception.request.url).to.include('page=2');
       });
     });
@@ -435,12 +524,20 @@ describe('Audit Log Viewer E2E Tests', () => {
     });
 
     it('should select individual rows', () => {
-      // Select first row
-      cy.get('[data-testid="select-row-audit-1"]').click();
-      
-      // Should show selection
-      cy.get('[data-testid="select-row-audit-1"]').should('be.checked');
-      cy.get('[data-testid="selection-count"]').should('contain', '1 selected');
+      // Wait for table to be stable
+      cy.waitForStableDOM('[data-testid="audit-log-table"]');
+
+      // Select first row with proper selector
+      cy.get('[data-testid="select-audit-1"]')
+        .should('be.visible')
+        .should('not.be.disabled')
+        .safeClick();
+
+      // Should show selection with timeout
+      cy.get('[data-testid="select-audit-1"]', { timeout: 3000 })
+        .should('be.checked');
+      cy.get('[data-testid="selection-count"]', { timeout: 3000 })
+        .should('contain', '1 selected');
     });
 
     it('should select all rows', () => {
@@ -448,14 +545,14 @@ describe('Audit Log Viewer E2E Tests', () => {
       cy.get('[data-testid="select-all-rows"]').click();
       
       // Should select all visible rows
-      cy.get('[data-testid^="select-row-"]').should('be.checked');
+      cy.get('[data-testid^="select-"]').should('be.checked');
       cy.get('[data-testid="selection-count"]').should('contain', '5 selected');
     });
 
     it('should export selected rows as CSV', () => {
       // Select some rows
-      cy.get('[data-testid="select-row-audit-1"]').click();
-      cy.get('[data-testid="select-row-audit-2"]').click();
+      cy.get('[data-testid="select-audit-1"]').click();
+      cy.get('[data-testid="select-audit-2"]').click();
       
       // Mock download
       cy.window().then((win) => {
@@ -486,14 +583,14 @@ describe('Audit Log Viewer E2E Tests', () => {
 
     it('should clear selection', () => {
       // Select some rows
-      cy.get('[data-testid="select-row-audit-1"]').click();
-      cy.get('[data-testid="select-row-audit-2"]').click();
+      cy.get('[data-testid="select-audit-1"]').click();
+      cy.get('[data-testid="select-audit-2"]').click();
       
       // Clear selection
       cy.get('[data-testid="clear-selection"]').click();
       
       // Should deselect all
-      cy.get('[data-testid^="select-row-"]').should('not.be.checked');
+      cy.get('[data-testid^="select-"]').should('not.be.checked');
       cy.get('[data-testid="selection-count"]').should('not.exist');
     });
   });

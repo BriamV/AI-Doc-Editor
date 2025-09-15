@@ -240,13 +240,22 @@ Cypress.Commands.add('mockAuditLogAPI', (scenario: string = 'default') => {
 });
 
 /**
- * Wait for audit logs to load completely
+ * Wait for audit logs to load completely with stability checks
  */
 Cypress.Commands.add('waitForAuditLogs', () => {
-  cy.wait('@getAuditLogs');
-  cy.wait('@getAuditStats');
+  // Wait for API calls to complete
+  cy.wait('@getAuditLogs', { timeout: 15000 });
+  cy.wait('@getAuditStats', { timeout: 10000 });
+
+  // Ensure table is visible and stable
+  cy.waitForStableDOM('[data-testid="audit-log-table"]');
   cy.get('[data-testid="audit-log-table"]').should('be.visible');
+
+  // Ensure loading states are cleared
   cy.get('[data-testid="loading-indicator"]').should('not.exist');
+
+  // Additional stability check - wait for any animations to complete
+  cy.wait(200);
 });
 
 /**
@@ -299,7 +308,7 @@ Cypress.Commands.add('applyAuditFilters', (filters) => {
  */
 Cypress.Commands.add('selectAuditLogs', (logIds: string[]) => {
   logIds.forEach(logId => {
-    cy.get(`[data-testid="select-row-${logId}"]`).check();
+    cy.get(`[data-testid="select-${logId}"]`).check();
   });
 });
 
@@ -358,7 +367,7 @@ Cypress.Commands.add('sortAuditLogs', (column: string, direction = 'desc') => {
  * Expand audit log row to show details
  */
 Cypress.Commands.add('expandAuditLogRow', (logId: string) => {
-  cy.get(`[data-testid="expand-row-${logId}"]`).click();
+  cy.get(`[data-testid="expand-${logId}"]`).click();
   cy.get(`[data-testid="expanded-details-${logId}"]`).should('be.visible');
 });
 

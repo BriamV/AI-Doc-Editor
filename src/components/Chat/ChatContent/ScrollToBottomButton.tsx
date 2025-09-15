@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAtBottom, useScrollToBottom } from 'react-scroll-to-bottom';
+import { useAtBottom, useScrollToBottom } from '@components/AutoScrollContainer/hooks';
 
 import { ChevronDown } from '@carbon/icons-react';
 

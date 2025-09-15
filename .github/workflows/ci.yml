@@ -130,6 +130,10 @@ jobs:
           echo "--- Setting up Python backend for E2E tests (bootstrap) ---"
           node scripts/multiplatform.cjs bootstrap
 
+      - name: Install Playwright Browsers (Node 20 only)
+        if: matrix.node-version == '20.x'
+        run: yarn playwright install --with-deps chromium
+
       - name: E2E Tests (Node 20 only)
         if: matrix.node-version == '20.x'
         run: |
@@ -140,8 +144,16 @@ jobs:
           # Wait for both services to be ready with timeout and retry limits
           npx wait-on http://localhost:5173 --timeout 60000 --interval 1000
           npx wait-on http://localhost:8000/api/healthz --timeout 60000 --interval 1000
-          # Run E2E tests
-          yarn test:e2e
+          # Run Playwright E2E tests
+          yarn test:playwright
+
+      - name: Upload Playwright Report (Node 20 only)
+        if: matrix.node-version == '20.x' && failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
 
   python-quality-gate:
     name: Python Quality Gate

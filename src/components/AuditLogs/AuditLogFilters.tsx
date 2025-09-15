@@ -116,6 +116,8 @@ const AuditLogFilters: React.FC = () => {
             <div className="relative">
               <input
                 type="text"
+                id="audit-log-search"
+                name="audit-log-search"
                 placeholder="Search in descriptions, user emails, IPs..."
                 value={localFilters.search || ''}
                 onChange={e => handleFilterChange('search', e.target.value)}
@@ -141,6 +143,8 @@ const AuditLogFilters: React.FC = () => {
               User
             </label>
             <select
+              id="audit-log-user-email"
+              name="audit-log-user-email"
               value={localFilters.userEmail || ''}
               onChange={e => handleFilterChange('userEmail', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -162,6 +166,8 @@ const AuditLogFilters: React.FC = () => {
               Action Type
             </label>
             <select
+              id="audit-log-action-type"
+              name="audit-log-action-type"
               value={localFilters.actionType || ''}
               onChange={e => handleFilterChange('actionType', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -182,6 +188,8 @@ const AuditLogFilters: React.FC = () => {
               Status
             </label>
             <select
+              id="audit-log-status"
+              name="audit-log-status"
               value={localFilters.status || ''}
               onChange={e => handleFilterChange('status', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -202,6 +210,8 @@ const AuditLogFilters: React.FC = () => {
             </label>
             <input
               type="text"
+              id="audit-log-ip-address"
+              name="audit-log-ip-address"
               placeholder="192.168.1.1"
               value={localFilters.ipAddress || ''}
               onChange={e => handleFilterChange('ipAddress', e.target.value)}
@@ -218,6 +228,8 @@ const AuditLogFilters: React.FC = () => {
             </label>
             <input
               type="datetime-local"
+              id="audit-log-date-from"
+              name="audit-log-date-from"
               value={localFilters.dateFrom || ''}
               onChange={e => handleFilterChange('dateFrom', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -232,6 +244,8 @@ const AuditLogFilters: React.FC = () => {
             </label>
             <input
               type="datetime-local"
+              id="audit-log-date-to"
+              name="audit-log-date-to"
               value={localFilters.dateTo || ''}
               onChange={e => handleFilterChange('dateTo', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"

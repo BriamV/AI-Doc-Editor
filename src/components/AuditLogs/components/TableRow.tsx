@@ -21,18 +21,27 @@ interface TableRowProps {
   onToggleSelection: (logId: string) => void;
 }
 
-const TableRow: React.FC<TableRowProps> = ({
+const TableRow: React.FC<TableRowProps> = React.memo(({
   log,
   isExpanded,
   isSelected,
   onToggleExpansion,
   onToggleSelection,
 }) => {
+  // Memoize handlers to prevent unnecessary re-renders
+  const handleToggleExpansion = React.useCallback(() => {
+    onToggleExpansion(log.id);
+  }, [onToggleExpansion, log.id]);
+
+  const handleToggleSelection = React.useCallback(() => {
+    onToggleSelection(log.id);
+  }, [onToggleSelection, log.id]);
+
   return (
     <>
       {/* Main row */}
       <tr
-        className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${
+        className={`hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
           isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''
         }`}
         data-testid={`audit-row-${log.id}`}
@@ -40,9 +49,10 @@ const TableRow: React.FC<TableRowProps> = ({
         {/* Expand button */}
         <td className="px-6 py-4 whitespace-nowrap">
           <button
-            onClick={() => onToggleExpansion(log.id)}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            onClick={handleToggleExpansion}
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
             data-testid={`expand-${log.id}`}
+            aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
           >
             {isExpanded ? (
               <ChevronDown className="h-4 w-4" />
@@ -57,9 +67,10 @@ const TableRow: React.FC<TableRowProps> = ({
           <input
             type="checkbox"
             checked={isSelected}
-            onChange={() => onToggleSelection(log.id)}
+            onChange={handleToggleSelection}
             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             data-testid={`select-${log.id}`}
+            aria-label={`Select audit log ${log.id}`}
           />
         </td>
 
@@ -126,7 +137,10 @@ const TableRow: React.FC<TableRowProps> = ({
 
       {/* Expanded row */}
       {isExpanded && (
-        <tr className="bg-gray-50 dark:bg-gray-800">
+        <tr
+          className="bg-gray-50 dark:bg-gray-800"
+          data-testid={`expanded-details-${log.id}`}
+        >
           <td colSpan={8} className="px-6 py-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Log details */}
@@ -228,6 +242,9 @@ const TableRow: React.FC<TableRowProps> = ({
       )}
     </>
   );
-};
+});
+
+// Add display name for debugging
+TableRow.displayName = 'TableRow';
 
 export default TableRow;
