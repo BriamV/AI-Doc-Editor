@@ -1,0 +1,9 @@
+﻿
+D:\Projects\DEV\AI-Doc-Editor\src\App.tsx
+  119:23  warning  Arrow function has too many lines (52). Maximum allowed is 50  max-lines-per-function
+
+D:\Projects\DEV\AI-Doc-Editor\src\pages\AuditLogs.tsx
+  18:29  warning  Arrow function has too many lines (51). Maximum allowed is 50  max-lines-per-function
+
+Ô£û 2 problems (0 errors, 2 warnings)
+

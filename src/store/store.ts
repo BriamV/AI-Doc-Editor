@@ -72,12 +72,23 @@ export const IDBStorage = {
       return null;
     }
 
+    // Allow Cypress to override idb-keyval via window.idbKeyval in tests
+    if (typeof window !== 'undefined' && window.idbKeyval?.get) {
+      const value = await window.idbKeyval.get(name);
+      return (value as unknown) || null;
+    }
+
     const value = await get(name);
     return value || null;
   },
   setItem: async (name: string, value: unknown) => {
     // Exit early on server
     if (typeof indexedDB === 'undefined') {
+      return;
+    }
+    // Allow Cypress to override idb-keyval via window.idbKeyval in tests
+    if (typeof window !== 'undefined' && window.idbKeyval?.set) {
+      await window.idbKeyval.set(name, value);
       return;
     }
     set(name, value);

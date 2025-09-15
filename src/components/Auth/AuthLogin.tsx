@@ -3,6 +3,8 @@
  * T-02: OAuth 2.0 + JWT with multiple providers
  */
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import type { User } from '@type/auth';
 import { useAuth } from '@hooks/useAuth';
 
 interface AuthLoginProps {
@@ -153,6 +155,7 @@ const BackendStatus = ({ backendAvailable }: { backendAvailable: boolean }) => (
 const AuthLogin: React.FC<AuthLoginProps> = ({ onSuccess, onError }) => {
   const { login, isLoading, backendAvailable } = useAuth();
   const [selectedProvider, setSelectedProvider] = useState<'google' | 'microsoft'>('google');
+  const navigate = useNavigate();
 
   const handleLogin = async (provider: 'google' | 'microsoft') => {
     try {
@@ -165,7 +168,53 @@ const AuthLogin: React.FC<AuthLoginProps> = ({ onSuccess, onError }) => {
     }
   };
 
-  if (!backendAvailable) return <BackendFallback />;
+  // Dev/Test helper: simulate login without backend
+  const handleTestLogin = (role: 'admin' | 'editor') => {
+    const testUser: User = {
+      id: '1',
+      email: role === 'admin' ? 'admin@example.com' : 'user@example.com',
+      name: role === 'admin' ? 'Admin' : 'Editor',
+      role,
+      provider: 'google',
+    };
+    // Set tokens/role for guards and API clients
+    window.localStorage.setItem('auth_token', 'mock-jwt-token');
+    window.localStorage.setItem('user_role', role);
+    // Use test interface exposed in main.tsx
+    window.app?.login(testUser);
+    // Navigate to home after test login
+    navigate('/');
+  };
+
+  // When backend is not available, show fallback and also expose test login in dev/test
+  if (!backendAvailable) {
+    return (
+      <div className="space-y-4">
+        <BackendFallback />
+        {(import.meta.env.DEV || import.meta.env.VITE_ENABLE_TESTING === 'true') && (
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
+            <h4 className="font-semibold text-blue-800">Test Login (Dev/Test Only)</h4>
+            <div className="flex gap-2">
+              <button
+                className="px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                onClick={() => handleTestLogin('admin')}
+                data-testid="test-login-admin"
+              >
+                Sign in as Admin
+              </button>
+              <button
+                className="px-3 py-2 rounded bg-gray-600 text-white hover:bg-gray-700"
+                onClick={() => handleTestLogin('editor')}
+                data-testid="test-login-editor"
+              >
+                Sign in as Editor
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="auth-login space-y-4">
@@ -178,6 +227,27 @@ const AuthLogin: React.FC<AuthLoginProps> = ({ onSuccess, onError }) => {
       />
       <TermsNotice />
       <BackendStatus backendAvailable={backendAvailable} />
+      {(import.meta.env.DEV || import.meta.env.VITE_ENABLE_TESTING === 'true') && (
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
+          <h4 className="font-semibold text-blue-800">Test Login (Dev/Test Only)</h4>
+          <div className="flex gap-2">
+            <button
+              className="px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+              onClick={() => handleTestLogin('admin')}
+              data-testid="test-login-admin"
+            >
+              Sign in as Admin
+            </button>
+            <button
+              className="px-3 py-2 rounded bg-gray-600 text-white hover:bg-gray-700"
+              onClick={() => handleTestLogin('editor')}
+              data-testid="test-login-editor"
+            >
+              Sign in as Editor
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

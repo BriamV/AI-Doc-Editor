@@ -110,6 +110,19 @@ declare global {
        * @param logId - Log ID to test modification attempts
        */
       verifyWORMConstraints(logId: string): Chainable<void>;
+
+      /**
+       * Mock API error responses for audit endpoints
+       * @param errorType - Key of error scenario in fixtures
+       */
+      mockAuditAPIError(errorType: string): Chainable<void>;
+
+      /**
+       * Verify responsive layouts
+       */
+      verifyMobileLayout(): Chainable<void>;
+      verifyTabletLayout(): Chainable<void>;
+      verifyDesktopLayout(): Chainable<void>;
     }
   }
 }
@@ -119,7 +132,7 @@ declare global {
  * Uses window.app.login test interface instead of form-based login
  */
 Cypress.Commands.add('login', (user: { email: string; password: string; role: string }) => {
-  // Mock user profile API for backend calls
+  // Mock user profile API (for any component that queries profile)
   cy.intercept('GET', '/api/auth/me', {
     statusCode: 200,
     body: {
@@ -130,24 +143,26 @@ Cypress.Commands.add('login', (user: { email: string; password: string; role: st
     }
   }).as('getProfile');
 
-  // Use window.app.login test interface exposed in main.tsx
-  cy.visit('/');
-  cy.window().then((window) => {
-    // Use the test helper interface for authentication
-    (window as any).app.login({
-      id: 1,
-      email: user.email,
-      role: user.role,
-      name: user.email.split('@')[0]
-    });
-    
-    // Store auth token in localStorage for API calls
-    window.localStorage.setItem('auth_token', 'mock-jwt-token');
-    window.localStorage.setItem('user_role', user.role);
+  // Use Test Login UI (Dev/Test Only) to avoid external providers
+  cy.visit('/login');
+  const isAdmin = user.role === 'admin';
+  const testBtn = isAdmin ? '[data-testid="test-login-admin"]' : '[data-testid="test-login-editor"]';
+
+  // Wait for window.app to be exposed and button to be present
+  cy.window({ log: false }).should('have.property', 'app');
+  cy.get(testBtn, { timeout: 10000 }).should('be.visible').click();
+
+  // Validate that tokens/role are present and we landed on /
+  cy.url({ timeout: 10000 }).should('match', /\/($|\?)/);
+  cy.window({ timeout: 10000 }).then((win) => {
+    expect(win.localStorage.getItem('auth_token')).to.exist;
+    // Map any non-admin role to 'editor' in tests
+    const expectedRole = isAdmin ? 'admin' : 'editor';
+    expect(win.localStorage.getItem('user_role')).to.eq(expectedRole);
   });
-  
-  // Wait for authentication state to be processed
-  cy.wait(100);
+
+  // Small wait to ensure guards/process finish
+  cy.wait(150);
 });
 
 /**

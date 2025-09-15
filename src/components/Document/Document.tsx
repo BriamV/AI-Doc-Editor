@@ -81,35 +81,19 @@ const Document = () => {
   const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
-    // This code will run whenever currentChatIndex changes
-    // You can perform any necessary actions or updates here
-    // For example, you can force a refresh of the component by updating the refresh state variable
-    setRefresh(!refresh);
-  }, [currentChatIndex, refresh]);
+    // Force a refresh only when currentChatIndex changes to avoid infinite update loop
+    setRefresh(prev => !prev);
+  }, [currentChatIndex]);
 
   function onChange(change: EditorState) {
-    if (chats) {
-      let temp = chats;
-
-      if (temp[currentChatIndex].editorState !== JSON.stringify(change)) {
-        chats[currentChatIndex].edited = true;
-      }
-
-      chats[currentChatIndex].editorState = JSON.stringify(change);
+    if (!chats) return;
+    const temp = chats;
+    const serialized = JSON.stringify(change);
+    if (temp[currentChatIndex].editorState !== serialized) {
+      temp[currentChatIndex].edited = true;
+      temp[currentChatIndex].editorState = serialized;
       setChats(temp);
     }
-    change.read(() => {
-      if (chats) {
-        let temp = chats;
-
-        if (temp[currentChatIndex].editorState !== JSON.stringify(change)) {
-          chats[currentChatIndex].edited = true;
-        }
-
-        chats[currentChatIndex].editorState = JSON.stringify(change);
-        setChats(temp);
-      }
-    });
   }
 
   return (

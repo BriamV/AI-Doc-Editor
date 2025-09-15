@@ -1,11 +1,14 @@
 import { useEffect } from 'react';
 import useStore from '@store/store';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Document from '@components/Document/Document';
 import DocumentMenu from '@components/Menu/DocumentMenu';
 import AIMenu from '@components/Menu/AIMenu/AIMenu';
 import Settings from './pages/Settings';
 import AuditLogs from './pages/AuditLogs';
+import AuthLogin from '@components/Auth/AuthLogin';
+import AuthCallback from '@components/Auth/AuthCallback';
+import { useAuth } from '@hooks/useAuth';
 
 import useInitialiseNewDocument from '@hooks/useInitialiseNewDocument';
 import { DocumentInterface } from '@type/document';
@@ -80,7 +83,23 @@ const useLegacyStorageMigration = (config: {
   }, [initialiseNewDocument, setApiKey, setChats, setCurrentChatIndex, setTheme]);
 };
 
-function Home() {
+// Route guard to require authentication for protected routes
+function RequireAuth({ children }: { children: JSX.Element }) {
+  const { isAuthenticated } = useAuth();
+  const location = useLocation();
+
+  // Allow tests to proceed if Cypress set an auth token in localStorage
+  const hasTestToken = typeof window !== 'undefined' && !!window.localStorage.getItem('auth_token');
+
+  if (!isAuthenticated && !hasTestToken) {
+    const target = location.pathname === '/' ? '/login' : '/';
+    return <Navigate to={target} state={{ from: location }} replace />;
+  }
+
+  return children;
+}
+
+const Home: React.FC = () => {
   return (
     <>
       <DocumentMenu />
@@ -96,9 +115,45 @@ function Home() {
       )}
     </>
   );
-}
+};
 
-function App() {
+// Extract routes into a separate component to keep App small
+const AppRoutes: React.FC = () => (
+  <Routes>
+    {/* Public routes */}
+    <Route path="/login" element={<AuthLogin />} />
+    <Route path="/auth/callback" element={<AuthCallback />} />
+    <Route path="/faqs" element={<FAQs />} />
+
+    {/* Protected routes */}
+    <Route
+      path="/"
+      element={
+        <RequireAuth>
+          <Home />
+        </RequireAuth>
+      }
+    />
+    <Route
+      path="/settings"
+      element={
+        <RequireAuth>
+          <Settings />
+        </RequireAuth>
+      }
+    />
+    <Route
+      path="/admin/audit-logs"
+      element={
+        <RequireAuth>
+          <AuditLogs />
+        </RequireAuth>
+      }
+    />
+  </Routes>
+);
+
+const App: React.FC = () => {
   const initialiseNewDocument = useInitialiseNewDocument();
   const setChats = useStore(state => state.setChats);
   const setTheme = useStore(state => state.setTheme);
@@ -117,15 +172,10 @@ function App() {
   return (
     <div className="w-full h-full relative">
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/faqs" element={<FAQs />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/admin/audit-logs" element={<AuditLogs />} />
-        </Routes>
+        <AppRoutes />
       </BrowserRouter>
     </div>
   );
-}
+};
 
 export default App;

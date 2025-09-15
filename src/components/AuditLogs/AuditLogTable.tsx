@@ -105,7 +105,10 @@ const AuditLogTable: React.FC<AuditLogTableProps> = ({ logs, isLoading }) => {
 
       {/* Loading overlay */}
       {isLoading && (
-        <div className="absolute inset-0 bg-white dark:bg-gray-900 bg-opacity-75 flex items-center justify-center">
+        <div
+          className="absolute inset-0 bg-white dark:bg-gray-900 bg-opacity-75 flex items-center justify-center"
+          data-testid="loading-indicator"
+        >
           <div className="flex items-center space-x-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
             <span className="text-sm text-gray-600 dark:text-gray-400">Loading...</span>
