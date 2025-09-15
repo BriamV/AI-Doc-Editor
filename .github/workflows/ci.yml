@@ -197,6 +197,13 @@ jobs:
           radon cc . --min=B --show-complexity
           radon mi . --min=B
 
+      - name: Enforce complexity gate (grade > B fails)
+        env:
+          CC_MAX_RANK: B
+        run: |
+          echo "🚧 Enforcing cyclomatic complexity gate (<= B)"
+          node scripts/python-cc-gate.cjs
+
       - name: Python type checking (MyPy)
         run: |
           cd backend

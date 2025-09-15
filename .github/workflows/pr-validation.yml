@@ -165,3 +165,33 @@ jobs:
           # Activar modo estricto para bloquear PR en caso de hallazgos críticos
           SEMGREP_BASELINE_REF: "${{ github.base_ref }}"
           SEMGREP_BLOCK_ON_SEVERITY: CRITICAL
+
+  python-complexity-gate:
+    name: Python Complexity Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Create venv and install radon
+        run: |
+          python -m venv backend/.venv
+          backend/.venv/bin/python -m pip install --upgrade pip
+          backend/.venv/bin/pip install radon
+
+      - name: Enforce complexity gate (<= B)
+        env:
+          CC_MAX_RANK: B
+        run: |
+          node scripts/python-cc-gate.cjs
