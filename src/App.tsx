@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import useStore from '@store/store';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate, useLocation } from 'react-router-dom';
 import Document from '@components/Document/Document';
 import DocumentMenu from '@components/Menu/DocumentMenu';
 import AIMenu from '@components/Menu/AIMenu/AIMenu';
@@ -117,41 +117,39 @@ const Home: React.FC = () => {
   );
 };
 
-// Extract routes into a separate component to keep App small
-const AppRoutes: React.FC = () => (
-  <Routes>
-    {/* Public routes */}
-    <Route path="/login" element={<AuthLogin />} />
-    <Route path="/auth/callback" element={<AuthCallback />} />
-    <Route path="/faqs" element={<FAQs />} />
+// Data router with v7 future flags enabled to silence RRD warnings
+const router = createBrowserRouter([
+  // Public routes
+  { path: '/login', element: <AuthLogin /> },
+  { path: '/auth/callback', element: <AuthCallback /> },
+  { path: '/faqs', element: <FAQs /> },
 
-    {/* Protected routes */}
-    <Route
-      path="/"
-      element={
-        <RequireAuth>
-          <Home />
-        </RequireAuth>
-      }
-    />
-    <Route
-      path="/settings"
-      element={
-        <RequireAuth>
-          <Settings />
-        </RequireAuth>
-      }
-    />
-    <Route
-      path="/admin/audit-logs"
-      element={
-        <RequireAuth>
-          <AuditLogs />
-        </RequireAuth>
-      }
-    />
-  </Routes>
-);
+  // Protected routes
+  {
+    path: '/',
+    element: (
+      <RequireAuth>
+        <Home />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: '/settings',
+    element: (
+      <RequireAuth>
+        <Settings />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: '/admin/audit-logs',
+    element: (
+      <RequireAuth>
+        <AuditLogs />
+      </RequireAuth>
+    ),
+  },
+]);
 
 const App: React.FC = () => {
   const initialiseNewDocument = useInitialiseNewDocument();
@@ -171,9 +169,7 @@ const App: React.FC = () => {
 
   return (
     <div className="w-full h-full relative">
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <RouterProvider router={router} future={{ v7_startTransition: true }} />
     </div>
   );
 };

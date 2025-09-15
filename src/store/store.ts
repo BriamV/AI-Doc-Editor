@@ -1,4 +1,5 @@
-import { StoreApi, create } from 'zustand';
+import { StoreApi } from 'zustand';
+import { createWithEqualityFn } from 'zustand/traditional';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { DocumentSlice, createDocumentSlice } from './document-slice';
 import { InputSlice, createInputSlice } from './input-slice';
@@ -98,7 +99,7 @@ export const IDBStorage = {
   },
 };
 
-const useStore = create<StoreState>()(
+const useStore = createWithEqualityFn<StoreState>()(
   persist(
     (set, get) => ({
       ...createDocumentSlice(set, get),

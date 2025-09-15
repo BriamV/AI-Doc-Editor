@@ -148,8 +148,13 @@ const normalizeStats = (raw: RawStatsResponse | unknown): AuditLogStats => {
 // Helper to retrieve an access token with E2E fallback
 const getToken = (accessToken?: string): string => {
   if (accessToken) return accessToken;
-  if (typeof window !== 'undefined') {
-    return window.localStorage.getItem('auth_token') || '';
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      return window.localStorage.getItem('auth_token') || '';
+    } catch (error) {
+      console.warn('Failed to access localStorage:', error);
+      return '';
+    }
   }
   return '';
 };

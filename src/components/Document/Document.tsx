@@ -29,7 +29,7 @@ const Document = () => {
 
   let editorState: InitialEditorStateType | undefined | null = null;
 
-  if (chats && chats[currentChatIndex]) {
+  if (chats && Array.isArray(chats) && chats[currentChatIndex]) {
     editorState = chats[currentChatIndex].editorState;
   }
 
@@ -42,7 +42,7 @@ const Document = () => {
 
     if (editorState === undefined || editorState === null || editorState === '') {
       const temp = chats;
-      if (temp) {
+      if (temp && Array.isArray(temp) && temp[currentChatIndex]) {
         temp[currentChatIndex].editorState = value;
         setChats(temp);
       }
@@ -79,7 +79,7 @@ const Document = () => {
   };
 
   function onChange(change: EditorState) {
-    if (!chats) return;
+    if (!chats || !Array.isArray(chats) || !chats[currentChatIndex]) return;
     const temp = chats;
     const serialized = JSON.stringify(change);
     if (temp[currentChatIndex].editorState !== serialized) {

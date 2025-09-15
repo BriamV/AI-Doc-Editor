@@ -103,14 +103,19 @@ const checkBackendHealth = async (): Promise<HealthCheckResponse | null> => {
   const healthUrl = `${apiBaseUrl}/api/health`;
 
   try {
+    // Create AbortController for timeout compatibility across browsers
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
     const response = await fetch(healthUrl, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      // Add timeout to prevent hanging
-      signal: AbortSignal.timeout(5000),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error(`Backend health check failed: ${response.status} ${response.statusText}`);
