@@ -205,21 +205,8 @@ class AuditPerformanceTestSuite:
         Test that optimized and legacy methods return identical results
         """
 
-        async with self.audit_service.get_session() as session:
-            # Create test data
-            await self.create_test_data(session, 500)
-
-            print("\n=== FUNCTIONAL EQUIVALENCE TEST ===")
-
-            # Get results from both methods
-            optimized_result = await self.audit_service.get_audit_stats("admin")
-            legacy_result = await self.audit_service.get_audit_stats_legacy("admin")
-
-            # Compare results
-            differences = []
-
-            # Compare basic metrics
-            basic_metrics = [
+        def compare_basic_metrics(opt, leg):
+            metrics = [
                 "total_events",
                 "events_today",
                 "events_this_week",
@@ -227,39 +214,46 @@ class AuditPerformanceTestSuite:
                 "security_events",
                 "failed_logins",
             ]
-
-            for metric in basic_metrics:
-                opt_value = getattr(optimized_result, metric)
-                leg_value = getattr(legacy_result, metric)
-
-                if opt_value != leg_value:
-                    differences.append(f"{metric}: optimized={opt_value}, legacy={leg_value}")
+            diffs = []
+            for m in metrics:
+                ov, lv = getattr(opt, m), getattr(leg, m)
+                if ov != lv:
+                    diffs.append(f"{m}: optimized={ov}, legacy={lv}")
                 else:
-                    print(f"✓ {metric}: {opt_value} (match)")
+                    print(f"✓ {m}: {ov} (match)")
+            return diffs
 
-            # Compare top actions (order might differ, so convert to sets)
-            opt_actions = {
-                (item["action_type"], item["count"]) for item in optimized_result.top_actions
-            }
-            leg_actions = {
-                (item["action_type"], item["count"]) for item in legacy_result.top_actions
-            }
+        def _list_to_set(lst, keys):
+            return {tuple(item[k] for k in keys) for item in lst}
 
-            if opt_actions == leg_actions:
+        def equal_as_sets(list_a, list_b, keys):
+            return _list_to_set(list_a, keys) == _list_to_set(list_b, keys)
+
+        async with self.audit_service.get_session() as session:
+            await self.create_test_data(session, 500)
+
+            print("\n=== FUNCTIONAL EQUIVALENCE TEST ===")
+
+            optimized_result = await self.audit_service.get_audit_stats("admin")
+            legacy_result = await self.audit_service.get_audit_stats_legacy("admin")
+
+            differences = []
+            differences.extend(compare_basic_metrics(optimized_result, legacy_result))
+
+            if equal_as_sets(
+                optimized_result.top_actions, legacy_result.top_actions, ["action_type", "count"]
+            ):
                 print(f"✓ top_actions: {len(optimized_result.top_actions)} items (match)")
             else:
                 differences.append("top_actions differ")
 
-            # Compare top users (order might differ, so convert to sets)
-            opt_users = {(item["user_email"], item["count"]) for item in optimized_result.top_users}
-            leg_users = {(item["user_email"], item["count"]) for item in legacy_result.top_users}
-
-            if opt_users == leg_users:
+            if equal_as_sets(
+                optimized_result.top_users, legacy_result.top_users, ["user_email", "count"]
+            ):
                 print(f"✓ top_users: {len(optimized_result.top_users)} items (match)")
             else:
                 differences.append("top_users differ")
 
-            # Report results
             if differences:
                 print("\n❌ FUNCTIONAL EQUIVALENCE FAILED:")
                 for diff in differences:
@@ -268,9 +262,6 @@ class AuditPerformanceTestSuite:
             else:
                 print("\n✅ FUNCTIONAL EQUIVALENCE PASSED: All results match")
                 return True
-
-            # Cleanup
-            await self.cleanup_test_data(session)
 
     async def test_query_efficiency(self):
         """

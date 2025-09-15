@@ -67,20 +67,10 @@ class BaseAccessValidator(BaseSecurityValidator):
     ) -> Dict[str, Any]:
         """
         Comprehensive user access validation
-
-        Args:
-            user_id: User requesting access
-            user_role: Role of the user
-            required_roles: List of acceptable roles
-            ip_address: Client IP address
-            resource_type: Type of resource being accessed
-
-        Returns:
-            dict: Comprehensive validation result
         """
         self.reset_errors()
 
-        validation_result = {
+        result = {
             "allowed": False,
             "user_id": user_id,
             "security_flags": [],
@@ -88,45 +78,54 @@ class BaseAccessValidator(BaseSecurityValidator):
             "recommendations": [],
         }
 
-        # 1. Role-based access control
+        # RBAC check
         if not self.validate_user_role(user_role, required_roles):
-            validation_result["security_flags"].append("insufficient_privileges")
-            validation_result["threat_score"] += 30
-            validation_result["recommendations"].append("Request elevated privileges")
-            return validation_result
+            result["security_flags"].append("insufficient_privileges")
+            result["threat_score"] += 30
+            result["recommendations"].append("Request elevated privileges")
+            return result
 
-        # 2. IP address validation if provided
+        # IP check
         if ip_address:
-            ip_validation = self.validate_ip_address(ip_address)
-            if not ip_validation["valid"]:
-                validation_result["security_flags"].extend(ip_validation["flags"])
-                validation_result["threat_score"] += 15
+            self._apply_ip_checks(ip_address, result)
 
-            # Check for suspicious IP flags
-            if "reserved_ip" in ip_validation["flags"]:
-                validation_result["security_flags"].append("suspicious_ip")
-                validation_result["threat_score"] += 25
+        # Time check
+        self._apply_time_checks(result)
 
-        # 3. Time-based validation
+        # Resource check
+        if resource_type:
+            self._apply_resource_checks(user_role, resource_type, result)
+
+        # Final decision
+        disqualifiers = {"insufficient_privileges", "suspicious_ip", "unauthorized_resource_access"}
+        if result["threat_score"] < 50 and not (disqualifiers & set(result["security_flags"])):
+            result["allowed"] = True
+
+        return result
+
+    def _apply_ip_checks(self, ip_address: str, result: Dict[str, Any]) -> None:
+        ip_validation = self.validate_ip_address(ip_address)
+        if not ip_validation["valid"]:
+            result["security_flags"].extend(ip_validation["flags"])
+            result["threat_score"] += 15
+
+        if "reserved_ip" in ip_validation["flags"]:
+            result["security_flags"].append("suspicious_ip")
+            result["threat_score"] += 25
+
+    def _apply_time_checks(self, result: Dict[str, Any]) -> None:
         time_validation = self.validate_access_time()
         if not time_validation["normal_hours"]:
-            validation_result["security_flags"].append("unusual_access_time")
-            validation_result["threat_score"] += 10
-            validation_result["recommendations"].append("Verify off-hours access requirement")
+            result["security_flags"].append("unusual_access_time")
+            result["threat_score"] += 10
+            result["recommendations"].append("Verify off-hours access requirement")
 
-        # 4. Resource-specific validation
-        if resource_type and not self._validate_resource_access(user_role, resource_type):
-            validation_result["security_flags"].append("unauthorized_resource_access")
-            validation_result["threat_score"] += 35
-
-        # Determine final access decision
-        if validation_result["threat_score"] < 50 and not any(
-            flag in validation_result["security_flags"]
-            for flag in ["insufficient_privileges", "suspicious_ip", "unauthorized_resource_access"]
-        ):
-            validation_result["allowed"] = True
-
-        return validation_result
+    def _apply_resource_checks(
+        self, user_role: str, resource_type: str, result: Dict[str, Any]
+    ) -> None:
+        if not self._validate_resource_access(user_role, resource_type):
+            result["security_flags"].append("unauthorized_resource_access")
+            result["threat_score"] += 35
 
     def _validate_resource_access(self, user_role: str, resource_type: str) -> bool:
         """

@@ -130,6 +130,26 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 return config
         return self.RATE_LIMITS["default"]
 
+    def _build_limit_headers(self, limit: int, count: int, window: int) -> dict:
+        now = int(time.time())
+        return {
+            "Retry-After": str(window),
+            "X-RateLimit-Limit": str(limit),
+            "X-RateLimit-Remaining": str(max(0, limit - count)),
+            "X-RateLimit-Reset": str(now + window),
+        }
+
+    def _rate_limited(self, message: str, window: int, limit: int, count: int) -> JSONResponse:
+        return JSONResponse(
+            status_code=429,
+            content={
+                "error": "Rate limit exceeded",
+                "message": message,
+                "retry_after": window,
+            },
+            headers=self._build_limit_headers(limit, count, window),
+        )
+
     async def dispatch(self, request: Request, call_next):
         """Main middleware dispatch function"""
         path = request.url.path
@@ -159,19 +179,14 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                     f"Rate limit exceeded for IP {client_ip} on path {path}: "
                     f"{ip_count}/{ip_limit['requests']} in {ip_limit['window']}s"
                 )
-                return JSONResponse(
-                    status_code=429,
-                    content={
-                        "error": "Rate limit exceeded",
-                        "message": f"Too many requests from IP. Limit: {ip_limit['requests']} per {ip_limit['window']} seconds",
-                        "retry_after": ip_limit["window"],
-                    },
-                    headers={
-                        "Retry-After": str(ip_limit["window"]),
-                        "X-RateLimit-Limit": str(ip_limit["requests"]),
-                        "X-RateLimit-Remaining": str(max(0, ip_limit["requests"] - ip_count)),
-                        "X-RateLimit-Reset": str(int(time.time()) + ip_limit["window"]),
-                    },
+                return self._rate_limited(
+                    message=(
+                        f"Too many requests from IP. Limit: {ip_limit['requests']} per "
+                        f"{ip_limit['window']} seconds"
+                    ),
+                    window=ip_limit["window"],
+                    limit=ip_limit["requests"],
+                    count=ip_count,
                 )
 
             # Check user-based rate limit (if user is identified)
@@ -185,21 +200,14 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                         f"Rate limit exceeded for user {user_id} on path {path}: "
                         f"{user_count}/{user_limit['requests']} in {user_limit['window']}s"
                     )
-                    return JSONResponse(
-                        status_code=429,
-                        content={
-                            "error": "Rate limit exceeded",
-                            "message": f"Too many requests for user. Limit: {user_limit['requests']} per {user_limit['window']} seconds",
-                            "retry_after": user_limit["window"],
-                        },
-                        headers={
-                            "Retry-After": str(user_limit["window"]),
-                            "X-RateLimit-Limit": str(user_limit["requests"]),
-                            "X-RateLimit-Remaining": str(
-                                max(0, user_limit["requests"] - user_count)
-                            ),
-                            "X-RateLimit-Reset": str(int(time.time()) + user_limit["window"]),
-                        },
+                    return self._rate_limited(
+                        message=(
+                            f"Too many requests for user. Limit: {user_limit['requests']} per "
+                            f"{user_limit['window']} seconds"
+                        ),
+                        window=user_limit["window"],
+                        limit=user_limit["requests"],
+                        count=user_count,
                     )
 
             # Process request

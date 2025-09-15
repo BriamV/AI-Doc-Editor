@@ -192,21 +192,19 @@ class AuditActionDetector:
         Returns:
             str: Human-readable description
         """
-        if action_type == AuditActionType.LOGIN_SUCCESS:
-            return f"User authentication {operation_status} via {path}"
-        elif action_type == AuditActionType.LOGIN_FAILURE:
-            return f"User authentication failed via {path}"
-        elif action_type == AuditActionType.LOGOUT:
-            return f"User logout {operation_status}"
-        elif action_type == AuditActionType.DOCUMENT_CREATE:
-            return f"Document creation {operation_status}"
-        elif action_type == AuditActionType.DOCUMENT_UPDATE:
-            return f"Document update {operation_status}"
-        elif action_type == AuditActionType.DOCUMENT_DELETE:
-            return f"Document deletion {operation_status}"
-        elif action_type == AuditActionType.CONFIG_UPDATE:
-            return f"System configuration update {operation_status}"
-        elif action_type == AuditActionType.API_KEY_UPDATE:
-            return f"API key configuration update {operation_status}"
-        else:
-            return f"{method} {path} operation {operation_status}"
+        templates = {
+            AuditActionType.LOGIN_SUCCESS: "User authentication {status} via {path}",
+            AuditActionType.LOGIN_FAILURE: "User authentication failed via {path}",
+            AuditActionType.LOGOUT: "User logout {status}",
+            AuditActionType.DOCUMENT_CREATE: "Document creation {status}",
+            AuditActionType.DOCUMENT_UPDATE: "Document update {status}",
+            AuditActionType.DOCUMENT_DELETE: "Document deletion {status}",
+            AuditActionType.CONFIG_UPDATE: "System configuration update {status}",
+            AuditActionType.API_KEY_UPDATE: "API key configuration update {status}",
+        }
+
+        template = templates.get(action_type)
+        if template:
+            return template.format(status=operation_status, path=path)
+
+        return f"{method} {path} operation {operation_status}"

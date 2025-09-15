@@ -25,14 +25,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# Create FastAPI application with security-first configuration
-def create_app() -> FastAPI:
-    """Create and configure FastAPI application with security hardening"""
-
-    # Disable docs in production for security
+def _build_fastapi_app() -> FastAPI:
+    """Create base FastAPI app with docs toggled by environment."""
     docs_enabled = settings.DEBUG and settings.ENVIRONMENT != "production"
-
-    app = FastAPI(
+    return FastAPI(
         title=settings.APP_NAME,
         description="AI-Doc-Editor Backend API with Security Hardening",
         version="0.1.0",
@@ -41,21 +37,25 @@ def create_app() -> FastAPI:
         openapi_url="/openapi.json" if docs_enabled else None,
     )
 
-    # Security logging
+
+def _log_security_banner() -> None:
+    """Log security-related boot information when enabled."""
     if settings.SECURITY_LOG_ENABLED:
         logger.info(f"Starting AI-Doc-Editor API in {settings.ENVIRONMENT} mode")
         logger.info(
-            f"Security features enabled: rate_limiting={settings.AUDIT_RATE_LIMIT_ENABLED}, "
+            "Security features enabled: "
+            f"rate_limiting={settings.AUDIT_RATE_LIMIT_ENABLED}, "
             f"secure_headers={settings.SECURE_HEADERS}, cors_restricted=True"
         )
 
-    # Add security middleware (order matters!)
 
+def _add_security_middleware(app: FastAPI) -> None:
+    """Attach security middlewares in the correct order."""
     # 1. Trusted Host Middleware (first line of defense)
     if settings.ENVIRONMENT == "production":
         app.add_middleware(
             TrustedHostMiddleware,
-            allowed_hosts=settings.ALLOWED_HOSTS + ["*.yourdomain.com"],  # Add production domains
+            allowed_hosts=settings.ALLOWED_HOSTS + ["*.yourdomain.com"],
         )
 
     # 2. Security Headers Middleware
@@ -70,10 +70,10 @@ def create_app() -> FastAPI:
     # 4. Audit middleware - must be added before CORS but after security
     app.add_middleware(AuditMiddleware, audit_service=AuditService())
 
-    # 5. CORS middleware (restrictive configuration)
-    cors_origins = settings.ALLOWED_ORIGINS
 
-    # Production: Remove localhost/development origins
+def _configure_cors(app: FastAPI) -> None:
+    """Configure restrictive CORS with production adjustments."""
+    cors_origins = settings.ALLOWED_ORIGINS
     if settings.ENVIRONMENT == "production":
         cors_origins = [
             origin
@@ -91,6 +91,14 @@ def create_app() -> FastAPI:
         max_age=settings.CORS_MAX_AGE,
     )
 
+
+# Create FastAPI application with security-first configuration
+def create_app() -> FastAPI:
+    """Create and configure FastAPI application with security hardening."""
+    app = _build_fastapi_app()
+    _log_security_banner()
+    _add_security_middleware(app)
+    _configure_cors(app)
     return app
 
 

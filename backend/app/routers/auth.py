@@ -15,6 +15,22 @@ from app.services.auth import AuthService
 router = APIRouter()
 security = HTTPBearer()
 
+# Provider configuration mapping to reduce branching complexity
+PROVIDERS = {
+    "google": {
+        "token_url": "https://oauth2.googleapis.com/token",
+        "user_info_url": "https://www.googleapis.com/oauth2/v2/userinfo",
+        "client_id": lambda: settings.GOOGLE_CLIENT_ID,
+        "client_secret": lambda: settings.GOOGLE_CLIENT_SECRET,
+    },
+    "microsoft": {
+        "token_url": "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+        "user_info_url": "https://graph.microsoft.com/v1.0/me",
+        "client_id": lambda: settings.MICROSOFT_CLIENT_ID,
+        "client_secret": lambda: settings.MICROSOFT_CLIENT_SECRET,
+    },
+}
+
 
 @router.post("/login")
 async def login(provider: str):
@@ -22,7 +38,7 @@ async def login(provider: str):
     Initiate OAuth 2.0 login flow
     T-02-ST1: OAuth 2.0 flow implementation
     """
-    if provider not in ["google", "microsoft"]:
+    if provider not in PROVIDERS:
         raise HTTPException(
             status_code=400, detail="Unsupported provider. Use 'google' or 'microsoft'"
         )
@@ -31,9 +47,15 @@ async def login(provider: str):
     redirect_uri = f"{settings.FRONTEND_URL}/auth/callback"
 
     if provider == "google":
-        auth_url = f"https://accounts.google.com/o/oauth2/auth?client_id={settings.GOOGLE_CLIENT_ID}&redirect_uri={redirect_uri}&scope=openid email profile&response_type=code"
+        auth_url = (
+            "https://accounts.google.com/o/oauth2/auth?"
+            f"client_id={settings.GOOGLE_CLIENT_ID}&redirect_uri={redirect_uri}&scope=openid email profile&response_type=code"
+        )
     elif provider == "microsoft":
-        auth_url = f"https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id={settings.MICROSOFT_CLIENT_ID}&redirect_uri={redirect_uri}&scope=openid email profile&response_type=code"
+        auth_url = (
+            "https://login.microsoftonline.com/common/oauth2/v2.0/authorize?"
+            f"client_id={settings.MICROSOFT_CLIENT_ID}&redirect_uri={redirect_uri}&scope=openid email profile&response_type=code"
+        )
 
     return JSONResponse(
         {
@@ -53,19 +75,15 @@ async def oauth_callback(code: str, state: Optional[str] = None, provider: str =
     try:
         # TODO: Validate state parameter
 
-        # Exchange code for tokens
-        if provider == "google":
-            token_url = "https://oauth2.googleapis.com/token"
-            user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
-            client_id = settings.GOOGLE_CLIENT_ID
-            client_secret = settings.GOOGLE_CLIENT_SECRET
-        elif provider == "microsoft":
-            token_url = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
-            user_info_url = "https://graph.microsoft.com/v1.0/me"
-            client_id = settings.MICROSOFT_CLIENT_ID
-            client_secret = settings.MICROSOFT_CLIENT_SECRET
-        else:
+        # Exchange code for tokens using provider config mapping
+        provider_cfg = PROVIDERS.get(provider)
+        if not provider_cfg:
             raise HTTPException(status_code=400, detail="Invalid provider")
+
+        token_url = provider_cfg["token_url"]
+        user_info_url = provider_cfg["user_info_url"]
+        client_id = provider_cfg["client_id"]()
+        client_secret = provider_cfg["client_secret"]()
 
         # Exchange authorization code for access token
         async with httpx.AsyncClient() as client:

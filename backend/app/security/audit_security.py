@@ -70,64 +70,66 @@ class AuditSecurityValidator(BaseAccessValidator):
         return validation_result
 
     def validate_query_parameters(self, filters: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Validate audit query parameters for injection attacks
-        Uses inherited input validation to eliminate code duplication
-
-        Args:
-            filters: Query filter parameters
-
-        Returns:
-            dict: Validation result
-        """
+        """Validate and sanitize audit query parameters"""
         self.reset_errors()
-        validation_result = {"valid": True, "sanitized_filters": {}, "security_flags": []}
+
+        result = {"valid": True, "sanitized_filters": {}, "security_flags": []}
+
+        def validate_generic(name: str, raw: Any) -> tuple[bool, Any, str | None]:
+            if raw is None:
+                return True, None, None
+            sval = str(raw)
+            if not self.validate_input_security(sval, name):
+                return False, None, f"suspicious_pattern_{name}"
+            if not self.validate_length(sval, "query_param"):
+                return False, None, f"excessive_length_{name}"
+            return True, self.sanitize_input(sval) if isinstance(raw, str) else raw, None
+
+        def email_validator(v: Any) -> tuple[bool, str | None]:
+            if v is None:
+                return True, None
+            return (self.validate_email_format(str(v)), "invalid_email_format")
+
+        def ip_validator(v: Any) -> tuple[bool, str | None]:
+            if v is None:
+                return True, None
+            ok = self.validate_ip_address(str(v)).get("valid", False)
+            return (ok, "invalid_ip_format")
+
+        def page_validator(v: Any) -> tuple[bool, str | None]:
+            if v is None:
+                return True, None
+            s = str(v)
+            return ((s.isdigit() and int(s) >= 1), "invalid_pagination")
+
+        field_validators = {
+            "user_email": email_validator,
+            "ip_address": ip_validator,
+            "page": page_validator,
+            "page_size": page_validator,
+        }
 
         for key, value in filters.items():
-            if value is None:
-                validation_result["sanitized_filters"][key] = None
+            ok, sanitized, err = validate_generic(key, value)
+            if not ok:
+                result["valid"] = False
+                result["security_flags"].append(err)  # type: ignore[arg-type]
                 continue
 
-            str_value = str(value)
-
-            # Use inherited security validation
-            if not self.validate_input_security(str_value, key):
-                validation_result["valid"] = False
-                validation_result["security_flags"].append(f"suspicious_pattern_{key}")
-                continue
-
-            # Use inherited length validation
-            if not self.validate_length(str_value, "query_param"):
-                validation_result["valid"] = False
-                validation_result["security_flags"].append(f"excessive_length_{key}")
-                continue
-
-            # Specific field validations using inherited methods
-            if key == "user_email":
-                if not self.validate_email_format(str_value):
-                    validation_result["valid"] = False
-                    validation_result["security_flags"].append("invalid_email_format")
+            # Field-specific
+            vfn = field_validators.get(key)
+            if vfn:
+                ok2, err2 = vfn(sanitized)
+                if not ok2:
+                    result["valid"] = False
+                    # normalize error per field
+                    flag = err2 if key not in ("page", "page_size") else f"{err2}_{key}"
+                    result["security_flags"].append(flag)  # type: ignore[arg-type]
                     continue
 
-            elif key == "ip_address":
-                ip_validation = self.validate_ip_address(str_value)
-                if not ip_validation["valid"]:
-                    validation_result["valid"] = False
-                    validation_result["security_flags"].append("invalid_ip_format")
-                    continue
+            result["sanitized_filters"][key] = sanitized
 
-            elif key in ["page", "page_size"]:
-                if not str_value.isdigit() or int(str_value) < 1:
-                    validation_result["valid"] = False
-                    validation_result["security_flags"].append(f"invalid_pagination_{key}")
-                    continue
-
-            # If validation passed, add sanitized value
-            validation_result["sanitized_filters"][key] = (
-                self.sanitize_input(str_value) if isinstance(value, str) else value
-            )
-
-        return validation_result
+        return result
 
     def detect_audit_anomalies(self, access_patterns: List[Dict[str, Any]]) -> Dict[str, Any]:
         """

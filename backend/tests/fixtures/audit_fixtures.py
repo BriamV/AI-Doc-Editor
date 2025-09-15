@@ -382,24 +382,27 @@ class MockAuditService:
     def _apply_filters(
         self, logs: List[Dict[str, Any]], filters: AuditLogQueryFilters
     ) -> List[Dict[str, Any]]:
-        """Apply filters to logs"""
-        filtered = logs.copy()
+        """Apply filters to logs with predicate composition"""
 
-        if filters.user_email:
-            filtered = [log for log in filtered if log.get("user_email") == filters.user_email]
+        def eq(field: str, expected):
+            return (
+                (lambda log: log.get(field) == expected)
+                if expected is not None
+                else (lambda _: True)
+            )
 
-        if filters.action_type:
-            filtered = [
-                log for log in filtered if log.get("action_type") == filters.action_type.value
-            ]
+        predicates = [
+            eq("user_email", getattr(filters, "user_email", None)),
+            (
+                (lambda log: log.get("action_type") == filters.action_type.value)
+                if getattr(filters, "action_type", None)
+                else (lambda _: True)
+            ),
+            eq("status", getattr(filters, "status", None)),
+            eq("ip_address", getattr(filters, "ip_address", None)),
+        ]
 
-        if filters.status:
-            filtered = [log for log in filtered if log.get("status") == filters.status]
-
-        if filters.ip_address:
-            filtered = [log for log in filtered if log.get("ip_address") == filters.ip_address]
-
-        return filtered
+        return [log for log in logs if all(pred(log) for pred in predicates)]
 
 
 @pytest.fixture

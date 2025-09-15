@@ -100,6 +100,130 @@ async def get_current_admin_user(token: str = Depends(security), request: Reques
         raise HTTPException(status_code=401, detail=f"Authentication failed: {str(e)}")
 
 
+def _log_admin_access_event(
+    *,
+    current_user: dict,
+    client_ip: str,
+    request: Request,
+    filters_payload: dict,
+    page: int,
+    page_size: int,
+):
+    security_logger.log_security_event(
+        "AUDIT_LOG_ACCESS",
+        {
+            "admin_email": current_user["email"],
+            "admin_id": current_user.get("user_id"),
+            "ip_address": client_ip,
+            "filters": filters_payload,
+            "page": page,
+            "page_size": page_size,
+            "timestamp": time.time(),
+        },
+        "INFO",
+    )
+
+    audit_service = AuditService()
+    asyncio.create_task(
+        audit_service.log_event(
+            action_type=AuditActionType.SYSTEM_CONFIG_CHANGE,
+            description=f"Admin {current_user['email']} accessed audit logs from IP {client_ip}",
+            user_id=current_user.get("user_id"),
+            user_email=current_user["email"],
+            user_role=current_user["role"],
+            details={
+                "filters_applied": bool(
+                    any(
+                        [
+                            filters_payload.get("user_id"),
+                            filters_payload.get("user_email"),
+                            filters_payload.get("action_type"),
+                            filters_payload.get("resource_type"),
+                            filters_payload.get("date_from"),
+                            filters_payload.get("date_to"),
+                        ]
+                    )
+                ),
+                "page_requested": page,
+                "page_size": page_size,
+                "client_ip": client_ip,
+            },
+            request=request,
+        )
+    )
+
+
+def _validate_and_normalize_pagination(page: int, page_size: int) -> tuple[int, int]:
+    pagination_validation = query_validator.validate_pagination(page, page_size)
+    if not pagination_validation["valid"]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid pagination parameters: {', '.join(pagination_validation['errors'])}",
+        )
+    return pagination_validation["page"], pagination_validation["page_size"]
+
+
+def _validate_and_normalize_sort(sort_by: str, sort_order: str) -> tuple[str, str]:
+    allowed_sort_fields = ["timestamp", "action_type", "user_email", "status"]
+    sort_validation = query_validator.validate_sort_parameters(
+        sort_by, sort_order, allowed_sort_fields
+    )
+    if not sort_validation["valid"]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid sort parameters: {', '.join(sort_validation['errors'])}",
+        )
+    return sort_validation["sort_by"], sort_validation["sort_order"]
+
+
+def _build_filters(
+    *,
+    user_id: Optional[str],
+    user_email: Optional[str],
+    action_type: Optional[AuditActionType],
+    resource_type: Optional[str],
+    resource_id: Optional[str],
+    ip_address: Optional[str],
+    status: Optional[str],
+    date_from: Optional[str],
+    date_to: Optional[str],
+    page: int,
+    page_size: int,
+    sort_by: str,
+    sort_order: str,
+) -> AuditLogQueryFilters:
+    from datetime import datetime
+
+    parsed_date_from = None
+    parsed_date_to = None
+    if date_from:
+        try:
+            parsed_date_from = datetime.fromisoformat(date_from.replace("Z", "+00:00"))
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date_from format. Use ISO format.")
+    if date_to:
+        try:
+            parsed_date_to = datetime.fromisoformat(date_to.replace("Z", "+00:00"))
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date_to format. Use ISO format.")
+
+    return AuditLogQueryFilters(
+        user_id=user_id,
+        user_email=user_email,
+        action_type=action_type,
+        resource_type=resource_type,
+        resource_id=resource_id,
+        ip_address=ip_address,
+        status=status,
+        date_from=parsed_date_from,
+        date_to=parsed_date_to,
+        page=page,
+        page_size=page_size,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
+
+
 @router.get("/logs", response_model=AuditLogListResponse)
 async def get_audit_logs(
     request: Request,
@@ -128,102 +252,31 @@ async def get_audit_logs(
     """
 
     try:
-        # Enhanced security logging for audit log access
         client_ip = request.client.host if request.client else "unknown"
 
-        # Log security event
-        security_logger.log_security_event(
-            "AUDIT_LOG_ACCESS",
-            {
-                "admin_email": current_user["email"],
-                "admin_id": current_user.get("user_id"),
-                "ip_address": client_ip,
-                "filters": {
-                    "user_id": user_id,
-                    "user_email": user_email,
-                    "action_type": action_type.value if action_type else None,
-                    "resource_type": resource_type,
-                    "date_range": f"{date_from} to {date_to}" if date_from or date_to else None,
-                },
-                "page": page,
-                "page_size": page_size,
-                "timestamp": time.time(),
-            },
-            "INFO",
+        filters_payload = {
+            "user_id": user_id,
+            "user_email": user_email,
+            "action_type": action_type.value if action_type else None,
+            "resource_type": resource_type,
+            "date_from": date_from,
+            "date_to": date_to,
+        }
+
+        _log_admin_access_event(
+            current_user=current_user,
+            client_ip=client_ip,
+            request=request,
+            filters_payload=filters_payload,
+            page=page,
+            page_size=page_size,
         )
 
-        # Log the audit log access itself in audit system
-        audit_service = AuditService()
-        asyncio.create_task(
-            audit_service.log_event(
-                action_type=AuditActionType.SYSTEM_CONFIG_CHANGE,
-                description=f"Admin {current_user['email']} accessed audit logs from IP {client_ip}",
-                user_id=current_user.get("user_id"),
-                user_email=current_user["email"],
-                user_role=current_user["role"],
-                details={
-                    "filters_applied": bool(
-                        any([user_id, user_email, action_type, resource_type, date_from, date_to])
-                    ),
-                    "page_requested": page,
-                    "page_size": page_size,
-                    "client_ip": client_ip,
-                },
-                request=request,
-            )
-        )
+        page, page_size = _validate_and_normalize_pagination(page, page_size)
+        sort_by, sort_order = _validate_and_normalize_sort(sort_by, sort_order)
 
-        # Validate pagination parameters using base validator
-        pagination_validation = query_validator.validate_pagination(page, page_size)
-        if not pagination_validation["valid"]:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid pagination parameters: {', '.join(pagination_validation['errors'])}",
-            )
-
-        # Use validated pagination values
-        page = pagination_validation["page"]
-        page_size = pagination_validation["page_size"]
-
-        # Validate sort parameters using base validator
-        allowed_sort_fields = ["timestamp", "action_type", "user_email", "status"]
-        sort_validation = query_validator.validate_sort_parameters(
-            sort_by, sort_order, allowed_sort_fields
-        )
-        if not sort_validation["valid"]:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid sort parameters: {', '.join(sort_validation['errors'])}",
-            )
-
-        # Use validated sort parameters
-        sort_by = sort_validation["sort_by"]
-        sort_order = sort_validation["sort_order"]
-
-        # Parse date filters
-        from datetime import datetime
-
-        parsed_date_from = None
-        parsed_date_to = None
-
-        if date_from:
-            try:
-                parsed_date_from = datetime.fromisoformat(date_from.replace("Z", "+00:00"))
-            except ValueError:
-                raise HTTPException(
-                    status_code=400, detail="Invalid date_from format. Use ISO format."
-                )
-
-        if date_to:
-            try:
-                parsed_date_to = datetime.fromisoformat(date_to.replace("Z", "+00:00"))
-            except ValueError:
-                raise HTTPException(
-                    status_code=400, detail="Invalid date_to format. Use ISO format."
-                )
-
-        # Create filter object
-        filters = AuditLogQueryFilters(
+        # Build filters with validation and parsing
+        filters = _build_filters(
             user_id=user_id,
             user_email=user_email,
             action_type=action_type,
@@ -231,8 +284,8 @@ async def get_audit_logs(
             resource_id=resource_id,
             ip_address=ip_address,
             status=status,
-            date_from=parsed_date_from,
-            date_to=parsed_date_to,
+            date_from=date_from,
+            date_to=date_to,
             page=page,
             page_size=page_size,
             sort_by=sort_by,
@@ -240,6 +293,7 @@ async def get_audit_logs(
         )
 
         # Retrieve audit logs
+        audit_service = AuditService()
         result = await audit_service.get_audit_logs(filters, current_user["role"])
 
         return result
