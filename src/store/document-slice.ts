@@ -28,49 +28,27 @@ export interface DocumentSlice {
   setCurrentSelection: (currentSelection: string) => void;
 }
 
-// Default document configuration
-const getDefaultDocumentCurrent = (): DocumentCurrent => ({
-  id: '',
-  folder: '',
-  title: '',
-  messages: [],
-  config: {
-    model: 'gpt-4',
-    max_completion_tokens: 150,
-    temperature: 0.9,
-    presence_penalty: 0.6,
-    top_p: 1,
-    frequency_penalty: 0.5,
-  },
-  titleSet: false,
-  notes: [],
-  favorited: false,
-  date: '',
-  messageIndex: null,
-  edited: false,
-});
-
-// Default editor settings
-const getDefaultEditorSettings = (): EditorSettings => ({
-  includeSelection: true,
-  activeMenu: 'chat',
-});
-
-// Create setter function factory
-const createSetter =
-  <T extends keyof DocumentSlice>(
-    key: T,
-    set: (fn: (state: DocumentSlice) => DocumentSlice) => void
-  ) =>
-  (value: DocumentSlice[T]) => {
-    set((prev: DocumentSlice) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
 export const createDocumentSlice: StoreSlice<DocumentSlice> = (set, _get) => ({
-  documentCurrent: getDefaultDocumentCurrent(),
+  documentCurrent: {
+    id: '',
+    folder: '',
+    title: '',
+    messages: [],
+    config: {
+      model: 'gpt-4',
+      max_completion_tokens: 150,
+      temperature: 0.9,
+      presence_penalty: 0.6,
+      top_p: 1,
+      frequency_penalty: 0.5,
+    },
+    titleSet: false,
+    notes: [],
+    favorited: false,
+    date: '',
+    messageIndex: null,
+    edited: false,
+  },
   currentChatIndex: -1,
   forceEditorRefresh: false,
   generating: false,
@@ -78,15 +56,69 @@ export const createDocumentSlice: StoreSlice<DocumentSlice> = (set, _get) => ({
   folders: {},
   editorState: '',
   currentSelection: '',
-  editorSettings: getDefaultEditorSettings(),
-  setDocumentCurrent: createSetter('documentCurrent', set),
-  setCurrentSelection: createSetter('currentSelection', set),
-  setEditorSettings: createSetter('editorSettings', set),
-  setChats: createSetter('chats', set),
-  setCurrentChatIndex: createSetter('currentChatIndex', set),
-  setForceEditorRefresh: createSetter('forceEditorRefresh', set),
-  setGenerating: createSetter('generating', set),
-  setError: createSetter('error', set),
-  setFolders: createSetter('folders', set),
-  setEditorState: createSetter('editorState', set),
+  editorSettings: {
+    includeSelection: true,
+    includeSelectionMenu: true,
+    activeMenu: 'chat',
+  },
+  setDocumentCurrent: (documentCurrent: DocumentCurrent) => {
+    set((prev: DocumentSlice) => ({
+      ...prev,
+      documentCurrent: documentCurrent,
+    }));
+  },
+  setCurrentSelection: (currentSelection: string) => {
+    set((prev: DocumentSlice) => ({
+      ...prev,
+      currentSelection: currentSelection,
+    }));
+  },
+  setEditorSettings: (editorSettings: EditorSettings) => {
+    set((prev: DocumentSlice) => ({
+      ...prev,
+      editorSettings: editorSettings,
+    }));
+  },
+  setChats: (chats: DocumentInterface[]) => {
+    set((prev: DocumentSlice) => ({
+      ...prev,
+      chats: chats,
+    }));
+  },
+  setCurrentChatIndex: (currentChatIndex: number) => {
+    set((prev: DocumentSlice) => ({
+      ...prev,
+      currentChatIndex: currentChatIndex,
+    }));
+  },
+  setForceEditorRefresh: (forceEditorRefresh: boolean) => {
+    set((prev: DocumentSlice) => ({
+      ...prev,
+      forceEditorRefresh: forceEditorRefresh,
+    }));
+  },
+  setGenerating: (generating: boolean) => {
+    set((prev: DocumentSlice) => ({
+      ...prev,
+      generating: generating,
+    }));
+  },
+  setError: (error: string) => {
+    set((prev: DocumentSlice) => ({
+      ...prev,
+      error: error,
+    }));
+  },
+  setFolders: (folders: FolderCollection) => {
+    set((prev: DocumentSlice) => ({
+      ...prev,
+      folders: folders,
+    }));
+  },
+  setEditorState: (editorState: string) => {
+    set((prev: DocumentSlice) => ({
+      ...prev,
+      editorState: editorState,
+    }));
+  },
 });

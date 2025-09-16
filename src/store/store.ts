@@ -1,5 +1,4 @@
-import { StoreApi } from 'zustand';
-import { createWithEqualityFn } from 'zustand/traditional';
+import { StoreApi, create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { DocumentSlice, createDocumentSlice } from './document-slice';
 import { InputSlice, createInputSlice } from './input-slice';
@@ -7,7 +6,6 @@ import { AuthSlice, createAuthSlice } from './auth-slice';
 import { ConfigSlice, createConfigSlice } from './config-slice';
 import { PromptSlice, createPromptSlice } from './prompt-slice';
 import { ToastSlice, createToastSlice } from './toast-slice';
-import { AuditSlice, createAuditSlice } from './audit-slice';
 import { get, set } from 'idb-keyval';
 // import {
 //   LocalStorageInterfaceV0ToV1,
@@ -35,8 +33,7 @@ export type StoreState = DocumentSlice &
   AuthSlice &
   ConfigSlice &
   PromptSlice &
-  ToastSlice &
-  AuditSlice;
+  ToastSlice;
 
 export type StoreSlice<T> = (
   set: StoreApi<StoreState>['setState'],
@@ -73,23 +70,12 @@ export const IDBStorage = {
       return null;
     }
 
-    // Allow Cypress to override idb-keyval via window.idbKeyval in tests
-    if (typeof window !== 'undefined' && window.idbKeyval?.get) {
-      const value = await window.idbKeyval.get(name);
-      return (value as unknown) || null;
-    }
-
     const value = await get(name);
     return value || null;
   },
   setItem: async (name: string, value: unknown) => {
     // Exit early on server
     if (typeof indexedDB === 'undefined') {
-      return;
-    }
-    // Allow Cypress to override idb-keyval via window.idbKeyval in tests
-    if (typeof window !== 'undefined' && window.idbKeyval?.set) {
-      await window.idbKeyval.set(name, value);
       return;
     }
     set(name, value);
@@ -99,7 +85,7 @@ export const IDBStorage = {
   },
 };
 
-const useStore = createWithEqualityFn<StoreState>()(
+const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
       ...createDocumentSlice(set, get),
@@ -108,7 +94,6 @@ const useStore = createWithEqualityFn<StoreState>()(
       ...createConfigSlice(set, get),
       ...createPromptSlice(set, get),
       ...createToastSlice(set, get),
-      ...createAuditSlice(set, get),
     }),
     {
       name: 'fthr-write',

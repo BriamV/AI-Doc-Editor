@@ -78,25 +78,3 @@ yarn pre-commit install
 ```
 
 Run `yarn pre-commit run --all-files` to verify formatting and linting locally.
-
-### Validation Commands for Development
-
-The project includes an advanced modular validation system with multi-technology support (TypeScript + Python) and workflow context detection:
-
-```bash
-# Context-aware validation (auto-detects current task/workflow)
-yarn run cmd workflow-context          # Show current context
-yarn run cmd validate-task             # Validate based on current task (T-XX)
-yarn run cmd validate-staged           # Pre-commit validation
-
-# Performance-optimized validation
-yarn run cmd validate-frontend-fast    # Quick frontend check (1-8s)
-yarn run cmd validate-backend-fast     # Quick backend check (1-3s)
-yarn run cmd validate-modified         # Only modified files
-
-# Complete validation
-yarn run cmd validate-all              # Full project validation
-yarn run cmd qa-gate                   # Complete quality gate
-```
-
-**Workflow Integration**: The system automatically detects your current branch context (feature/T-XX, develop, release/RX) and suggests appropriate validation commands.

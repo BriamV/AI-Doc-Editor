@@ -6,7 +6,6 @@ import SettingsMenu from '@components/FooterMenu/SettingsMenu/SettingsMenu';
 import CollapseOptions from './CollapseOptions';
 import GoogleSync from '@components/GoogleSync';
 import { TotalTokenCostDisplay } from '@components/FooterMenu/SettingsMenu/TotalTokenCost';
-import AdminSettingsLink from './AdminSettingsLink';
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || undefined;
 
@@ -27,7 +26,6 @@ const MenuOptions = () => {
         <ImportExportChat />
         <Api />
         <SettingsMenu />
-        <AdminSettingsLink />
       </div>
     </>
   );

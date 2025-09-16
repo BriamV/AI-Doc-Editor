@@ -5,7 +5,6 @@ import {
   ConfigInterface,
   FolderCollection,
   MessageInterface,
-  Folder,
 } from '@type/document';
 import { roles } from '@type/document';
 import { defaultModel, modelOptions, _defaultChatConfig } from '@constants/chat';
@@ -42,18 +41,16 @@ const validateAndFixChatConfig = (config: ConfigInterface) => {
   if (config === undefined) config = _defaultChatConfig;
   if (!(typeof config === 'object')) return false;
 
-  if (config.temperature === undefined) config.temperature = _defaultChatConfig.temperature;
+  if (!config.temperature) config.temperature = _defaultChatConfig.temperature;
   if (!(typeof config.temperature === 'number')) return false;
 
-  if (config.presence_penalty === undefined)
-    config.presence_penalty = _defaultChatConfig.presence_penalty;
+  if (!config.presence_penalty) config.presence_penalty = _defaultChatConfig.presence_penalty;
   if (!(typeof config.presence_penalty === 'number')) return false;
 
-  if (config.top_p === undefined) config.top_p = _defaultChatConfig.top_p;
+  if (!config.top_p) config.top_p = _defaultChatConfig.top_p;
   if (!(typeof config.top_p === 'number')) return false;
 
-  if (config.frequency_penalty === undefined)
-    config.frequency_penalty = _defaultChatConfig.frequency_penalty;
+  if (!config.frequency_penalty) config.frequency_penalty = _defaultChatConfig.frequency_penalty;
   if (!(typeof config.frequency_penalty === 'number')) return false;
 
   if (!config.model) config.model = defaultModel;
@@ -68,15 +65,13 @@ export const isLegacyImport = (importedData: unknown) => {
 };
 
 export const validateFolders = (folders: FolderCollection): folders is FolderCollection => {
-  if (typeof folders !== 'object' || folders === null) return false;
+  if (typeof folders !== 'object') return false;
 
-  const entries = Object.entries(folders as Record<string, Folder>);
-  for (const [, folder] of entries) {
-    if (!folder || typeof folder !== 'object') return false;
-    if (typeof folder.id !== 'string') return false;
-    if (typeof folder.name !== 'string') return false;
-    if (typeof folder.order !== 'number') return false;
-    if (typeof folder.expanded !== 'boolean') return false;
+  for (const folderId in folders) {
+    if (typeof folders[folderId].id !== 'string') return false;
+    if (typeof folders[folderId].name !== 'string') return false;
+    if (typeof folders[folderId].order !== 'number') return false;
+    if (typeof folders[folderId].expanded !== 'boolean') return false;
   }
 
   return true;
