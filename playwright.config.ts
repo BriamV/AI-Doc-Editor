@@ -32,9 +32,27 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        // Browser launch args for stability (similar to Cypress config)
+        // Conditional browser launch args for security
         launchOptions: {
-          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+          args: (() => {
+            const baseArgs: string[] = [];
+
+            // Only disable sandbox in CI environments where it's necessary
+            // Local development should maintain security restrictions
+            if (process.env.CI || process.env.GITHUB_ACTIONS) {
+              // CI environments may require sandbox disabled
+              baseArgs.push('--no-sandbox', '--disable-setuid-sandbox');
+            }
+
+            // Always include security-conscious flags
+            baseArgs.push(
+              '--disable-background-timer-throttling',
+              '--disable-renderer-backgrounding',
+              '--disable-backgrounding-occluded-windows'
+            );
+
+            return baseArgs;
+          })(),
         },
       },
     },

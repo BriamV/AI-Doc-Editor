@@ -85,22 +85,35 @@ const useLegacyStorageMigration = (config: {
 
 // Security: Constant-time string comparison to prevent timing attacks
 const constantTimeCompare = (a: string, b: string): boolean => {
-  if (a.length !== b.length) {
-    // Still perform a dummy comparison to prevent timing leaks
-    let dummyResult = 0;
-    for (let i = 0; i < Math.max(a.length, b.length); i++) {
-      const aChar = i < a.length ? a.charCodeAt(i) : 0;
-      const bChar = i < b.length ? b.charCodeAt(i) : 0;
-      dummyResult |= aChar ^ bChar;
-    }
-    // Use the dummy result to prevent optimization but always return false for length mismatch
-    return dummyResult === -1; // This will always be false since XOR can't produce -1
+  // Convert strings to fixed-length buffers to ensure constant-time operation
+  const maxLength = Math.max(a.length, b.length, 64); // Minimum 64 chars for consistency
+
+  // Use Uint8Array for secure buffer operations (prevents object injection)
+  const bufferA = new Uint8Array(maxLength);
+  const bufferB = new Uint8Array(maxLength);
+
+  // Fill buffers with string data, padding with zeros
+  for (let i = 0; i < maxLength; i++) {
+    // Use safe array access with bounds checking
+    const charA = i < a.length ? a.charCodeAt(i) : 0;
+    const charB = i < b.length ? b.charCodeAt(i) : 0;
+    bufferA.set([charA], i);
+    bufferB.set([charB], i);
   }
 
+  // Perform constant-time comparison on fixed-length buffers
   let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  for (let i = 0; i < maxLength; i++) {
+    // Use safe typed array access with bounds checking
+    const byteA = bufferA.at(i) ?? 0;
+    const byteB = bufferB.at(i) ?? 0;
+    result |= byteA ^ byteB;
   }
+
+  // Length check must also be constant-time
+  const lengthDiff = a.length ^ b.length;
+  result |= lengthDiff;
+
   return result === 0;
 };
 

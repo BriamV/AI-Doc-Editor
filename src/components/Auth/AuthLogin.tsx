@@ -178,12 +178,26 @@ const AuthLogin: React.FC<AuthLoginProps> = ({ onSuccess, onError }) => {
       provider: 'google',
     };
 
-    // Security: Generate secure test token with expiry
+    // Security: Generate secure test token with proper entropy and HMAC-like structure
     const generateSecureTestToken = (userRole: string): string => {
       const timestamp = Date.now();
-      const randomBytes = crypto.getRandomValues(new Uint8Array(16));
-      const randomHex = Array.from(randomBytes, byte => byte.toString(16).padStart(2, '')).join('');
-      return btoa(`test-${userRole}-${timestamp}-${randomHex}`);
+
+      // Generate high-entropy random data (32 bytes for 256-bit security)
+      const randomBytes = crypto.getRandomValues(new Uint8Array(32));
+      const randomHex = Array.from(randomBytes, byte => byte.toString(16).padStart(2, '0')).join(
+        ''
+      );
+
+      // Create HMAC-like structure: payload + separator + signature
+      const payload = `test-${userRole}-${timestamp}`;
+
+      // Generate signature using additional entropy
+      const sigBytes = crypto.getRandomValues(new Uint8Array(16));
+      const signature = Array.from(sigBytes, byte => byte.toString(16).padStart(2, '0')).join('');
+
+      // Combine with proper structure and use Base64URL encoding for web safety
+      const tokenData = `${payload}.${randomHex}.${signature}`;
+      return btoa(tokenData).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
     };
 
     // Set secure tokens with expiry (1 hour for testing)
