@@ -15,77 +15,58 @@ const isCI = process.env.CI === 'true';
  * basado en la configuración centralizada
  */
 function runSecurityAudit() {
-    // Obtenemos el nivel de audit configurado (por defecto 'critical' si no está configurado)
-    const auditLevel = config.securityConfig?.auditLevel || 'critical';
-    console.log(`    -> Running yarn audit (blocking level: ${auditLevel})...`);
-
+    console.log("\n    -> Running security audit...");
+    let output = "";
     try {
-        // Configurar opciones adecuadas para CI o entorno local
-        const auditOptions = isCI ? '--json --registry=https://registry.npmjs.org' : '--json';
-        console.log(`    -> Using audit options: ${auditOptions}${isCI ? ' (CI environment detected)' : ''}`);        
-        
-        // Ejecutamos yarn audit de forma segura y capturamos la salida
-        // Nota: yarn audit siempre devuelve código 1 si encuentra cualquier vulnerabilidad
-        // Validación: auditOptions está limitado a valores seguros específicos
-        const validOptions = ['--json', '--json --registry=https://registry.npmjs.org'];
-        if (!validOptions.includes(auditOptions)) {
-            throw new Error(`Opciones de audit no válidas: ${auditOptions}`);
-        }
-        
-        // Uso de la versión segura de execSync
-        const output = execSyncSafe(`yarn audit ${auditOptions}`, { stdio: 'pipe', encoding: 'utf8' });
-        
-        // Analizamos el resultado para verificar solo las vulnerabilidades del nivel configurado
-        const auditResults = parseAuditOutput(output);
-        const { critical, high, moderate, low } = auditResults;
-        
-        // Generamos un informe para futuras referencias
-        generateAuditReport(auditResults);
-        
-        // Verificamos si hay vulnerabilidades del nivel configurado o superior
-        let hasBlockingVulnerabilities = false;
-        
-        switch(auditLevel) {
-            case 'critical':
-                hasBlockingVulnerabilities = critical > 0;
-                break;
-            case 'high':
-                hasBlockingVulnerabilities = critical > 0 || high > 0;
-                break;
-            case 'moderate':
-                hasBlockingVulnerabilities = critical > 0 || high > 0 || moderate > 0;
-                break;
-            case 'low':
-                hasBlockingVulnerabilities = critical > 0 || high > 0 || moderate > 0 || low > 0;
-                break;
-            default:
-                hasBlockingVulnerabilities = critical > 0;
-        }
-        
-        // Mostrar resumen de vulnerabilidades
-        console.log('    -> Vulnerability summary:')
-        console.log(`       Critical: ${critical}, High: ${high}, Moderate: ${moderate}, Low: ${low}`);
-        
-        // Si hay vulnerabilidades bloqueantes según el nivel configurado, fallamos
-        if (hasBlockingVulnerabilities) {
-            console.error(`\n    -> ❌ Found ${auditLevel} level vulnerabilities. See report at reports/security-audit.json`);
-            console.error('       Run "yarn run cmd audit-fix" to attempt automatic fixes or update dependencies manually.');
-            process.exit(1);
-        } else {
-            // Si hay vulnerabilidades pero no son del nivel configurado, mostramos advertencia
-            if (critical > 0 || high > 0 || moderate > 0 || low > 0) {
-                console.log(`\n    -> ⚠️ Found vulnerabilities below ${auditLevel} level. See report at reports/security-audit.json`);
-            } else {
-                console.log('    -> ✅ No vulnerabilities found.');
-            }
-        }
+        output = execSync('yarn npm audit --all --recursive --json', { encoding: 'utf8', stdio: ['inherit', 'pipe', 'pipe'] });
     } catch (error) {
-        // Manejar el resultado de yarn audit, que puede fallar con código 1
-        // Si llegamos aquí es porque hubo un error al ejecutar el comando, no por vulnerabilidades
-        console.error('\n    -> ❌ Error running yarn audit:');
-        console.error(error.message || error);
-        process.exit(1);
+        if (error.stdout) {
+            output = error.stdout.toString();
+        } else {
+            throw error;
+        }
     }
+
+    const advisories = [];
+    output.split(/\r?\n/).forEach(line => {
+        if (!line.trim()) {
+            return;
+        }
+        try {
+            advisories.push(JSON.parse(line));
+        } catch (parseError) {
+            console.warn('    -> Unable to parse npm audit line:', line);
+        }
+    });
+
+    const blocking = [];
+    const deprecations = [];
+    for (const advisory of advisories) {
+        const issue = advisory?.children?.Issue || '';
+        if (/deprecation/i.test(issue)) {
+            deprecations.push(advisory);
+        } else {
+            blocking.push(advisory);
+        }
+    }
+
+    if (deprecations.length > 0) {
+        console.log('\n    -> Ignoring npm audit deprecation notices (not security vulnerabilities):');
+        for (const { value, children } of deprecations) {
+            console.log(`      - ${value}: ${children?.Issue || 'see npm audit output'}`);
+        }
+    }
+
+    if (blocking.length > 0) {
+        console.error('\n    -> Blocking vulnerabilities detected by npm audit:');
+        for (const { value, children } of blocking) {
+            const severity = children?.Severity ? ` [${children.Severity}]` : '';
+            console.error(`      - ${value}${severity}: ${children?.Issue || 'see npm audit output'}`);
+        }
+        throw new Error('Security audit failed');
+    }
+
+    console.log('    -> npm audit passed (no blocking vulnerabilities found).');
 }
 
 /**
@@ -181,9 +162,9 @@ runSecurityAudit();
 
 console.log('\n    -> Generating license report (this may take a minute)...');
 try {
-    // Ejecutamos license-checker, redirigiendo su salida (que es un JSON enorme) al archivo.
+    // Ejecutamos license-checker-rseidelsohn, redirigiendo su salida (que es un JSON enorme) al archivo.
     // Usamos stdio: 'ignore' para no ensuciar la consola, ya que solo nos interesa el archivo de salida.
-    execSync('npx license-checker --production --json > yarn-licenses.json', { stdio: 'ignore' });
+    execSync('npx license-checker-rseidelsohn --production --json > yarn-licenses.json', { stdio: 'ignore' });
     console.log('    -> ✅ License report generated successfully: yarn-licenses.json');
 } catch (error) {
     console.error('\n    -> ❌ Failed to generate license report.');
