@@ -1,0 +1,13 @@
+# Spectral configuration for API spec validation
+extends: ["spectral:oas"]
+
+rules:
+  # Disable some rules for development flexibility
+  info-description: warn
+  operation-description: warn
+  operation-operationId: warn
+  
+  # Keep important rules as errors
+  info-contact: error
+  info-version: error
+  openapi-tags: error

@@ -1,3 +1,4 @@
+// Date utility functions for AI-Doc-Editor
 export const getToday = () => {
   const date = new Date();
   const year = date.getFullYear();

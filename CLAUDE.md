@@ -2,475 +2,256 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Development Commands
+## Project Overview
+AI Document Editor: React 18 + TypeScript + Python FastAPI + AI integration
+Features: Document generation with RAG, real-time collaboration, OAuth security
+Repository: https://github.com/BriamV/AI-Doc-Editor/
 
-### Primary Commands (Recommended)
+## Tech Stack
+- Frontend: React 18 + TypeScript + Vite + TailwindCSS
+- Backend: Python FastAPI + SQLAlchemy + Alembic
+- AI: OpenAI GPT-4o + embeddings + LangChain
+- Desktop: Electron + auto-updater
+- State: Zustand + IndexedDB encryption
+- Testing: Playwright E2E + Jest unit tests
+- Tools: Multi-stack quality ecosystem (40+ tools integrated)
+  - **Frontend**: ESLint, Prettier, Jest, TSC
+  - **Python**: Black, Ruff, Radon, MyPy, pip-audit
+  - **Security**: Semgrep, git-secrets, yarn audit
+  - **Docs**: markdownlint, yamlfix, yamllint, spectral
+  - **Shell**: shellcheck, shfmt
+  - **Config**: taplo (TOML), prettier (JSON/XML/CSS)
+  - **Infrastructure**: Docker, GitHub Actions, Claude Code hooks
 
-- `make dev` - Start development server (preferred over yarn dev)
-- `make build` - Build for production with full validation
-- `make qa-gate` - Run complete quality gate (TypeScript, ESLint, Prettier, tests, build, security)
-- `make test` - Run unit tests
-- `make security-scan` - Run T-43 dependency security scanning
-
-### Build and Development
-
-- `yarn dev` - Start development server (Vite + React)
-- `yarn build` - Build for production (TypeScript + Vite)
-- `yarn preview` - Preview production build
-
-### Electron Desktop App
-
-- `yarn electron` - Run as Electron desktop app (concurrent dev server + Electron)
-- `yarn pack` - Package Electron app for current platform
-- `yarn make` - Build and package Electron app for distribution
-
-### Quality & Testing
-
-- `make lint` - Run ESLint with auto-fix capability
-- `make format` - Format code with Prettier
-- `make test-coverage` - Run tests with coverage report
-- `make audit` - Check for security vulnerabilities
-
-### Docker Commands (T-01.5)
-
-- `make docker-dev` - Start development environment with Docker
-- `make docker-build` - Build production Docker image
-- `make docker-stop` - Stop all Docker services
-
-## Project Architecture
-
-### Tech Stack
-
-- **Frontend**: React 18 + TypeScript + Vite
-- **Editor**: Monaco Editor for Markdown editing with live preview
-- **UI Framework**: TailwindCSS with custom configuration
-- **State Management**: Zustand with IndexedDB persistence
-- **Desktop**: Electron wrapper for cross-platform distribution
-- **AI Integration**: OpenAI GPT-4o/GPT-4o-mini with custom API layer
-- **RAG**: Vector embeddings with OpenAI text-embedding-3-small
-
-### Core Features
-
-This is an AI-powered document editor that supports:
-
-- Document generation using AI prompts and templates
-- RAG (Retrieval-Augmented Generation) with knowledge base
-- Markdown editing with real-time preview
-- Document versioning and audit trails
-- Multiple export formats (PDF, DOCX, MD)
-- OAuth authentication (Google/Microsoft)
-- Secure document storage with encryption
-
-### Project Structure
-
-#### Source Organization (`src/`)
-
-- `components/` - React components organized by feature
-  - `Chat/` - AI chat interface and message handling
-  - `Document/` - Document editor with Lexical/Monaco integration
-  - `Menu/` - Navigation menus (AI, Document, Settings)
-  - `GoogleSync/` - Google Drive integration
-- `store/` - Zustand state management slices
-- `api/` - API client for OpenAI and Google services
-- `hooks/` - Custom React hooks
-- `types/` - TypeScript type definitions
-- `utils/` - Utility functions
-- `constants/` - Application constants
-
-#### State Management
-
-- Uses Zustand with IndexedDB persistence (`idb-keyval`)
-- Store slices: documents, input, auth, config, prompts, toast
-- Custom IDB storage implementation for browser persistence
-
-#### Path Aliases (Vite Config)
-
-- `@components/` → `src/components/`
-- `@store/` → `src/store/`
-- `@api/` → `src/api/`
-- `@hooks/` → `src/hooks/`
-- `@types/` → `src/types/`
-- `@utils/` → `src/utils/`
-- `@constants/` → `src/constants/`
-
-### Key Dependencies
-
-- **Editor**: `@lexical/react`, `react-markdown`, `katex` for math
-- **State**: `zustand`, `idb-keyval` for persistence
-- **UI**: `tailwindcss`, `@tailwindcss/typography`
-- **Auth**: `@react-oauth/google`
-- **Build**: `vite`, `@vitejs/plugin-react-swc`
-- **Desktop**: `electron`, `electron-builder`
-- **AI**: Custom OpenAI API integration
-
-### Development Notes
-
-- Uses SWC for faster TypeScript compilation
-- IndexedDB for client-side persistence (not localStorage)
-- Custom Tailwind configuration with extended gray scale
-- Electron build outputs to `release/` directory
-- Supports multiple languages via i18next
-
-### Critical Development Methodology
-
-**IMPORTANT**: This project requires surgical precision in data handling and verification:
-
-1. **Multilingual Context**: Core documentation (PRD, WORK-PLAN, Sub Tareas, UX-FLOW) is in **SPANISH**, while codebase is in English. Always verify language context before making assumptions.
-
-2. **Data Verification Protocol**:
-   - NEVER assume numerical data (complexity points, task counts, file sizes, timelines)
-   - ALWAYS verify by reading source documents directly
-   - Use `ls -lh` and `wc -c` for precise file sizes
-   - Cross-reference multiple sources for critical metrics
-
-3. **Efficient Task Execution**:
-   - For simple data updates: Go directly to source files, avoid over-tooling
-   - For complex searches: Use Task tool for broad discovery
-   - For specific file/code searches: Use targeted Grep/Glob patterns
-   - For Sub Tareas v2.md (120KB): **ALWAYS use Grep/search patterns - never full read**
-   - For specific updates: Read → Verify → Edit in sequence
-
-4. **Quality Gates**: Before any commit, run `make qa-gate` and verify that updated data matches source documents exactly. Inaccurate documentation undermines project credibility.
-
-5. **Branch Strategy**: Create feature branches for development work instead of working directly on main branch to minimize impact
-
-## Current Project Phase
-
-**Phase**: R0.WP2 (User Management & API Security)
-**Previous**: R0.WP1 ✅ Complete (CI/CD, Security, Governance, Tools)
-
-📊 **Detailed Status**: [DEVELOPMENT-STATUS.md](docs/DEVELOPMENT-STATUS.md)
-📋 **Task Progress**: `bash tools/progress-dashboard.sh`
-
-### Security Considerations
-
-- API keys stored encrypted in IndexedDB
-- TLS 1.3+ required for network traffic
-- AES-256 encryption for document storage
-- OAuth 2.0 authentication flow
-- GDPR compliance features built-in
-
-### Performance Targets
-
-- Document generation: ≤8 minutes for 10-page documents
-- Markdown preview: ≤200ms render time
-- File upload processing: ≤120s for 10MB files
-- RAG search: <1s response time for 15 documents
-
-## Project Context
-
-**Current**: AI text editor with basic features
-**Target**: Professional document generation platform with RAG
-**Architecture**: Frontend-only → Full-stack (R1+)
-
-📑 **Complete Vision**: [PRD v2.md](docs/PRD v2.md) (37KB, Spanish)
-📐 **Gap Analysis**: [ARCH-GAP-ANALYSIS.md](docs/ARCH-GAP-ANALYSIS.md) (5KB)
-
-### Supporting Documentation
-
-- **PRD v2.md** (37KB): Complete product requirements document defining the AI-powered document generator with RAG capabilities, functional requirements, KPIs, and 6-phase roadmap (R0-R6) - **IN SPANISH**
-- **WORK-PLAN v5.md** (42KB): Comprehensive 6-release execution plan (484 complexity points) with 47 tasks (T-01 to T-47), detailed WBS methodology, and delivery timeline - **IN SPANISH**
-- **Sub Tareas v2.md** (120KB): Extensive detailed breakdown of implementation subtasks with complexity scoring and dependency mapping - **USE WITH CAUTION: Large file, use targeted searches/reads** - **IN SPANISH**
-- **DESIGN_GUIDELINES.md** (6KB): UI/UX design standards and component guidelines
-- **ARCH-GAP-ANALYSIS.md** (5KB): Technical gap analysis showing ~65% PRD coverage with current base architecture, identifying 11 functional gaps and 9 NFR gaps
-- **UX-FLOW.md** (5KB): User experience design document with 4 UI sprint roadmap, performance tolerances (streaming 30 tok/s, <150ms WS handshake), and UX risk mitigations - **IN SPANISH**
-- **CONTRIBUTING.md** (1KB): Development workflow, coding standards, and contribution guidelines
-- **ADR-001.md** (4KB): Adoptar Pydantic v2 como capa de validación - 5-8x performance improvement, deferred to R1 backend implementation
-- **ADR-002.md** (6KB): Posponer orquestadores (LangChain/Haystack) hasta R4 - mantener dispatcher LiteLLM/SDK nativos, decisión revisar en T-47
-
-## Codebase Quick Facts
-
-- **Size**: ~962MB (959MB node_modules + 3MB source)
-- **Tasks**: 47 tasks across 6 releases (484 complexity points)
-- **Critical Files**: Sub Tareas v2.md (120KB) - use grep only
-
-📈 **Detailed Analytics**: `bash tools/progress-dashboard.sh`
-
-## File Access Quick Reference
-
-**Large Files (120KB+)**: Use grep patterns - `grep -n "T-02" "docs/Sub Tareas v2.md"`
-**Medium Files (37-42KB)**: Safe for full read - PRD v2.md, WORK-PLAN v5.md  
-**Small Files (<10KB)**: Direct read - ADR files, UX-FLOW.md
-
-📚 **Complete Strategy**: [DEVELOPMENT-IMPACT-ANALYSIS.md](docs/DEVELOPMENT-IMPACT-ANALYSIS.md)
-
-## Environment Configuration
-
-### Development Environment
-
-- **Platform**: WSL2 (Ubuntu) on Windows 11
-- **Claude Code**: Running through WSL2 environment
-- **Terminal**: Windows Terminal with WSL2 integration
-- **Docker**: Requires `sg docker -c` prefix for WSL2 Docker commands
-- **Note**: `claude doctor` command has known compatibility issues with WSL2 but core functionality works normally
-- **Claude Code Version**: 1.0.25 (verified working)
-
-## Custom Development Workflow
-
-### Quality Assurance Protocol
-
-**MANDATORY**: Before any commit, run the full quality gate:
-
+## Development Setup
 ```bash
-make qa-gate
+# Prerequisites: Node.js 18.16.0, Python 3.11+, WSL2 (Windows)
+yarn install && yarn dev                  # Start development
+yarn build && yarn test                   # Build & test
+yarn security-scan                        # Security audit
+
+# ⚠️  LEGACY MIGRATION WARNING:
+# scripts/cli.cjs and 'yarn run cmd' commands are DEPRECATED
+# Use direct yarn commands instead (see Essential Commands section)
 ```
 
-This runs: TypeScript → ESLint → Prettier → Tests → Build → Security Scan
+## 🚨 MANDATORY: Sub-Agent First Workflow
+1. **FIRST**: Use CUSTOM slash commands (.claude/commands/) for complex tasks
+2. **SECOND**: Use direct yarn commands (yarn dev, yarn build, yarn test)  
+3. **LAST**: Direct CLI only if above unavailable
+4. **NEVER**: Use scripts/cli.cjs (DEPRECATED - marked for removal)
 
-### Task Navigation Commands
+### Sub-Agent Architecture
+- **Custom Commands**: 19 workflow orchestrators in .claude/commands/ that analyze context
+- **Global Sub-Agents**: 40+ Claude Code specialists (security-auditor, frontend-developer, etc.)
+- **Invocation**: Commands auto-select and delegate to appropriate sub-agents
 
-- `make task-nav TASK=T-02` - Navigate to specific task documentation
-- `make dev-status` - Show development progress dashboard
-- ~~`make extract-work`~~ - Use `bash tools/extract-subtasks.sh T-02` directly
-- ~~`make r0-wp1-status`~~ - Removed (see DEVELOPMENT-STATUS.md)
-
-### Development Tools Integration
-
-**Essential workflow commands from tools/ directory:**
-
+## ⚡ CONSTANT VALIDATION Required
 ```bash
-# Navigate directly to task with line numbers
-bash tools/task-navigator.sh T-02
-
-# Extract actionable subtasks for development
-bash tools/extract-subtasks.sh T-02
-
-# Update task status (3 seconds vs 30 seconds manual)
-bash tools/status-updater.sh T-02 "En progreso - OAuth providers configured"
-
-# Real-time progress across all releases
-bash tools/progress-dashboard.sh
+# ALWAYS validate after branch changes, context switches, or issues
+/health-check                    # Immediate system validation
+tools/progress-dashboard.sh      # Project status verification
+yarn run cmd validate-modified   # Code quality check
 ```
 
-### Governance & Compliance Workflow
-
 ```bash
-# Generate Excel traceability matrix (req ↔ task ↔ test mapping)
-make traceability
+# Daily Workflow Commands (Tier 1)
+/task-dev T-XX [complete]       # Task development with context
+/review-complete [--scope]      # Multi-agent code review  
+/commit-smart                   # Intelligent commits
+/pr-flow [--draft]              # Pull request automation
+/health-check                   # System diagnostics
+/docs-update [scope]            # Documentation maintenance
+/auto-workflow [scope]          # Context-aware suggestions
+/context-analyze [--depth]      # Project analysis
 
-# Validate OpenAPI 3.1 specification
-make api-spec
+# Specialized Commands (Tier 2) - Use as needed
+/security-audit /architecture /debug-analyze /pipeline-check 
+/deploy-validate /adr-create /issue-generate
 
-# Complete governance validation
-make governance
+# Advanced Commands (Tier 3) - Production/Emergency  
+/release-prep /hotfix-flow /search-web /explain-codebase
 
-# Use certification template for task validation
-cp docs/templates/ACTA-CERTIFICACION.md docs/certifications/CERT-T-02-$(date +%Y%m%d).md
+# Sub-Agent Invocation Pattern (Auto-handled by commands)
+> Use the [AGENT] sub-agent to [SPECIFIC-TASK]
 ```
 
-### Docker Development (WSL2)
-
+## Essential Commands
 ```bash
-# Check Docker availability
-make docker-check
+# Development (PREFERRED - Direct commands)
+yarn dev|build|test|security-scan
 
-# Development with Docker
-make docker-dev
+# Testing (Playwright E2E primary)
+yarn test:e2e              # Run E2E tests (Playwright)
+yarn test:e2e:headed       # Run with browser visible
+yarn test:e2e:debug        # Debug E2E tests
+yarn test:e2e:ui           # Interactive UI mode
+yarn test:e2e:report       # Show HTML test report
 
-# Production build
-make docker-build
+# Quality (automated via hooks - 54% performance optimized)
+yarn lint|format|tsc-check
+
+# Multi-tech validation (TypeScript + Python auto-detection)
+yarn tsc-check        # Frontend TypeScript validation
+yarn python-quality   # Backend Python validation (format + lint + complexity)
+yarn python-format    # Python autofix formatting (Black)
+yarn python-lint      # Python autofix linting (Ruff)
+
+# Environment validation & diagnostics (NEW - Unified Multiplatform)
+yarn env-validate     # Comprehensive environment diagnostics
+yarn env-info         # Detailed platform and tool information
+
+# ⚠️  LEGACY DEPRECATION NOTICE:
+# OLD: yarn run cmd <command>  <- DEPRECATED, will be removed
+# NEW: yarn <command>          <- Use this instead
+# Migration: All 'yarn run cmd' references should use direct yarn commands
 ```
 
-### File Access Strategy
+## Project Structure
+- `src/components/` - React components (Chat, Document, Menu)
+- `src/store/` - Zustand stores (docs, auth, config)  
+- `backend/` - Python FastAPI backend + .venv
+- `docs/` - Spanish documentation (primary)
+- `.claude/commands/` - 19 production slash commands
+- `tools/` - Task management scripts
+- `scripts/multiplatform.cjs` - **NEW** Unified cross-platform validator
 
-**Optimized approach based on file sizes:**
-
+## 🔧 Quality Tools Ecosystem (40+ Tools)
+**Hooks-Integrated Multi-Stack Pipeline:**
 ```bash
-# Large files - Use targeted searches
-grep -n "T-02" "docs/Sub Tareas v2.md"                    # 120KB
-bash tools/task-navigator.sh T-02                         # Direct navigation
+# Frontend Quality
+eslint, prettier, jest, tsc              # TypeScript/JavaScript
 
-# Medium files - Safe for full reads
-Read "docs/WORK-PLAN v5.md"                              # 42KB
-Read "docs/PRD v2.md"                                    # 37KB
+# Python Backend Quality  
+black, ruff, radon, mypy, pip-audit      # Python quality gates
 
-# Small files - Read directly
-Read "docs/ARCH-GAP-ANALYSIS.md"                         # 5KB
-Read "docs/UX-FLOW.md"                                   # 5KB
-Read "docs/adr/ADR-006-dependency-security-scanning.md"  # ADR files
+# Security & Secrets
+semgrep, git-secrets, yarn audit         # Security scanning
 
-# Source code - Use Task tool for discovery
-Task "search for OAuth implementation"                    # Broad searches
-Glob "**/*auth*.ts"                                      # Specific patterns
+# Documentation
+markdownlint, yamlfix, yamllint, spectral # Docs quality
+
+# Configuration & Shell
+taplo, shellcheck, shfmt                 # Config + shell scripts
+
+# Multi-Format Support
+prettier (JSON/XML/CSS/HTML)             # Universal formatting
+```
+**Auto-Detection**: Windows/Linux/WSL + multi-venv support
+**Unified Validator**: `scripts/multiplatform.cjs` consolidates all cross-platform logic
+
+## Quality Assurance
+- **Multi-Stack Pipeline**: 40+ tools integrated via .claude/hooks.json
+- **Auto-formatting**: Real-time format on Edit/Write/MultiEdit
+  - TypeScript/JavaScript: ESLint + Prettier
+  - Python: Black + Ruff (autofix)
+  - Docs: markdownlint + yamlfix
+  - Shell: shellcheck + shfmt
+  - Config: taplo (TOML) + prettier (JSON/XML/CSS)
+- **Design Metrics**: Complexity (CC≤15) + LOC (≤300) validation
+- **Security Gates**: Semgrep + git-secrets + dependency audits
+- **Performance**: 54% optimized (152s → 70s total timeout)
+- **Multi-OS**: Windows/Linux/WSL auto-detection
+- **Compliance**: OAuth 2.0, TLS 1.3+, AES-256, GDPR
+
+## Task Management Workflow
+```bash
+# Use custom slash commands for workflow automation (PREFERRED)
+/context-analyze                         # Project progress analysis
+/task-dev T-XX                          # Task development with context  
+/review-complete --scope T-XX           # Validation and review
+/commit-smart                           # Mark development complete
+
+# Legacy bash tools (still functional but use slash commands when possible)
+tools/progress-dashboard.sh              # Project progress
+tools/task-navigator.sh T-XX             # Task details  
+tools/extract-subtasks.sh T-XX           # Development planning
+tools/validate-dod.sh T-XX               # Definition of Done validation
+tools/qa-workflow.sh T-XX dev-complete   # Mark development complete
 ```
 
-### Development Workflow Integration
+## Current Context
+- **Branch**: develop
+- **Phase**: R0.WP3 (Seguridad y Auditoría) 
+- **Language**: Spanish docs, English code
+- **Pattern**: T-XX task identification
+- **Status**: docs/DEVELOPMENT-STATUS.md
 
-#### Pre-Development Task Setup
+## Sub-Agent Architecture
+- **40+ Global Sub-Agents**: Built-in Claude Code specialists (security-auditor, backend-architect, etc.)
+- **Local Project Agent**: workflow-architect - Specialized for this project's workflow orchestration
+- **Custom Commands**: Auto-select appropriate sub-agents (global + local) based on project context
 
+## GitHub Issues Management
 ```bash
-# 1. Extract current task work
-bash tools/extract-subtasks.sh T-02 > current-task.md
+# ✅ ALWAYS specify target repository (this repo has forks)
+gh issue view <NUMBER> --repo BriamV/AI-Doc-Editor          # View issue
+gh issue close <NUMBER> --repo BriamV/AI-Doc-Editor -c "..." # Close issue
 
-# 2. Update status to in-progress
-bash tools/status-updater.sh T-02 "En progreso - Iniciando desarrollo"
-
-# 3. Create feature branch
-git checkout -b feature/T-02-oauth-implementation
-
-# 4. Validate API spec changes
-make api-spec
+# ❌ NEVER use without --repo flag (targets wrong repository)
+gh issue view <NUMBER>                                      # WRONG
 ```
 
-#### During Development
-
+## Security & Compliance
 ```bash
-# Update subtask progress
-bash tools/status-updater.sh T-02 "En progreso - ST1: OAuth providers completado"
+# PREFERRED: Direct commands
+yarn security-scan                         # Security scan (audit + semgrep)
+/docs-update                               # Traceability matrix via commands
+docs/adr/ADR-006-security.md              # Security architecture
 
-# Run quality gate before commits
-make qa-gate
-
-# Generate traceability after significant changes
-make traceability
+# ⚠️  LEGACY: Avoid these deprecated patterns
+# yarn run cmd security-scan  <- DEPRECATED
+# yarn run cmd traceability   <- Use /docs-update instead
 ```
 
-#### Task Completion Workflow
+## Do Not Touch
+- `docs/Sub Tareas v2.md` - Use tools/task-navigator.sh instead
+- `.claude/commands/legacy/` - Deprecated commands
+- `test-*.js` - Temporary debugging files
+- `.claude/hooks.json.backup` - Backup configuration
+- `legacy/` - Migrated Cypress files (see legacy/MIGRATION-README.md)
 
+## ⚠️  Legacy Components (Marked for Deprecation)
+- `scripts/` - **DEPRECATED** - All CLI functionality moved to direct yarn commands
+  - `scripts/cli.cjs` - Legacy CLI wrapper, use direct yarn commands instead
+  - `yarn run cmd <command>` - Replace with `yarn <command>`
+- `legacy/cypress/` - **MIGRATED** - Cypress E2E tests replaced by Playwright
+  - `yarn test:cypress` - Legacy Cypress commands (use `yarn test:e2e` instead)
+  - Migration completed: All E2E testing now uses Playwright
+- Timeline: legacy/ will be removed after Playwright validation phase
+
+## Integration Policy
+All enhancements MUST integrate into workflow:
+1. Document in CLAUDE.md with concrete commands
+2. Map to existing tools/scripts  
+3. Test before documenting
+4. Remove redundancies
+
+## 🔨 POST-BUILD VALIDATION Protocol
+**MANDATORY after package.json changes or new scripts:**
 ```bash
-# 1. Final quality validation
-make qa-gate
-
-# 2. Create certification document
-cp docs/templates/ACTA-CERTIFICACION.md docs/certifications/CERT-T-02-$(date +%Y%m%d).md
-# (Fill certification criteria and evidence)
-
-# 3. Update final status
-bash tools/status-updater.sh T-02 "Completado 100% - Certificado"
-
-# 4. Update traceability matrix
-make traceability
+# ✅ ALWAYS run after modifying package.json or adding scripts
+yarn install --frozen-lockfile          # Verify dependencies
+yarn build                              # Ensure build doesn't break
+yarn tsc-check                          # TypeScript validation
+yarn quality-gate                       # Full quality pipeline
+# ✅ Multi-tech validation (Python + TypeScript + Frontend)
+# ✅ Autofix priorized: Use --fix flags when available
+# ✅ Validate CI/CD integration works end-to-end
 ```
 
-#### ADR Integration Workflow
-
-**When making architectural decisions:**
-
+## CLAUDE.md Editing Rules
 ```bash
-# 1. Check existing ADRs
-ls docs/adr/ADR-*.md
-
-# 2. Use template for new decisions
-cp docs/adr/ADR-000-template.md docs/adr/ADR-007-new-decision.md
-
-# 3. Reference in traceability matrix
-make traceability
-
-# 4. Update API spec if needed
-make api-spec
+# ✅ MANDATORY: Follow existing structure and style
+# ✅ CONCISO: Max 3-5 lines per concept
+# ✅ CLARO: Specific commands, not explanations
+# ✅ DIRECTO: What to do (✅) and NOT do (❌)
+# ✅ ESPECÍFICO: Use placeholders (<NUMBER>, <FILE>)
+# ❌ NO extensive documentation - keep compact
 ```
 
-#### Security & Compliance Integration
-
-```bash
-# Before any commit - security scan
-make security-scan
-
-# Validate no CRITICAL vulnerabilities
-yarn audit --level critical
-```
-
-## Custom Slash Commands (Future Enhancement)
-
-📋 **Planned Enhancement**: [SLASH-COMMANDS-SPEC.md](docs/SLASH-COMMANDS-SPEC.md)
-
-- `/task`, `/qg`, `/cert`, `/doc`, `/dev` workflows planned
-- Integration with existing make commands and tools/ scripts
-- Target implementation: Post R0.WP2
-
-**Current Alternative**: Use direct commands:
-
-- `bash tools/task-navigator.sh T-02` (instead of /task T-02)
-- `make qa-gate` (instead of /qg run)
-
-## **CRITICAL: Development Workflow Integration Policy**
-
-### **Mandatory Integration Rule**
-
-**🚨 EVERY development enhancement MUST be operationally integrated into this workflow - NO exceptions.**
-
-**When implementing ANY feature that impacts development:**
-
-1. **IMMEDIATELY document operational usage** in this CLAUDE.md file
-2. **Create concrete commands/scripts** - not just conceptual descriptions
-3. **Map to existing workflow sections** - tools/, make commands, or slash commands
-4. **Test integration** - verify commands work before documenting
-5. **Remove redundant processes** - eliminate what the new enhancement replaces
-
-### **Integration Categories**
-
-#### **A. Development Tools Enhancement**
-
-```bash
-# New script created → ADD to tools/ directory documentation
-# Example: New validation script
-echo "bash tools/validate-feature.sh T-02" >> workflow commands
-
-# New make command → ADD to Primary Commands section
-# Example: New testing command
-echo "make test-integration - Run integration tests" >> Primary Commands
-```
-
-#### **B. Quality/Security Enhancement**
-
-```bash
-# New quality check → ADD to qa-gate workflow
-# New security scan → ADD to security-scan command
-# New compliance → ADD to governance workflow
-```
-
-#### **C. Documentation/Navigation Enhancement**
-
-```bash
-# New file access pattern → UPDATE File Access Strategy
-# New search optimization → UPDATE search commands
-# New template → ADD to certification/governance workflow
-```
-
-#### **D. Slash Command Extension**
-
-```bash
-# New workflow → CREATE new slash command or EXTEND existing
-# Map to actual make/tools commands - NO abstract concepts
-```
-
-### **Anti-Patterns - DO NOT CREATE**
-
-❌ **Documentation without operational integration**
-❌ **Tools that aren't mapped to daily workflow**  
-❌ **Features implemented "for completeness" without clear usage**
-❌ **Duplicate workflows that don't replace existing ones**
-❌ **Abstract concepts without concrete commands**
-
-### **Example Integration Process**
-
-```bash
-# WRONG: Just document that X was implemented
-# RIGHT: Document HOW to use X operationally
-
-# If implementing new auth validation:
-# 1. Create: tools/validate-auth.sh T-02
-# 2. Add to Makefile: auth-check target
-# 3. Document in CLAUDE.md: "bash tools/validate-auth.sh T-02"
-# 4. Add to /qg slash command: "/qg auth - Validate authentication"
-# 5. Remove old manual auth validation steps
-```
-
-**🎯 OBJECTIVE**: Every enhancement strengthens the development velocity, never creates overhead. This CLAUDE.md becomes the single source of truth for operational development workflow.
-
-### **Smart Documentation Impact Validation**
-
-**After each action, validate documentation impact intelligently:**
-
-```bash
-# New tool/script → Check CLAUDE.md tools/ section
-# Task status change → Update specific task docs only
-# Command modified → Check CLAUDE.md commands section
-# No brute force searches - target specific impact
-```
-
-**Validation Tiers**:
-
-- **Tier 1**: CLAUDE.md, Makefile, package.json (always check)
-- **Tier 2**: DEVELOPMENT-STATUS.md, traceability.xlsx (context-based)
-- **Tier 3**: PRD, WORK-PLAN (rare changes only)
+## Quick Reference
+- 📋 **Task details**: `/task-dev T-XX`
+- 🔍 **Codebase analysis**: `/context-analyze`
+- 🚀 **Full command list**: `/auto-workflow`
+- 📊 **Progress**: `tools/progress-dashboard.sh`

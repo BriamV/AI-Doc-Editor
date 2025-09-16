@@ -48,12 +48,13 @@ export const limitMessageTokens = (
   const limitedMessages: MessageInterface[] = [];
   let tokenCount = 0;
 
-  const isSystemFirstMessage = messages[0]?.role === 'system';
+  const firstMsg = messages.at(0);
+  const isSystemFirstMessage = firstMsg?.role === 'system';
   let retainSystemMessage = false;
 
   // Check if the first message is a system message and if it fits within the token limit
-  if (isSystemFirstMessage) {
-    const systemTokenCount = countTokens([messages[0]], model);
+  if (isSystemFirstMessage && firstMsg) {
+    const systemTokenCount = countTokens([firstMsg], model);
     if (systemTokenCount < limit) {
       tokenCount += systemTokenCount;
       retainSystemMessage = true;
@@ -62,22 +63,23 @@ export const limitMessageTokens = (
 
   // Iterate through messages in reverse order, adding them to the limitedMessages array
   // until the token limit is reached (excludes first message)
-  for (let i = messages.length - 1; i >= 1; i--) {
-    const count = countTokens([messages[i]], model);
+  const reversedBody = messages.slice(1).reverse();
+  for (const msg of reversedBody) {
+    const count = countTokens([msg], model);
     if (count + tokenCount > limit) break;
     tokenCount += count;
-    limitedMessages.unshift({ ...messages[i] });
+    limitedMessages.unshift({ ...msg });
   }
 
   // Process first message
-  if (retainSystemMessage) {
+  if (retainSystemMessage && firstMsg) {
     // Insert the system message in the third position from the end
-    limitedMessages.splice(-3, 0, { ...messages[0] });
-  } else if (!isSystemFirstMessage) {
+    limitedMessages.splice(-3, 0, { ...firstMsg });
+  } else if (!isSystemFirstMessage && firstMsg) {
     // Check if the first message (non-system) can fit within the limit
-    const firstMessageTokenCount = countTokens([messages[0]], model);
+    const firstMessageTokenCount = countTokens([firstMsg], model);
     if (firstMessageTokenCount + tokenCount < limit) {
-      limitedMessages.unshift({ ...messages[0] });
+      limitedMessages.unshift({ ...firstMsg });
     }
   }
 
@@ -90,19 +92,54 @@ export const updateTotalTokenUsed = (
   completionMessage: MessageInterface
 ) => {
   const setTotalTokenUsed = useStore.getState().setTotalTokenUsed;
-  const updatedTotalTokenUsed: TotalTokenUsed = JSON.parse(
+  const currentTotals: TotalTokenUsed = JSON.parse(
     JSON.stringify(useStore.getState().totalTokenUsed)
   );
 
   const newPromptTokens = countTokens(promptMessages, model);
   const newCompletionTokens = countTokens([completionMessage], model);
-  const { promptTokens = 0, completionTokens = 0 } = updatedTotalTokenUsed[model] ?? {};
 
-  updatedTotalTokenUsed[model] = {
-    promptTokens: promptTokens + newPromptTokens,
-    completionTokens: completionTokens + newCompletionTokens,
-  };
-  setTotalTokenUsed(updatedTotalTokenUsed);
+  const add = (prev?: { promptTokens: number; completionTokens: number }) => ({
+    promptTokens: (prev?.promptTokens ?? 0) + newPromptTokens,
+    completionTokens: (prev?.completionTokens ?? 0) + newCompletionTokens,
+  });
+
+  let nextTotals: TotalTokenUsed = { ...currentTotals };
+
+  switch (model) {
+    case 'gpt-3.5-turbo':
+      nextTotals['gpt-3.5-turbo'] = add(currentTotals['gpt-3.5-turbo']);
+      break;
+    case 'gpt-3.5-turbo-16k':
+      nextTotals['gpt-3.5-turbo-16k'] = add(currentTotals['gpt-3.5-turbo-16k']);
+      break;
+    case 'gpt-4':
+      nextTotals['gpt-4'] = add(currentTotals['gpt-4']);
+      break;
+    case 'gpt-4-32k':
+      nextTotals['gpt-4-32k'] = add(currentTotals['gpt-4-32k']);
+      break;
+    case 'gpt-4-turbo':
+      nextTotals['gpt-4-turbo'] = add(currentTotals['gpt-4-turbo']);
+      break;
+    case 'gpt-4o':
+      nextTotals['gpt-4o'] = add(currentTotals['gpt-4o']);
+      break;
+    case 'gpt-4.5-preview':
+      nextTotals['gpt-4.5-preview'] = add(currentTotals['gpt-4.5-preview']);
+      break;
+    case 'o1':
+      nextTotals['o1'] = add(currentTotals['o1']);
+      break;
+    case 'o3-mini':
+      nextTotals['o3-mini'] = add(currentTotals['o3-mini']);
+      break;
+    default:
+      // Unknown model: avoid dynamic index to satisfy security/detect-object-injection
+      return;
+  }
+
+  setTotalTokenUsed(nextTotals);
 };
 
 export default countTokens;

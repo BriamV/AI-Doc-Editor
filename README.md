@@ -58,7 +58,7 @@ Este proyecto es un fork mejorado de [AI Text Editor](https://github.com/darryls
 
 4. Inicia el servidor de desarrollo:
    ```bash
-   yarn dev
+   yarn run cmd dev
    ```
 
 ## 🚀 Uso
@@ -90,6 +90,8 @@ Este proyecto está bajo la [Licencia MIT](LICENSE).
 - **Base de Datos**: SQLite (datos de usuario) + Chroma (vector store)
 - **Autenticación**: OAuth 2.0 (Google/Microsoft)
 - **IA**: OpenAI GPT-4o / GPT-4o-mini con ventana de contexto de 128k tokens
+- **Automatización**: Scripts Node.js modulares para desarrollo, pruebas, construcción y despliegue
+- **Gobernanza**: Validación de API y generación de matrices de trazabilidad en múltiples formatos (XLSX, JSON, Markdown)
 
 ### Seguridad
 
@@ -119,7 +121,7 @@ cp .env.example .env
 # Editar .env con tus configuraciones
 
 # Iniciar con Docker Compose
-docker-compose up -d
+yarn run cmd docker-prod
 ```
 
 ## 📈 Métricas y Monitoreo
@@ -148,6 +150,37 @@ Sí, el sistema está diseñado para cumplir con GDPR, HIPAA e ISO 27001, con ca
 ### ¿Cómo puedo contribuir al proyecto?
 
 Consulta nuestra [guía de contribución](docs/CONTRIBUTING.md) para más detalles sobre cómo contribuir con código, reportar errores o sugerir mejoras.
+
+### ¿Cómo utilizo los scripts de desarrollo?
+
+El proyecto utiliza un sistema modular de scripts Node.js para todas las tareas de desarrollo, pruebas, construcción y despliegue. Consulta la [documentación de scripts](scripts/README.md) para ver todos los comandos disponibles.
+
+Ejemplos de comandos comunes:
+
+```bash
+# Iniciar servidor de desarrollo
+yarn run cmd dev
+
+# Ejecutar pruebas
+yarn run cmd test
+
+# Verificar calidad del código
+yarn run cmd qa-gate
+
+# Construir para producción
+yarn run cmd build
+
+# Generar matriz de trazabilidad en todos los formatos
+yarn run cmd traceability
+
+# Generar matriz de trazabilidad en formato específico
+yarn run cmd traceability --format=xlsx  # Solo Excel
+yarn run cmd traceability --format=json  # Solo JSON
+yarn run cmd traceability --format=md    # Solo Markdown
+
+# Ver todos los comandos disponibles
+yarn run cmd help
+```
 
 ## 🤝 Agradecimientos
 

@@ -1,4 +1,5 @@
 import { StoreSlice } from './store';
+import { StoreApi } from 'zustand';
 import { Theme } from '@type/theme';
 import { ConfigInterface, TotalTokenUsed } from '@type/document';
 import { _defaultChatConfig, _defaultSystemMessage } from '@constants/chat';
@@ -41,7 +42,18 @@ export interface ConfigSlice {
   setFineTuneModels: (fineTuneModels: FineTuneModel[]) => void;
 }
 
-export const createConfigSlice: StoreSlice<ConfigSlice> = (set, _get) => ({
+// Helper function to create setter functions
+const createSetter =
+  <T>(key: keyof ConfigSlice, set: StoreApi<ConfigSlice>['setState']) =>
+  (value: T) => {
+    set((prev: ConfigSlice) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+// Helper function to create the initial state
+const createInitialState = (): Omit<ConfigSlice, keyof ConfigSliceActions> => ({
   openConfig: false,
   theme: 'dark',
   activeMenu: 'chat',
@@ -59,106 +71,52 @@ export const createConfigSlice: StoreSlice<ConfigSlice> = (set, _get) => ({
   totalTokenUsed: {},
   fineTuneModels: [],
   aiPadding: 0,
-  setAIPadding: (aiPadding: number) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      aiPadding: aiPadding,
-    }));
-  },
-  setOpenConfig: (openConfig: boolean) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      openConfig: openConfig,
-    }));
-  },
-  setFineTuneModels: (fineTuneModels: FineTuneModel[]) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      fineTuneModels: fineTuneModels,
-    }));
-  },
-  setTheme: (theme: Theme) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      theme: theme,
-    }));
-  },
-  setAutoTitle: (autoTitle: boolean) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      autoTitle: autoTitle,
-    }));
-  },
-  setAdvancedMode: (advancedMode: boolean) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      advancedMode: advancedMode,
-    }));
-  },
-  setDefaultChatConfig: (defaultChatConfig: ConfigInterface) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      defaultChatConfig: defaultChatConfig,
-    }));
-  },
-  setDefaultSystemMessage: (defaultSystemMessage: string) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      defaultSystemMessage: defaultSystemMessage,
-    }));
-  },
-  setActiveMenu: (activeMenu: string) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      activeMenu: activeMenu,
-    }));
-  },
-  setHideMenuOptions: (hideMenuOptions: boolean) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      hideMenuOptions: hideMenuOptions,
-    }));
-  },
-  setHideSideAIMenu: (hideSideAIMenu: boolean) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      hideSideAIMenu: hideSideAIMenu,
-    }));
-  },
-  setHideSideMenu: (hideSideMenu: boolean) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      hideSideMenu: hideSideMenu,
-    }));
-  },
-  setEnterToSubmit: (enterToSubmit: boolean) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      enterToSubmit: enterToSubmit,
-    }));
-  },
-  setInlineLatex: (inlineLatex: boolean) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      inlineLatex: inlineLatex,
-    }));
-  },
-  setMarkdownMode: (markdownMode: boolean) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      markdownMode: markdownMode,
-    }));
-  },
-  setCountTotalTokens: (countTotalTokens: boolean) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      countTotalTokens: countTotalTokens,
-    }));
-  },
-  setTotalTokenUsed: (totalTokenUsed: TotalTokenUsed) => {
-    set((prev: ConfigSlice) => ({
-      ...prev,
-      totalTokenUsed: totalTokenUsed,
-    }));
-  },
+});
+
+// Helper function to create all setter actions
+const createActions = (set: StoreApi<ConfigSlice>['setState']): ConfigSliceActions => ({
+  setAIPadding: createSetter<number>('aiPadding', set),
+  setOpenConfig: createSetter<boolean>('openConfig', set),
+  setFineTuneModels: createSetter<FineTuneModel[]>('fineTuneModels', set),
+  setTheme: createSetter<Theme>('theme', set),
+  setAutoTitle: createSetter<boolean>('autoTitle', set),
+  setAdvancedMode: createSetter<boolean>('advancedMode', set),
+  setDefaultChatConfig: createSetter<ConfigInterface>('defaultChatConfig', set),
+  setDefaultSystemMessage: createSetter<string>('defaultSystemMessage', set),
+  setActiveMenu: createSetter<string>('activeMenu', set),
+  setHideMenuOptions: createSetter<boolean>('hideMenuOptions', set),
+  setHideSideAIMenu: createSetter<boolean>('hideSideAIMenu', set),
+  setHideSideMenu: createSetter<boolean>('hideSideMenu', set),
+  setEnterToSubmit: createSetter<boolean>('enterToSubmit', set),
+  setInlineLatex: createSetter<boolean>('inlineLatex', set),
+  setMarkdownMode: createSetter<boolean>('markdownMode', set),
+  setCountTotalTokens: createSetter<boolean>('countTotalTokens', set),
+  setTotalTokenUsed: createSetter<TotalTokenUsed>('totalTokenUsed', set),
+});
+
+// Type for actions only
+type ConfigSliceActions = Pick<
+  ConfigSlice,
+  | 'setAIPadding'
+  | 'setOpenConfig'
+  | 'setFineTuneModels'
+  | 'setTheme'
+  | 'setAutoTitle'
+  | 'setAdvancedMode'
+  | 'setDefaultChatConfig'
+  | 'setDefaultSystemMessage'
+  | 'setActiveMenu'
+  | 'setHideMenuOptions'
+  | 'setHideSideAIMenu'
+  | 'setHideSideMenu'
+  | 'setEnterToSubmit'
+  | 'setInlineLatex'
+  | 'setMarkdownMode'
+  | 'setCountTotalTokens'
+  | 'setTotalTokenUsed'
+>;
+
+export const createConfigSlice: StoreSlice<ConfigSlice> = (set, _get) => ({
+  ...createInitialState(),
+  ...createActions(set),
 });

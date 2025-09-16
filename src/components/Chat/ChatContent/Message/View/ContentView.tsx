@@ -1,4 +1,4 @@
-import React, { DetailedHTMLProps, HTMLAttributes, memo, useState } from 'react';
+import React, { DetailedHTMLProps, HTMLAttributes, memo, useState, useCallback } from 'react';
 
 import ReactMarkdown from 'react-markdown';
 import { CodeProps, ReactMarkdownProps } from 'react-markdown/lib/ast-to-react';
@@ -25,6 +25,115 @@ import EditButton from './Button/EditButton';
 import DeleteButton from './Button/DeleteButton';
 
 import CodeBlock from '../CodeBlock';
+
+// Custom hook for message actions
+interface MessageActionsParams {
+  messageIndex: number;
+  chats: DocumentInterface[] | null;
+  setChats: (chats: DocumentInterface[]) => void;
+  currentChatIndex: number;
+  content: string;
+  handleSubmit: () => void;
+}
+
+const useMessageActions = (params: MessageActionsParams) => {
+  const { messageIndex, chats, setChats, currentChatIndex, content, handleSubmit } = params;
+  const handleDelete = useCallback(() => {
+    if (!chats) return;
+
+    const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
+
+    updatedChats[currentChatIndex].messageCurrent.messages.splice(messageIndex, 1);
+    setChats(updatedChats);
+  }, [chats, setChats, currentChatIndex, messageIndex]);
+
+  const handleMove = useCallback(
+    (direction: 'up' | 'down') => {
+      if (!chats) return;
+
+      const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
+
+      const updatedMessages = updatedChats[currentChatIndex].messageCurrent.messages;
+
+      const temp = updatedMessages[messageIndex];
+      if (direction === 'up') {
+        updatedMessages[messageIndex] = updatedMessages[messageIndex - 1];
+
+        updatedMessages[messageIndex - 1] = temp;
+      } else {
+        updatedMessages[messageIndex] = updatedMessages[messageIndex + 1];
+
+        updatedMessages[messageIndex + 1] = temp;
+      }
+      setChats(updatedChats);
+    },
+    [chats, setChats, currentChatIndex, messageIndex]
+  );
+
+  const handleMoveUp = useCallback(() => handleMove('up'), [handleMove]);
+  const handleMoveDown = useCallback(() => handleMove('down'), [handleMove]);
+
+  const handleRefresh = useCallback(() => {
+    if (!chats) return;
+
+    const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
+
+    const updatedMessages = updatedChats[currentChatIndex].messageCurrent.messages;
+    updatedMessages.splice(updatedMessages.length - 1, 1);
+    setChats(updatedChats);
+    handleSubmit();
+  }, [chats, setChats, currentChatIndex, handleSubmit]);
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(content);
+  }, [content]);
+
+  return {
+    handleDelete,
+    handleMove,
+    handleMoveUp,
+    handleMoveDown,
+    handleRefresh,
+    handleCopy,
+  };
+};
+
+// Custom hook for markdown rendering
+const useMarkdownRenderer = (inlineLatex: boolean, markdownMode: boolean) => {
+  const renderContent = useCallback(
+    (content: string) => {
+      if (markdownMode) {
+        return (
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: inlineLatex }]]}
+            rehypePlugins={[
+              rehypeKatex,
+              [
+                rehypeHighlight,
+                {
+                  detect: true,
+                  ignoreMissing: true,
+                  subset: codeLanguageSubset,
+                },
+              ],
+            ]}
+            linkTarget="_new"
+            components={{
+              code,
+              p,
+            }}
+          >
+            {content}
+          </ReactMarkdown>
+        );
+      }
+      return <span className="whitespace-pre-wrap">{content}</span>;
+    },
+    [inlineLatex, markdownMode]
+  );
+
+  return { renderContent };
+};
 
 const ContentView = memo(
   ({
@@ -53,77 +162,22 @@ const ContentView = memo(
     const inlineLatex = useStore(state => state.inlineLatex);
     const markdownMode = useStore(state => state.markdownMode);
 
-    const handleDelete = () => {
-      if (!chats) return;
-      const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
-      updatedChats[currentChatIndex].messageCurrent.messages.splice(messageIndex, 1);
-      setChats(updatedChats);
-    };
+    const { handleDelete, handleMoveUp, handleMoveDown, handleRefresh, handleCopy } =
+      useMessageActions({
+        messageIndex,
+        chats: chats ?? null,
+        setChats,
+        currentChatIndex,
+        content,
+        handleSubmit,
+      });
 
-    const handleMove = (direction: 'up' | 'down') => {
-      if (!chats) return;
-      const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
-      const updatedMessages = updatedChats[currentChatIndex].messageCurrent.messages;
-      const temp = updatedMessages[messageIndex];
-      if (direction === 'up') {
-        updatedMessages[messageIndex] = updatedMessages[messageIndex - 1];
-        updatedMessages[messageIndex - 1] = temp;
-      } else {
-        updatedMessages[messageIndex] = updatedMessages[messageIndex + 1];
-        updatedMessages[messageIndex + 1] = temp;
-      }
-      setChats(updatedChats);
-    };
-
-    const handleMoveUp = () => {
-      handleMove('up');
-    };
-
-    const handleMoveDown = () => {
-      handleMove('down');
-    };
-
-    const handleRefresh = () => {
-      if (!chats) return;
-      const updatedChats: DocumentInterface[] = JSON.parse(JSON.stringify(chats));
-      const updatedMessages = updatedChats[currentChatIndex].messageCurrent.messages;
-      updatedMessages.splice(updatedMessages.length - 1, 1);
-      setChats(updatedChats);
-      handleSubmit();
-    };
-
-    const handleCopy = () => {
-      navigator.clipboard.writeText(content);
-    };
+    const { renderContent } = useMarkdownRenderer(inlineLatex, markdownMode);
 
     return (
       <>
         <div className="markdown prose w-full md:max-w-full break-words dark:prose-invert dark share-gpt-message">
-          {markdownMode ? (
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: inlineLatex }]]}
-              rehypePlugins={[
-                rehypeKatex,
-                [
-                  rehypeHighlight,
-                  {
-                    detect: true,
-                    ignoreMissing: true,
-                    subset: codeLanguageSubset,
-                  },
-                ],
-              ]}
-              linkTarget="_new"
-              components={{
-                code,
-                p,
-              }}
-            >
-              {content}
-            </ReactMarkdown>
-          ) : (
-            <span className="whitespace-pre-wrap">{content}</span>
-          )}
+          {renderContent(content)}
         </div>
         <div className="flex justify-end gap-2 w-full mt-2">
           {isDelete || (

@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef } from 'react';
 import useStore from '@store/store';
 import MobileBar from '../MobileBar';
 import { InitialEditorStateType } from '@lexical/react/LexicalComposer';
@@ -29,7 +29,7 @@ const Document = () => {
 
   let editorState: InitialEditorStateType | undefined | null = null;
 
-  if (chats && chats[currentChatIndex]) {
+  if (chats && Array.isArray(chats) && chats[currentChatIndex]) {
     editorState = chats[currentChatIndex].editorState;
   }
 
@@ -42,7 +42,7 @@ const Document = () => {
 
     if (editorState === undefined || editorState === null || editorState === '') {
       const temp = chats;
-      if (temp) {
+      if (temp && Array.isArray(temp) && temp[currentChatIndex]) {
         temp[currentChatIndex].editorState = value;
         setChats(temp);
       }
@@ -78,34 +78,15 @@ const Document = () => {
     ],
   };
 
-  const [refresh, setRefresh] = useState(false);
-
-  useEffect(() => {
-    // This code will run whenever currentChatIndex changes
-    // You can perform any necessary actions or updates here
-    // For example, you can force a refresh of the component by updating the refresh state variable
-    setRefresh(!refresh);
-  }, [currentChatIndex, refresh]);
-
   function onChange(change: EditorState) {
-    if (chats) {
-      let temp = chats;
-      if (temp[currentChatIndex].editorState !== JSON.stringify(change)) {
-        chats[currentChatIndex].edited = true;
-      }
-      chats[currentChatIndex].editorState = JSON.stringify(change);
+    if (!chats || !Array.isArray(chats) || !chats[currentChatIndex]) return;
+    const temp = chats;
+    const serialized = JSON.stringify(change);
+    if (temp[currentChatIndex].editorState !== serialized) {
+      temp[currentChatIndex].edited = true;
+      temp[currentChatIndex].editorState = serialized;
       setChats(temp);
     }
-    change.read(() => {
-      if (chats) {
-        let temp = chats;
-        if (temp[currentChatIndex].editorState !== JSON.stringify(change)) {
-          chats[currentChatIndex].edited = true;
-        }
-        chats[currentChatIndex].editorState = JSON.stringify(change);
-        setChats(temp);
-      }
-    });
   }
 
   return (

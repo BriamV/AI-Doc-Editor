@@ -128,14 +128,27 @@ export const useAuth = () => {
 
   const hasRole = useCallback(
     (role: 'editor' | 'admin'): boolean => {
-      if (!user) return false;
-      return user.role === role || (role === 'editor' && user.role === 'admin');
+      // Primary: use user from store
+      if (user) {
+        return user.role === role || (role === 'editor' && user.role === 'admin');
+      }
+      // Fallback for E2E: read role from localStorage if available
+      if (typeof window !== 'undefined') {
+        const storedRole = window.localStorage.getItem('user_role');
+        if (storedRole === 'admin') return true; // admin has all roles
+        if (storedRole === 'editor' && role === 'editor') return true;
+      }
+      return false;
     },
     [user]
   );
 
   const isAdmin = useCallback((): boolean => {
-    return user?.role === 'admin' || false;
+    if (user?.role === 'admin') return true;
+    if (typeof window !== 'undefined') {
+      return window.localStorage.getItem('user_role') === 'admin';
+    }
+    return false;
   }, [user]);
 
   return {

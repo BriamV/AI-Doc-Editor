@@ -1,2 +1,9 @@
 # Auto detect text files and perform LF normalization
-* text=auto
+* text=auto eol=lf
+
+# Explicitly set line endings for text files
+*.{js,jsx,ts,tsx,json,md,yml,yaml} text eol=lf
+*.{css,scss,html,svg} text eol=lf
+
+# Binary files
+*.{png,jpg,jpeg,gif,ico,woff,woff2,ttf,eot} binary

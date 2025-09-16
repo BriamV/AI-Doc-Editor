@@ -1,9 +1,9 @@
 #!/bin/bash
-# Status Updater for Sub Tareas v2.md
+# Status Updater for Sub Tareas v2.md - Simplified & Robust
 # Usage: ./tools/status-updater.sh T-01 "Completado 100%"
 
-TASK_ID="$1"
-NEW_STATUS="$2"
+TASK_ID="${1:-}"
+NEW_STATUS="${2:-}"
 FILE="docs/Sub Tareas v2.md"
 
 if [[ -z "$TASK_ID" || -z "$NEW_STATUS" ]]; then
@@ -19,22 +19,28 @@ fi
 
 echo "🔄 Updating Task $TASK_ID status to: $NEW_STATUS"
 
+# Check if task exists
+TASK_LINE=$(grep -n "### \*\*Tarea ${TASK_ID}:" "$FILE" || true)
+if [[ -z "$TASK_LINE" ]]; then
+    echo "❌ Task $TASK_ID not found"
+    echo "📋 Available tasks:"
+    grep -o "T-[0-9]\+" "$FILE" | sort -u | head -5
+    exit 1
+fi
+
 # Create backup
 cp "$FILE" "${FILE}.backup.$(date +%Y%m%d_%H%M%S)"
 
-# Update status using sed - find the task and update its status line
+# Update using simple sed replacement
 sed -i "/### \*\*Tarea ${TASK_ID}:/,/### \*\*Tarea/ {
-    s/- \*\*Estado:\*\* .*/- **Estado:** ${NEW_STATUS}/
+    s/^- \*\*Estado:\*\* .*/- **Estado:** ${NEW_STATUS}/
 }" "$FILE"
 
-# Verify the change was made
-if grep -q "- \*\*Estado:\*\* ${NEW_STATUS}" "$FILE"; then
+# Verify the change
+if grep -A 20 "### \*\*Tarea ${TASK_ID}:" "$FILE" | grep -q "Estado:.*${NEW_STATUS}"; then
     echo "✅ Successfully updated $TASK_ID status"
-    echo "📋 Current status for $TASK_ID:"
-    grep -A 10 "### \*\*Tarea ${TASK_ID}:" "$FILE" | grep "Estado:" || echo "❌ Status line not found"
+    echo "📋 Current status:"
+    grep -A 20 "### \*\*Tarea ${TASK_ID}:" "$FILE" | grep "Estado:" | head -1
 else
-    echo "❌ Failed to update status. Check if task ID exists: $TASK_ID"
-    echo "📋 Available tasks:"
-    grep "### \*\*Tarea" "$FILE" | head -5
-    echo "   ... (showing first 5 tasks)"
+    echo "❌ Update may have failed. Please check manually."
 fi

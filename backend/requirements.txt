@@ -18,7 +18,9 @@ requests==2.32.3
 # Database
 sqlalchemy==2.0.31
 alembic==1.13.2
-asyncpg==0.29.0  # PostgreSQL async driver
+# asyncpg currently lacks wheels for Python 3.13 on Windows and fails to build.
+# Install it from requirements-optional.txt if you need PostgreSQL async driver.
+# asyncpg==0.29.0  # PostgreSQL async driver
 aiosqlite==0.20.0  # SQLite async driver (for development)
 
 # Encryption
