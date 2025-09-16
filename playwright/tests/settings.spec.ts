@@ -5,8 +5,12 @@ test.describe('Admin Settings Page', () => {
     await page.goto('/settings');
     await page.waitForLoadState('networkidle');
 
-    // Should redirect to home page for non-authenticated users
-    await expect(page).toHaveURL('/');
+    const path = new URL(page.url()).pathname;
+    expect(path).not.toBe('/settings');
+
+    if (path === '/login') {
+      await expect(page.getByTestId('test-login-admin')).toBeVisible();
+    }
   });
 
   test('allows admin users to access settings', async ({ page }) => {

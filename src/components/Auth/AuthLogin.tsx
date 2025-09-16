@@ -177,9 +177,23 @@ const AuthLogin: React.FC<AuthLoginProps> = ({ onSuccess, onError }) => {
       role,
       provider: 'google',
     };
-    // Set tokens/role for guards and API clients
-    window.localStorage.setItem('auth_token', 'mock-jwt-token');
+
+    // Security: Generate secure test token with expiry
+    const generateSecureTestToken = (userRole: string): string => {
+      const timestamp = Date.now();
+      const randomBytes = crypto.getRandomValues(new Uint8Array(16));
+      const randomHex = Array.from(randomBytes, byte => byte.toString(16).padStart(2, '')).join('');
+      return btoa(`test-${userRole}-${timestamp}-${randomHex}`);
+    };
+
+    // Set secure tokens with expiry (1 hour for testing)
+    const secureToken = generateSecureTestToken(role);
+    const expiry = Date.now() + 60 * 60 * 1000; // 1 hour
+
+    window.localStorage.setItem('auth_token', secureToken);
     window.localStorage.setItem('user_role', role);
+    window.localStorage.setItem('token_expiry', expiry.toString());
+
     // Use test interface exposed in main.tsx
     window.app?.login(testUser);
     // Navigate to home after test login

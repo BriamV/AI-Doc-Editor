@@ -1,11 +1,13 @@
-import { test, expect } from '@playwright/test';
+﻿import { test, expect } from '@playwright/test';
 import { AuditTestHelpers } from '../utils/audit-helpers';
 
 test.describe('Audit Log Viewer E2E Tests', () => {
   let auditHelpers: AuditTestHelpers;
 
   test.beforeEach(async ({ page }) => {
-    auditHelpers = new AuditTestHelpers(page);
+    // Use real backend in local dev, mocks in CI for faster execution
+    const useRealBackend = !process.env.CI;
+    auditHelpers = new AuditTestHelpers(page, useRealBackend);
 
     // Handle any console errors that aren't test failures
     page.on('console', msg => {
@@ -13,6 +15,9 @@ test.describe('Audit Log Viewer E2E Tests', () => {
         console.log('Console error:', msg.text());
       }
     });
+
+    // Setup backend integration (real or mocked based on environment)
+    await auditHelpers.setupBackendIntegration();
 
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -63,8 +68,7 @@ test.describe('Audit Log Viewer E2E Tests', () => {
       await expect(page).toHaveURL('/');
 
       // Now try to navigate to audit logs - should show access denied
-      await page.goto('/admin/audit-logs');
-      await page.waitForLoadState('networkidle');
+      await auditHelpers.navigateToAuditLogs();
 
       // Should show access denied message (inline, not redirect)
       await expect(page.getByText(/access denied/i)).toBeVisible();
@@ -84,8 +88,7 @@ test.describe('Audit Log Viewer E2E Tests', () => {
       await expect(page).toHaveURL('/');
 
       // Now navigate to audit logs - should work
-      await page.goto('/admin/audit-logs');
-      await page.waitForLoadState('networkidle');
+      await auditHelpers.navigateToAuditLogs();
 
       // Should see audit logs interface
       await expect(page.getByTestId('audit-log-table')).toBeVisible({ timeout: 10000 });
@@ -103,17 +106,17 @@ test.describe('Audit Log Viewer E2E Tests', () => {
     });
 
     test('should display audit logs table with correct data', async ({ page }) => {
-      await page.goto('/admin/audit-logs');
-      await page.waitForLoadState('networkidle');
+      await auditHelpers.navigateToAuditLogs();
 
       // Wait for table to load
       await expect(page.getByTestId('audit-log-table')).toBeVisible();
 
-      // Check table headers
-      await expect(page.getByText('Timestamp')).toBeVisible();
-      await expect(page.getByText('User')).toBeVisible();
-      await expect(page.getByText('Action')).toBeVisible();
-      await expect(page.getByText('Status')).toBeVisible();
+      // Check table headers (target the th elements specifically)
+      const table = page.getByTestId('audit-log-table');
+      await expect(table.locator('th').getByText('Timestamp')).toBeVisible();
+      await expect(table.locator('th').getByText('User')).toBeVisible();
+      await expect(table.locator('th').getByText('Action')).toBeVisible();
+      await expect(table.locator('th').getByText('Status')).toBeVisible();
     });
   });
 
@@ -125,17 +128,18 @@ test.describe('Audit Log Viewer E2E Tests', () => {
       await expect(page.getByTestId('test-login-admin')).toBeVisible();
       await page.getByTestId('test-login-admin').click();
       await expect(page).toHaveURL('/');
-
-      await page.goto('/admin/audit-logs');
-      await page.waitForLoadState('networkidle');
+      await auditHelpers.navigateToAuditLogs();
     });
 
     test('should filter by user email', async ({ page }) => {
+      // Ensure filters are expanded first
+      await auditHelpers.ensureFiltersExpanded();
+
       // Wait for filters to be available
       await expect(page.getByTestId('filter-user-email')).toBeVisible();
 
-      // Enter a user email
-      await page.fill('[data-testid="filter-user-email"]', 'test@example.com');
+      // Select a user email from dropdown
+      await page.selectOption('[data-testid="filter-user-email"]', 'admin@example.com');
 
       // Click apply filters
       await page.getByTestId('apply-filters').click();
@@ -148,11 +152,14 @@ test.describe('Audit Log Viewer E2E Tests', () => {
     });
 
     test('should filter by date range', async ({ page }) => {
-      // Set date from
-      await page.fill('[data-testid="filter-date-from"]', '2024-01-01');
+      // Ensure filters are expanded first
+      await auditHelpers.ensureFiltersExpanded();
 
-      // Set date to
-      await page.fill('[data-testid="filter-date-to"]', '2024-12-31');
+      // Set date from (datetime-local format required)
+      await page.fill('[data-testid="filter-date-from"]', '2024-01-01T00:00');
+
+      // Set date to (datetime-local format required)
+      await page.fill('[data-testid="filter-date-to"]', '2024-12-31T23:59');
 
       // Apply filters
       await page.getByTestId('apply-filters').click();
@@ -170,9 +177,7 @@ test.describe('Audit Log Viewer E2E Tests', () => {
       await expect(page.getByTestId('test-login-admin')).toBeVisible();
       await page.getByTestId('test-login-admin').click();
       await expect(page).toHaveURL('/');
-
-      await page.goto('/admin/audit-logs');
-      await page.waitForLoadState('networkidle');
+      await auditHelpers.navigateToAuditLogs();
     });
 
     test('should sort by timestamp', async ({ page }) => {
@@ -194,9 +199,7 @@ test.describe('Audit Log Viewer E2E Tests', () => {
       await expect(page.getByTestId('test-login-admin')).toBeVisible();
       await page.getByTestId('test-login-admin').click();
       await expect(page).toHaveURL('/');
-
-      await page.goto('/admin/audit-logs');
-      await page.waitForLoadState('networkidle');
+      await auditHelpers.navigateToAuditLogs();
     });
 
     test('should display pagination controls', async ({ page }) => {
@@ -219,9 +222,7 @@ test.describe('Audit Log Viewer E2E Tests', () => {
       await expect(page.getByTestId('test-login-admin')).toBeVisible();
       await page.getByTestId('test-login-admin').click();
       await expect(page).toHaveURL('/');
-
-      await page.goto('/admin/audit-logs');
-      await page.waitForLoadState('networkidle');
+      await auditHelpers.navigateToAuditLogs();
     });
 
     test('should select individual rows', async ({ page }) => {
@@ -247,9 +248,7 @@ test.describe('Audit Log Viewer E2E Tests', () => {
       await expect(page.getByTestId('test-login-admin')).toBeVisible();
       await page.getByTestId('test-login-admin').click();
       await expect(page).toHaveURL('/');
-
-      await page.goto('/admin/audit-logs');
-      await page.waitForLoadState('networkidle');
+      await auditHelpers.navigateToAuditLogs();
     });
 
     test('should toggle auto-refresh', async ({ page }) => {
@@ -281,9 +280,7 @@ test.describe('Audit Log Viewer E2E Tests', () => {
     test('should handle API errors gracefully', async ({ page }) => {
       // Mock API error
       await page.route('**/api/audit/**', route => route.abort());
-
-      await page.goto('/admin/audit-logs');
-      await page.waitForLoadState('networkidle');
+      await auditHelpers.navigateToAuditLogs();
 
       // Should still show the page structure even with API errors
       await expect(page.locator('body')).toBeVisible();
@@ -302,9 +299,7 @@ test.describe('Audit Log Viewer E2E Tests', () => {
 
     test('should adapt to mobile viewport', async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 667 });
-
-      await page.goto('/admin/audit-logs');
-      await page.waitForLoadState('networkidle');
+      await auditHelpers.navigateToAuditLogs();
 
       // Should still be functional on mobile
       await expect(page.locator('body')).toBeVisible();

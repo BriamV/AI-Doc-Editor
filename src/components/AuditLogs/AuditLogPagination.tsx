@@ -164,7 +164,7 @@ const AuditLogPagination: React.FC = () => {
                 defaultValue={page}
                 className="w-16 text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 data-testid="goto-page-input"
-                onKeyDown={(e) => {
+                onKeyDown={e => {
                   if (e.key === 'Enter') {
                     const newPage = parseInt((e.target as HTMLInputElement).value);
                     if (newPage >= 1 && newPage <= totalPages) {

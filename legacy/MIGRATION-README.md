@@ -1,8 +1,12 @@
-# Cypress to Playwright Migration
+﻿# Cypress to Playwright Migration
 
 ## Migration Completed: September 15, 2025
 
 This directory contains the legacy Cypress testing framework files that have been replaced by Playwright as the primary E2E testing solution.
+
+## Current Scope
+- Desktop web journeys on laptop/desktop browsers (Chromium project).
+- Mobile and tablet device coverage is out of scope for this phase; Playwright mobile projects are disabled until needed.
 
 ## What Was Migrated
 
@@ -27,7 +31,7 @@ This directory contains the legacy Cypress testing framework files that have bee
 
 ### Enhanced Features
 - **Multi-browser support**: Chrome, Firefox, Safari, Edge
-- **Mobile testing**: Built-in device emulation
+- **Mobile testing (future option)**: Built-in device emulation (available via Playwright but currently disabled in scope)
 - **Better debugging**: Built-in trace viewer and inspector
 - **CI integration**: Native GitHub Actions support
 

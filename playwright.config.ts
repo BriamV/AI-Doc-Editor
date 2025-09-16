@@ -20,9 +20,11 @@ export default defineConfig({
     actionTimeout: 10000,
     navigationTimeout: 15000,
     // Increase timeouts for stability
-    expect: {
-      timeout: 10000,
-    },
+  },
+
+  // Global expect configuration
+  expect: {
+    timeout: 10000,
   },
 
   projects: [
@@ -47,22 +49,16 @@ export default defineConfig({
     //   use: { ...devices['Desktop Safari'] },
     // },
 
-    // Mobile testing configurations
-    {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
-    },
+    // Mobile configurations are intentionally disabled for the desktop-only scope
   ],
 
-  webServer: {
+  webServer: process.env.CI ? undefined : {
+    // In CI: Services are pre-started by workflow, don't start webServer
+    // In local dev: Start full-stack development server for real E2E testing
     command: 'yarn dev',
     url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
+    reuseExistingServer: true, // Allow reusing existing dev server
+    timeout: 180 * 1000, // Full-stack startup requires more time
     env: {
       MODE: 'test',
     },

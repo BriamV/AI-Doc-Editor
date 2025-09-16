@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AutoScrollContext, AutoScrollContextType } from './hooks';
 
 type Props = {
@@ -36,7 +36,7 @@ const AutoScrollContainer: React.FC<Props> = ({ className, children }) => {
     const target = scrollRef.current;
 
     // ResizeObserver with error handling to prevent loop errors in tests
-    const ro = new ResizeObserver((entries) => {
+    const ro = new ResizeObserver(_entries => {
       try {
         // Batch DOM reads and writes to prevent loops
         requestAnimationFrame(() => {
@@ -52,7 +52,7 @@ const AutoScrollContainer: React.FC<Props> = ({ className, children }) => {
       }
     });
 
-    const mo = new MutationObserver((mutations) => {
+    const mo = new MutationObserver(mutations => {
       try {
         // Only trigger on significant mutations to prevent excessive calls
         const hasSignificantChanges = mutations.some(
@@ -83,7 +83,7 @@ const AutoScrollContainer: React.FC<Props> = ({ className, children }) => {
       try {
         ro.disconnect();
         mo.disconnect();
-      } catch (error) {
+      } catch (_error) {
         // Ignore cleanup errors
       }
     };
