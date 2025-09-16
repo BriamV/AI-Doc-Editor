@@ -5,15 +5,13 @@
 import { ConfigInterface, MessageInterface } from '@type/document';
 import { isAzureEndpoint } from '@utils/api';
 
-export const getChatCompletion = async (params: {
-  endpoint: string;
-  messages: MessageInterface[];
-  config: ConfigInterface;
-  apiKey?: string;
-  customHeaders?: Record<string, string>;
-}) => {
-  const { endpoint: endpointParam, messages, config, apiKey, customHeaders } = params;
-  let endpoint = endpointParam;
+export const getChatCompletion = async (
+  endpoint: string,
+  messages: MessageInterface[],
+  config: ConfigInterface,
+  apiKey?: string,
+  customHeaders?: Record<string, string>
+) => {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...customHeaders,
@@ -52,15 +50,13 @@ export const getChatCompletion = async (params: {
   return data;
 };
 
-export const getChatCompletionStream = async (params: {
-  endpoint: string;
-  messages: MessageInterface[];
-  config: ConfigInterface;
-  apiKey?: string;
-  customHeaders?: Record<string, string>;
-}) => {
-  const { endpoint: endpointParam, messages, config, apiKey, customHeaders } = params;
-  let endpoint = endpointParam;
+export const getChatCompletionStream = async (
+  endpoint: string,
+  messages: MessageInterface[],
+  config: ConfigInterface,
+  apiKey?: string,
+  customHeaders?: Record<string, string>
+) => {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...customHeaders,

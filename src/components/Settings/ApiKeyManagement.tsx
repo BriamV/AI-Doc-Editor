@@ -164,8 +164,6 @@ const ApiKeyManagement: React.FC = () => {
             </label>
             <input
               type="password"
-              id="openai-api-key"
-              name="openai-api-key"
               value={apiKey}
               onChange={e => setApiKey(e.target.value)}
               placeholder="sk-..."

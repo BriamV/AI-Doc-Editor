@@ -9,15 +9,10 @@ const Toggle = ({
   isChecked: boolean;
   setIsChecked: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  // Generate a unique ID based on the label to ensure accessibility
-  const toggleId = `toggle-${label.toLowerCase().replace(/\s+/g, '-')}`;
-
   return (
     <label className="relative flex items-center cursor-pointer">
       <input
         type="checkbox"
-        id={toggleId}
-        name={toggleId}
         className="sr-only peer"
         checked={isChecked}
         onChange={() => {

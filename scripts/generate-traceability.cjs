@@ -1,258 +1,130 @@
 #!/usr/bin/env node
 /**
  * T-17: Traceability Matrix Generator
- * Generates traceability matrices in multiple formats (XLSX, JSON, Markdown)
- * mapping requirements ⇄ tasks ⇄ tests
- * 
- * Usage: node generate-traceability.cjs [--format=<xlsx|json|md|all>] [--output=<dir>]
+ * Generates docs/traceability.xlsx mapping requirements ⇄ tasks ⇄ tests
  */
 
-// Importar ExcelJS con ruta absoluta para evitar problemas de resolución
-const ExcelJS = require(require.resolve('exceljs'));
+const XLSX = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 
-// Importar los datos de trazabilidad del módulo compartido
-const traceabilityData = require('./generate-traceability-data.cjs');
+// Mock data for initial implementation
+// In future, this would parse actual PRD and WORK-PLAN files
+const traceabilityData = [
+  {
+    reqId: 'USR-001',
+    requirement: 'OAuth 2.0 Google/MS + JWT',
+    taskId: 'T-02',
+    taskName: 'OAuth 2.0 + JWT con Roles y Refresh Token',
+    testFile: 'cypress/e2e/auth.cy.ts',
+    testName: 'OAuth login flow',
+    status: 'Planned',
+    release: 'R0.WP2',
+    adr: 'ADR-009',
+  },
+  {
+    reqId: 'GEN-001',
+    requirement: 'Prompt libre generation',
+    taskId: 'T-05',
+    taskName: 'Planner Service (/plan)',
+    testFile: 'tests/api/planner.test.ts',
+    testName: 'Plan generation E2E',
+    status: 'Planned',
+    release: 'R1.WP2',
+    adr: 'ADR-010',
+  },
+  {
+    reqId: 'EDT-001',
+    requirement: 'Editor MD + comandos IA',
+    taskId: 'T-07',
+    taskName: 'Editor UI Core + Split View',
+    testFile: 'cypress/e2e/editor.cy.ts',
+    testName: 'Monaco editor integration',
+    status: 'Planned',
+    release: 'R2.WP1',
+    adr: 'ADR-011',
+  },
+  {
+    reqId: 'PERF-001',
+    requirement: 'Document generation ≤8 min',
+    taskId: 'T-20',
+    taskName: 'Bench E2E Performance',
+    testFile: 'tests/performance/generation.test.ts',
+    testName: 'End-to-end generation benchmark',
+    status: 'Planned',
+    release: 'R6.WP3',
+    adr: 'ADR-012',
+  },
+  {
+    reqId: 'SEC-001',
+    requirement: 'AES-256 at-rest encryption',
+    taskId: 'T-12',
+    taskName: 'Credential Store & Crypto',
+    testFile: 'tests/security/encryption.test.ts',
+    testName: 'Encryption validation',
+    status: 'Planned',
+    release: 'R0.WP3',
+    adr: 'ADR-009',
+  },
+];
 
-// Procesar argumentos de línea de comandos
-const args = process.argv.slice(2);
-const format = args.find(arg => arg.startsWith('--format='))?.split('=')[1] || 'all';
-const outputArg = args.find(arg => arg.startsWith('--output='))?.split('=')[1];
-const outputDir = outputArg || path.join(__dirname, '..', 'docs');
+// Generate matrix data
+const matrixData = traceabilityData.map(item => ({
+  'Requirement ID': item.reqId,
+  'Requirement Description': item.requirement,
+  'Task ID': item.taskId,
+  'Task Name': item.taskName,
+  'Test File': item.testFile,
+  'Test Description': item.testName,
+  Status: item.status,
+  Release: item.release,
+  'Related ADR': item.adr,
+  'Last Updated': new Date().toISOString().split('T')[0],
+}));
 
-// Asegurarse de que el directorio de salida existe
-if (!fs.existsSync(outputDir)) {
-  fs.mkdirSync(outputDir, { recursive: true });
+// Create workbook
+const wb = XLSX.utils.book_new();
+
+// Add main traceability sheet
+const ws1 = XLSX.utils.json_to_sheet(matrixData);
+XLSX.utils.book_append_sheet(wb, ws1, 'Traceability Matrix');
+
+// Add summary sheet
+const summaryData = [
+  { Metric: 'Total Requirements', Value: new Set(traceabilityData.map(i => i.reqId)).size },
+  { Metric: 'Total Tasks', Value: new Set(traceabilityData.map(i => i.taskId)).size },
+  { Metric: 'Total Test Files', Value: new Set(traceabilityData.map(i => i.testFile)).size },
+  { Metric: 'Coverage Percentage', Value: '100%' },
+  { Metric: 'Last Generated', Value: new Date().toISOString() },
+];
+
+const ws2 = XLSX.utils.json_to_sheet(summaryData);
+XLSX.utils.book_append_sheet(wb, ws2, 'Summary');
+
+// Add requirements breakdown
+const reqBreakdown = [
+  { Category: 'Authentication', Count: 1, Example: 'USR-001' },
+  { Category: 'Generation', Count: 1, Example: 'GEN-001' },
+  { Category: 'Editor', Count: 1, Example: 'EDT-001' },
+  { Category: 'Performance', Count: 1, Example: 'PERF-001' },
+  { Category: 'Security', Count: 1, Example: 'SEC-001' },
+];
+
+const ws3 = XLSX.utils.json_to_sheet(reqBreakdown);
+XLSX.utils.book_append_sheet(wb, ws3, 'Requirements Breakdown');
+
+// Ensure docs directory exists
+const docsDir = path.join(__dirname, '..', 'docs');
+if (!fs.existsSync(docsDir)) {
+  fs.mkdirSync(docsDir, { recursive: true });
 }
 
-// Función para generar el archivo XLSX
-function generateXlsx() {
-  // Generar datos para el Excel
-  const matrixData = traceabilityData.map(item => ({
-    'Requirement ID': item.reqId,
-    'Requirement Description': item.requirement,
-    'Task ID': item.taskId,
-    'Task Name': item.taskName,
-    'Test File': item.testFile,
-    'Test Description': item.testName || '',
-    Status: item.status,
-    Release: item.release,
-    'Related ADR': item.adr || '',
-    'Last Updated': new Date().toISOString().split('T')[0],
-  }));
+// Write file
+const outputPath = path.join(docsDir, 'traceability.xlsx');
+XLSX.writeFile(wb, outputPath);
 
-  // Crear workbook con ExcelJS
-  const wb = new ExcelJS.Workbook();
-  wb.creator = 'AI-Doc-Editor';
-  wb.lastModifiedBy = 'Traceability Generator';
-  wb.created = new Date();
-  wb.modified = new Date();
-
-  // ===== SECCIÓN: Hoja principal de trazabilidad =====
-  // Añadir hoja principal de trazabilidad
-  const ws1 = wb.addWorksheet('Traceability Matrix');
-  
-  // Definir encabezados
-  const headers = [
-    'Requirement ID', 'Requirement Description', 'Task ID', 'Task Name', 
-    'Test File', 'Test Description', 'Status', 'Release', 'Related ADR', 'Last Updated'
-  ];
-  ws1.addRow(headers);
-  
-  // Dar formato a encabezados
-  ws1.getRow(1).font = { bold: true };
-  ws1.getRow(1).fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FFD3D3D3' }
-  };
-  
-  // Añadir datos
-  matrixData.forEach(item => {
-    ws1.addRow(Object.values(item));
-  });
-  
-  // Auto-ajustar columnas
-  ws1.columns.forEach(column => {
-    let maxLength = 0;
-    column.eachCell({ includeEmpty: true }, cell => {
-      const columnLength = cell.value ? cell.value.toString().length : 10;
-      if (columnLength > maxLength) {
-        maxLength = columnLength;
-      }
-    });
-    column.width = Math.min(maxLength + 2, 50); // Máximo 50 caracteres de ancho
-  });
-
-  // ===== SECCIÓN: Hoja de resumen =====
-  // Añadir hoja de resumen
-  const uniqueReqs = new Set(traceabilityData.map(i => i.reqId));
-  const uniqueTasks = new Set(traceabilityData.map(i => i.taskId));
-  const uniqueTests = new Set(traceabilityData.map(i => i.testFile));
-  
-  const summaryData = [
-    { Metric: 'Total Requirements', Value: uniqueReqs.size },
-    { Metric: 'Total Tasks', Value: uniqueTasks.size },
-    { Metric: 'Total Test Files', Value: uniqueTests.size },
-    { Metric: 'Coverage Percentage', Value: '100%' },
-    { Metric: 'Last Generated', Value: new Date().toISOString() },
-  ];
-
-  const ws2 = wb.addWorksheet('Summary');
-  ws2.addRow(['Metric', 'Value']);
-  ws2.getRow(1).font = { bold: true };
-  
-  summaryData.forEach(item => {
-    ws2.addRow([item.Metric, item.Value]);
-  });
-  
-  // Auto-ajustar columnas
-  ws2.columns.forEach(column => {
-    let maxLength = 0;
-    column.eachCell({ includeEmpty: true }, cell => {
-      const columnLength = cell.value ? cell.value.toString().length : 10;
-      if (columnLength > maxLength) {
-        maxLength = columnLength;
-      }
-    });
-    column.width = maxLength + 2;
-  });
-
-  // ===== SECCIÓN: Desglose de requisitos =====
-  // Añadir desglose de requisitos
-  const categories = [
-    { name: 'Authentication', prefix: 'USR' },
-    { name: 'Generation', prefix: 'GEN' },
-    { name: 'Editor', prefix: 'EDT' },
-    { name: 'Performance', prefix: 'PERF' },
-    { name: 'Security', prefix: 'SEC' }
-  ];
-  
-  const reqBreakdown = categories.map(cat => {
-    const count = traceabilityData.filter(i => i.reqId.startsWith(cat.prefix)).length;
-    const example = traceabilityData.find(i => i.reqId.startsWith(cat.prefix))?.reqId || 'N/A';
-    return { Category: cat.name, Count: count, Example: example };
-  });
-
-  const ws3 = wb.addWorksheet('Requirements Breakdown');
-  ws3.addRow(['Category', 'Count', 'Example']);
-  ws3.getRow(1).font = { bold: true };
-  
-  reqBreakdown.forEach(item => {
-    ws3.addRow([item.Category, item.Count, item.Example]);
-  });
-  
-  // Auto-ajustar columnas
-  ws3.columns.forEach(column => {
-    let maxLength = 0;
-    column.eachCell({ includeEmpty: true }, cell => {
-      const columnLength = cell.value ? cell.value.toString().length : 10;
-      if (columnLength > maxLength) {
-        maxLength = columnLength;
-      }
-    });
-    column.width = maxLength + 2;
-  });
-
-  // Escribir archivo
-  const outputPath = path.join(outputDir, 'traceability.xlsx');
-  wb.xlsx.writeFile(outputPath);
-
-  return outputPath;
-}
-
-// Función para generar el archivo JSON
-function generateJson() {
-  const jsonOutputPath = path.join(outputDir, 'traceability.json');
-  fs.writeFileSync(jsonOutputPath, JSON.stringify(traceabilityData, null, 2));
-  return jsonOutputPath;
-}
-
-// Función para generar el archivo Markdown
-function generateMarkdown() {
-  const mdOutputPath = path.join(outputDir, 'traceability.md');
-  
-  // Generar contenido Markdown
-  let mdContent = '# Matriz de Trazabilidad\n\n';
-  
-  // Tabla principal
-  mdContent += '## Mapeo de Requisitos, Tareas y Pruebas\n\n';
-  mdContent += '| Req ID | Requisito | Tarea ID | Nombre de Tarea | Archivo de Prueba | Estado | Release |\n';
-  mdContent += '|--------|----------|---------|----------------|-----------------|--------|--------:|\n';
-  
-  traceabilityData.forEach(item => {
-    mdContent += `| ${item.reqId} | ${item.requirement} | ${item.taskId} | ${item.taskName} | `;
-    mdContent += `\`${item.testFile}\` | ${item.status} | ${item.release} |\n`;
-  });
-  
-  // Resumen
-  mdContent += '\n## Resumen\n\n';
-  const uniqueReqs = new Set(traceabilityData.map(i => i.reqId));
-  const uniqueTasks = new Set(traceabilityData.map(i => i.taskId));
-  const uniqueTests = new Set(traceabilityData.map(i => i.testFile));
-  
-  mdContent += `- **Total de Requisitos**: ${uniqueReqs.size}\n`;
-  mdContent += `- **Total de Tareas**: ${uniqueTasks.size}\n`;
-  mdContent += `- **Total de Archivos de Prueba**: ${uniqueTests.size}\n`;
-  mdContent += `- **Porcentaje de Cobertura**: 100%\n`;
-  mdContent += `- **Última Actualización**: ${new Date().toISOString()}\n`;
-  
-  // Desglose por categoría
-  mdContent += '\n## Desglose por Categoría\n\n';
-  mdContent += '| Categoría | Cantidad | Ejemplo |\n';
-  mdContent += '|-----------|----------|---------|\n';
-  
-  const categories = [
-    { name: 'Authentication', prefix: 'USR' },
-    { name: 'Generation', prefix: 'GEN' },
-    { name: 'Editor', prefix: 'EDT' },
-    { name: 'Performance', prefix: 'PERF' },
-    { name: 'Security', prefix: 'SEC' }
-  ];
-  
-  categories.forEach(cat => {
-    const count = traceabilityData.filter(i => i.reqId.startsWith(cat.prefix)).length;
-    const example = traceabilityData.find(i => i.reqId.startsWith(cat.prefix))?.reqId || 'N/A';
-    mdContent += `| ${cat.name} | ${count} | ${example} |\n`;
-  });
-  
-  // Escribir archivo Markdown
-  fs.writeFileSync(mdOutputPath, mdContent);
-  return mdOutputPath;
-}
-
-// Generar los formatos solicitados
-const generatedFiles = [];
-
-if (format === 'xlsx' || format === 'all') {
-  const xlsxPath = generateXlsx();
-  generatedFiles.push({ format: 'XLSX', path: xlsxPath });
-}
-
-if (format === 'json' || format === 'all') {
-  const jsonPath = generateJson();
-  generatedFiles.push({ format: 'JSON', path: jsonPath });
-}
-
-if (format === 'md' || format === 'all') {
-  const mdPath = generateMarkdown();
-  generatedFiles.push({ format: 'Markdown', path: mdPath });
-}
-
-// Mostrar resumen
-console.log('✅ Matriz de trazabilidad generada en los siguientes formatos:');
-generatedFiles.forEach(file => {
-  console.log(`📄 ${file.format}: ${file.path}`);
-});
-
-// Mostrar estadísticas
-const uniqueReqs = new Set(traceabilityData.map(i => i.reqId));
-const uniqueTasks = new Set(traceabilityData.map(i => i.taskId));
-const uniqueTests = new Set(traceabilityData.map(i => i.testFile));
-
-console.log(`\n📊 La matriz contiene ${traceabilityData.length} mapeos de requisito-tarea-prueba`);
-console.log(`🔗 Requisitos cubiertos: ${uniqueReqs.size}`);
-console.log(`📋 Tareas mapeadas: ${uniqueTasks.size}`);
-console.log(`🧪 Archivos de prueba referenciados: ${uniqueTests.size}`);
-
+console.log(`✅ Traceability matrix generated: ${outputPath}`);
+console.log(`📊 Matrix contains ${matrixData.length} requirement-task-test mappings`);
+console.log(`🔗 Requirements covered: ${new Set(traceabilityData.map(i => i.reqId)).size}`);
+console.log(`📋 Tasks mapped: ${new Set(traceabilityData.map(i => i.taskId)).size}`);
+console.log(`🧪 Test files referenced: ${new Set(traceabilityData.map(i => i.testFile)).size}`);

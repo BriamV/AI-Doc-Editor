@@ -1,7 +1,6 @@
 import { defaultAPIEndpoint } from '@constants/auth';
 import { StoreSlice } from './store';
 import { User } from '../types/auth';
-import { getEnvVar } from '../utils/env';
 
 export interface AuthSlice {
   apiKey?: string;
@@ -26,7 +25,7 @@ export interface AuthSlice {
 }
 
 export const createAuthSlice: StoreSlice<AuthSlice> = set => ({
-  apiKey: getEnvVar('VITE_OPENAI_API_KEY') || undefined,
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY || undefined,
   apiEndpoint: defaultAPIEndpoint,
   apiCalls: 0,
   firstVisit: true,

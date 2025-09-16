@@ -46,14 +46,14 @@ echo ""
 echo "📋 DEVELOPMENT SUBTASKS:"
 echo "========================"
 
-# Find subtask table (between header and next section)
+# Find subtask table (between "| WII |" header and next empty line or section)
 echo "$task_content" | awk '
-    /\| ID del Elemento de Trabajo \(WII\)/ { in_table=1; print "| Status | WII | Description | Complexity | Deliverable |"; print "|--------|-----|-------------|------------|-------------|"; next }
-    in_table && /^\|/ && !/ID del Elemento de Trabajo/ && !/^[ ]*\|[ ]*-/ { 
+    /\| WII \|/ { in_table=1; print "| # | WII | Description | Complexity | Deliverable |"; print "|---|-----|-------------|------------|-------------|"; next }
+    in_table && /^\|/ && !/WII/ { 
         gsub(/^\| */, "| ⏳ | ")  # Add pending status emoji
         print 
     }
-    in_table && (/^$/ || /^---/ ||  /^###/) { in_table=0 }
+    in_table && !/^\|/ && !/^$/ { in_table=0 }
 '
 
 echo ""
@@ -63,30 +63,28 @@ echo "========================="
 # Create actionable checklist
 counter=1
 echo "$task_content" | awk -v counter=1 '
-    /\| ID del Elemento de Trabajo \(WII\)/ { in_table=1; next }
-    in_table && /^\|/ && !/ID del Elemento de Trabajo/ && !/^[ ]*\|[ ]*-/ {
-        # Extract fields (skip empty separator lines)
-        if ($0 !~ /^[ ]*\|[ ]*-/) {
-            split($0, fields, "|")
-            wii = fields[2]
-            desc = fields[3] 
-            complexity = fields[4]
-            deliverable = fields[5]
-            
-            # Clean up whitespace
-            gsub(/^ *| *$/, "", wii)
-            gsub(/^ *| *$/, "", desc)  
-            gsub(/^ *| *$/, "", complexity)
-            gsub(/^ *| *$/, "", deliverable)
-            
-            if (wii != "" && wii !~ /^[ ]*$/) {
-                printf "[ ] **%s** (%s pts): %s\n", wii, complexity, desc
-                printf "    📦 Deliverable: %s\n\n", deliverable
-                counter++
-            }
+    /\| WII \|/ { in_table=1; next }
+    in_table && /^\|/ && !/WII/ {
+        # Extract fields
+        split($0, fields, "|")
+        wii = fields[2]
+        desc = fields[3] 
+        complexity = fields[4]
+        deliverable = fields[5]
+        
+        # Clean up whitespace
+        gsub(/^ *| *$/, "", wii)
+        gsub(/^ *| *$/, "", desc)
+        gsub(/^ *| *$/, "", complexity)
+        gsub(/^ *| *$/, "", deliverable)
+        
+        if (wii != "") {
+            printf "[ ] **%s** (%s pts): %s\n", wii, complexity, desc
+            printf "    📦 Deliverable: %s\n\n", deliverable
+            counter++
         }
     }
-    in_table && (/^$/ || /^---/ || /^###/) { in_table=0 }
+    in_table && !/^\|/ && !/^$/ { in_table=0 }
 '
 
 echo "💡 QUICK COMMANDS:"
