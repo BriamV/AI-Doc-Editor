@@ -49,7 +49,7 @@ const commands = {
   // Comandos de seguridad - Usar comandos directos de npm/yarn
   audit: 'npm audit',
   auditFix: 'npm audit fix',
-  licenseCheck: 'license-checker --production --json --out reports/licenses.json',
+  licenseCheck: 'license-checker-rseidelsohn --production --json --out reports/licenses.json',
 
   // Comandos de gobernanza - Usar rutas directas a los scripts
   apiSpec: 'npx redocly lint',

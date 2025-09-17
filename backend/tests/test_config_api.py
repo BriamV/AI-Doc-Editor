@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.main import app
 from app.db.session import AsyncSessionLocal
+from sqlalchemy import text
 import asyncio
 
 client = TestClient(app)
@@ -17,7 +18,7 @@ def setup_module(module):
     # Ensure DB is empty
     async def clear():
         async with AsyncSessionLocal() as session:
-            await session.execute("DELETE FROM system_configurations")
+            await session.execute(text("DELETE FROM system_configurations"))
             await session.commit()
 
     asyncio.run(clear())

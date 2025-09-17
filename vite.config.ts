@@ -20,5 +20,17 @@ export default defineConfig({
       '@src/': new URL('./src/', import.meta.url).pathname,
     },
   },
+  server: {
+    port: 5173,
+    strictPort: true,
+    proxy: {
+      // Proxy API calls in dev to the Python backend
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
   base: './',
 });

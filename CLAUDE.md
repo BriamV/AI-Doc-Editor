@@ -9,10 +9,11 @@ Repository: https://github.com/BriamV/AI-Doc-Editor/
 
 ## Tech Stack
 - Frontend: React 18 + TypeScript + Vite + TailwindCSS
-- Backend: Python FastAPI + SQLAlchemy + Alembic  
+- Backend: Python FastAPI + SQLAlchemy + Alembic
 - AI: OpenAI GPT-4o + embeddings + LangChain
 - Desktop: Electron + auto-updater
 - State: Zustand + IndexedDB encryption
+- Testing: Playwright E2E + Jest unit tests
 - Tools: Multi-stack quality ecosystem (40+ tools integrated)
   - **Frontend**: ESLint, Prettier, Jest, TSC
   - **Python**: Black, Ruff, Radon, MyPy, pip-audit
@@ -80,6 +81,13 @@ yarn run cmd validate-modified   # Code quality check
 # Development (PREFERRED - Direct commands)
 yarn dev|build|test|security-scan
 
+# Testing (Playwright E2E primary)
+yarn test:e2e              # Run E2E tests (Playwright)
+yarn test:e2e:headed       # Run with browser visible
+yarn test:e2e:debug        # Debug E2E tests
+yarn test:e2e:ui           # Interactive UI mode
+yarn test:e2e:report       # Show HTML test report
+
 # Quality (automated via hooks - 54% performance optimized)
 yarn lint|format|tsc-check
 
@@ -88,6 +96,10 @@ yarn tsc-check        # Frontend TypeScript validation
 yarn python-quality   # Backend Python validation (format + lint + complexity)
 yarn python-format    # Python autofix formatting (Black)
 yarn python-lint      # Python autofix linting (Ruff)
+
+# Environment validation & diagnostics (NEW - Unified Multiplatform)
+yarn env-validate     # Comprehensive environment diagnostics
+yarn env-info         # Detailed platform and tool information
 
 # ⚠️  LEGACY DEPRECATION NOTICE:
 # OLD: yarn run cmd <command>  <- DEPRECATED, will be removed
@@ -102,6 +114,7 @@ yarn python-lint      # Python autofix linting (Ruff)
 - `docs/` - Spanish documentation (primary)
 - `.claude/commands/` - 19 production slash commands
 - `tools/` - Task management scripts
+- `scripts/multiplatform.cjs` - **NEW** Unified cross-platform validator
 
 ## 🔧 Quality Tools Ecosystem (40+ Tools)
 **Hooks-Integrated Multi-Stack Pipeline:**
@@ -125,6 +138,7 @@ taplo, shellcheck, shfmt                 # Config + shell scripts
 prettier (JSON/XML/CSS/HTML)             # Universal formatting
 ```
 **Auto-Detection**: Windows/Linux/WSL + multi-venv support
+**Unified Validator**: `scripts/multiplatform.cjs` consolidates all cross-platform logic
 
 ## Quality Assurance
 - **Multi-Stack Pipeline**: 40+ tools integrated via .claude/hooks.json
@@ -192,16 +206,19 @@ docs/adr/ADR-006-security.md              # Security architecture
 
 ## Do Not Touch
 - `docs/Sub Tareas v2.md` - Use tools/task-navigator.sh instead
-- `.claude/commands/legacy/` - Deprecated commands  
+- `.claude/commands/legacy/` - Deprecated commands
 - `test-*.js` - Temporary debugging files
 - `.claude/hooks.json.backup` - Backup configuration
+- `legacy/` - Migrated Cypress files (see legacy/MIGRATION-README.md)
 
 ## ⚠️  Legacy Components (Marked for Deprecation)
 - `scripts/` - **DEPRECATED** - All CLI functionality moved to direct yarn commands
   - `scripts/cli.cjs` - Legacy CLI wrapper, use direct yarn commands instead
   - `yarn run cmd <command>` - Replace with `yarn <command>`
-- Migration completed: All package.json scripts now use direct commands
-- Timeline: scripts/ will be removed in next major cleanup phase
+- `legacy/cypress/` - **MIGRATED** - Cypress E2E tests replaced by Playwright
+  - `yarn test:cypress` - Legacy Cypress commands (use `yarn test:e2e` instead)
+  - Migration completed: All E2E testing now uses Playwright
+- Timeline: legacy/ will be removed after Playwright validation phase
 
 ## Integration Policy
 All enhancements MUST integrate into workflow:

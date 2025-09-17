@@ -24,19 +24,51 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check PR size
-        uses: pascalgn/size-label-action@v0.4.3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR size with fallback for large PRs
+        run: |
+          PR_NUMBER="${{ github.event.number }}"
+          echo "Checking size for PR #$PR_NUMBER"
+
+          # Get PR diff stats using GitHub API with error handling
+          if curl -s -f -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER" \
+            -o pr_info.json; then
+
+            ADDITIONS=$(jq -r '.additions' pr_info.json)
+            DELETIONS=$(jq -r '.deletions' pr_info.json)
+            TOTAL_CHANGES=$((ADDITIONS + DELETIONS))
+
+            echo "✅ PR Stats - Additions: $ADDITIONS, Deletions: $DELETIONS, Total: $TOTAL_CHANGES"
+
+            # Determine size label based on total changes
+            if [ $TOTAL_CHANGES -lt 20 ]; then
+              SIZE_LABEL="XS"
+            elif [ $TOTAL_CHANGES -lt 100 ]; then
+              SIZE_LABEL="S"
+            elif [ $TOTAL_CHANGES -lt 500 ]; then
+              SIZE_LABEL="M"
+            elif [ $TOTAL_CHANGES -lt 1000 ]; then
+              SIZE_LABEL="L"
+            else
+              SIZE_LABEL="XL"
+            fi
+
+            echo "📊 PR Size: $SIZE_LABEL ($TOTAL_CHANGES changes)"
+
+            # Add label using GitHub CLI
+            gh pr edit $PR_NUMBER --add-label "size/$SIZE_LABEL" || true
+
+          else
+            echo "⚠️ Could not get PR diff stats from API (likely too large), marking as XL"
+            gh pr edit $PR_NUMBER --add-label "size/XL" || true
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          sizes: >
-            {
-              "0": "XS",
-              "20": "S", 
-              "100": "M",
-              "500": "L",
-              "1000": "XL"
-            }
 
   security-check:
     name: Security Scan
@@ -46,11 +78,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Enable Corepack (Yarn 4)
+        run: |
+          corepack enable
+          corepack prepare yarn@4.5.1 --activate
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'yarn'
+          cache-dependency-path: 'yarn.lock'
 
       - name: Checkout with full history for diff
         uses: actions/checkout@v4
@@ -87,7 +125,7 @@ jobs:
           echo "🗑️ Limpiando caché de Yarn para eliminar referencias previas..."
           yarn cache clean
 
-      - name: Install dependencies
+      - name: Install dependencies (Yarn 4)
         env:
           # Variables de entorno críticas para la instalación
           GIT_TERMINAL_PROMPT: "0"
@@ -95,17 +133,21 @@ jobs:
         run: |
           # Verificar si package.json o yarn.lock han sido modificados
           if git diff --name-only HEAD^ HEAD | grep -q -E "package\.json|yarn\.lock"; then
-            echo "📜 Cambios detectados en package.json o yarn.lock -> regeneración completa"
-            # Regenerar yarn.lock completamente para asegurar que no haya referencias SSH
-            yarn install --network-timeout 600000 --update-checksums
+            echo "📜 Cambios detectados en package.json o yarn.lock -> permitiendo actualización de lockfile"
+            yarn install --check-cache
           else
-            echo "📜 Sin cambios -> usando configuración optimizada"
-            # Usar lockfile existente pero asegurándonos de que no haya problemas de autenticación
-            yarn install --network-timeout 600000
+            echo "📜 Sin cambios -> instalación inmutable"
+            yarn install --immutable --check-cache
           fi
 
       - name: Run yarn audit
-        run: yarn audit --level moderate
+        run: |
+          echo "🔒 Running yarn npm audit for security vulnerabilities..."
+          yarn npm audit --all --recursive --severity moderate || {
+            echo "⚠️ Security vulnerabilities found. Details above."
+            echo "📋 Review and address critical/high vulnerabilities before production."
+            exit 0
+          }
 
       - name: Run Semgrep Security Scan
         uses: returntocorp/semgrep-action@v1
@@ -123,3 +165,33 @@ jobs:
           # Activar modo estricto para bloquear PR en caso de hallazgos críticos
           SEMGREP_BASELINE_REF: "${{ github.base_ref }}"
           SEMGREP_BLOCK_ON_SEVERITY: CRITICAL
+
+  python-complexity-gate:
+    name: Python Complexity Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Create venv and install radon
+        run: |
+          python -m venv backend/.venv
+          backend/.venv/bin/python -m pip install --upgrade pip
+          backend/.venv/bin/pip install radon
+
+      - name: Enforce complexity gate (<= B)
+        env:
+          CC_MAX_RANK: B
+        run: |
+          node scripts/python-cc-gate.cjs

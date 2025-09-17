@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { getEnvVar } from '../utils/env';
 import {
   DocumentInterface,
   ConfigInterface,
@@ -17,7 +18,7 @@ const dateString =
   ('0' + date.getDate()).slice(-2);
 
 export const _defaultSystemMessage =
-  import.meta.env.VITE_DEFAULT_SYSTEM_MESSAGE ??
+  getEnvVar('VITE_DEFAULT_SYSTEM_MESSAGE') ??
   `Hello! How can I assist you with your writing today?`;
 
 export const modelOptions: ModelOptions[] = [

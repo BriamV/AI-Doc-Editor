@@ -3,6 +3,8 @@
  * T-02: OAuth 2.0 + JWT with multiple providers
  */
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import type { User } from '@type/auth';
 import { useAuth } from '@hooks/useAuth';
 
 interface AuthLoginProps {
@@ -153,6 +155,7 @@ const BackendStatus = ({ backendAvailable }: { backendAvailable: boolean }) => (
 const AuthLogin: React.FC<AuthLoginProps> = ({ onSuccess, onError }) => {
   const { login, isLoading, backendAvailable } = useAuth();
   const [selectedProvider, setSelectedProvider] = useState<'google' | 'microsoft'>('google');
+  const navigate = useNavigate();
 
   const handleLogin = async (provider: 'google' | 'microsoft') => {
     try {
@@ -165,7 +168,81 @@ const AuthLogin: React.FC<AuthLoginProps> = ({ onSuccess, onError }) => {
     }
   };
 
-  if (!backendAvailable) return <BackendFallback />;
+  // Dev/Test helper: simulate login without backend
+  const handleTestLogin = (role: 'admin' | 'editor') => {
+    const testUser: User = {
+      id: '1',
+      email: role === 'admin' ? 'admin@example.com' : 'user@example.com',
+      name: role === 'admin' ? 'Admin' : 'Editor',
+      role,
+      provider: 'google',
+    };
+
+    // Security: Generate secure test token with proper entropy and HMAC-like structure
+    const generateSecureTestToken = (userRole: string): string => {
+      const timestamp = Date.now();
+
+      // Generate high-entropy random data (32 bytes for 256-bit security)
+      const randomBytes = crypto.getRandomValues(new Uint8Array(32));
+      const randomHex = Array.from(randomBytes, byte => byte.toString(16).padStart(2, '0')).join(
+        ''
+      );
+
+      // Create HMAC-like structure: payload + separator + signature
+      const payload = `test-${userRole}-${timestamp}`;
+
+      // Generate signature using additional entropy
+      const sigBytes = crypto.getRandomValues(new Uint8Array(16));
+      const signature = Array.from(sigBytes, byte => byte.toString(16).padStart(2, '0')).join('');
+
+      // Combine with proper structure and use Base64URL encoding for web safety
+      const tokenData = `${payload}.${randomHex}.${signature}`;
+      return btoa(tokenData).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    };
+
+    // Set secure tokens with expiry (1 hour for testing)
+    const secureToken = generateSecureTestToken(role);
+    const expiry = Date.now() + 60 * 60 * 1000; // 1 hour
+
+    window.localStorage.setItem('auth_token', secureToken);
+    window.localStorage.setItem('user_role', role);
+    window.localStorage.setItem('token_expiry', expiry.toString());
+
+    // Use test interface exposed in main.tsx
+    window.app?.login(testUser);
+    // Navigate to home after test login
+    navigate('/');
+  };
+
+  // When backend is not available, show fallback and also expose test login in dev/test
+  if (!backendAvailable) {
+    return (
+      <div className="space-y-4">
+        <BackendFallback />
+        {(import.meta.env.DEV || import.meta.env.VITE_ENABLE_TESTING === 'true') && (
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
+            <h4 className="font-semibold text-blue-800">Test Login (Dev/Test Only)</h4>
+            <div className="flex gap-2">
+              <button
+                className="px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                onClick={() => handleTestLogin('admin')}
+                data-testid="test-login-admin"
+              >
+                Sign in as Admin
+              </button>
+              <button
+                className="px-3 py-2 rounded bg-gray-600 text-white hover:bg-gray-700"
+                onClick={() => handleTestLogin('editor')}
+                data-testid="test-login-editor"
+              >
+                Sign in as Editor
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="auth-login space-y-4">
@@ -178,6 +255,27 @@ const AuthLogin: React.FC<AuthLoginProps> = ({ onSuccess, onError }) => {
       />
       <TermsNotice />
       <BackendStatus backendAvailable={backendAvailable} />
+      {(import.meta.env.DEV || import.meta.env.VITE_ENABLE_TESTING === 'true') && (
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
+          <h4 className="font-semibold text-blue-800">Test Login (Dev/Test Only)</h4>
+          <div className="flex gap-2">
+            <button
+              className="px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+              onClick={() => handleTestLogin('admin')}
+              data-testid="test-login-admin"
+            >
+              Sign in as Admin
+            </button>
+            <button
+              className="px-3 py-2 rounded bg-gray-600 text-white hover:bg-gray-700"
+              onClick={() => handleTestLogin('editor')}
+              data-testid="test-login-editor"
+            >
+              Sign in as Editor
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

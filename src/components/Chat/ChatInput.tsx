@@ -19,6 +19,8 @@ const TextField = () => {
         tabIndex={0}
         data-id="2557e994-6f98-4656-a955-7808084f8b8c"
         rows={1}
+        id="chat-input"
+        name="chat-input"
         className="m-0 w-full resize-none border-0 bg-transparent p-0 pl-2 pr-7 focus:ring-0 focus-visible:ring-0 dark:bg-transparent md:pl-0"
         style={{ maxHeight: '200px', height: '24px', overflowY: 'hidden' }}
       ></textarea>

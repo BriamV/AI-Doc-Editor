@@ -4,6 +4,7 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+yarn_err.txt
 pnpm-debug.log*
 lerna-debug.log*
 dev-debug.log
@@ -11,9 +12,15 @@ dev-debug.log
 # Code quality reports
 eslint-report.json
 *.eslint.json
+eslint-report*.txt
+*.lint-report.*
 
 # Dependency directories
 node_modules/
+.yarn/
+.yarn/cache/
+.yarn/install-state.gz
+!.yarn/patches/
 
 # Build outputs
 dist
@@ -85,3 +92,16 @@ nyc_output/
 .cc-metrics-fail.json
 .cc-refactor-attempts
 venv/
+
+# E2E Test Artifacts
+# Playwright artifacts (primary E2E framework)
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Cypress test artifacts (legacy - deprecated)
+cypress/screenshots/
+cypress/videos/
+
+# Playwright MCP artifacts
+.playwright-mcp/
