@@ -1,20 +1,43 @@
-import { Link } from 'react-router-dom';
-import { Security } from '@carbon/icons-react';
-import { useAuth } from '@hooks/useAuth';
+import { Security, UserMultiple, Settings } from '@carbon/icons-react';
+import { useRoles } from '@hooks/useRoles';
+import { RoleBasedMenuItem } from '@components/Auth/RoleBasedMenu';
 
-/** Links displayed only for admins to access admin pages */
+/** Enhanced admin links with role-based access control */
 const AdminSettingsLink = () => {
-  const { isAdmin } = useAuth();
+  const { isAdmin } = useRoles();
+
   if (!isAdmin()) return null;
 
   return (
-    <div className="space-y-1">
-      <Link
+    <div className="space-y-1 border-t border-gray-600 pt-2 mt-2">
+      <div className="text-xs font-semibold text-gray-400 px-2 mb-1">ADMIN TOOLS</div>
+
+      <RoleBasedMenuItem
         to="/admin/audit-logs"
-        className="flex py-2 px-2 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-white text-sm"
+        icon={<Security className="w-4 h-4" />}
+        requiredRoles={['admin']}
+        className="text-white text-sm"
       >
-        <Security className="w-4 h-4" /> Audit Logs
-      </Link>
+        Audit Logs
+      </RoleBasedMenuItem>
+
+      <RoleBasedMenuItem
+        to="/admin/users"
+        icon={<UserMultiple className="w-4 h-4" />}
+        requiredRoles={['admin']}
+        className="text-white text-sm"
+      >
+        User Management
+      </RoleBasedMenuItem>
+
+      <RoleBasedMenuItem
+        to="/admin/settings"
+        icon={<Settings className="w-4 h-4" />}
+        requiredRoles={['admin']}
+        className="text-white text-sm"
+      >
+        System Settings
+      </RoleBasedMenuItem>
     </div>
   );
 };

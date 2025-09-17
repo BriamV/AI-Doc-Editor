@@ -7,23 +7,18 @@ Validates OAuth security configuration and compliance with security best practic
 Run this script before production deployment to ensure security requirements are met.
 """
 
-import os
+import json
 import re
 import sys
-import json
-import asyncio
-import secrets
-import logging
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Tuple
+from typing import Dict, Any
 from urllib.parse import urlparse
 
 # Add app directory to path for imports
 sys.path.append(str(Path(__file__).parent / "app"))
 
 from app.core.config import settings
-from app.security.oauth_security import oauth_security
-from app.security.secure_logging import security_logger
 
 
 class OAuthSecurityValidator:
@@ -34,7 +29,7 @@ class OAuthSecurityValidator:
             "passed": [],
             "warnings": [],
             "errors": [],
-            "critical_errors": []
+            "critical_errors": [],
         }
         self.score = 0
         self.max_score = 0
@@ -66,9 +61,14 @@ class OAuthSecurityValidator:
         if settings.ENVIRONMENT in ["production", "staging"]:
             self._add_pass("Environment set to production/staging", 5)
         elif settings.ENVIRONMENT == "development":
-            self._add_warning("Environment set to development - ensure this is correct for deployment")
+            self._add_warning(
+                "Environment set to development - ensure this is correct for deployment"
+            )
         else:
-            self._add_error("Invalid environment setting", "Environment must be development, staging, or production")
+            self._add_error(
+                "Invalid environment setting",
+                "Environment must be development, staging, or production",
+            )
 
         # Check production domain
         if settings.ENVIRONMENT == "production":
@@ -76,61 +76,110 @@ class OAuthSecurityValidator:
                 if settings.PRODUCTION_DOMAIN.startswith("https://"):
                     self._add_pass("Production domain configured with HTTPS", 10)
                 else:
-                    self._add_critical("Production domain must use HTTPS",
-                                     "OAuth 2.0 requires HTTPS in production")
+                    self._add_critical(
+                        "Production domain must use HTTPS", "OAuth 2.0 requires HTTPS in production"
+                    )
             else:
-                self._add_critical("Production domain not configured",
-                                 "PRODUCTION_DOMAIN is required for production OAuth callbacks")
+                self._add_critical(
+                    "Production domain not configured",
+                    "PRODUCTION_DOMAIN is required for production OAuth callbacks",
+                )
 
         # Check HTTPS enforcement
         if settings.ENVIRONMENT == "production" and not settings.REQUIRE_HTTPS:
-            self._add_critical("HTTPS not enforced in production",
-                             "Set REQUIRE_HTTPS=true for production")
+            self._add_critical(
+                "HTTPS not enforced in production", "Set REQUIRE_HTTPS=true for production"
+            )
 
     def _validate_oauth_credentials(self):
         """Validate OAuth provider credentials"""
         print("\n🔑 Validating OAuth Credentials...")
 
-        # Google OAuth validation
-        if settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET:
-            if self._validate_google_client_id(settings.GOOGLE_CLIENT_ID):
-                self._add_pass("Google Client ID format valid", 5)
-            else:
-                self._add_error("Invalid Google Client ID format",
-                              "Expected format: numbers-string.apps.googleusercontent.com")
+        self._validate_google_oauth_credentials()
+        self._validate_microsoft_oauth_credentials()
+        self._check_production_demo_credentials()
 
-            if len(settings.GOOGLE_CLIENT_SECRET) > 20:
-                self._add_pass("Google Client Secret configured", 5)
-            else:
-                self._add_error("Google Client Secret too short or missing",
-                              "Client secrets should be longer than 20 characters")
+    def _validate_google_oauth_credentials(self):
+        """Validate Google OAuth credentials"""
+        if not settings.GOOGLE_CLIENT_ID or not settings.GOOGLE_CLIENT_SECRET:
+            self._add_warning(
+                "Google OAuth credentials not configured - OAuth will not work for Google"
+            )
+            return
+
+        self._validate_client_id(
+            settings.GOOGLE_CLIENT_ID,
+            self._validate_google_client_id,
+            "Google Client ID format valid",
+            "Invalid Google Client ID format",
+            "Expected format: numbers-string.apps.googleusercontent.com",
+        )
+
+        self._validate_client_secret(
+            settings.GOOGLE_CLIENT_SECRET,
+            "Google Client Secret configured",
+            "Google Client Secret too short or missing",
+        )
+
+    def _validate_microsoft_oauth_credentials(self):
+        """Validate Microsoft OAuth credentials"""
+        if not settings.MICROSOFT_CLIENT_ID or not settings.MICROSOFT_CLIENT_SECRET:
+            self._add_warning(
+                "Microsoft OAuth credentials not configured - OAuth will not work for Microsoft"
+            )
+            return
+
+        self._validate_client_id(
+            settings.MICROSOFT_CLIENT_ID,
+            self._validate_microsoft_client_id,
+            "Microsoft Client ID format valid",
+            "Invalid Microsoft Client ID format",
+            "Expected UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+        )
+
+        self._validate_client_secret(
+            settings.MICROSOFT_CLIENT_SECRET,
+            "Microsoft Client Secret configured",
+            "Microsoft Client Secret too short or missing",
+        )
+
+    def _validate_client_id(
+        self, client_id: str, validator_func, success_msg: str, error_msg: str, error_details: str
+    ):
+        """Validate client ID using provided validator function"""
+        if validator_func(client_id):
+            self._add_pass(success_msg, 5)
         else:
-            self._add_warning("Google OAuth credentials not configured - OAuth will not work for Google")
+            self._add_error(error_msg, error_details)
 
-        # Microsoft OAuth validation
-        if settings.MICROSOFT_CLIENT_ID and settings.MICROSOFT_CLIENT_SECRET:
-            if self._validate_microsoft_client_id(settings.MICROSOFT_CLIENT_ID):
-                self._add_pass("Microsoft Client ID format valid", 5)
-            else:
-                self._add_error("Invalid Microsoft Client ID format",
-                              "Expected UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
-
-            if len(settings.MICROSOFT_CLIENT_SECRET) > 20:
-                self._add_pass("Microsoft Client Secret configured", 5)
-            else:
-                self._add_error("Microsoft Client Secret too short or missing",
-                              "Client secrets should be longer than 20 characters")
+    def _validate_client_secret(self, client_secret: str, success_msg: str, error_msg: str):
+        """Validate client secret length"""
+        if len(client_secret) > 20:
+            self._add_pass(success_msg, 5)
         else:
-            self._add_warning("Microsoft OAuth credentials not configured - OAuth will not work for Microsoft")
+            self._add_error(error_msg, "Client secrets should be longer than 20 characters")
 
-        # Check for demo/development credentials in production
-        if settings.ENVIRONMENT == "production":
-            demo_patterns = ["demo", "test", "development", "localhost", "example"]
-            for pattern in demo_patterns:
-                if (pattern in settings.GOOGLE_CLIENT_ID.lower() or
-                    pattern in settings.MICROSOFT_CLIENT_ID.lower()):
-                    self._add_critical("Demo/development credentials detected in production",
-                                     "Use real production OAuth credentials")
+    def _check_production_demo_credentials(self):
+        """Check for demo/development credentials in production"""
+        if settings.ENVIRONMENT != "production":
+            return
+
+        demo_patterns = ["demo", "test", "development", "localhost", "example"]
+
+        for pattern in demo_patterns:
+            if self._has_demo_pattern_in_credentials(pattern):
+                self._add_critical(
+                    "Demo/development credentials detected in production",
+                    "Use real production OAuth credentials",
+                )
+                break
+
+    def _has_demo_pattern_in_credentials(self, pattern: str) -> bool:
+        """Check if demo pattern exists in any OAuth credentials"""
+        google_id = getattr(settings, "GOOGLE_CLIENT_ID", "") or ""
+        microsoft_id = getattr(settings, "MICROSOFT_CLIENT_ID", "") or ""
+
+        return pattern in google_id.lower() or pattern in microsoft_id.lower()
 
     def _validate_jwt_security(self):
         """Validate JWT security configuration"""
@@ -142,14 +191,18 @@ class OAuthSecurityValidator:
         if len(secret_key) >= 32:
             self._add_pass("JWT secret key meets minimum length requirement", 5)
         else:
-            self._add_critical("JWT secret key too short",
-                             f"Secret key must be at least 32 characters, got {len(secret_key)}")
+            self._add_critical(
+                "JWT secret key too short",
+                f"Secret key must be at least 32 characters, got {len(secret_key)}",
+            )
 
         # Check for default development key
         if "development-secret-key" in secret_key.lower():
             if settings.ENVIRONMENT == "production":
-                self._add_critical("Default development JWT secret in production",
-                                 "Must change SECRET_KEY for production deployment")
+                self._add_critical(
+                    "Default development JWT secret in production",
+                    "Must change SECRET_KEY for production deployment",
+                )
             else:
                 self._add_warning("Using default development JWT secret")
 
@@ -158,16 +211,21 @@ class OAuthSecurityValidator:
         if entropy >= 3.0:
             self._add_pass("JWT secret key has sufficient entropy", 5)
         elif entropy >= 2.0:
-            self._add_warning("JWT secret key has moderate entropy - consider using more random key")
+            self._add_warning(
+                "JWT secret key has moderate entropy - consider using more random key"
+            )
         else:
-            self._add_error("JWT secret key has low entropy",
-                          "Use a more random key for better security")
+            self._add_error(
+                "JWT secret key has low entropy", "Use a more random key for better security"
+            )
 
         # Token expiration settings
         if settings.ACCESS_TOKEN_EXPIRE_MINUTES <= 60:
             self._add_pass("Access token expiration appropriately short", 3)
         else:
-            self._add_warning("Access token expiration is quite long - consider shorter duration for production")
+            self._add_warning(
+                "Access token expiration is quite long - consider shorter duration for production"
+            )
 
         if 1 <= settings.REFRESH_TOKEN_EXPIRE_DAYS <= 30:
             self._add_pass("Refresh token expiration appropriately configured", 3)
@@ -178,30 +236,56 @@ class OAuthSecurityValidator:
         """Validate CORS security configuration"""
         print("\n🌐 Validating CORS Configuration...")
 
-        # Check allowed origins
-        if settings.ALLOWED_ORIGINS:
-            # Check for wildcard in production
-            if "*" in settings.ALLOWED_ORIGINS and settings.ENVIRONMENT == "production":
-                self._add_critical("Wildcard CORS origin in production",
-                                 "Specify exact domains instead of '*' for production")
-            else:
-                self._add_pass("CORS origins configured", 3)
+        self._validate_cors_origins()
+        self._validate_cors_credentials()
+        self._validate_cors_methods()
 
-            # Check for HTTPS origins in production
-            if settings.ENVIRONMENT == "production":
-                http_origins = [origin for origin in settings.ALLOWED_ORIGINS
-                              if origin.startswith("http://") and not origin.startswith("http://localhost")]
-                if http_origins:
-                    self._add_error("HTTP origins in production CORS",
-                                  f"Use HTTPS for production origins: {http_origins}")
-        else:
+    def _validate_cors_origins(self):
+        """Validate CORS origins configuration"""
+        if not settings.ALLOWED_ORIGINS:
             self._add_error("No CORS origins configured", "Configure ALLOWED_ORIGINS")
+            return
 
-        # Check credentials setting
+        self._check_wildcard_origins()
+        self._check_production_https_origins()
+
+    def _check_wildcard_origins(self):
+        """Check for wildcard CORS origins in production"""
+        if "*" in settings.ALLOWED_ORIGINS and settings.ENVIRONMENT == "production":
+            self._add_critical(
+                "Wildcard CORS origin in production",
+                "Specify exact domains instead of '*' for production",
+            )
+        else:
+            self._add_pass("CORS origins configured", 3)
+
+    def _check_production_https_origins(self):
+        """Check for HTTPS origins in production"""
+        if settings.ENVIRONMENT != "production":
+            return
+
+        http_origins = self._find_insecure_http_origins()
+        if http_origins:
+            self._add_error(
+                "HTTP origins in production CORS",
+                f"Use HTTPS for production origins: {http_origins}",
+            )
+
+    def _find_insecure_http_origins(self) -> list[str]:
+        """Find HTTP origins that are not localhost"""
+        return [
+            origin
+            for origin in settings.ALLOWED_ORIGINS
+            if origin.startswith("http://") and not origin.startswith("http://localhost")
+        ]
+
+    def _validate_cors_credentials(self):
+        """Validate CORS credentials setting"""
         if settings.CORS_ALLOW_CREDENTIALS:
             self._add_pass("CORS credentials properly configured", 2)
 
-        # Check allowed methods
+    def _validate_cors_methods(self):
+        """Validate CORS allowed methods"""
         dangerous_methods = ["TRACE", "CONNECT"]
         if any(method in settings.CORS_ALLOW_METHODS for method in dangerous_methods):
             self._add_warning("Potentially dangerous HTTP methods allowed in CORS")
@@ -226,11 +310,7 @@ class OAuthSecurityValidator:
                 self._add_pass("HSTS includes subdomains", 2)
 
         # Check CSP configuration
-        csp_directives = {
-            "default-src": settings.CSP_DEFAULT_SRC,
-            "script-src": settings.CSP_SCRIPT_SRC,
-            "frame-ancestors": settings.CSP_FRAME_ANCESTORS
-        }
+        # CSP validation checks
 
         if settings.CSP_FRAME_ANCESTORS == "'none'":
             self._add_pass("Frame ancestors properly restricted", 3)
@@ -252,8 +332,7 @@ class OAuthSecurityValidator:
         if settings.LOG_SANITIZATION_ENABLED:
             self._add_pass("Log sanitization enabled", 5)
         else:
-            self._add_critical("Log sanitization disabled",
-                             "Sensitive data may be exposed in logs")
+            self._add_critical("Log sanitization disabled", "Sensitive data may be exposed in logs")
 
         if settings.AUDIT_INTEGRITY_CHECKS:
             self._add_pass("Audit integrity checks enabled", 3)
@@ -330,13 +409,17 @@ class OAuthSecurityValidator:
             if requirement:
                 self._add_pass(f"Production requirement met: {description}", 5)
             else:
-                self._add_critical(f"Production requirement not met: {description}",
-                                 f"Required for production deployment")
+                self._add_critical(
+                    f"Production requirement not met: {description}",
+                    "Required for production deployment",
+                )
 
         # Check for sensitive data in logs
         if settings.AUDIT_LOG_SENSITIVE_DATA:
-            self._add_critical("Sensitive data logging enabled in production",
-                             "Set AUDIT_LOG_SENSITIVE_DATA=false for production")
+            self._add_critical(
+                "Sensitive data logging enabled in production",
+                "Set AUDIT_LOG_SENSITIVE_DATA=false for production",
+            )
 
         # Validate production domain
         if settings.PRODUCTION_DOMAIN:
@@ -344,8 +427,9 @@ class OAuthSecurityValidator:
             if not parsed.netloc:
                 self._add_error("Invalid production domain format")
             elif parsed.netloc in ["localhost", "127.0.0.1", "0.0.0.0"]:
-                self._add_critical("Production domain points to localhost",
-                                 "Use real production domain")
+                self._add_critical(
+                    "Production domain points to localhost", "Use real production domain"
+                )
 
     def _validate_google_client_id(self, client_id: str) -> bool:
         """Validate Google OAuth Client ID format"""
@@ -413,63 +497,96 @@ class OAuthSecurityValidator:
 
     def _generate_report(self) -> Dict[str, Any]:
         """Generate final validation report"""
+        self._print_report_header()
+
+        score_percentage = self._calculate_score_percentage()
+        status, status_emoji = self._determine_overall_status()
+
+        self._print_status_and_score(status_emoji, status, score_percentage)
+        self._print_summary_counts()
+        self._print_issues_sections()
+        self._print_recommendations(score_percentage)
+        self._print_security_resources()
+
+        return self._create_structured_report(status, score_percentage)
+
+    def _print_report_header(self):
+        """Print report header"""
         print("\n" + "=" * 60)
         print("📊 OAuth Security Validation Report")
         print("=" * 60)
 
-        # Calculate score percentage
-        score_percentage = (self.score / self.max_score * 100) if self.max_score > 0 else 0
+    def _calculate_score_percentage(self) -> float:
+        """Calculate score percentage"""
+        return (self.score / self.max_score * 100) if self.max_score > 0 else 0
 
-        # Determine overall status
+    def _determine_overall_status(self) -> tuple[str, str]:
+        """Determine overall validation status"""
         if self.validation_results["critical_errors"]:
-            status = "CRITICAL - Deployment Blocked"
-            status_emoji = "🚨"
+            return "CRITICAL - Deployment Blocked", "🚨"
         elif self.validation_results["errors"]:
-            status = "FAILED - Errors Must Be Fixed"
-            status_emoji = "❌"
+            return "FAILED - Errors Must Be Fixed", "❌"
         elif self.validation_results["warnings"]:
-            status = "PASSED WITH WARNINGS"
-            status_emoji = "⚠️"
+            return "PASSED WITH WARNINGS", "⚠️"
         else:
-            status = "PASSED - All Validations Successful"
-            status_emoji = "✅"
+            return "PASSED - All Validations Successful", "✅"
 
+    def _print_status_and_score(self, status_emoji: str, status: str, score_percentage: float):
+        """Print status and score information"""
         print(f"\n{status_emoji} Overall Status: {status}")
         print(f"📊 Security Score: {self.score}/{self.max_score} ({score_percentage:.1f}%)")
 
-        # Summary counts
-        print(f"\n📋 Summary:")
+    def _print_summary_counts(self):
+        """Print summary counts"""
+        print("\n📋 Summary:")
         print(f"  ✅ Passed: {len(self.validation_results['passed'])}")
         print(f"  ⚠️  Warnings: {len(self.validation_results['warnings'])}")
         print(f"  ❌ Errors: {len(self.validation_results['errors'])}")
         print(f"  🚨 Critical: {len(self.validation_results['critical_errors'])}")
 
-        # Show critical errors
-        if self.validation_results["critical_errors"]:
-            print(f"\n🚨 Critical Issues (Must Fix Before Production):")
-            for error in self.validation_results["critical_errors"]:
-                print(f"  • {error['message']}")
-                if error['details']:
-                    print(f"    → {error['details']}")
+    def _print_issues_sections(self):
+        """Print all issues sections"""
+        self._print_critical_errors()
+        self._print_errors()
+        self._print_warnings()
 
-        # Show errors
-        if self.validation_results["errors"]:
-            print(f"\n❌ Errors (Should Fix):")
-            for error in self.validation_results["errors"]:
-                print(f"  • {error['message']}")
-                if error['details']:
-                    print(f"    → {error['details']}")
+    def _print_critical_errors(self):
+        """Print critical errors section"""
+        if not self.validation_results["critical_errors"]:
+            return
 
-        # Show warnings
-        if self.validation_results["warnings"]:
-            print(f"\n⚠️  Warnings (Recommended Fixes):")
-            for warning in self.validation_results["warnings"]:
-                print(f"  • {warning['message']}")
-                if warning['details']:
-                    print(f"    → {warning['details']}")
+        print("\n🚨 Critical Issues (Must Fix Before Production):")
+        for error in self.validation_results["critical_errors"]:
+            print(f"  • {error['message']}")
+            if error["details"]:
+                print(f"    → {error['details']}")
 
-        # Recommendations
-        print(f"\n💡 Recommendations:")
+    def _print_errors(self):
+        """Print errors section"""
+        if not self.validation_results["errors"]:
+            return
+
+        print("\n❌ Errors (Should Fix):")
+        for error in self.validation_results["errors"]:
+            print(f"  • {error['message']}")
+            if error["details"]:
+                print(f"    → {error['details']}")
+
+    def _print_warnings(self):
+        """Print warnings section"""
+        if not self.validation_results["warnings"]:
+            return
+
+        print("\n⚠️  Warnings (Recommended Fixes):")
+        for warning in self.validation_results["warnings"]:
+            print(f"  • {warning['message']}")
+            if warning["details"]:
+                print(f"    → {warning['details']}")
+
+    def _print_recommendations(self, score_percentage: float):
+        """Print recommendations based on score"""
+        print("\n💡 Recommendations:")
+
         if score_percentage >= 90:
             print("  • OAuth security configuration is excellent!")
             print("  • Consider regular security reviews and updates")
@@ -483,12 +600,15 @@ class OAuthSecurityValidator:
             print("  • Security configuration is insufficient for production")
             print("  • Major security improvements required")
 
+    def _print_security_resources(self):
+        """Print security resources section"""
         print("\n📚 Additional Security Resources:")
         print("  • OWASP OAuth 2.0 Security Cheat Sheet")
         print("  • RFC 6749 - OAuth 2.0 Authorization Framework")
         print("  • Project security documentation: docs/security/")
 
-        # Return structured report
+    def _create_structured_report(self, status: str, score_percentage: float) -> Dict[str, Any]:
+        """Create structured report dictionary"""
         return {
             "status": status,
             "score": self.score,
@@ -497,7 +617,7 @@ class OAuthSecurityValidator:
             "environment": settings.ENVIRONMENT,
             "timestamp": str(datetime.now()),
             "results": self.validation_results,
-            "deployment_approved": len(self.validation_results["critical_errors"]) == 0
+            "deployment_approved": len(self.validation_results["critical_errors"]) == 0,
         }
 
 

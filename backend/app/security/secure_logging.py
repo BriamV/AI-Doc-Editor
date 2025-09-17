@@ -17,7 +17,7 @@ import hmac
 import logging
 import sys
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, Optional
 from pathlib import Path
 from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 
@@ -32,15 +32,15 @@ class SensitiveDataRedactor:
         r'(?i)(password|passwd|pwd)[\s]*[:=][\s]*["\']?([^"\s,}]+)',
         r'(?i)(secret|token|key|apikey|api_key)[\s]*[:=][\s]*["\']?([^"\s,}]+)',
         r'(?i)(client_secret|refresh_token|access_token)[\s]*[:=][\s]*["\']?([^"\s,}]+)',
-        r'(?i)(authorization)[\s]*:[\s]*bearer[\s]+([^\s]+)',
-        r'(?i)(x-api-key|x-auth-token)[\s]*:[\s]*([^\s,}]+)',
+        r"(?i)(authorization)[\s]*:[\s]*bearer[\s]+([^\s]+)",
+        r"(?i)(x-api-key|x-auth-token)[\s]*:[\s]*([^\s,}]+)",
         r'(?i)(credential|auth|authentication)[\s]*[:=][\s]*["\']?([^"\s,}]+)',
     ]
 
     # JWT token patterns
     JWT_PATTERNS = [
-        r'eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*',  # JWT structure
-        r'Bearer[\s]+([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*)',  # Bearer JWT
+        r"eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*",  # JWT structure
+        r"Bearer[\s]+([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*)",  # Bearer JWT
     ]
 
     # OAuth authorization code patterns
@@ -51,14 +51,12 @@ class SensitiveDataRedactor:
 
     # Credit card and sensitive number patterns
     SENSITIVE_NUMBER_PATTERNS = [
-        r'\b(?:\d{4}[-\s]?){3}\d{4}\b',  # Credit card numbers
-        r'\b\d{3}-?\d{2}-?\d{4}\b',      # SSN pattern
+        r"\b(?:\d{4}[-\s]?){3}\d{4}\b",  # Credit card numbers
+        r"\b\d{3}-?\d{2}-?\d{4}\b",  # SSN pattern
     ]
 
     # Email patterns (partial redaction)
-    EMAIL_PATTERNS = [
-        r'\b([a-zA-Z0-9._%+-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b'
-    ]
+    EMAIL_PATTERNS = [r"\b([a-zA-Z0-9._%+-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b"]
 
     def __init__(self):
         self.redaction_marker = "***REDACTED***"
@@ -83,27 +81,17 @@ class SensitiveDataRedactor:
         # Redact sensitive fields
         for pattern in self.SENSITIVE_FIELD_PATTERNS:
             redacted_text = re.sub(
-                pattern,
-                r'\1=' + self.redaction_marker,
-                redacted_text,
-                flags=re.IGNORECASE
+                pattern, r"\1=" + self.redaction_marker, redacted_text, flags=re.IGNORECASE
             )
 
         # Redact JWT tokens
         for pattern in self.JWT_PATTERNS:
-            redacted_text = re.sub(
-                pattern,
-                self.redaction_marker,
-                redacted_text
-            )
+            redacted_text = re.sub(pattern, self.redaction_marker, redacted_text)
 
         # Redact OAuth codes
         for pattern in self.OAUTH_CODE_PATTERNS:
             redacted_text = re.sub(
-                pattern,
-                r'\1=' + self.redaction_marker,
-                redacted_text,
-                flags=re.IGNORECASE
+                pattern, r"\1=" + self.redaction_marker, redacted_text, flags=re.IGNORECASE
             )
 
         # Redact sensitive numbers
@@ -112,11 +100,7 @@ class SensitiveDataRedactor:
 
         # Partial redaction for emails (keep domain for debugging)
         if preserve_structure:
-            redacted_text = re.sub(
-                self.EMAIL_PATTERNS[0],
-                r'\1****@\2',
-                redacted_text
-            )
+            redacted_text = re.sub(self.EMAIL_PATTERNS[0], r"\1****@\2", redacted_text)
 
         return redacted_text
 
@@ -135,33 +119,70 @@ class SensitiveDataRedactor:
             return data
 
         redacted = {}
-        sensitive_keys = [
-            'password', 'secret', 'token', 'key', 'credential', 'auth',
-            'client_secret', 'refresh_token', 'access_token', 'authorization',
-            'x-api-key', 'x-auth-token', 'apikey', 'api_key'
-        ]
+        sensitive_keys = self._get_sensitive_keys()
 
         for key, value in data.items():
-            key_lower = str(key).lower()
-
-            # Check if key is sensitive
-            if any(sensitive_key in key_lower for sensitive_key in sensitive_keys):
-                redacted[key] = self.redaction_marker
-            elif isinstance(value, str):
-                redacted[key] = self.redact_sensitive_data(value)
-            elif isinstance(value, dict) and deep:
-                redacted[key] = self.redact_dict(value, deep=True)
-            elif isinstance(value, (list, tuple)) and deep:
-                redacted[key] = [
-                    self.redact_dict(item, deep=True) if isinstance(item, dict)
-                    else self.redact_sensitive_data(str(item)) if isinstance(item, str)
-                    else item
-                    for item in value
-                ]
-            else:
-                redacted[key] = value
+            redacted[key] = self._redact_dict_value(key, value, sensitive_keys, deep)
 
         return redacted
+
+    def _get_sensitive_keys(self) -> list[str]:
+        """Get list of sensitive key patterns"""
+        return [
+            "password",
+            "secret",
+            "token",
+            "key",
+            "credential",
+            "auth",
+            "client_secret",
+            "refresh_token",
+            "access_token",
+            "authorization",
+            "x-api-key",
+            "x-auth-token",
+            "apikey",
+            "api_key",
+        ]
+
+    def _redact_dict_value(
+        self, key: str, value: Any, sensitive_keys: list[str], deep: bool
+    ) -> Any:
+        """Redact a single dictionary value based on key and type"""
+        key_lower = str(key).lower()
+
+        if self._is_sensitive_key(key_lower, sensitive_keys):
+            return self.redaction_marker
+
+        return self._redact_by_value_type(value, deep)
+
+    def _is_sensitive_key(self, key_lower: str, sensitive_keys: list[str]) -> bool:
+        """Check if key contains sensitive information"""
+        return any(sensitive_key in key_lower for sensitive_key in sensitive_keys)
+
+    def _redact_by_value_type(self, value: Any, deep: bool) -> Any:
+        """Redact value based on its type"""
+        if isinstance(value, str):
+            return self.redact_sensitive_data(value)
+        elif isinstance(value, dict) and deep:
+            return self.redact_dict(value, deep=True)
+        elif isinstance(value, (list, tuple)) and deep:
+            return self._redact_sequence(value)
+        else:
+            return value
+
+    def _redact_sequence(self, sequence: Any) -> list:
+        """Redact items in a sequence (list or tuple)"""
+        return [self._redact_sequence_item(item) for item in sequence]
+
+    def _redact_sequence_item(self, item: Any) -> Any:
+        """Redact a single item from a sequence"""
+        if isinstance(item, dict):
+            return self.redact_dict(item, deep=True)
+        elif isinstance(item, str):
+            return self.redact_sensitive_data(str(item))
+        else:
+            return item
 
 
 class SecurityEventLogger:
@@ -190,10 +211,10 @@ class SecurityEventLogger:
 
             file_handler = TimedRotatingFileHandler(
                 security_log_path,
-                when='midnight',
+                when="midnight",
                 interval=1,
                 backupCount=settings.LOG_RETENTION_DAYS,
-                encoding='utf-8'
+                encoding="utf-8",
             )
             file_handler.setLevel(logging.INFO)
             file_handler.setFormatter(json_formatter)
@@ -214,7 +235,7 @@ class SecurityEventLogger:
         user_email: Optional[str] = None,
         client_ip: Optional[str] = None,
         user_agent: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ):
         """
         Log OAuth-specific security events
@@ -237,7 +258,7 @@ class SecurityEventLogger:
             "user_email": self._redact_email(user_email) if user_email else None,
             "client_ip": client_ip,
             "user_agent": self._sanitize_user_agent(user_agent) if user_agent else None,
-            **kwargs
+            **kwargs,
         }
 
         # Remove None values
@@ -260,7 +281,7 @@ class SecurityEventLogger:
         severity: str,
         description: str,
         source: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ):
         """
         Log general security events
@@ -279,7 +300,7 @@ class SecurityEventLogger:
             "description": description,
             "source": source,
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            **kwargs
+            **kwargs,
         }
 
         # Remove None values
@@ -294,7 +315,9 @@ class SecurityEventLogger:
         elif severity.lower() == "high":
             self.logger.error(f"High severity security event: {event_type}", extra=sanitized_data)
         elif severity.lower() == "medium":
-            self.logger.warning(f"Medium severity security event: {event_type}", extra=sanitized_data)
+            self.logger.warning(
+                f"Medium severity security event: {event_type}", extra=sanitized_data
+            )
         else:
             self.logger.info(f"Security event: {event_type}", extra=sanitized_data)
 
@@ -304,7 +327,7 @@ class SecurityEventLogger:
         resource: str,
         user_id: Optional[str] = None,
         success: bool = True,
-        **kwargs
+        **kwargs,
     ):
         """
         Log audit trail events
@@ -323,7 +346,7 @@ class SecurityEventLogger:
             "user_id": user_id,
             "success": success,
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            **kwargs
+            **kwargs,
         }
 
         # Remove None values
@@ -339,14 +362,14 @@ class SecurityEventLogger:
 
     def _redact_email(self, email: str) -> str:
         """Partially redact email for privacy while keeping domain for debugging"""
-        if not email or '@' not in email:
+        if not email or "@" not in email:
             return email
 
-        local, domain = email.split('@', 1)
+        local, domain = email.split("@", 1)
         if len(local) <= 2:
-            redacted_local = '*' * len(local)
+            redacted_local = "*" * len(local)
         else:
-            redacted_local = local[0] + '*' * (len(local) - 2) + local[-1]
+            redacted_local = local[0] + "*" * (len(local) - 2) + local[-1]
 
         return f"{redacted_local}@{domain}"
 
@@ -356,10 +379,10 @@ class SecurityEventLogger:
             return user_agent
 
         # Remove version numbers that might contain sensitive info
-        sanitized = re.sub(r'/[\d.]+', '/***', user_agent)
+        sanitized = re.sub(r"/[\d.]+", "/***", user_agent)
 
         # Truncate if too long
-        return sanitized[:200] + '...' if len(sanitized) > 200 else sanitized
+        return sanitized[:200] + "..." if len(sanitized) > 200 else sanitized
 
 
 class JSONSecurityFormatter(logging.Formatter):
@@ -379,12 +402,31 @@ class JSONSecurityFormatter(logging.Formatter):
         }
 
         # Add extra data if present
-        if hasattr(record, '__dict__'):
+        if hasattr(record, "__dict__"):
             for key, value in record.__dict__.items():
-                if key not in ['name', 'msg', 'args', 'levelname', 'levelno', 'pathname',
-                              'filename', 'module', 'exc_info', 'exc_text', 'stack_info',
-                              'lineno', 'funcName', 'created', 'msecs', 'relativeCreated',
-                              'thread', 'threadName', 'processName', 'process', 'getMessage']:
+                if key not in [
+                    "name",
+                    "msg",
+                    "args",
+                    "levelname",
+                    "levelno",
+                    "pathname",
+                    "filename",
+                    "module",
+                    "exc_info",
+                    "exc_text",
+                    "stack_info",
+                    "lineno",
+                    "funcName",
+                    "created",
+                    "msecs",
+                    "relativeCreated",
+                    "thread",
+                    "threadName",
+                    "processName",
+                    "process",
+                    "getMessage",
+                ]:
                     log_data[key] = value
 
         # Add exception info if present
@@ -405,8 +447,8 @@ class JSONSecurityFormatter(logging.Formatter):
         sorted_data = json.dumps(log_data, sort_keys=True, default=str)
 
         # Calculate HMAC
-        key = settings.AUDIT_ENCRYPTION_KEY.encode('utf-8')
-        return hmac.new(key, sorted_data.encode('utf-8'), hashlib.sha256).hexdigest()[:16]
+        key = settings.AUDIT_ENCRYPTION_KEY.encode("utf-8")
+        return hmac.new(key, sorted_data.encode("utf-8"), hashlib.sha256).hexdigest()[:16]
 
 
 class SecureConsoleFormatter(logging.Formatter):
@@ -414,8 +456,7 @@ class SecureConsoleFormatter(logging.Formatter):
 
     def __init__(self):
         super().__init__(
-            fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S"
+            fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
         )
         self.redactor = SensitiveDataRedactor()
 
@@ -447,11 +488,17 @@ class OAuthEventTracker:
             status="started",
             client_ip=client_ip,
             user_agent=user_agent,
-            flow_stage="authorization_request"
+            flow_stage="authorization_request",
         )
 
-    def track_oauth_callback(self, provider: str, success: bool, user_email: str = None,
-                           client_ip: str = None, error: str = None):
+    def track_oauth_callback(
+        self,
+        provider: str,
+        success: bool,
+        user_email: str = None,
+        client_ip: str = None,
+        error: str = None,
+    ):
         """Track OAuth callback processing"""
         status = "success" if success else "failure"
 
@@ -462,11 +509,12 @@ class OAuthEventTracker:
             user_email=user_email,
             client_ip=client_ip,
             flow_stage="authorization_callback",
-            error_message=error if error else None
+            error_message=error if error else None,
         )
 
-    def track_token_refresh(self, provider: str, user_email: str, success: bool,
-                          client_ip: str = None):
+    def track_token_refresh(
+        self, provider: str, user_email: str, success: bool, client_ip: str = None
+    ):
         """Track token refresh events"""
         status = "success" if success else "failure"
 
@@ -476,11 +524,12 @@ class OAuthEventTracker:
             status=status,
             user_email=user_email,
             client_ip=client_ip,
-            flow_stage="token_refresh"
+            flow_stage="token_refresh",
         )
 
-    def track_suspicious_activity(self, event_type: str, details: Dict[str, Any],
-                                client_ip: str = None):
+    def track_suspicious_activity(
+        self, event_type: str, details: Dict[str, Any], client_ip: str = None
+    ):
         """Track suspicious OAuth activity"""
         self.security_logger.log_security_event(
             event_type=f"oauth_suspicious_{event_type}",
@@ -488,7 +537,7 @@ class OAuthEventTracker:
             description=f"Suspicious OAuth activity detected: {event_type}",
             source="oauth_security",
             client_ip=client_ip,
-            details=details
+            details=details,
         )
 
     def get_oauth_metrics(self) -> Dict[str, Any]:
@@ -539,20 +588,17 @@ def configure_secure_logging():
         log_path.parent.mkdir(parents=True, exist_ok=True)
 
         file_handler = RotatingFileHandler(
-            log_path,
-            maxBytes=10 * 1024 * 1024,  # 10MB
-            backupCount=5,
-            encoding='utf-8'
+            log_path, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"  # 10MB
         )
         file_handler.setFormatter(formatter)
         root_logger.addHandler(file_handler)
 
     # Configure specific loggers to prevent credential leakage
     sensitive_loggers = [
-        'urllib3.connectionpool',
-        'requests.packages.urllib3',
-        'httpx',
-        'httpcore',
+        "urllib3.connectionpool",
+        "requests.packages.urllib3",
+        "httpx",
+        "httpcore",
     ]
 
     for logger_name in sensitive_loggers:

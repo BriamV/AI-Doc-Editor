@@ -3,11 +3,9 @@ Configuration settings for FastAPI backend
 T-02: OAuth 2.0 + JWT settings
 """
 
-import os
 import re
 import secrets
 import logging
-from datetime import datetime, timedelta
 from typing import Optional, Dict, Any, List
 from pydantic_settings import BaseSettings
 from pydantic import Field, validator
@@ -32,7 +30,7 @@ class Settings(BaseSettings):
     # JWT settings - Enhanced security
     SECRET_KEY: str = Field(
         default="development-secret-key-change-in-production-T02-2025",
-        description="JWT secret key - MUST be changed in production"
+        description="JWT secret key - MUST be changed in production",
     )
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
@@ -47,36 +45,33 @@ class Settings(BaseSettings):
     # OAuth providers - Production ready configuration
     # Required for OAuth authentication - set via environment variables
     GOOGLE_CLIENT_ID: str = Field(
-        default="",
-        description="Google OAuth 2.0 Client ID - Required for Google authentication"
+        default="", description="Google OAuth 2.0 Client ID - Required for Google authentication"
     )
     GOOGLE_CLIENT_SECRET: str = Field(
-        default="",
-        description="Google OAuth 2.0 Client Secret - SENSITIVE: Never log or expose"
+        default="", description="Google OAuth 2.0 Client Secret - SENSITIVE: Never log or expose"
     )
     MICROSOFT_CLIENT_ID: str = Field(
         default="",
-        description="Microsoft OAuth 2.0 Client ID - Required for Microsoft authentication"
+        description="Microsoft OAuth 2.0 Client ID - Required for Microsoft authentication",
     )
     MICROSOFT_CLIENT_SECRET: str = Field(
-        default="",
-        description="Microsoft OAuth 2.0 Client Secret - SENSITIVE: Never log or expose"
+        default="", description="Microsoft OAuth 2.0 Client Secret - SENSITIVE: Never log or expose"
     )
 
     # OAuth client ID validation patterns
     GOOGLE_CLIENT_ID_PATTERN: str = r"^[0-9]+-[a-zA-Z0-9_-]+\.apps\.googleusercontent\.com$"
-    MICROSOFT_CLIENT_ID_PATTERN: str = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    MICROSOFT_CLIENT_ID_PATTERN: str = (
+        r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    )
 
     # Production domain (required for production OAuth callbacks)
     PRODUCTION_DOMAIN: str = Field(
-        default="",
-        description="Production domain with protocol (e.g., https://yourdomain.com)"
+        default="", description="Production domain with protocol (e.g., https://yourdomain.com)"
     )
 
     # OAuth security enhancements
     OAUTH_SECRETS_ENCRYPTION_KEY: str = Field(
-        default="",
-        description="Fernet key for encrypting OAuth secrets at rest"
+        default="", description="Fernet key for encrypting OAuth secrets at rest"
     )
     OAUTH_SECRET_ROTATION_DAYS: int = 90  # Recommend secret rotation every 90 days
     OAUTH_SECRET_EXPIRY_WARNING_DAYS: int = 30  # Warn 30 days before expiry
@@ -176,15 +171,15 @@ class Settings(BaseSettings):
         r"(?i)(password|secret|token|key)[:=]\s*['\"]?([^'\"\s,}]+)",
         r"(?i)(client_secret|refresh_token|access_token)[:=]\s*['\"]?([^'\"\s,}]+)",
         r"(?i)(authorization):\s*bearer\s+([^\s]+)",
-        r"(?i)(api_key|apikey)[:=]\s*['\"]?([^'\"\s,}]+)"
+        r"(?i)(api_key|apikey)[:=]\s*['\"]?([^'\"\s,}]+)",
     ]
 
-    @validator('SECRET_KEY')
+    @validator("SECRET_KEY")
     def validate_secret_key(cls, v: str, values: Dict[str, Any]) -> str:
         """Validate JWT secret key strength"""
-        environment = values.get('ENVIRONMENT', 'development')
+        environment = values.get("ENVIRONMENT", "development")
 
-        if environment == 'production':
+        if environment == "production":
             if len(v) < cls.JWT_SECRET_MIN_LENGTH:
                 raise ValueError(
                     f"SECRET_KEY must be at least {cls.JWT_SECRET_MIN_LENGTH} characters in production"
@@ -205,7 +200,7 @@ class Settings(BaseSettings):
 
         return v
 
-    @validator('GOOGLE_CLIENT_ID')
+    @validator("GOOGLE_CLIENT_ID")
     def validate_google_client_id(cls, v: str) -> str:
         """Validate Google OAuth Client ID format"""
         if v and not re.match(cls.GOOGLE_CLIENT_ID_PATTERN, v):
@@ -214,7 +209,7 @@ class Settings(BaseSettings):
             )
         return v
 
-    @validator('MICROSOFT_CLIENT_ID')
+    @validator("MICROSOFT_CLIENT_ID")
     def validate_microsoft_client_id(cls, v: str) -> str:
         """Validate Microsoft OAuth Client ID format (UUID)"""
         if v and not re.match(cls.MICROSOFT_CLIENT_ID_PATTERN, v.lower()):
@@ -223,14 +218,14 @@ class Settings(BaseSettings):
             )
         return v
 
-    @validator('PRODUCTION_DOMAIN')
+    @validator("PRODUCTION_DOMAIN")
     def validate_production_domain(cls, v: str, values: Dict[str, Any]) -> str:
         """Validate production domain format and security"""
-        environment = values.get('ENVIRONMENT', 'development')
+        environment = values.get("ENVIRONMENT", "development")
 
-        if environment == 'production' and v:
+        if environment == "production" and v:
             # Ensure HTTPS in production
-            if not v.startswith('https://'):
+            if not v.startswith("https://"):
                 raise ValueError(
                     "PRODUCTION_DOMAIN must use HTTPS in production environment for OAuth 2.0 compliance"
                 )
@@ -300,7 +295,9 @@ class Settings(BaseSettings):
         if isinstance(data, dict):
             sanitized = {}
             for key, value in data.items():
-                if any(pattern in key.lower() for pattern in ['secret', 'password', 'token', 'key']):
+                if any(
+                    pattern in key.lower() for pattern in ["secret", "password", "token", "key"]
+                ):
                     sanitized[key] = "***REDACTED***"
                 else:
                     sanitized[key] = self.sanitize_for_logging(value)
@@ -384,20 +381,18 @@ class Settings(BaseSettings):
             return True
 
         return (
-            len(self.SECRET_KEY) >= self.JWT_SECRET_MIN_LENGTH and
-            "development-secret-key" not in self.SECRET_KEY.lower() and
-            self.calculate_secret_entropy(self.SECRET_KEY) >= self.JWT_SECRET_ENTROPY_THRESHOLD
+            len(self.SECRET_KEY) >= self.JWT_SECRET_MIN_LENGTH
+            and "development-secret-key" not in self.SECRET_KEY.lower()
+            and self.calculate_secret_entropy(self.SECRET_KEY) >= self.JWT_SECRET_ENTROPY_THRESHOLD
         )
 
     def _validate_client_id_formats(self) -> bool:
         """Validate OAuth client ID formats"""
-        google_valid = (
-            not self.GOOGLE_CLIENT_ID or
-            re.match(self.GOOGLE_CLIENT_ID_PATTERN, self.GOOGLE_CLIENT_ID)
+        google_valid = not self.GOOGLE_CLIENT_ID or re.match(
+            self.GOOGLE_CLIENT_ID_PATTERN, self.GOOGLE_CLIENT_ID
         )
-        microsoft_valid = (
-            not self.MICROSOFT_CLIENT_ID or
-            re.match(self.MICROSOFT_CLIENT_ID_PATTERN, self.MICROSOFT_CLIENT_ID.lower())
+        microsoft_valid = not self.MICROSOFT_CLIENT_ID or re.match(
+            self.MICROSOFT_CLIENT_ID_PATTERN, self.MICROSOFT_CLIENT_ID.lower()
         )
         return google_valid and microsoft_valid
 
@@ -406,14 +401,16 @@ class Settings(BaseSettings):
         headers = {}
 
         if self.SECURITY_HEADERS_ENABLED:
-            headers.update({
-                "X-Content-Type-Options": "nosniff",
-                "X-Frame-Options": "DENY",
-                "X-XSS-Protection": "1; mode=block",
-                "Referrer-Policy": "strict-origin-when-cross-origin",
-                "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
-                "Content-Security-Policy": self._build_csp_header(),
-            })
+            headers.update(
+                {
+                    "X-Content-Type-Options": "nosniff",
+                    "X-Frame-Options": "DENY",
+                    "X-XSS-Protection": "1; mode=block",
+                    "Referrer-Policy": "strict-origin-when-cross-origin",
+                    "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
+                    "Content-Security-Policy": self._build_csp_header(),
+                }
+            )
 
             if self.REQUIRE_HTTPS:
                 hsts_value = f"max-age={self.HSTS_MAX_AGE}"
@@ -463,8 +460,6 @@ class Settings(BaseSettings):
             "encryption_enabled": bool(self.OAUTH_SECRETS_ENCRYPTION_KEY),
         }
 
-        return validation_results
-
     def get_oauth_redirect_uri(self, provider: str) -> str:
         """Get the appropriate OAuth redirect URI based on environment"""
         if self.ENVIRONMENT == "production":
@@ -496,9 +491,12 @@ class Settings(BaseSettings):
         # Custom JSON encoders for sensitive data
         json_encoders = {
             # Redact sensitive fields in JSON serialization
-            str: lambda v: "***REDACTED***" if any(
-                keyword in str(v).lower() for keyword in ['secret', 'password', 'token']
-            ) and len(str(v)) > 10 else v
+            str: lambda v: (
+                "***REDACTED***"
+                if any(keyword in str(v).lower() for keyword in ["secret", "password", "token"])
+                and len(str(v)) > 10
+                else v
+            )
         }
 
 

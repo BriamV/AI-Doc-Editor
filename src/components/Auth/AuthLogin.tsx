@@ -4,8 +4,9 @@
  */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { User } from '@type/auth';
+import type { User } from '../../types/auth';
 import { useAuth } from '@hooks/useAuth';
+import { getEnvVar } from '@utils/env';
 
 interface AuthLoginProps {
   onSuccess?: () => void;
@@ -219,7 +220,7 @@ const AuthLogin: React.FC<AuthLoginProps> = ({ onSuccess, onError }) => {
     return (
       <div className="space-y-4">
         <BackendFallback />
-        {(import.meta.env.DEV || import.meta.env.VITE_ENABLE_TESTING === 'true') && (
+        {(getEnvVar('DEV') || getEnvVar('VITE_ENABLE_TESTING') === 'true') && (
           <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
             <h4 className="font-semibold text-blue-800">Test Login (Dev/Test Only)</h4>
             <div className="flex gap-2">
@@ -255,7 +256,7 @@ const AuthLogin: React.FC<AuthLoginProps> = ({ onSuccess, onError }) => {
       />
       <TermsNotice />
       <BackendStatus backendAvailable={backendAvailable} />
-      {(import.meta.env.DEV || import.meta.env.VITE_ENABLE_TESTING === 'true') && (
+      {(getEnvVar('DEV') || getEnvVar('VITE_ENABLE_TESTING') === 'true') && (
         <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
           <h4 className="font-semibold text-blue-800">Test Login (Dev/Test Only)</h4>
           <div className="flex gap-2">

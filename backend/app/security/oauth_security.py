@@ -13,17 +13,13 @@ Implements OWASP OAuth 2.0 security best practices:
 
 import base64
 import hashlib
-import hmac
 import secrets
 import time
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, Optional, List, Any, Tuple
-from urllib.parse import parse_qs, urlencode, urlparse
+from urllib.parse import urlparse
 import re
-import json
-
-from cryptography.fernet import Fernet
 from jose import jwt, JWTError
 from pydantic import BaseModel, Field, validator
 from fastapi import HTTPException, status
@@ -40,11 +36,13 @@ class OAuthState(BaseModel):
     redirect_uri: str
     nonce: Optional[str] = None
 
-    @validator('state')
+    @validator("state")
     def validate_state_format(cls, v):
         """Validate state parameter format and entropy"""
-        if not re.match(r'^[a-zA-Z0-9_-]+$', v):
-            raise ValueError("State must contain only alphanumeric characters, hyphens, and underscores")
+        if not re.match(r"^[a-zA-Z0-9_-]+$", v):
+            raise ValueError(
+                "State must contain only alphanumeric characters, hyphens, and underscores"
+            )
 
         # Check entropy (basic)
         unique_chars = len(set(v))
@@ -61,7 +59,7 @@ class PKCEChallenge(BaseModel):
     code_challenge: str = Field(..., min_length=43, max_length=128)
     code_challenge_method: str = Field(default="S256")
 
-    @validator('code_challenge_method')
+    @validator("code_challenge_method")
     def validate_challenge_method(cls, v):
         """Validate PKCE challenge method"""
         if v not in ["S256", "plain"]:
@@ -132,18 +130,16 @@ class OAuthSecurityValidator:
             timestamp=time.time(),
             provider=provider.lower(),
             redirect_uri=redirect_uri,
-            nonce=nonce
+            nonce=nonce,
         )
 
         self.state_storage[state] = oauth_state
 
         self.logger.info(
             f"Generated OAuth state for provider {provider}",
-            extra=settings.sanitize_for_logging({
-                "provider": provider,
-                "state_length": len(state),
-                "redirect_uri": redirect_uri
-            })
+            extra=settings.sanitize_for_logging(
+                {"provider": provider, "state_length": len(state), "redirect_uri": redirect_uri}
+            ),
         )
 
         return state
@@ -163,7 +159,10 @@ class OAuthSecurityValidator:
         if not state or state not in self.state_storage:
             self.logger.warning(
                 "OAuth state validation failed: state not found",
-                extra={"provider": provider, "state_exists": state in self.state_storage if state else False}
+                extra={
+                    "provider": provider,
+                    "state_exists": state in self.state_storage if state else False,
+                },
             )
             return False
 
@@ -174,7 +173,7 @@ class OAuthSecurityValidator:
         if age_minutes > self.max_state_age_minutes:
             self.logger.warning(
                 "OAuth state validation failed: expired state",
-                extra={"provider": provider, "age_minutes": age_minutes}
+                extra={"provider": provider, "age_minutes": age_minutes},
             )
             del self.state_storage[state]
             return False
@@ -183,7 +182,7 @@ class OAuthSecurityValidator:
         if stored_state.provider.lower() != provider.lower():
             self.logger.warning(
                 "OAuth state validation failed: provider mismatch",
-                extra={"expected": stored_state.provider, "actual": provider}
+                extra={"expected": stored_state.provider, "actual": provider},
             )
             return False
 
@@ -191,17 +190,14 @@ class OAuthSecurityValidator:
         if stored_state.redirect_uri != redirect_uri:
             self.logger.warning(
                 "OAuth state validation failed: redirect URI mismatch",
-                extra={"expected": stored_state.redirect_uri, "actual": redirect_uri}
+                extra={"expected": stored_state.redirect_uri, "actual": redirect_uri},
             )
             return False
 
         # Clean up used state (one-time use)
         del self.state_storage[state]
 
-        self.logger.info(
-            "OAuth state validation successful",
-            extra={"provider": provider}
-        )
+        self.logger.info("OAuth state validation successful", extra={"provider": provider})
 
         return True
 
@@ -216,23 +212,21 @@ class OAuthSecurityValidator:
         code_verifier = secrets.token_urlsafe(96)  # ~128 chars when base64url encoded
 
         # Generate S256 challenge
-        digest = hashlib.sha256(code_verifier.encode('utf-8')).digest()
-        code_challenge = base64.urlsafe_b64encode(digest).decode('utf-8').rstrip('=')
+        digest = hashlib.sha256(code_verifier.encode("utf-8")).digest()
+        code_challenge = base64.urlsafe_b64encode(digest).decode("utf-8").rstrip("=")
 
         method = "S256"
 
         # Store PKCE challenge
         pkce = PKCEChallenge(
-            code_verifier=code_verifier,
-            code_challenge=code_challenge,
-            code_challenge_method=method
+            code_verifier=code_verifier, code_challenge=code_challenge, code_challenge_method=method
         )
 
         self.pkce_storage[code_challenge] = pkce
 
         self.logger.info(
             "Generated PKCE challenge",
-            extra={"method": method, "challenge_length": len(code_challenge)}
+            extra={"method": method, "challenge_length": len(code_challenge)},
         )
 
         return code_verifier, code_challenge, method
@@ -256,8 +250,8 @@ class OAuthSecurityValidator:
 
         # Validate code verifier
         if stored_pkce.code_challenge_method == "S256":
-            digest = hashlib.sha256(code_verifier.encode('utf-8')).digest()
-            computed_challenge = base64.urlsafe_b64encode(digest).decode('utf-8').rstrip('=')
+            digest = hashlib.sha256(code_verifier.encode("utf-8")).digest()
+            computed_challenge = base64.urlsafe_b64encode(digest).decode("utf-8").rstrip("=")
 
             if computed_challenge != code_challenge:
                 self.logger.warning("PKCE validation failed: S256 challenge mismatch")
@@ -295,7 +289,7 @@ class OAuthSecurityValidator:
         if settings.ENVIRONMENT == "production" and parsed.scheme != "https":
             self.logger.warning(
                 "Redirect URI must use HTTPS in production",
-                extra={"scheme": parsed.scheme, "provider": provider}
+                extra={"scheme": parsed.scheme, "provider": provider},
             )
             return False
 
@@ -304,7 +298,7 @@ class OAuthSecurityValidator:
         if parsed.netloc not in allowed_domains:
             self.logger.warning(
                 "Redirect URI domain not allowed",
-                extra={"domain": parsed.netloc, "allowed": allowed_domains, "provider": provider}
+                extra={"domain": parsed.netloc, "allowed": allowed_domains, "provider": provider},
             )
             return False
 
@@ -314,14 +308,14 @@ class OAuthSecurityValidator:
             r"data:",
             r"file:",
             r"ftp:",
-            r"\.\./"  # Path traversal
+            r"\.\./",  # Path traversal
         ]
 
         for pattern in suspicious_patterns:
             if re.search(pattern, redirect_uri, re.IGNORECASE):
                 self.logger.warning(
                     "Redirect URI contains suspicious pattern",
-                    extra={"pattern": pattern, "uri": redirect_uri}
+                    extra={"pattern": pattern, "uri": redirect_uri},
                 )
                 return False
 
@@ -345,11 +339,11 @@ class OAuthSecurityValidator:
                 settings.SECRET_KEY,
                 algorithms=[settings.ALGORITHM],
                 issuer=settings.JWT_ISSUER,
-                audience=settings.JWT_AUDIENCE
+                audience=settings.JWT_AUDIENCE,
             )
 
             # Check token expiration
-            exp = payload.get('exp')
+            exp = payload.get("exp")
             if exp and datetime.utcnow().timestamp() > exp:
                 return OAuthTokenValidation(
                     valid=False,
@@ -358,7 +352,7 @@ class OAuthSecurityValidator:
                     subject="",
                     issuer="",
                     audience="",
-                    error="Token expired"
+                    error="Token expired",
                 )
 
             # Extract token information
@@ -366,16 +360,15 @@ class OAuthSecurityValidator:
                 valid=True,
                 token_type=token_type,
                 expires_at=datetime.fromtimestamp(exp) if exp else None,
-                scope=payload.get('scope', '').split(' ') if payload.get('scope') else [],
-                subject=payload.get('sub', ''),
-                issuer=payload.get('iss', ''),
-                audience=payload.get('aud', '')
+                scope=payload.get("scope", "").split(" ") if payload.get("scope") else [],
+                subject=payload.get("sub", ""),
+                issuer=payload.get("iss", ""),
+                audience=payload.get("aud", ""),
             )
 
         except JWTError as e:
             self.logger.warning(
-                "OAuth token validation failed",
-                extra={"error": str(e), "token_type": token_type}
+                "OAuth token validation failed", extra={"error": str(e), "token_type": token_type}
             )
             return OAuthTokenValidation(
                 valid=False,
@@ -384,7 +377,7 @@ class OAuthSecurityValidator:
                 subject="",
                 issuer="",
                 audience="",
-                error=f"JWT validation failed: {str(e)}"
+                error=f"JWT validation failed: {str(e)}",
             )
 
     def check_rate_limit(self, client_ip: str, endpoint: str = "oauth") -> bool:
@@ -405,8 +398,7 @@ class OAuthSecurityValidator:
         key = f"{client_ip}:{endpoint}"
         if key in self.rate_limit_window:
             self.rate_limit_window[key] = [
-                timestamp for timestamp in self.rate_limit_window[key]
-                if timestamp > window_start
+                timestamp for timestamp in self.rate_limit_window[key] if timestamp > window_start
             ]
         else:
             self.rate_limit_window[key] = []
@@ -417,7 +409,7 @@ class OAuthSecurityValidator:
         if current_count >= self.rate_limit_per_hour:
             self.logger.warning(
                 "OAuth rate limit exceeded",
-                extra={"client_ip": client_ip, "endpoint": endpoint, "count": current_count}
+                extra={"client_ip": client_ip, "endpoint": endpoint, "count": current_count},
             )
             return False
 
@@ -444,7 +436,7 @@ class OAuthSecurityValidator:
         if invalid_scopes:
             self.logger.warning(
                 "Invalid OAuth scopes requested",
-                extra={"provider": provider, "invalid_scopes": list(invalid_scopes)}
+                extra={"provider": provider, "invalid_scopes": list(invalid_scopes)},
             )
             return False
 
@@ -467,16 +459,13 @@ class OAuthSecurityValidator:
             "event_type": event_type,
             "provider": provider,
             "timestamp": datetime.utcnow().isoformat(),
-            **kwargs
+            **kwargs,
         }
 
         # Sanitize sensitive data
         sanitized_data = settings.sanitize_for_logging(event_data)
 
-        self.logger.info(
-            f"OAuth security event: {event_type}",
-            extra=sanitized_data
-        )
+        self.logger.info(f"OAuth security event: {event_type}", extra=sanitized_data)
 
     def _get_allowed_redirect_domains(self, provider: str) -> List[str]:
         """Get allowed redirect domains for OAuth provider"""
@@ -511,19 +500,17 @@ class OAuthSecurityValidator:
 
         # Flag if requesting both sensitive and read-only scopes without justification
         has_sensitive = any(
-            any(sensitive in scope.lower() for sensitive in sensitive_scopes)
-            for scope in scopes
+            any(sensitive in scope.lower() for sensitive in sensitive_scopes) for scope in scopes
         )
 
         has_read_only = any(
-            any(read_only in scope.lower() for read_only in read_only_scopes)
-            for scope in scopes
+            any(read_only in scope.lower() for read_only in read_only_scopes) for scope in scopes
         )
 
         if has_sensitive and has_read_only and len(scopes) > 5:
             self.logger.warning(
                 "Suspicious OAuth scope combination detected",
-                extra={"provider": provider, "scope_count": len(scopes)}
+                extra={"provider": provider, "scope_count": len(scopes)},
             )
             return True
 
@@ -551,7 +538,7 @@ class OAuthSecurityMiddleware:
             if not self.validator.check_rate_limit(client_ip, "oauth"):
                 raise HTTPException(
                     status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    detail="OAuth rate limit exceeded"
+                    detail="OAuth rate limit exceeded",
                 )
 
             # Log OAuth request
@@ -559,7 +546,7 @@ class OAuthSecurityMiddleware:
                 "oauth_request",
                 request.path_params.get("provider", "unknown"),
                 path=str(request.url.path),
-                client_ip=client_ip
+                client_ip=client_ip,
             )
 
         response = await call_next(request)
@@ -583,5 +570,5 @@ def get_oauth_security_status() -> Dict[str, Any]:
             "scope_validation": True,
             "rate_limiting": True,
             "token_validation": True,
-        }
+        },
     }
