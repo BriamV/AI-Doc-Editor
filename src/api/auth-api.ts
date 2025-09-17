@@ -47,12 +47,11 @@ class AuthAPI {
    * T-02-ST1: OAuth flow initiation
    */
   async initiateLogin(provider: 'google' | 'microsoft'): Promise<LoginResponse> {
-    const response = await fetch(`${this.baseURL}/login`, {
+    const response = await fetch(`${this.baseURL}/login?provider=${provider}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ provider }),
     });
 
     if (!response.ok) {

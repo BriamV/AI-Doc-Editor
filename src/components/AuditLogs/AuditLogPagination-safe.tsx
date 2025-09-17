@@ -1,20 +1,55 @@
 /**
- * Audit Log Pagination Component
- * Handles pagination controls for audit logs in T-13 security audit system
+ * Enhanced Audit Log Pagination with Better Error Handling
+ * This version adds safety checks to prevent undefined state errors
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import useStore from '@store/store';
 import { ChevronLeft, ChevronRight, SkipBack, SkipForward } from '@carbon/icons-react';
 
-const AuditLogPagination: React.FC = () => {
-  const { pagination, goToPage, changePageSize } = useStore();
+const AuditLogPaginationSafe: React.FC = () => {
+  // Enhanced state extraction with defaults
+  const storeState = useStore();
+
+  // Safe extraction with fallbacks
+  const pagination = useMemo(() => {
+    if (!storeState || !storeState.pagination) {
+      console.warn('Audit pagination state not initialized, using defaults');
+      return {
+        page: 1,
+        pageSize: 10,
+        total: 0,
+        totalPages: 0,
+      };
+    }
+    return storeState.pagination;
+  }, [storeState]);
+
+  const { goToPage, changePageSize } = useMemo(() => {
+    if (!storeState) {
+      console.warn('Store not available, pagination functions disabled');
+      return {
+        goToPage: () => console.warn('goToPage not available'),
+        changePageSize: () => console.warn('changePageSize not available'),
+      };
+    }
+    return {
+      goToPage: storeState.goToPage || (() => {}),
+      changePageSize: storeState.changePageSize || (() => {}),
+    };
+  }, [storeState]);
 
   const { page, pageSize, total, totalPages } = pagination;
 
   const handlePageChange = useCallback(
     (newPage: number) => {
-      if (newPage >= 1 && newPage <= totalPages) {
-        goToPage(newPage);
+      try {
+        if (newPage >= 1 && newPage <= totalPages) {
+          goToPage(newPage);
+        } else {
+          console.warn(`Invalid page number: ${newPage}. Valid range: 1-${totalPages}`);
+        }
+      } catch (error) {
+        console.error('Error changing page:', error);
       }
     },
     [totalPages, goToPage]
@@ -22,25 +57,29 @@ const AuditLogPagination: React.FC = () => {
 
   const handlePageSizeChange = useCallback(
     (newPageSize: number) => {
-      changePageSize(newPageSize);
+      try {
+        if (newPageSize > 0) {
+          changePageSize(newPageSize);
+        } else {
+          console.warn(`Invalid page size: ${newPageSize}`);
+        }
+      } catch (error) {
+        console.error('Error changing page size:', error);
+      }
     },
     [changePageSize]
   );
 
-  // Calculate the range of items being displayed
-  const startItem = total === 0 ? 0 : (page - 1) * pageSize + 1;
-  const endItem = Math.min(page * pageSize, total);
+  // Enhanced page number generation with safety checks
+  const getPageNumbers = useCallback(() => {
+    if (totalPages <= 0) return [];
 
-  // Generate page numbers to display
-  const getPageNumbers = () => {
-    const delta = 2; // Number of pages to show on each side of current page
+    const delta = 2;
     const range = [];
 
-    // Calculate start and end of range
     const start = Math.max(1, page - delta);
     const end = Math.min(totalPages, page + delta);
 
-    // Add first page
     if (start > 1) {
       range.push(1);
       if (start > 2) {
@@ -48,12 +87,10 @@ const AuditLogPagination: React.FC = () => {
       }
     }
 
-    // Add current range
     for (let i = start; i <= end; i++) {
       range.push(i);
     }
 
-    // Add last page
     if (end < totalPages) {
       if (end < totalPages - 1) {
         range.push('...');
@@ -62,10 +99,54 @@ const AuditLogPagination: React.FC = () => {
     }
 
     return range;
-  };
+  }, [page, totalPages]);
 
   const pageNumbers = getPageNumbers();
 
+  // Calculate display values safely
+  const startItem = total === 0 ? 0 : Math.max(0, (page - 1) * pageSize + 1);
+  const endItem = Math.min(page * pageSize, total);
+
+  // Enhanced input handler with validation
+  const handleGoToPageInput = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        try {
+          const input = e.target as HTMLInputElement;
+          const newPage = parseInt(input.value);
+
+          if (isNaN(newPage)) {
+            console.warn('Invalid page number entered');
+            input.value = page.toString();
+            return;
+          }
+
+          if (newPage >= 1 && newPage <= totalPages) {
+            handlePageChange(newPage);
+          } else {
+            console.warn(`Page ${newPage} is out of range (1-${totalPages})`);
+            input.value = page.toString();
+          }
+        } catch (error) {
+          console.error('Error processing page input:', error);
+        }
+      }
+    },
+    [page, totalPages, handlePageChange]
+  );
+
+  // Show loading state if store is not ready
+  if (!storeState) {
+    return (
+      <div className="bg-white dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-center">
+          <div className="text-sm text-gray-500 dark:text-gray-400">Loading pagination...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Single page or no data case
   if (totalPages <= 1) {
     return (
       <div className="bg-white dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
@@ -132,7 +213,7 @@ const AuditLogPagination: React.FC = () => {
 
           {/* Page navigation */}
           <nav className="flex items-center space-x-1">
-            {/* First page */}
+            {/* Navigation buttons with enhanced error handling */}
             <button
               onClick={() => handlePageChange(1)}
               disabled={page === 1}
@@ -143,7 +224,6 @@ const AuditLogPagination: React.FC = () => {
               <SkipBack className="h-4 w-4" />
             </button>
 
-            {/* Previous page */}
             <button
               onClick={() => handlePageChange(page - 1)}
               disabled={page === 1}
@@ -154,7 +234,7 @@ const AuditLogPagination: React.FC = () => {
               <ChevronLeft className="h-4 w-4" />
             </button>
 
-            {/* Go to page input */}
+            {/* Go to page input with enhanced validation */}
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-700 dark:text-gray-300">Go to:</span>
               <input
@@ -164,21 +244,21 @@ const AuditLogPagination: React.FC = () => {
                 defaultValue={page}
                 className="w-16 text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 data-testid="goto-page-input"
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    const newPage = parseInt((e.target as HTMLInputElement).value);
-                    if (newPage >= 1 && newPage <= totalPages) {
-                      handlePageChange(newPage);
-                    }
+                onKeyDown={handleGoToPageInput}
+                onBlur={e => {
+                  // Reset to current page if invalid value
+                  const value = parseInt(e.target.value);
+                  if (isNaN(value) || value < 1 || value > totalPages) {
+                    e.target.value = page.toString();
                   }
                 }}
               />
             </div>
 
-            {/* Page numbers */}
+            {/* Page numbers with safe rendering */}
             <div className="flex items-center space-x-1">
               {pageNumbers.map((pageNum, index) => (
-                <React.Fragment key={index}>
+                <React.Fragment key={`page-${pageNum}-${index}`}>
                   {pageNum === '...' ? (
                     <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300">
                       ...
@@ -199,7 +279,6 @@ const AuditLogPagination: React.FC = () => {
               ))}
             </div>
 
-            {/* Next page */}
             <button
               onClick={() => handlePageChange(page + 1)}
               disabled={page === totalPages}
@@ -210,7 +289,6 @@ const AuditLogPagination: React.FC = () => {
               <ChevronRight className="h-4 w-4" />
             </button>
 
-            {/* Last page */}
             <button
               onClick={() => handlePageChange(totalPages)}
               disabled={page === totalPages}
@@ -236,4 +314,4 @@ const AuditLogPagination: React.FC = () => {
   );
 };
 
-export default AuditLogPagination;
+export default AuditLogPaginationSafe;

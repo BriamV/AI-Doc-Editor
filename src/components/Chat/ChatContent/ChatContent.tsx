@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import ScrollToBottom from 'react-scroll-to-bottom';
+import AutoScrollContainer from '@components/AutoScrollContainer/AutoScrollContainer';
 import useStore from '@store/store';
 import ScrollToBottomButton from './ScrollToBottomButton';
 import Message from './Message';
@@ -42,7 +42,7 @@ const ChatContent = () => {
 
   return (
     <div className="flex-1 overflow-hidden" ref={messageContainerRef}>
-      <ScrollToBottom className="h-full dark:bg-gray-900" followButtonClassName="hidden">
+      <AutoScrollContainer className="h-full dark:bg-gray-900">
         <ScrollToBottomButton />
         <div className="flex flex-col items-center text-sm dark:bg-gray-800">
           <div className="flex flex-col items-center text-sm dark:bg-gray-800 w-full" ref={saveRef}>
@@ -75,7 +75,7 @@ const ChatContent = () => {
             </div>
           )}
         </div>
-      </ScrollToBottom>
+      </AutoScrollContainer>
     </div>
   );
 };

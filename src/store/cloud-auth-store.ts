@@ -1,4 +1,5 @@
-import { StoreApi, create } from 'zustand';
+import { StoreApi } from 'zustand';
+import { createWithEqualityFn } from 'zustand/traditional';
 import { persist } from 'zustand/middleware';
 import { CloudAuthSlice, createCloudAuthSlice } from './cloud-auth-slice';
 
@@ -9,7 +10,7 @@ export type StoreSlice<T> = (
   get: StoreApi<StoreState>['getState']
 ) => T;
 
-const useCloudAuthStore = create<StoreState>()(
+const useCloudAuthStore = createWithEqualityFn<StoreState>()(
   persist(
     (set, get) => ({
       ...createCloudAuthSlice(set, get),

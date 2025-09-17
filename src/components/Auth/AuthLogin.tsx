@@ -177,9 +177,37 @@ const AuthLogin: React.FC<AuthLoginProps> = ({ onSuccess, onError }) => {
       role,
       provider: 'google',
     };
-    // Set tokens/role for guards and API clients
-    window.localStorage.setItem('auth_token', 'mock-jwt-token');
+
+    // Security: Generate secure test token with proper entropy and HMAC-like structure
+    const generateSecureTestToken = (userRole: string): string => {
+      const timestamp = Date.now();
+
+      // Generate high-entropy random data (32 bytes for 256-bit security)
+      const randomBytes = crypto.getRandomValues(new Uint8Array(32));
+      const randomHex = Array.from(randomBytes, byte => byte.toString(16).padStart(2, '0')).join(
+        ''
+      );
+
+      // Create HMAC-like structure: payload + separator + signature
+      const payload = `test-${userRole}-${timestamp}`;
+
+      // Generate signature using additional entropy
+      const sigBytes = crypto.getRandomValues(new Uint8Array(16));
+      const signature = Array.from(sigBytes, byte => byte.toString(16).padStart(2, '0')).join('');
+
+      // Combine with proper structure and use Base64URL encoding for web safety
+      const tokenData = `${payload}.${randomHex}.${signature}`;
+      return btoa(tokenData).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    };
+
+    // Set secure tokens with expiry (1 hour for testing)
+    const secureToken = generateSecureTestToken(role);
+    const expiry = Date.now() + 60 * 60 * 1000; // 1 hour
+
+    window.localStorage.setItem('auth_token', secureToken);
     window.localStorage.setItem('user_role', role);
+    window.localStorage.setItem('token_expiry', expiry.toString());
+
     // Use test interface exposed in main.tsx
     window.app?.login(testUser);
     // Navigate to home after test login
