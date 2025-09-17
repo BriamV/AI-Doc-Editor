@@ -8,6 +8,9 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? [['html'], ['github']] : [['html'], ['list']],
 
+  // Global timeout for CI environments (prevent hanging)
+  globalTimeout: process.env.CI ? 240000 : undefined, // 4 minutes max in CI
+
   // Global setup and teardown
   globalSetup: './playwright/global-setup.ts',
   globalTeardown: './playwright/global-teardown.ts',
