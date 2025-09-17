@@ -231,7 +231,6 @@
     "glob": "^11.0.3",
     "rimraf": "^5.0.10",
     "@npmcli/move-file": "^3.0.0",
-    "test-exclude": "^7.0.1",
     "@electron/get@npm:^2.0.0": "patch:@electron/get@npm:2.0.3#./.yarn/patches/@electron-get-npm-2.0.3-d576982a3c.patch",
     "@electron/get@npm:2.0.3": "patch:@electron/get@npm:2.0.3#./.yarn/patches/@electron-get-npm-2.0.3-d576982a3c.patch",
     "@electron/get": "patch:@electron/get@npm:2.0.3#./.yarn/patches/@electron-get-npm-2.0.3-d576982a3c.patch"
