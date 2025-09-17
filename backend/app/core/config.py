@@ -28,11 +28,23 @@ class Settings(BaseSettings):
     JWT_ISSUER: str = "ai-doc-editor"
     JWT_AUDIENCE: str = "ai-doc-editor-api"
 
-    # OAuth providers (Defaults para desarrollo, configuración real desde Admin UI)
-    GOOGLE_CLIENT_ID: str = "demo-google-client-id"
-    GOOGLE_CLIENT_SECRET: str = "demo-google-client-secret"
-    MICROSOFT_CLIENT_ID: str = "demo-microsoft-client-id"
-    MICROSOFT_CLIENT_SECRET: str = "demo-microsoft-client-secret"
+    # OAuth providers - Production ready configuration
+    # Required for OAuth authentication - set via environment variables
+    GOOGLE_CLIENT_ID: str = ""  # Set via GOOGLE_CLIENT_ID env var
+    GOOGLE_CLIENT_SECRET: str = ""  # Set via GOOGLE_CLIENT_SECRET env var
+    MICROSOFT_CLIENT_ID: str = ""  # Set via MICROSOFT_CLIENT_ID env var
+    MICROSOFT_CLIENT_SECRET: str = ""  # Set via MICROSOFT_CLIENT_SECRET env var
+
+    # Production domain (required for production OAuth callbacks)
+    PRODUCTION_DOMAIN: str = ""  # Set via PRODUCTION_DOMAIN env var for production
+
+    # OAuth scopes
+    GOOGLE_SCOPES: list = ["openid", "email", "profile"]
+    MICROSOFT_SCOPES: list = ["openid", "email", "profile"]
+
+    # OAuth security settings
+    OAUTH_STATE_EXPIRE_MINUTES: int = 10  # State parameter expiration
+    OAUTH_NONCE_LENGTH: int = 32  # Nonce length for security
 
     # CORS Security - Restrictive by default
     FRONTEND_URL: str = "http://localhost:5173"
@@ -88,6 +100,69 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     SECURITY_LOG_ENABLED: bool = True
     PERFORMANCE_MONITORING: bool = True
+
+    def validate_oauth_config(self) -> dict:
+        """
+        Validate OAuth configuration and return status
+        Returns dict with provider status and validation results
+        """
+        validation_results = {
+            "google": {
+                "enabled": bool(self.GOOGLE_CLIENT_ID and self.GOOGLE_CLIENT_SECRET),
+                "client_id_set": bool(self.GOOGLE_CLIENT_ID),
+                "client_secret_set": bool(self.GOOGLE_CLIENT_SECRET),
+            },
+            "microsoft": {
+                "enabled": bool(self.MICROSOFT_CLIENT_ID and self.MICROSOFT_CLIENT_SECRET),
+                "client_id_set": bool(self.MICROSOFT_CLIENT_ID),
+                "client_secret_set": bool(self.MICROSOFT_CLIENT_SECRET),
+            },
+        }
+
+        # Production environment validation
+        if self.ENVIRONMENT == "production":
+            # Validate OAuth credentials
+            for provider, config in validation_results.items():
+                if not config["enabled"]:
+                    raise ValueError(
+                        f"OAuth {provider.title()} credentials are required in production environment. "
+                        f"Set {provider.upper()}_CLIENT_ID and {provider.upper()}_CLIENT_SECRET"
+                    )
+
+            # Validate production domain
+            if not self.PRODUCTION_DOMAIN:
+                raise ValueError(
+                    "PRODUCTION_DOMAIN is required in production environment. "
+                    "Set PRODUCTION_DOMAIN=https://yourdomain.com"
+                )
+
+            # Validate production domain format
+            if not self.PRODUCTION_DOMAIN.startswith(("https://", "http://")):
+                raise ValueError(
+                    "PRODUCTION_DOMAIN must include protocol (https:// recommended for production)"
+                )
+
+        return validation_results
+
+    def get_oauth_redirect_uri(self, provider: str) -> str:
+        """Get the appropriate OAuth redirect URI based on environment"""
+        if self.ENVIRONMENT == "production":
+            if not self.PRODUCTION_DOMAIN:
+                raise ValueError(
+                    "PRODUCTION_DOMAIN must be set for production OAuth callbacks. "
+                    "Example: https://yourdomain.com"
+                )
+            base_url = self.PRODUCTION_DOMAIN
+        else:
+            # Development/staging: use localhost with backend port
+            base_url = "http://localhost:8000"
+
+        if provider.lower() == "google":
+            return f"{base_url}/auth/google/callback"
+        elif provider.lower() == "microsoft":
+            return f"{base_url}/auth/microsoft/callback"
+        else:
+            raise ValueError(f"Unsupported OAuth provider: {provider}")
 
     class Config:
         env_file = ".env"
