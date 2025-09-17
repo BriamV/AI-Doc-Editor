@@ -18,7 +18,7 @@ const AuditLogPaginationSafe: React.FC = () => {
         page: 1,
         pageSize: 10,
         total: 0,
-        totalPages: 0
+        totalPages: 0,
       };
     }
     return storeState.pagination;
@@ -29,12 +29,12 @@ const AuditLogPaginationSafe: React.FC = () => {
       console.warn('Store not available, pagination functions disabled');
       return {
         goToPage: () => console.warn('goToPage not available'),
-        changePageSize: () => console.warn('changePageSize not available')
+        changePageSize: () => console.warn('changePageSize not available'),
       };
     }
     return {
       goToPage: storeState.goToPage || (() => {}),
-      changePageSize: storeState.changePageSize || (() => {})
+      changePageSize: storeState.changePageSize || (() => {}),
     };
   }, [storeState]);
 
@@ -108,29 +108,32 @@ const AuditLogPaginationSafe: React.FC = () => {
   const endItem = Math.min(page * pageSize, total);
 
   // Enhanced input handler with validation
-  const handleGoToPageInput = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      try {
-        const input = e.target as HTMLInputElement;
-        const newPage = parseInt(input.value);
+  const handleGoToPageInput = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        try {
+          const input = e.target as HTMLInputElement;
+          const newPage = parseInt(input.value);
 
-        if (isNaN(newPage)) {
-          console.warn('Invalid page number entered');
-          input.value = page.toString();
-          return;
-        }
+          if (isNaN(newPage)) {
+            console.warn('Invalid page number entered');
+            input.value = page.toString();
+            return;
+          }
 
-        if (newPage >= 1 && newPage <= totalPages) {
-          handlePageChange(newPage);
-        } else {
-          console.warn(`Page ${newPage} is out of range (1-${totalPages})`);
-          input.value = page.toString();
+          if (newPage >= 1 && newPage <= totalPages) {
+            handlePageChange(newPage);
+          } else {
+            console.warn(`Page ${newPage} is out of range (1-${totalPages})`);
+            input.value = page.toString();
+          }
+        } catch (error) {
+          console.error('Error processing page input:', error);
         }
-      } catch (error) {
-        console.error('Error processing page input:', error);
       }
-    }
-  }, [page, totalPages, handlePageChange]);
+    },
+    [page, totalPages, handlePageChange]
+  );
 
   // Show loading state if store is not ready
   if (!storeState) {
@@ -242,7 +245,7 @@ const AuditLogPaginationSafe: React.FC = () => {
                 className="w-16 text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 data-testid="goto-page-input"
                 onKeyDown={handleGoToPageInput}
-                onBlur={(e) => {
+                onBlur={e => {
                   // Reset to current page if invalid value
                   const value = parseInt(e.target.value);
                   if (isNaN(value) || value < 1 || value > totalPages) {
