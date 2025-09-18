@@ -124,6 +124,15 @@ class Settings(BaseSettings):
     PASSWORD_MIN_LENGTH: int = 8
     REQUIRE_HTTPS: bool = False  # Set to True in production
 
+    # TLS 1.3 Configuration (Week 2 - T-12)
+    TLS_SECURITY_LEVEL: str = "high"  # maximum, high, medium, compatibility
+    TLS_CERTIFICATE_PATH: str = ""  # Path to TLS certificate file
+    TLS_PRIVATE_KEY_PATH: str = ""  # Path to TLS private key file
+    TLS_CERTIFICATE_CHAIN_PATH: str = ""  # Path to certificate chain file
+    TLS_ENABLE_OCSP_STAPLING: bool = True
+    TLS_CERTIFICATE_VALIDATION_TIMEOUT: int = 30
+    TLS_PINNED_CERTIFICATES: List[str] = []  # SHA256 fingerprints for certificate pinning
+
     # Enhanced security settings
     SECURITY_HEADERS_ENABLED: bool = True
     HSTS_MAX_AGE: int = 31536000  # 1 year
@@ -458,6 +467,21 @@ class Settings(BaseSettings):
             "expiry_warning_days": self.OAUTH_SECRET_EXPIRY_WARNING_DAYS,
             "client_id_validation_enabled": True,
             "encryption_enabled": bool(self.OAUTH_SECRETS_ENCRYPTION_KEY),
+        }
+
+    def get_tls_security_config(self) -> Dict[str, Any]:
+        """Get TLS-specific security configuration"""
+        return {
+            "security_level": self.TLS_SECURITY_LEVEL,
+            "certificate_path": self.TLS_CERTIFICATE_PATH,
+            "private_key_path": self.TLS_PRIVATE_KEY_PATH,
+            "certificate_chain_path": self.TLS_CERTIFICATE_CHAIN_PATH,
+            "ocsp_stapling_enabled": self.TLS_ENABLE_OCSP_STAPLING,
+            "validation_timeout": self.TLS_CERTIFICATE_VALIDATION_TIMEOUT,
+            "pinned_certificates_count": len(self.TLS_PINNED_CERTIFICATES),
+            "https_required": self.REQUIRE_HTTPS,
+            "hsts_enabled": self.SECURITY_HEADERS_ENABLED,
+            "hsts_max_age": self.HSTS_MAX_AGE,
         }
 
     def get_oauth_redirect_uri(self, provider: str) -> str:
