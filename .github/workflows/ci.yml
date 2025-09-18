@@ -137,6 +137,8 @@ jobs:
       - name: E2E Tests (Node 20 only)
         if: matrix.node-version == '20.x'
         timeout-minutes: 8
+        env:
+          VITE_ENABLE_TESTING: true
         run: |
           # Set up process tracking and cleanup
           set -e
@@ -147,9 +149,9 @@ jobs:
           backend/.venv/bin/python -m uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 8000 &
           BACKEND_PID=$!
 
-          # Start frontend
-          echo "🌐 Starting frontend server..."
-          yarn vite &
+          # Start frontend with testing environment enabled
+          echo "🌐 Starting frontend server with testing environment..."
+          VITE_ENABLE_TESTING=true yarn vite &
           FRONTEND_PID=$!
 
           # Wait for both services to be ready with reduced timeout

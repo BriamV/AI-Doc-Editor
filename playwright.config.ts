@@ -82,6 +82,7 @@ export default defineConfig({
     timeout: 180 * 1000, // Full-stack startup requires more time
     env: {
       MODE: 'test',
+      VITE_ENABLE_TESTING: 'true', // Enable test login buttons for E2E tests
     },
   },
 });
