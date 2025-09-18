@@ -29,6 +29,7 @@ from dataclasses import dataclass
 
 class EncryptionAlgorithm(Enum):
     """Supported encryption algorithms with security ratings"""
+
     AES_256_GCM = "AES-256-GCM"  # Recommended: AEAD with 256-bit key
     AES_128_GCM = "AES-128-GCM"  # Acceptable: AEAD with 128-bit key
     CHACHA20_POLY1305 = "ChaCha20-Poly1305"  # Alternative: Fast AEAD
@@ -36,6 +37,7 @@ class EncryptionAlgorithm(Enum):
 
 class KeyDerivationFunction(Enum):
     """Supported key derivation functions"""
+
     PBKDF2_SHA256 = "PBKDF2-SHA256"  # Standard: RFC 2898
     ARGON2ID = "Argon2id"  # Recommended: Memory-hard function
     SCRYPT = "scrypt"  # Alternative: Memory-hard function
@@ -44,6 +46,7 @@ class KeyDerivationFunction(Enum):
 @dataclass
 class EncryptionMetadata:
     """Metadata for encrypted data"""
+
     algorithm: EncryptionAlgorithm
     key_version: int
     created_at: datetime
@@ -56,6 +59,7 @@ class EncryptionMetadata:
 @dataclass
 class EncryptionResult:
     """Result of encryption operation"""
+
     encrypted_data: bytes
     metadata: EncryptionMetadata
     success: bool
@@ -65,6 +69,7 @@ class EncryptionResult:
 @dataclass
 class DecryptionResult:
     """Result of decryption operation"""
+
     decrypted_data: bytes
     metadata: EncryptionMetadata
     success: bool
@@ -92,7 +97,7 @@ class EncryptionInterface(ABC):
         self,
         plaintext: Union[str, bytes],
         key_id: Optional[str] = None,
-        additional_data: Optional[bytes] = None
+        additional_data: Optional[bytes] = None,
     ) -> EncryptionResult:
         """
         Encrypt plaintext data using authenticated encryption
@@ -118,7 +123,7 @@ class EncryptionInterface(ABC):
         self,
         encrypted_data: bytes,
         metadata: EncryptionMetadata,
-        additional_data: Optional[bytes] = None
+        additional_data: Optional[bytes] = None,
     ) -> DecryptionResult:
         """
         Decrypt data and verify authenticity
@@ -165,7 +170,7 @@ class EncryptionInterface(ABC):
         salt: bytes,
         iterations: int,
         key_length: int = 32,
-        algorithm: KeyDerivationFunction = KeyDerivationFunction.ARGON2ID
+        algorithm: KeyDerivationFunction = KeyDerivationFunction.ARGON2ID,
     ) -> bytes:
         """
         Derive encryption key from password using secure KDF
@@ -308,7 +313,7 @@ def create_secure_encryption_context() -> Dict[str, Any]:
         "key_derivation": KeyDerivationFunction.ARGON2ID,
         "require_hsm": False,  # Set to True for HSM-required environments
         "audit_enabled": True,
-        "memory_protection": True
+        "memory_protection": True,
     }
 
 

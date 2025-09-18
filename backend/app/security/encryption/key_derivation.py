@@ -28,10 +28,9 @@ COMPLIANCE:
 
 import secrets
 import logging
-from typing import Dict, Any, Optional, Union, Tuple
+from typing import Dict, Any, Optional
 from datetime import datetime
 from enum import Enum
-import hashlib
 import time
 
 import argon2
@@ -51,7 +50,7 @@ class Argon2SecurityLevel(Enum):
         "memory_cost": 8,  # 8 MiB
         "parallelism": 1,
         "hash_len": 32,
-        "salt_len": 16
+        "salt_len": 16,
     }
 
     # Standard security - General applications
@@ -60,7 +59,7 @@ class Argon2SecurityLevel(Enum):
         "memory_cost": 19456,  # ~19 MiB (2^14.24 KiB)
         "parallelism": 1,
         "hash_len": 32,
-        "salt_len": 16
+        "salt_len": 16,
     }
 
     # High security - Sensitive applications
@@ -69,7 +68,7 @@ class Argon2SecurityLevel(Enum):
         "memory_cost": 65536,  # 64 MiB (2^16 KiB)
         "parallelism": 2,
         "hash_len": 32,
-        "salt_len": 32
+        "salt_len": 32,
     }
 
     # Maximum security - Critical applications
@@ -78,22 +77,25 @@ class Argon2SecurityLevel(Enum):
         "memory_cost": 262144,  # 256 MiB (2^18 KiB)
         "parallelism": 4,
         "hash_len": 64,
-        "salt_len": 32
+        "salt_len": 32,
     }
 
 
 class Argon2DerivationError(Exception):
     """Base exception for Argon2 key derivation errors"""
+
     pass
 
 
 class Argon2ParameterError(Argon2DerivationError):
     """Parameter validation errors"""
+
     pass
 
 
 class Argon2SecurityError(Argon2DerivationError):
     """Security-related errors"""
+
     pass
 
 
@@ -135,7 +137,7 @@ class Argon2KeyDerivation:
         self,
         security_level: Argon2SecurityLevel = Argon2SecurityLevel.HIGH,
         custom_params: Optional[Dict[str, int]] = None,
-        audit_logger: Optional[logging.Logger] = None
+        audit_logger: Optional[logging.Logger] = None,
     ):
         """
         Initialize Argon2id key derivation function
@@ -161,8 +163,8 @@ class Argon2KeyDerivation:
             parallelism=self._params["parallelism"],
             hash_len=self._params["hash_len"],
             salt_len=self._params["salt_len"],
-            encoding='utf-8',
-            type=Type.ID  # Argon2id variant
+            encoding="utf-8",
+            type=Type.ID,  # Argon2id variant
         )
 
         # Performance tracking
@@ -170,14 +172,17 @@ class Argon2KeyDerivation:
             "derivations_count": 0,
             "total_time_ms": 0,
             "avg_time_ms": 0,
-            "last_derivation_time": None
+            "last_derivation_time": None,
         }
 
-        self._log_security_event("kdf_initialized", {
-            "algorithm": "Argon2id",
-            "security_level": security_level.name if not custom_params else "CUSTOM",
-            "parameters": self._params
-        })
+        self._log_security_event(
+            "kdf_initialized",
+            {
+                "algorithm": "Argon2id",
+                "security_level": security_level.name if not custom_params else "CUSTOM",
+                "parameters": self._params,
+            },
+        )
 
     def derive_key(
         self,
@@ -185,7 +190,7 @@ class Argon2KeyDerivation:
         salt: bytes,
         iterations: Optional[int] = None,
         key_length: int = 32,
-        algorithm: KeyDerivationFunction = KeyDerivationFunction.ARGON2ID
+        algorithm: KeyDerivationFunction = KeyDerivationFunction.ARGON2ID,
     ) -> bytes:
         """
         Derive encryption key from password using Argon2id
@@ -217,13 +222,13 @@ class Argon2KeyDerivation:
 
             # Derive key using Argon2id
             derived_key = argon2.low_level.hash_secret_raw(
-                secret=password.encode('utf-8'),
+                secret=password.encode("utf-8"),
                 salt=salt,
                 time_cost=self._params["time_cost"],
                 memory_cost=self._params["memory_cost"],
                 parallelism=self._params["parallelism"],
                 hash_len=key_length,
-                type=Type.ID
+                type=Type.ID,
             )
 
             # Performance monitoring end
@@ -237,22 +242,29 @@ class Argon2KeyDerivation:
             self._validate_derived_key(derived_key, key_length)
 
             # Log successful derivation
-            self._log_security_event("key_derivation_success", {
-                "salt_length": len(salt),
-                "key_length": key_length,
-                "derivation_time_ms": round(derivation_time, 2),
-                "algorithm": "Argon2id"
-            })
+            self._log_security_event(
+                "key_derivation_success",
+                {
+                    "salt_length": len(salt),
+                    "key_length": key_length,
+                    "derivation_time_ms": round(derivation_time, 2),
+                    "algorithm": "Argon2id",
+                },
+            )
 
             return derived_key
 
         except Exception as e:
             # Secure error handling
-            self._log_security_event("key_derivation_failed", {
-                "error_type": type(e).__name__,
-                "salt_length": len(salt) if salt else 0,
-                "key_length": key_length
-            }, level=logging.ERROR)
+            self._log_security_event(
+                "key_derivation_failed",
+                {
+                    "error_type": type(e).__name__,
+                    "salt_length": len(salt) if salt else 0,
+                    "key_length": key_length,
+                },
+                level=logging.ERROR,
+            )
 
             if isinstance(e, (Argon2ParameterError, Argon2SecurityError)):
                 raise
@@ -278,17 +290,19 @@ class Argon2KeyDerivation:
             if salt:
                 # Validate custom salt
                 if len(salt) < self.MIN_SALT_LENGTH:
-                    raise Argon2ParameterError(f"Salt too short: {len(salt)} < {self.MIN_SALT_LENGTH}")
+                    raise Argon2ParameterError(
+                        f"Salt too short: {len(salt)} < {self.MIN_SALT_LENGTH}"
+                    )
 
                 # Use low-level API with custom salt
                 hash_bytes = argon2.low_level.hash_secret_raw(
-                    secret=password.encode('utf-8'),
+                    secret=password.encode("utf-8"),
                     salt=salt,
                     time_cost=self._params["time_cost"],
                     memory_cost=self._params["memory_cost"],
                     parallelism=self._params["parallelism"],
                     hash_len=self._params["hash_len"],
-                    type=Type.ID
+                    type=Type.ID,
                 )
 
                 # Encode to Argon2 string format
@@ -298,16 +312,16 @@ class Argon2KeyDerivation:
                     time_cost=self._params["time_cost"],
                     memory_cost=self._params["memory_cost"],
                     parallelism=self._params["parallelism"],
-                    type=Type.ID
+                    type=Type.ID,
                 )
             else:
                 # Use high-level API with automatic salt generation
                 return self._hasher.hash(password)
 
         except Exception as e:
-            self._log_security_event("password_hashing_failed", {
-                "error_type": type(e).__name__
-            }, level=logging.ERROR)
+            self._log_security_event(
+                "password_hashing_failed", {"error_type": type(e).__name__}, level=logging.ERROR
+            )
             raise Argon2DerivationError(f"Password hashing failed: {e}")
 
         finally:
@@ -328,28 +342,32 @@ class Argon2KeyDerivation:
         try:
             self._hasher.verify(hash_value, password)
 
-            self._log_security_event("password_verification_success", {
-                "hash_algorithm": "Argon2id"
-            })
+            self._log_security_event(
+                "password_verification_success", {"hash_algorithm": "Argon2id"}
+            )
 
             return True
 
         except VerifyMismatchError:
-            self._log_security_event("password_verification_failed", {
-                "reason": "password_mismatch"
-            }, level=logging.WARNING)
+            self._log_security_event(
+                "password_verification_failed",
+                {"reason": "password_mismatch"},
+                level=logging.WARNING,
+            )
             return False
 
         except InvalidHash:
-            self._log_security_event("password_verification_failed", {
-                "reason": "invalid_hash_format"
-            }, level=logging.ERROR)
+            self._log_security_event(
+                "password_verification_failed",
+                {"reason": "invalid_hash_format"},
+                level=logging.ERROR,
+            )
             return False
 
         except Exception as e:
-            self._log_security_event("password_verification_error", {
-                "error_type": type(e).__name__
-            }, level=logging.ERROR)
+            self._log_security_event(
+                "password_verification_error", {"error_type": type(e).__name__}, level=logging.ERROR
+            )
             return False
 
         finally:
@@ -373,17 +391,14 @@ class Argon2KeyDerivation:
 
         salt = secrets.token_bytes(length)
 
-        self._log_security_event("salt_generated", {
-            "salt_length": length,
-            "entropy_bits": length * 8
-        })
+        self._log_security_event(
+            "salt_generated", {"salt_length": length, "entropy_bits": length * 8}
+        )
 
         return salt
 
     def benchmark_parameters(
-        self,
-        target_time_ms: int = 500,
-        test_password: str = "test_password_for_benchmark"
+        self, target_time_ms: int = 500, test_password: str = "test_password_for_benchmark"
     ) -> Dict[str, Any]:
         """
         Benchmark Argon2 parameters to achieve target derivation time
@@ -399,7 +414,7 @@ class Argon2KeyDerivation:
             "target_time_ms": target_time_ms,
             "test_results": [],
             "recommended_params": None,
-            "security_assessment": {}
+            "security_assessment": {},
         }
 
         # Test different parameter combinations
@@ -411,7 +426,7 @@ class Argon2KeyDerivation:
         ]
 
         closest_config = None
-        closest_diff = float('inf')
+        closest_diff = float("inf")
 
         for config in test_configs:
             try:
@@ -420,13 +435,13 @@ class Argon2KeyDerivation:
 
                 test_salt = secrets.token_bytes(32)
                 argon2.low_level.hash_secret_raw(
-                    secret=test_password.encode('utf-8'),
+                    secret=test_password.encode("utf-8"),
                     salt=test_salt,
                     time_cost=config["time_cost"],
                     memory_cost=config["memory_cost"],
                     parallelism=config["parallelism"],
                     hash_len=32,
-                    type=Type.ID
+                    type=Type.ID,
                 )
 
                 end_time = time.perf_counter()
@@ -439,7 +454,7 @@ class Argon2KeyDerivation:
                     "config": config,
                     "actual_time_ms": round(actual_time_ms, 2),
                     "security_score": security_score,
-                    "memory_mb": config["memory_cost"] / 1024
+                    "memory_mb": config["memory_cost"] / 1024,
                 }
 
                 benchmark_results["test_results"].append(test_result)
@@ -464,14 +479,17 @@ class Argon2KeyDerivation:
                 "gpu_resistant": closest_config["memory_cost"] >= 65536,
                 "asic_resistant": closest_config["memory_cost"] >= 262144,
                 "side_channel_resistant": True,  # Argon2id provides this
-                "compliance": self._assess_compliance(closest_config)
+                "compliance": self._assess_compliance(closest_config),
             }
 
-        self._log_security_event("parameter_benchmark_completed", {
-            "target_time_ms": target_time_ms,
-            "recommended_params": closest_config,
-            "test_count": len(benchmark_results["test_results"])
-        })
+        self._log_security_event(
+            "parameter_benchmark_completed",
+            {
+                "target_time_ms": target_time_ms,
+                "recommended_params": closest_config,
+                "test_count": len(benchmark_results["test_results"]),
+            },
+        )
 
         return benchmark_results
 
@@ -493,21 +511,17 @@ class Argon2KeyDerivation:
                 "side_channel_resistance",
                 "gpu_asic_resistance",
                 "salt_based_uniqueness",
-                "configurable_cost_parameters"
+                "configurable_cost_parameters",
             ],
-            "compliance": [
-                "OWASP",
-                "NIST-SP-800-63B",
-                "RFC-9106"
-            ],
+            "compliance": ["OWASP", "NIST-SP-800-63B", "RFC-9106"],
             "threat_mitigation": [
                 "dictionary_attacks",
                 "brute_force_attacks",
                 "rainbow_table_attacks",
                 "gpu_acceleration_attacks",
                 "asic_attacks",
-                "side_channel_attacks"
-            ]
+                "side_channel_attacks",
+            ],
         }
 
     # Private implementation methods
@@ -553,7 +567,9 @@ class Argon2KeyDerivation:
     def _validate_derived_key(self, key: bytes, expected_length: int) -> None:
         """Validate derived key properties"""
         if len(key) != expected_length:
-            raise Argon2SecurityError(f"Derived key length mismatch: {len(key)} != {expected_length}")
+            raise Argon2SecurityError(
+                f"Derived key length mismatch: {len(key)} != {expected_length}"
+            )
 
         # Basic entropy check
         entropy = self._estimate_entropy(key)
@@ -569,6 +585,7 @@ class Argon2KeyDerivation:
 
         # Shannon entropy calculation
         import math
+
         byte_counts = [0] * 256
         for byte_val in data:
             byte_counts[byte_val] += 1
@@ -626,25 +643,24 @@ class Argon2KeyDerivation:
         return {
             "owasp_minimum": config["memory_cost"] >= 19456 and config["time_cost"] >= 2,
             "nist_recommended": config["memory_cost"] >= 65536 and config["time_cost"] >= 3,
-            "enterprise_grade": config["memory_cost"] >= 262144 and config["time_cost"] >= 4
+            "enterprise_grade": config["memory_cost"] >= 262144 and config["time_cost"] >= 4,
         }
 
     def _log_security_event(
-        self,
-        event_type: str,
-        details: Dict[str, Any],
-        level: int = logging.INFO
+        self, event_type: str, details: Dict[str, Any], level: int = logging.INFO
     ) -> None:
         """Log security events for audit trail"""
         event = {
             "timestamp": datetime.utcnow().isoformat(),
             "event_type": event_type,
             "algorithm": "Argon2id",
-            "details": details
+            "details": details,
         }
 
         # Remove sensitive data from logs
-        safe_details = {k: v for k, v in details.items() if k not in ["password", "hash_value", "key_bytes"]}
+        safe_details = {
+            k: v for k, v in details.items() if k not in ["password", "hash_value", "key_bytes"]
+        }
         event["details"] = safe_details
 
         self._logger.log(level, f"Argon2 KDF Event: {event_type}", extra={"security_event": event})

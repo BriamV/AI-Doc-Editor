@@ -34,7 +34,7 @@ __all__ = [
     "HSMIntegration",
     "MasterKeyManager",
     "KeyVersioning",
-    "KeySecurityMonitor"
+    "KeySecurityMonitor",
 ]
 
 # Import main classes (to be implemented)

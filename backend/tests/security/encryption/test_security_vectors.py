@@ -28,17 +28,13 @@ from typing import List, Dict, Any
 # Import modules under test
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 
 from app.security.encryption.aes_gcm_engine import AESGCMEngine
 from app.security.encryption.key_derivation import Argon2KeyDerivation, Argon2SecurityLevel
 from app.security.encryption.nonce_manager import NonceManager
 from app.security.encryption.memory_utils import SecureMemoryManager
-from app.security.encryption.encryption_interface import (
-    EncryptionAlgorithm,
-    EncryptionMetadata,
-    KeyDerivationFunction
-)
 
 
 class TestNISTAESGCMVectors:
@@ -64,7 +60,7 @@ class TestNISTAESGCMVectors:
                 "plaintext": "",
                 "aad": "",
                 "expected_ciphertext": "",
-                "expected_tag": "530f8afbc74536b9a963b4f1c4cb738b"
+                "expected_tag": "530f8afbc74536b9a963b4f1c4cb738b",
             },
             {
                 "name": "AES-256-GCM Test Case 2",
@@ -73,7 +69,7 @@ class TestNISTAESGCMVectors:
                 "plaintext": "00000000000000000000000000000000",
                 "aad": "",
                 "expected_ciphertext": "cea7403d4d606b6e074ec5d3baf39d18",
-                "expected_tag": "d0d1c8a799996bf0265b98b5d48ab919"
+                "expected_tag": "d0d1c8a799996bf0265b98b5d48ab919",
             },
             {
                 "name": "AES-256-GCM Test Case 3 (with AAD)",
@@ -82,8 +78,8 @@ class TestNISTAESGCMVectors:
                 "plaintext": "d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b391aafd255",
                 "aad": "feedfacedeadbeeffeedfacedeadbeefabaddad2",
                 "expected_ciphertext": "522dc1f099567d07f47f37a32a84427d643a8cdcbfe5c0c97598a2bd2555d1aa8cb08e48590dbb3da7b08b1056828838c5f61e6393ba7a0abcc9f662898015ad",
-                "expected_tag": "b094dac5d93471bdec1a502270e3cc6c"
-            }
+                "expected_tag": "b094dac5d93471bdec1a502270e3cc6c",
+            },
         ]
 
     def test_nist_vectors_encryption_compatibility(self, engine):
@@ -92,8 +88,8 @@ class TestNISTAESGCMVectors:
 
         for vector in vectors:
             # Convert hex strings to bytes
-            key = binascii.unhexlify(vector["key"])
-            nonce = binascii.unhexlify(vector["iv"])
+            _ = binascii.unhexlify(vector["key"])  # noqa: F841
+            _ = binascii.unhexlify(vector["iv"])  # noqa: F841
             plaintext = binascii.unhexlify(vector["plaintext"]) if vector["plaintext"] else b""
             aad = binascii.unhexlify(vector["aad"]) if vector["aad"] else None
 
@@ -101,18 +97,13 @@ class TestNISTAESGCMVectors:
             # uses random nonces. Instead, we test round-trip compatibility.
 
             # Test with our implementation
-            result = engine.encrypt(
-                plaintext,
-                additional_data=aad
-            )
+            result = engine.encrypt(plaintext, additional_data=aad)
 
             assert result.success is True, f"Encryption failed for {vector['name']}"
 
             # Test decryption
             decrypt_result = engine.decrypt(
-                result.encrypted_data,
-                result.metadata,
-                additional_data=aad
+                result.encrypted_data, result.metadata, additional_data=aad
             )
 
             assert decrypt_result.success is True, f"Decryption failed for {vector['name']}"
@@ -133,14 +124,14 @@ class TestNISTAESGCMVectors:
 
         # All ciphertexts should be different (due to random nonces)
         ciphertexts = [r.encrypted_data for r in results]
-        assert len(set(ciphertexts)) == len(ciphertexts), "GCM with random nonces should produce different ciphertexts"
+        assert len(set(ciphertexts)) == len(
+            ciphertexts
+        ), "GCM with random nonces should produce different ciphertexts"
 
         # All should decrypt to same plaintext
         for result in results:
             decrypt_result = engine.decrypt(
-                result.encrypted_data,
-                result.metadata,
-                additional_data=aad
+                result.encrypted_data, result.metadata, additional_data=aad
             )
             assert decrypt_result.success is True
             assert decrypt_result.decrypted_data == plaintext
@@ -154,11 +145,7 @@ class TestNISTAESGCMVectors:
         assert result.success is True
 
         # Valid decryption should work
-        decrypt_result = engine.decrypt(
-            result.encrypted_data,
-            result.metadata,
-            additional_data=aad
-        )
+        decrypt_result = engine.decrypt(result.encrypted_data, result.metadata, additional_data=aad)
         assert decrypt_result.success is True
         assert decrypt_result.integrity_verified is True
 
@@ -168,9 +155,7 @@ class TestNISTAESGCMVectors:
             tampered_data[0] ^= 0x01  # Flip one bit
 
             decrypt_result = engine.decrypt(
-                bytes(tampered_data),
-                result.metadata,
-                additional_data=aad
+                bytes(tampered_data), result.metadata, additional_data=aad
             )
             assert decrypt_result.success is False
             assert decrypt_result.integrity_verified is False
@@ -199,7 +184,7 @@ class TestArgon2RFC9106Vectors:
                 "memory_cost": 65536,  # 64 MiB
                 "parallelism": 1,
                 "hash_length": 32,
-                "expected_output": "09316115d5cf24ed5a15a31a3ba326e5cf32edc24702987c02b6566f61913cf7"
+                "expected_output": "09316115d5cf24ed5a15a31a3ba326e5cf32edc24702987c02b6566f61913cf7",
             },
             {
                 "name": "Argon2id Test Vector 2",
@@ -209,8 +194,8 @@ class TestArgon2RFC9106Vectors:
                 "memory_cost": 262144,  # 256 MiB
                 "parallelism": 1,
                 "hash_length": 32,
-                "expected_output": "78fe1ec91fb3aa5657d72e710854e4c3d9b9198c742f9616c2f085bed95b2e8c"
-            }
+                "expected_output": "78fe1ec91fb3aa5657d72e710854e4c3d9b9198c742f9616c2f085bed95b2e8c",
+            },
         ]
 
     def test_argon2_deterministic_output(self, kdf):
@@ -221,11 +206,7 @@ class TestArgon2RFC9106Vectors:
         # Generate same key multiple times
         keys = []
         for _ in range(3):
-            key = kdf.derive_key(
-                password=password,
-                salt=salt,
-                key_length=32
-            )
+            key = kdf.derive_key(password=password, salt=salt, key_length=32)
             keys.append(key)
 
         # All keys should be identical
@@ -258,21 +239,25 @@ class TestArgon2RFC9106Vectors:
         salt = b"test_salt_16_bytes123"
 
         # Different time costs
-        kdf1 = Argon2KeyDerivation(custom_params={
-            "time_cost": 1,
-            "memory_cost": 1024,
-            "parallelism": 1,
-            "hash_len": 32,
-            "salt_len": 16
-        })
+        kdf1 = Argon2KeyDerivation(
+            custom_params={
+                "time_cost": 1,
+                "memory_cost": 1024,
+                "parallelism": 1,
+                "hash_len": 32,
+                "salt_len": 16,
+            }
+        )
 
-        kdf2 = Argon2KeyDerivation(custom_params={
-            "time_cost": 2,
-            "memory_cost": 1024,
-            "parallelism": 1,
-            "hash_len": 32,
-            "salt_len": 16
-        })
+        kdf2 = Argon2KeyDerivation(
+            custom_params={
+                "time_cost": 2,
+                "memory_cost": 1024,
+                "parallelism": 1,
+                "hash_len": 32,
+                "salt_len": 16,
+            }
+        )
 
         key1 = kdf1.derive_key(password, salt, key_length=32)
         key2 = kdf2.derive_key(password, salt, key_length=32)
@@ -308,9 +293,7 @@ class TestSecurityAttackVectors:
 
             # Attack should be detected
             decrypt_result = engine.decrypt(
-                bytes(modified_ciphertext),
-                result.metadata,
-                additional_data=aad
+                bytes(modified_ciphertext), result.metadata, additional_data=aad
             )
             assert decrypt_result.success is False, "Bit-flipping attack should be detected"
 
@@ -376,7 +359,7 @@ class TestSecurityAttackVectors:
             "qwerty",
             "letmein",
             "welcome",
-            "monkey"
+            "monkey",
         ]
 
         salt = kdf.generate_salt(32)
@@ -393,8 +376,8 @@ class TestSecurityAttackVectors:
 
         # Keys should not have obvious patterns
         for key in derived_keys:
-            assert key != b'\x00' * 32, "Key should not be all zeros"
-            assert key != b'\xff' * 32, "Key should not be all ones"
+            assert key != b"\x00" * 32, "Key should not be all zeros"
+            assert key != b"\xff" * 32, "Key should not be all ones"
             assert len(set(key)) > 10, "Key should have good byte diversity"
 
     def test_side_channel_resistance_memory(self):
@@ -405,7 +388,7 @@ class TestSecurityAttackVectors:
             "password123",
             "secret_key_value",
             "confidential_token",
-            b"binary_secret_data"
+            b"binary_secret_data",
         ]
 
         # Test secure deletion
@@ -495,8 +478,8 @@ class TestCrossImplementationCompatibility:
         plaintext = b"Interoperability test data"
 
         # Use a fixed key and nonce for this test
-        test_key = b'\x00' * 32  # All zeros for simplicity
-        test_nonce = b'\x00' * 12  # All zeros for simplicity
+        _ = b"\x00" * 32  # All zeros for simplicity # noqa: F841
+        _ = b"\x00" * 12  # All zeros for simplicity # noqa: F841
 
         # Since our implementation uses random nonces, we test
         # that the underlying algorithm works correctly
@@ -512,7 +495,7 @@ class TestCrossImplementationCompatibility:
         assert engine.KEY_SIZE == 32  # 256 bits
 
         # Test that validation accepts 256-bit keys
-        test_key = b'\x01' * 32
+        test_key = b"\x01" * 32
         validation = engine.validate_key_strength(test_key)
         assert validation["is_valid"] is True
 
@@ -576,7 +559,7 @@ class TestEdgeCasesAndBoundaries:
 
             decrypt_result = engine.decrypt(result.encrypted_data, result.metadata)
             assert decrypt_result.success is True
-            assert decrypt_result.decrypted_data.decode('utf-8') == text
+            assert decrypt_result.decrypted_data.decode("utf-8") == text
 
     def test_minimum_maximum_key_derivation_parameters(self, kdf):
         """Test boundary values for key derivation parameters"""

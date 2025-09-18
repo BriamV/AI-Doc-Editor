@@ -34,7 +34,7 @@ __all__ = [
     "AccessControl",
     "BackupEncryption",
     "MigrationService",
-    "StorageIntegrityMonitor"
+    "StorageIntegrityMonitor",
 ]
 
 # Import main classes (to be implemented)

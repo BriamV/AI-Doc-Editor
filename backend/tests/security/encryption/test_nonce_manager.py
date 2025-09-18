@@ -26,20 +26,19 @@ import pytest
 import secrets
 import threading
 import time
-from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 # Import modules under test
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 
 from app.security.encryption.nonce_manager import (
     NonceManager,
-    NonceError,
     NonceCollisionError,
     NonceValidationError,
-    NonceExhaustionError
+    NonceExhaustionError,
 )
 
 
@@ -58,7 +57,7 @@ class TestNonceManagerBasicOperations:
         # Verify basic properties
         assert isinstance(nonce, bytes)
         assert len(nonce) == manager.GCM_NONCE_LENGTH
-        assert nonce != b'\x00' * manager.GCM_NONCE_LENGTH  # Not all zeros
+        assert nonce != b"\x00" * manager.GCM_NONCE_LENGTH  # Not all zeros
 
     def test_custom_nonce_lengths(self, manager):
         """Test nonce generation with custom lengths"""
@@ -196,12 +195,12 @@ class TestNonceValidation:
     def test_weak_nonce_rejection(self, manager):
         """Test rejection of weak nonces"""
         # All zeros
-        weak_nonce = b'\x00' * 12
+        weak_nonce = b"\x00" * 12
         with pytest.raises(NonceValidationError):
             manager.validate_nonce(weak_nonce)
 
         # All ones
-        weak_nonce = b'\xff' * 12
+        weak_nonce = b"\xff" * 12
         with pytest.raises(NonceValidationError):
             manager.validate_nonce(weak_nonce)
 
@@ -274,8 +273,7 @@ class TestNonceThreadSafety:
                 for nonce in test_nonces:
                     try:
                         result = manager.validate_nonce(
-                            nonce,
-                            key_id=f"thread_{threading.current_thread().ident}"
+                            nonce, key_id=f"thread_{threading.current_thread().ident}"
                         )
                         validation_results.append(("success", result))
                     except NonceCollisionError:
@@ -356,7 +354,7 @@ class TestNonceMemoryManagement:
 
         # Generate more nonces than the limit
         for i in range(150):
-            nonce = manager.generate_nonce(key_id=key_id)
+            _ = manager.generate_nonce(key_id=key_id)  # noqa: F841
 
         # Should not exceed the limit
         stats = manager.get_nonce_stats(key_id=key_id)
@@ -371,7 +369,7 @@ class TestNonceMemoryManagement:
             manager.generate_nonce(key_id=key_id)
 
         initial_stats = manager.get_nonce_stats(key_id=key_id)
-        initial_count = initial_stats["nonces_generated"]
+        _ = initial_stats["nonces_generated"]  # noqa: F841
 
         # Perform cleanup (with very recent age to force cleanup)
         cleanup_stats = manager.cleanup_old_nonces(max_age_hours=0, key_id=key_id)
@@ -492,8 +490,8 @@ class TestNonceErrorHandling:
     def test_nonce_exhaustion_detection(self, manager):
         """Test detection of potential nonce space exhaustion"""
         # Mock a very small nonce space for testing
-        with patch.object(manager, 'MAX_NONCE_LENGTH', 8):
-            with patch.object(manager, '_check_nonce_exhaustion') as mock_check:
+        with patch.object(manager, "MAX_NONCE_LENGTH", 8):
+            with patch.object(manager, "_check_nonce_exhaustion") as mock_check:
                 mock_check.side_effect = NonceExhaustionError("Nonce space exhausted")
 
                 with pytest.raises(NonceExhaustionError):
@@ -504,10 +502,10 @@ class TestNonceErrorHandling:
         key_id = "test_key"
 
         # Generate a nonce normally
-        nonce = manager.generate_nonce(key_id=key_id)
+        _ = manager.generate_nonce(key_id=key_id)  # noqa: F841
 
         # Mock the nonce set to force collision detection
-        with patch.object(manager._nonce_sets[key_id], '__contains__', return_value=True):
+        with patch.object(manager._nonce_sets[key_id], "__contains__", return_value=True):
             # This should trigger collision detection in validate_nonce
             with pytest.raises(NonceCollisionError):
                 manager.validate_nonce(secrets.token_bytes(12), key_id=key_id)
@@ -558,13 +556,13 @@ class TestNonceSecurityProperties:
         # 1. No obvious patterns
         for i in range(1, len(nonces)):
             # Consecutive nonces should not be similar
-            similarity = sum(a == b for a, b in zip(nonces[i-1], nonces[i]))
+            similarity = sum(a == b for a, b in zip(nonces[i - 1], nonces[i]))
             assert similarity < len(nonces[i]) * 0.5  # Less than 50% similarity
 
         # 2. Bit distribution should be reasonable
-        all_bits = b''.join(nonces)
-        zero_count = sum(bin(byte).count('0') for byte in all_bits)
-        one_count = sum(bin(byte).count('1') for byte in all_bits)
+        all_bits = b"".join(nonces)
+        zero_count = sum(bin(byte).count("0") for byte in all_bits)
+        one_count = sum(bin(byte).count("1") for byte in all_bits)
         total_bits = zero_count + one_count
 
         # Should be roughly balanced (within 10%)
@@ -579,7 +577,7 @@ class TestNonceSecurityProperties:
         times = []
         for i in range(100):
             start_time = time.perf_counter()
-            nonce = manager.generate_nonce(key_id=key_id)
+            _ = manager.generate_nonce(key_id=key_id)  # noqa: F841
             end_time = time.perf_counter()
             times.append(end_time - start_time)
 
@@ -601,12 +599,12 @@ class TestNonceSecurityProperties:
         # This is a basic test - in practice, we trust the underlying CSPRNG
         for i in range(1, len(nonces)):
             # No obvious mathematical relationship
-            assert nonces[i] != nonces[i-1]
+            assert nonces[i] != nonces[i - 1]
 
             # XOR should not reveal patterns
-            xor_result = bytes(a ^ b for a, b in zip(nonces[i], nonces[i-1]))
-            assert xor_result != b'\x00' * len(nonces[i])  # Not all zeros
-            assert xor_result != b'\xff' * len(nonces[i])  # Not all ones
+            xor_result = bytes(a ^ b for a, b in zip(nonces[i], nonces[i - 1]))
+            assert xor_result != b"\x00" * len(nonces[i])  # Not all zeros
+            assert xor_result != b"\xff" * len(nonces[i])  # Not all ones
 
 
 if __name__ == "__main__":

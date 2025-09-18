@@ -29,33 +29,35 @@ COMPLIANCE:
 import secrets
 import threading
 import logging
-from typing import Dict, Any, Optional, Set, Tuple
+from typing import Dict, Any, Optional, Set
 from datetime import datetime, timedelta
 from collections import deque
 import hashlib
-import struct
-import time
 
 from .memory_utils import SecureMemoryManager
 
 
 class NonceError(Exception):
     """Base exception for nonce management errors"""
+
     pass
 
 
 class NonceCollisionError(NonceError):
     """Nonce collision detected"""
+
     pass
 
 
 class NonceValidationError(NonceError):
     """Nonce validation failed"""
+
     pass
 
 
 class NonceExhaustionError(NonceError):
     """Nonce space exhaustion detected"""
+
     pass
 
 
@@ -89,7 +91,7 @@ class NonceManager:
     """
 
     # Security constants
-    MIN_NONCE_LENGTH = 8   # 64 bits minimum
+    MIN_NONCE_LENGTH = 8  # 64 bits minimum
     MAX_NONCE_LENGTH = 16  # 128 bits maximum
     GCM_NONCE_LENGTH = 12  # 96 bits GCM standard
     CHACHA20_NONCE_LENGTH = 12  # 96 bits ChaCha20
@@ -102,7 +104,7 @@ class NonceManager:
         max_tracked_per_key: int = DEFAULT_MAX_TRACKED,
         enable_collision_detection: bool = True,
         cleanup_interval_hours: int = 24,
-        audit_logger: Optional[logging.Logger] = None
+        audit_logger: Optional[logging.Logger] = None,
     ):
         """
         Initialize secure nonce manager
@@ -136,17 +138,20 @@ class NonceManager:
             "validations_performed": 0,
             "cleanup_operations": 0,
             "last_cleanup": datetime.utcnow(),
-            "memory_usage_bytes": 0
+            "memory_usage_bytes": 0,
         }
 
         # Last cleanup time
         self._last_cleanup = datetime.utcnow()
 
-        self._log_security_event("nonce_manager_initialized", {
-            "max_tracked_per_key": max_tracked_per_key,
-            "collision_detection": enable_collision_detection,
-            "cleanup_interval_hours": cleanup_interval_hours
-        })
+        self._log_security_event(
+            "nonce_manager_initialized",
+            {
+                "max_tracked_per_key": max_tracked_per_key,
+                "collision_detection": enable_collision_detection,
+                "cleanup_interval_hours": cleanup_interval_hours,
+            },
+        )
 
     def generate_nonce(self, length: int = GCM_NONCE_LENGTH, key_id: Optional[str] = None) -> bytes:
         """
@@ -194,21 +199,28 @@ class NonceManager:
                 # Update statistics
                 self._update_generation_stats(tracking_key)
 
-                self._log_security_event("nonce_generated", {
-                    "length_bytes": length,
-                    "length_bits": length * 8,
-                    "key_id": tracking_key,
-                    "total_for_key": len(self._nonce_sets[tracking_key])
-                })
+                self._log_security_event(
+                    "nonce_generated",
+                    {
+                        "length_bytes": length,
+                        "length_bits": length * 8,
+                        "key_id": tracking_key,
+                        "total_for_key": len(self._nonce_sets[tracking_key]),
+                    },
+                )
 
                 return nonce
 
         except Exception as e:
-            self._log_security_event("nonce_generation_failed", {
-                "error_type": type(e).__name__,
-                "length": length,
-                "key_id": tracking_key if 'tracking_key' in locals() else None
-            }, level=logging.ERROR)
+            self._log_security_event(
+                "nonce_generation_failed",
+                {
+                    "error_type": type(e).__name__,
+                    "length": length,
+                    "key_id": tracking_key if "tracking_key" in locals() else None,
+                },
+                level=logging.ERROR,
+            )
             raise
 
     def validate_nonce(self, nonce: bytes, key_id: Optional[str] = None) -> bool:
@@ -232,9 +244,7 @@ class NonceManager:
                 raise NonceValidationError("Nonce cannot be empty")
 
             if not (self.MIN_NONCE_LENGTH <= len(nonce) <= self.MAX_NONCE_LENGTH):
-                raise NonceValidationError(
-                    f"Invalid nonce length: {len(nonce)} bytes"
-                )
+                raise NonceValidationError(f"Invalid nonce length: {len(nonce)} bytes")
 
             tracking_key = key_id or "global"
 
@@ -246,10 +256,11 @@ class NonceManager:
                 # Check for collision
                 if nonce in self._nonce_sets[tracking_key]:
                     self._stats["collisions_detected"] += 1
-                    self._log_security_event("nonce_collision_detected", {
-                        "key_id": tracking_key,
-                        "nonce_length": len(nonce)
-                    }, level=logging.ERROR)
+                    self._log_security_event(
+                        "nonce_collision_detected",
+                        {"key_id": tracking_key, "nonce_length": len(nonce)},
+                        level=logging.ERROR,
+                    )
                     raise NonceCollisionError(f"Nonce already used for key: {tracking_key}")
 
                 # Validate entropy (basic check)
@@ -258,20 +269,23 @@ class NonceManager:
 
                 self._stats["validations_performed"] += 1
 
-                self._log_security_event("nonce_validated", {
-                    "key_id": tracking_key,
-                    "nonce_length": len(nonce),
-                    "entropy_valid": True
-                })
+                self._log_security_event(
+                    "nonce_validated",
+                    {"key_id": tracking_key, "nonce_length": len(nonce), "entropy_valid": True},
+                )
 
                 return True
 
         except Exception as e:
-            self._log_security_event("nonce_validation_failed", {
-                "error_type": type(e).__name__,
-                "key_id": tracking_key if 'tracking_key' in locals() else None,
-                "nonce_length": len(nonce) if nonce else 0
-            }, level=logging.ERROR)
+            self._log_security_event(
+                "nonce_validation_failed",
+                {
+                    "error_type": type(e).__name__,
+                    "key_id": tracking_key if "tracking_key" in locals() else None,
+                    "nonce_length": len(nonce) if nonce else 0,
+                },
+                level=logging.ERROR,
+            )
             raise
 
     def mark_nonce_used(self, nonce: bytes, key_id: Optional[str] = None) -> bool:
@@ -298,10 +312,9 @@ class NonceManager:
             # Mark as used
             self._track_nonce(nonce, tracking_key)
 
-            self._log_security_event("nonce_marked_used", {
-                "key_id": tracking_key,
-                "nonce_length": len(nonce)
-            })
+            self._log_security_event(
+                "nonce_marked_used", {"key_id": tracking_key, "nonce_length": len(nonce)}
+            )
 
             return True
 
@@ -326,7 +339,7 @@ class NonceManager:
                     "nonces_generated": len(self._nonce_sets[tracking_key]),
                     "generation_count": self._generation_counts.get(tracking_key, 0),
                     "memory_usage_bytes": self._estimate_key_memory_usage(tracking_key),
-                    "last_generation": self._get_last_generation_time(tracking_key)
+                    "last_generation": self._get_last_generation_time(tracking_key),
                 }
             else:
                 # Global statistics
@@ -334,20 +347,22 @@ class NonceManager:
                 total_generations = sum(self._generation_counts.values())
 
                 stats = self._stats.copy()
-                stats.update({
-                    "active_keys": len(self._nonce_sets),
-                    "total_nonces_tracked": total_nonces,
-                    "total_generations": total_generations,
-                    "average_nonces_per_key": total_nonces / len(self._nonce_sets) if self._nonce_sets else 0,
-                    "memory_efficiency": self._calculate_memory_efficiency()
-                })
+                stats.update(
+                    {
+                        "active_keys": len(self._nonce_sets),
+                        "total_nonces_tracked": total_nonces,
+                        "total_generations": total_generations,
+                        "average_nonces_per_key": (
+                            total_nonces / len(self._nonce_sets) if self._nonce_sets else 0
+                        ),
+                        "memory_efficiency": self._calculate_memory_efficiency(),
+                    }
+                )
 
                 return stats
 
     def cleanup_old_nonces(
-        self,
-        max_age_hours: int = 24,
-        key_id: Optional[str] = None
+        self, max_age_hours: int = 24, key_id: Optional[str] = None
     ) -> Dict[str, int]:
         """
         Clean up old nonces to manage memory usage
@@ -372,7 +387,7 @@ class NonceManager:
                     continue
 
                 # Count nonces before cleanup
-                initial_count = len(self._nonce_sets[tracking_key])
+                _ = len(self._nonce_sets[tracking_key])  # Track initial count for logging
 
                 # Remove old nonces
                 timestamps = self._nonce_timestamps[tracking_key]
@@ -383,7 +398,9 @@ class NonceManager:
                 while timestamps and timestamps[0][1] < cutoff_time:
                     nonce_hash, _ = timestamps.popleft()
                     # Find and remove actual nonce (inefficient but necessary)
-                    nonces_to_remove = [n for n in nonce_set if hashlib.sha256(n).digest()[:8] == nonce_hash]
+                    nonces_to_remove = [
+                        n for n in nonce_set if hashlib.sha256(n).digest()[:8] == nonce_hash
+                    ]
                     for nonce in nonces_to_remove:
                         nonce_set.discard(nonce)
                         removed_count += 1
@@ -397,11 +414,14 @@ class NonceManager:
             self._stats["cleanup_operations"] += 1
             self._stats["last_cleanup"] = self._last_cleanup
 
-            self._log_security_event("nonce_cleanup_completed", {
-                "cleaned_keys": cleanup_stats["cleaned_keys"],
-                "removed_nonces": cleanup_stats["removed_nonces"],
-                "max_age_hours": max_age_hours
-            })
+            self._log_security_event(
+                "nonce_cleanup_completed",
+                {
+                    "cleaned_keys": cleanup_stats["cleaned_keys"],
+                    "removed_nonces": cleanup_stats["removed_nonces"],
+                    "max_age_hours": max_age_hours,
+                },
+            )
 
             return cleanup_stats
 
@@ -424,9 +444,7 @@ class NonceManager:
             del self._nonce_timestamps[key_id]
             del self._generation_counts[key_id]
 
-            self._log_security_event("key_tracking_reset", {
-                "key_id": key_id
-            })
+            self._log_security_event("key_tracking_reset", {"key_id": key_id})
 
             return True
 
@@ -444,7 +462,7 @@ class NonceManager:
             export_data = {
                 "export_timestamp": datetime.utcnow().isoformat(),
                 "export_format": "SHA256_truncated",
-                "keys": {}
+                "keys": {},
             }
 
             keys_to_export = [key_id] if key_id else list(self._nonce_sets.keys())
@@ -462,7 +480,7 @@ class NonceManager:
                 export_data["keys"][tracking_key] = {
                     "nonce_count": len(nonce_hashes),
                     "nonce_hashes": sorted(nonce_hashes),  # Sort for consistent export
-                    "generation_count": self._generation_counts.get(tracking_key, 0)
+                    "generation_count": self._generation_counts.get(tracking_key, 0),
                 }
 
             return export_data
@@ -510,8 +528,9 @@ class NonceManager:
             # Remove oldest nonce
             oldest_hash, _ = self._nonce_timestamps[key_id].popleft()
             # Find and remove corresponding nonce (inefficient but necessary)
-            nonces_to_remove = [n for n in self._nonce_sets[key_id]
-                              if hashlib.sha256(n).digest()[:8] == oldest_hash]
+            nonces_to_remove = [
+                n for n in self._nonce_sets[key_id] if hashlib.sha256(n).digest()[:8] == oldest_hash
+            ]
             for old_nonce in nonces_to_remove:
                 self._nonce_sets[key_id].discard(old_nonce)
                 break
@@ -528,12 +547,16 @@ class NonceManager:
         warning_threshold = max_safe_nonces * 0.1
 
         if nonce_count > warning_threshold:
-            self._log_security_event("nonce_exhaustion_warning", {
-                "key_id": key_id,
-                "current_nonces": nonce_count,
-                "warning_threshold": int(warning_threshold),
-                "nonce_length_bits": length * 8
-            }, level=logging.WARNING)
+            self._log_security_event(
+                "nonce_exhaustion_warning",
+                {
+                    "key_id": key_id,
+                    "current_nonces": nonce_count,
+                    "warning_threshold": int(warning_threshold),
+                    "nonce_length_bits": length * 8,
+                },
+                level=logging.WARNING,
+            )
 
     def _validate_nonce_entropy(self, nonce: bytes) -> bool:
         """Basic entropy validation for nonce"""
@@ -541,10 +564,10 @@ class NonceManager:
             return True
 
         # Check for obviously bad patterns
-        if nonce == b'\x00' * len(nonce):  # All zeros
+        if nonce == b"\x00" * len(nonce):  # All zeros
             return False
 
-        if nonce == b'\xff' * len(nonce):  # All ones
+        if nonce == b"\xff" * len(nonce):  # All ones
             return False
 
         # Simple entropy estimation
@@ -605,17 +628,16 @@ class NonceManager:
         return self._nonce_timestamps[key_id][-1][1].isoformat()
 
     def _log_security_event(
-        self,
-        event_type: str,
-        details: Dict[str, Any],
-        level: int = logging.INFO
+        self, event_type: str, details: Dict[str, Any], level: int = logging.INFO
     ) -> None:
         """Log security events for audit trail"""
         event = {
             "timestamp": datetime.utcnow().isoformat(),
             "event_type": event_type,
             "component": "NonceManager",
-            "details": details
+            "details": details,
         }
 
-        self._logger.log(level, f"Nonce Manager Event: {event_type}", extra={"security_event": event})
+        self._logger.log(
+            level, f"Nonce Manager Event: {event_type}", extra={"security_event": event}
+        )

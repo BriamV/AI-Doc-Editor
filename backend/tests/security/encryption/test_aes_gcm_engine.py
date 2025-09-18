@@ -24,25 +24,21 @@ import pytest
 import secrets
 import threading
 import time
-from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch
 
 # Import modules under test
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 
 from app.security.encryption.aes_gcm_engine import (
     AESGCMEngine,
-    AESGCMSecurityError,
     AESGCMKeyError,
-    AESGCMNonceError,
-    AESGCMAuthenticationError
 )
 from app.security.encryption.encryption_interface import (
     EncryptionAlgorithm,
-    EncryptionMetadata,
-    KeyDerivationFunction
+    KeyDerivationFunction,
 )
 
 
@@ -63,7 +59,7 @@ class TestAESGCMEngineBasicOperations:
             "unicode_text": "🔐 Secure Data 🔒",
             "binary_data": secrets.token_bytes(256),
             "empty_data": "",
-            "special_chars": "!@#$%^&*()_+-=[]{}|;:,.<>?"
+            "special_chars": "!@#$%^&*()_+-=[]{}|;:,.<>?",
         }
 
     def test_basic_string_encryption_decryption(self, engine, test_data):
@@ -81,14 +77,11 @@ class TestAESGCMEngineBasicOperations:
         assert len(result.metadata.auth_tag) == engine.TAG_SIZE
 
         # Decrypt data
-        decrypt_result = engine.decrypt(
-            result.encrypted_data,
-            result.metadata
-        )
+        decrypt_result = engine.decrypt(result.encrypted_data, result.metadata)
 
         assert decrypt_result.success is True
         assert decrypt_result.integrity_verified is True
-        assert decrypt_result.decrypted_data.decode('utf-8') == plaintext
+        assert decrypt_result.decrypted_data.decode("utf-8") == plaintext
 
     def test_basic_bytes_encryption_decryption(self, engine, test_data):
         """Test basic bytes encryption and decryption"""
@@ -101,10 +94,7 @@ class TestAESGCMEngineBasicOperations:
         assert len(result.encrypted_data) > 0
 
         # Decrypt data
-        decrypt_result = engine.decrypt(
-            result.encrypted_data,
-            result.metadata
-        )
+        decrypt_result = engine.decrypt(result.encrypted_data, result.metadata)
 
         assert decrypt_result.success is True
         assert decrypt_result.decrypted_data == plaintext
@@ -118,7 +108,7 @@ class TestAESGCMEngineBasicOperations:
         decrypt_result = engine.decrypt(result.encrypted_data, result.metadata)
 
         assert decrypt_result.success is True
-        assert decrypt_result.decrypted_data.decode('utf-8') == plaintext
+        assert decrypt_result.decrypted_data.decode("utf-8") == plaintext
 
     def test_empty_data_handling(self, engine, test_data):
         """Test handling of empty data"""
@@ -129,7 +119,7 @@ class TestAESGCMEngineBasicOperations:
 
         decrypt_result = engine.decrypt(result.encrypted_data, result.metadata)
         assert decrypt_result.success is True
-        assert decrypt_result.decrypted_data.decode('utf-8') == plaintext
+        assert decrypt_result.decrypted_data.decode("utf-8") == plaintext
 
     def test_large_data_encryption(self, engine, test_data):
         """Test encryption of large data"""
@@ -140,7 +130,7 @@ class TestAESGCMEngineBasicOperations:
 
         decrypt_result = engine.decrypt(result.encrypted_data, result.metadata)
         assert decrypt_result.success is True
-        assert decrypt_result.decrypted_data.decode('utf-8') == plaintext
+        assert decrypt_result.decrypted_data.decode("utf-8") == plaintext
 
 
 class TestAESGCMEngineAAD:
@@ -161,13 +151,9 @@ class TestAESGCMEngineAAD:
         assert result.metadata.additional_data == aad
 
         # Decrypt with correct AAD
-        decrypt_result = engine.decrypt(
-            result.encrypted_data,
-            result.metadata,
-            additional_data=aad
-        )
+        decrypt_result = engine.decrypt(result.encrypted_data, result.metadata, additional_data=aad)
         assert decrypt_result.success is True
-        assert decrypt_result.decrypted_data.decode('utf-8') == plaintext
+        assert decrypt_result.decrypted_data.decode("utf-8") == plaintext
 
     def test_aad_mismatch_failure(self, engine):
         """Test that AAD mismatch causes authentication failure"""
@@ -181,9 +167,7 @@ class TestAESGCMEngineAAD:
 
         # Try to decrypt with AAD2 (should fail)
         decrypt_result = engine.decrypt(
-            result.encrypted_data,
-            result.metadata,
-            additional_data=aad2
+            result.encrypted_data, result.metadata, additional_data=aad2
         )
         assert decrypt_result.success is False
         assert decrypt_result.integrity_verified is False
@@ -197,10 +181,7 @@ class TestAESGCMEngineAAD:
         result = engine.encrypt(plaintext, additional_data=aad)
 
         # Try to decrypt without AAD (should fail)
-        decrypt_result = engine.decrypt(
-            result.encrypted_data,
-            result.metadata
-        )
+        decrypt_result = engine.decrypt(result.encrypted_data, result.metadata)
         assert decrypt_result.success is False
 
     def test_large_aad_handling(self, engine):
@@ -212,9 +193,7 @@ class TestAESGCMEngineAAD:
         assert result.success is True
 
         decrypt_result = engine.decrypt(
-            result.encrypted_data,
-            result.metadata,
-            additional_data=large_aad
+            result.encrypted_data, result.metadata, additional_data=large_aad
         )
         assert decrypt_result.success is True
 
@@ -285,7 +264,7 @@ class TestAESGCMEngineKeyManagement:
         assert validation["strength_score"] > 80
 
         # Weak key (all zeros)
-        weak_key = b'\x00' * 32
+        weak_key = b"\x00" * 32
         validation = engine.validate_key_strength(weak_key)
         assert validation["is_valid"] is False
 
@@ -333,8 +312,8 @@ class TestAESGCMEngineNonceSecurity:
         nonce = engine.generate_nonce(12)
 
         # Basic entropy checks
-        assert nonce != b'\x00' * 12  # Not all zeros
-        assert nonce != b'\xff' * 12  # Not all ones
+        assert nonce != b"\x00" * 12  # Not all zeros
+        assert nonce != b"\xff" * 12  # Not all ones
 
         # Check for reasonable byte distribution
         unique_bytes = len(set(nonce))
@@ -356,10 +335,7 @@ class TestAESGCMEngineErrorHandling:
         corrupted_metadata = result.metadata
         corrupted_metadata.algorithm = EncryptionAlgorithm.AES_128_GCM
 
-        decrypt_result = engine.decrypt(
-            result.encrypted_data,
-            corrupted_metadata
-        )
+        decrypt_result = engine.decrypt(result.encrypted_data, corrupted_metadata)
         assert decrypt_result.success is False
 
     def test_corrupted_encrypted_data(self, engine):
@@ -370,10 +346,7 @@ class TestAESGCMEngineErrorHandling:
         corrupted_data = bytearray(result.encrypted_data)
         corrupted_data[0] ^= 0xFF  # Flip bits in first byte
 
-        decrypt_result = engine.decrypt(
-            bytes(corrupted_data),
-            result.metadata
-        )
+        decrypt_result = engine.decrypt(bytes(corrupted_data), result.metadata)
         assert decrypt_result.success is False
         assert decrypt_result.integrity_verified is False
 
@@ -387,10 +360,7 @@ class TestAESGCMEngineErrorHandling:
         corrupted_tag[0] ^= 0xFF
         corrupted_metadata.auth_tag = bytes(corrupted_tag)
 
-        decrypt_result = engine.decrypt(
-            result.encrypted_data,
-            corrupted_metadata
-        )
+        decrypt_result = engine.decrypt(result.encrypted_data, corrupted_metadata)
         assert decrypt_result.success is False
 
     def test_missing_auth_tag(self, engine):
@@ -401,17 +371,14 @@ class TestAESGCMEngineErrorHandling:
         corrupted_metadata = result.metadata
         corrupted_metadata.auth_tag = None
 
-        decrypt_result = engine.decrypt(
-            result.encrypted_data,
-            corrupted_metadata
-        )
+        decrypt_result = engine.decrypt(result.encrypted_data, corrupted_metadata)
         assert decrypt_result.success is False
 
     def test_oversized_plaintext(self, engine):
         """Test handling of oversized plaintext"""
         # Create data larger than GCM limit (theoretical - not practical to test)
         # Just test the size check logic with a mock
-        with patch.object(engine, 'MAX_PLAINTEXT_SIZE', 100):
+        with patch.object(engine, "MAX_PLAINTEXT_SIZE", 100):
             large_data = "A" * 200
             result = engine.encrypt(large_data)
             assert result.success is False
@@ -419,7 +386,7 @@ class TestAESGCMEngineErrorHandling:
     def test_oversized_aad(self, engine):
         """Test handling of oversized AAD"""
         # Test AAD size limit with mock
-        with patch.object(engine, 'MAX_AAD_SIZE', 50):
+        with patch.object(engine, "MAX_AAD_SIZE", 50):
             large_aad = b"A" * 100
             result = engine.encrypt("test", additional_data=large_aad)
             assert result.success is False
@@ -442,11 +409,11 @@ class TestAESGCMEngineKeyDerivation:
             salt=salt,
             iterations=1000,  # Low for testing
             key_length=32,
-            algorithm=KeyDerivationFunction.ARGON2ID
+            algorithm=KeyDerivationFunction.ARGON2ID,
         )
 
         assert len(derived_key) == 32
-        assert derived_key != b'\x00' * 32  # Not all zeros
+        assert derived_key != b"\x00" * 32  # Not all zeros
 
         # Same inputs should produce same output
         derived_key2 = engine.derive_key(
@@ -454,7 +421,7 @@ class TestAESGCMEngineKeyDerivation:
             salt=salt,
             iterations=1000,
             key_length=32,
-            algorithm=KeyDerivationFunction.ARGON2ID
+            algorithm=KeyDerivationFunction.ARGON2ID,
         )
 
         assert derived_key == derived_key2
@@ -465,7 +432,7 @@ class TestAESGCMEngineKeyDerivation:
             salt=salt,
             iterations=1000,
             key_length=32,
-            algorithm=KeyDerivationFunction.ARGON2ID
+            algorithm=KeyDerivationFunction.ARGON2ID,
         )
 
         assert derived_key != derived_key3
@@ -593,7 +560,6 @@ class TestAESGCMEnginePerformance:
     def test_memory_usage_stability(self, engine):
         """Test memory usage doesn't grow excessively"""
         import gc
-        import sys
 
         # Get initial memory usage
         gc.collect()
@@ -640,8 +606,7 @@ class TestAESGCMEngineCompliance:
             # This is a simplified test - full implementation would
             # verify against known good outputs
             result = engine.encrypt(
-                vector["plaintext"],
-                additional_data=vector["aad"] if vector["aad"] else None
+                vector["plaintext"], additional_data=vector["aad"] if vector["aad"] else None
             )
             assert result.success is True
 

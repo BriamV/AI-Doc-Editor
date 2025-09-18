@@ -26,7 +26,7 @@ __all__ = [
     "KeyDerivationService",
     "NonceManager",
     "EncryptionInterface",
-    "SecureCredentialCipher"
+    "SecureCredentialCipher",
 ]
 
 # Import main classes (to be implemented)

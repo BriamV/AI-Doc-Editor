@@ -29,7 +29,6 @@ COMPLIANCE:
 
 import os
 import sys
-import mmap
 import ctypes
 import logging
 import threading
@@ -46,7 +45,7 @@ if sys.platform == "win32":
     import ctypes.wintypes
     from ctypes import windll
 elif sys.platform.startswith("linux"):
-    import mlock
+    pass
 else:
     # macOS and other Unix-like systems
     pass
@@ -54,22 +53,26 @@ else:
 
 class MemorySecurityError(Exception):
     """Base exception for memory security operations"""
+
     pass
 
 
 class MemoryLockError(MemorySecurityError):
     """Memory locking operation failed"""
+
     pass
 
 
 class SecureDeletionError(MemorySecurityError):
     """Secure deletion operation failed"""
+
     pass
 
 
 @dataclass
 class MemoryStats:
     """Memory security statistics"""
+
     secure_deletions: int = 0
     memory_locks: int = 0
     failed_deletions: int = 0
@@ -118,11 +121,7 @@ class SecureBuffer:
         if len(data) + offset > self._size:
             raise MemorySecurityError("Data exceeds buffer size")
 
-        ctypes.memmove(
-            ctypes.addressof(self._buffer) + offset,
-            data,
-            len(data)
-        )
+        ctypes.memmove(ctypes.addressof(self._buffer) + offset, data, len(data))
 
     def read(self, length: int = None, offset: int = 0) -> bytes:
         """Read data from secure buffer"""
@@ -133,13 +132,13 @@ class SecureBuffer:
         if offset + read_length > self._size:
             raise MemorySecurityError("Read exceeds buffer size")
 
-        return self._buffer.raw[offset:offset + read_length]
+        return self._buffer.raw[offset : offset + read_length]
 
     def clear(self) -> None:
         """Securely clear buffer contents"""
         if not self._cleared and self._buffer:
             # Multiple overwrite passes
-            patterns = [b'\x00', b'\xff', b'\xaa', b'\x55']
+            patterns = [b"\x00", b"\xff", b"\xaa", b"\x55"]
 
             for pattern in patterns:
                 ctypes.memset(self._buffer, ord(pattern), self._size)
@@ -168,11 +167,8 @@ class SecureBuffer:
         try:
             if sys.platform == "win32":
                 # Windows VirtualLock
-                windll.kernel32.VirtualLock(
-                    ctypes.addressof(self._buffer),
-                    self._size
-                )
-            elif hasattr(os, 'mlock'):
+                windll.kernel32.VirtualLock(ctypes.addressof(self._buffer), self._size)
+            elif hasattr(os, "mlock"):
                 # Unix mlock
                 os.mlock(ctypes.addressof(self._buffer), self._size)
 
@@ -186,11 +182,8 @@ class SecureBuffer:
         """Unlock buffer memory pages"""
         try:
             if sys.platform == "win32":
-                windll.kernel32.VirtualUnlock(
-                    ctypes.addressof(self._buffer),
-                    self._size
-                )
-            elif hasattr(os, 'munlock'):
+                windll.kernel32.VirtualUnlock(ctypes.addressof(self._buffer), self._size)
+            elif hasattr(os, "munlock"):
                 os.munlock(ctypes.addressof(self._buffer), self._size)
 
             self._locked = False
@@ -227,13 +220,13 @@ class SecureMemoryManager:
 
     # Secure deletion patterns
     DELETION_PATTERNS = [
-        b'\x00',  # Zeros
-        b'\xff',  # Ones
-        b'\xaa',  # 10101010
-        b'\x55',  # 01010101
-        b'\x36',  # Random pattern 1
-        b'\xc9',  # Random pattern 2
-        b'\x00'   # Final zeros
+        b"\x00",  # Zeros
+        b"\xff",  # Ones
+        b"\xaa",  # 10101010
+        b"\x55",  # 01010101
+        b"\x36",  # Random pattern 1
+        b"\xc9",  # Random pattern 2
+        b"\x00",  # Final zeros
     ]
 
     def __init__(self, audit_logger: Optional[logging.Logger] = None):
@@ -252,10 +245,10 @@ class SecureMemoryManager:
         # Initialize platform-specific features
         self._init_platform_features()
 
-        self._log_security_event("memory_manager_initialized", {
-            "platform": sys.platform,
-            "features": self._get_available_features()
-        })
+        self._log_security_event(
+            "memory_manager_initialized",
+            {"platform": sys.platform, "features": self._get_available_features()},
+        )
 
     def secure_delete(self, data: Union[str, bytes, bytearray, array.array]) -> bool:
         """
@@ -288,24 +281,28 @@ class SecureMemoryManager:
 
                 if success:
                     self._stats.secure_deletions += 1
-                    self._stats.total_bytes_cleared += len(data) if hasattr(data, '__len__') else 0
+                    self._stats.total_bytes_cleared += len(data) if hasattr(data, "__len__") else 0
                 else:
                     self._stats.failed_deletions += 1
 
-                self._log_security_event("secure_deletion", {
-                    "data_type": type(data).__name__,
-                    "data_length": len(data) if hasattr(data, '__len__') else 0,
-                    "success": success
-                })
+                self._log_security_event(
+                    "secure_deletion",
+                    {
+                        "data_type": type(data).__name__,
+                        "data_length": len(data) if hasattr(data, "__len__") else 0,
+                        "success": success,
+                    },
+                )
 
                 return success
 
         except Exception as e:
             self._stats.failed_deletions += 1
-            self._log_security_event("secure_deletion_failed", {
-                "error": str(e),
-                "data_type": type(data).__name__
-            }, level=logging.ERROR)
+            self._log_security_event(
+                "secure_deletion_failed",
+                {"error": str(e), "data_type": type(data).__name__},
+                level=logging.ERROR,
+            )
             return False
 
     def create_secure_buffer(self, size: int, lock_memory: bool = True) -> SecureBuffer:
@@ -329,19 +326,19 @@ class SecureMemoryManager:
                 self._stats.memory_locks += 1
                 self._stats.locked_memory_bytes += size
 
-            self._log_security_event("secure_buffer_created", {
-                "size_bytes": size,
-                "memory_locked": lock_memory
-            })
+            self._log_security_event(
+                "secure_buffer_created", {"size_bytes": size, "memory_locked": lock_memory}
+            )
 
             return buffer
 
         except Exception as e:
             self._stats.failed_locks += 1
-            self._log_security_event("secure_buffer_creation_failed", {
-                "error": str(e),
-                "size_bytes": size
-            }, level=logging.ERROR)
+            self._log_security_event(
+                "secure_buffer_creation_failed",
+                {"error": str(e), "size_bytes": size},
+                level=logging.ERROR,
+            )
             raise
 
     @contextmanager
@@ -365,15 +362,15 @@ class SecureMemoryManager:
             if clear_on_exit:
                 # Clear context variables
                 for key, value in context_vars.items():
-                    if hasattr(value, '__dict__'):
+                    if hasattr(value, "__dict__"):
                         self.secure_delete(value)
 
                 # Force garbage collection
                 gc.collect()
 
-            self._log_security_event("secure_context_exited", {
-                "cleared_variables": len(context_vars)
-            })
+            self._log_security_event(
+                "secure_context_exited", {"cleared_variables": len(context_vars)}
+            )
 
     def lock_memory_pages(self, address: int, size: int) -> bool:
         """
@@ -390,7 +387,7 @@ class SecureMemoryManager:
             if sys.platform == "win32":
                 result = windll.kernel32.VirtualLock(address, size)
                 success = bool(result)
-            elif hasattr(os, 'mlock'):
+            elif hasattr(os, "mlock"):
                 os.mlock(address, size)
                 success = True
             else:
@@ -400,21 +397,19 @@ class SecureMemoryManager:
                 self._stats.memory_locks += 1
                 self._stats.locked_memory_bytes += size
 
-            self._log_security_event("memory_lock", {
-                "address": hex(address),
-                "size_bytes": size,
-                "success": success
-            })
+            self._log_security_event(
+                "memory_lock", {"address": hex(address), "size_bytes": size, "success": success}
+            )
 
             return success
 
         except Exception as e:
             self._stats.failed_locks += 1
-            self._log_security_event("memory_lock_failed", {
-                "error": str(e),
-                "address": hex(address),
-                "size_bytes": size
-            }, level=logging.ERROR)
+            self._log_security_event(
+                "memory_lock_failed",
+                {"error": str(e), "address": hex(address), "size_bytes": size},
+                level=logging.ERROR,
+            )
             return False
 
     def disable_core_dumps(self) -> bool:
@@ -425,22 +420,23 @@ class SecureMemoryManager:
             True if successful
         """
         try:
-            if hasattr(os, 'setrlimit'):
+            if hasattr(os, "setrlimit"):
                 import resource
+
                 resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
 
                 self._log_security_event("core_dumps_disabled", {})
                 return True
             else:
-                self._log_security_event("core_dumps_disable_unavailable", {
-                    "platform": sys.platform
-                })
+                self._log_security_event(
+                    "core_dumps_disable_unavailable", {"platform": sys.platform}
+                )
                 return False
 
         except Exception as e:
-            self._log_security_event("core_dumps_disable_failed", {
-                "error": str(e)
-            }, level=logging.ERROR)
+            self._log_security_event(
+                "core_dumps_disable_failed", {"error": str(e)}, level=logging.ERROR
+            )
             return False
 
     def clear_stack_variables(self, frame_count: int = 3) -> int:
@@ -457,6 +453,7 @@ class SecureMemoryManager:
 
         try:
             import inspect
+
             current_frame = inspect.currentframe()
 
             for i in range(frame_count):
@@ -474,15 +471,15 @@ class SecureMemoryManager:
                         if self.secure_delete(var_value):
                             cleared_count += 1
 
-            self._log_security_event("stack_variables_cleared", {
-                "cleared_count": cleared_count,
-                "frames_processed": frame_count
-            })
+            self._log_security_event(
+                "stack_variables_cleared",
+                {"cleared_count": cleared_count, "frames_processed": frame_count},
+            )
 
         except Exception as e:
-            self._log_security_event("stack_clearing_failed", {
-                "error": str(e)
-            }, level=logging.ERROR)
+            self._log_security_event(
+                "stack_clearing_failed", {"error": str(e)}, level=logging.ERROR
+            )
 
         return cleared_count
 
@@ -506,10 +503,11 @@ class SecureMemoryManager:
                 "locked_memory_bytes": self._stats.locked_memory_bytes,
                 "active_buffers": len(self._active_buffers),
                 "deletion_success_rate": (
-                    self._stats.secure_deletions /
-                    max(1, self._stats.secure_deletions + self._stats.failed_deletions)
-                ) * 100,
-                "available_features": self._get_available_features()
+                    self._stats.secure_deletions
+                    / max(1, self._stats.secure_deletions + self._stats.failed_deletions)
+                )
+                * 100,
+                "available_features": self._get_available_features(),
             }
 
     def cleanup_all(self) -> Dict[str, int]:
@@ -519,11 +517,7 @@ class SecureMemoryManager:
         Returns:
             Cleanup statistics
         """
-        cleanup_stats = {
-            "buffers_cleared": 0,
-            "memory_unlocked": 0,
-            "garbage_collected": 0
-        }
+        cleanup_stats = {"buffers_cleared": 0, "memory_unlocked": 0, "garbage_collected": 0}
 
         with self._lock:
             # Clear active buffers
@@ -549,7 +543,7 @@ class SecureMemoryManager:
         """Securely delete string data"""
         try:
             # Convert to mutable bytearray
-            encoded = data.encode('utf-8')
+            encoded = data.encode("utf-8")
             mutable_data = bytearray(encoded)
 
             # Overwrite with patterns
@@ -585,7 +579,7 @@ class SecureMemoryManager:
         """Securely delete array data"""
         try:
             # Overwrite array contents
-            if data.typecode in ('b', 'B'):  # Byte arrays
+            if data.typecode in ("b", "B"):  # Byte arrays
                 for pattern in self.DELETION_PATTERNS:
                     for i in range(len(data)):
                         data[i] = ord(pattern)
@@ -603,12 +597,12 @@ class SecureMemoryManager:
         """Attempt to securely delete generic data"""
         try:
             # Try to clear object attributes
-            if hasattr(data, '__dict__'):
+            if hasattr(data, "__dict__"):
                 for attr_name in list(data.__dict__.keys()):
                     setattr(data, attr_name, None)
 
             # Try to clear if it's a container
-            if hasattr(data, 'clear'):
+            if hasattr(data, "clear"):
                 data.clear()
 
             return True
@@ -619,8 +613,16 @@ class SecureMemoryManager:
     def _is_sensitive_variable(self, var_name: str, var_value: Any) -> bool:
         """Check if variable appears to contain sensitive data"""
         sensitive_names = [
-            'password', 'pass', 'secret', 'key', 'token', 'credential',
-            'auth', 'private', 'sensitive', 'confidential'
+            "password",
+            "pass",
+            "secret",
+            "key",
+            "token",
+            "credential",
+            "auth",
+            "private",
+            "sensitive",
+            "confidential",
         ]
 
         var_name_lower = var_name.lower()
@@ -632,9 +634,9 @@ class SecureMemoryManager:
             # Windows-specific initialization
             try:
                 # Set process privilege for memory locking
-                import win32api
-                import win32security
-                import win32con
+                import win32api  # noqa: F401
+                import win32security  # noqa: F401
+                import win32con  # noqa: F401
 
                 # This would require admin privileges
                 pass
@@ -645,7 +647,8 @@ class SecureMemoryManager:
             # Linux-specific initialization
             try:
                 # Check for mlock capability
-                import resource
+                import resource  # noqa: F401
+
                 pass
             except ImportError:
                 pass
@@ -654,26 +657,25 @@ class SecureMemoryManager:
         """Get list of available security features"""
         features = ["secure_deletion", "garbage_collection"]
 
-        if hasattr(os, 'mlock') or sys.platform == "win32":
+        if hasattr(os, "mlock") or sys.platform == "win32":
             features.append("memory_locking")
 
-        if hasattr(os, 'setrlimit'):
+        if hasattr(os, "setrlimit"):
             features.append("core_dump_disable")
 
         return features
 
     def _log_security_event(
-        self,
-        event_type: str,
-        details: Dict[str, Any],
-        level: int = logging.INFO
+        self, event_type: str, details: Dict[str, Any], level: int = logging.INFO
     ) -> None:
         """Log security events for audit trail"""
         event = {
             "timestamp": datetime.utcnow().isoformat(),
             "event_type": event_type,
             "component": "SecureMemoryManager",
-            "details": details
+            "details": details,
         }
 
-        self._logger.log(level, f"Memory Security Event: {event_type}", extra={"security_event": event})
+        self._logger.log(
+            level, f"Memory Security Event: {event_type}", extra={"security_event": event}
+        )

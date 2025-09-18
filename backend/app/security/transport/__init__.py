@@ -33,7 +33,7 @@ __all__ = [
     "CertificateManager",
     "CipherSuites",
     "SecurityMiddleware",
-    "TransportSecurityValidator"
+    "TransportSecurityValidator",
 ]
 
 # Import main classes (to be implemented)

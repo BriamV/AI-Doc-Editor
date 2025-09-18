@@ -24,22 +24,19 @@ SECURITY TEST AREAS:
 
 import pytest
 import threading
-import time
 import gc
 import array
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch
 import sys
 import os
 
 # Import modules under test
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 
 from app.security.encryption.memory_utils import (
     SecureMemoryManager,
     SecureBuffer,
     MemorySecurityError,
-    MemoryLockError,
-    SecureDeletionError
 )
 
 
@@ -54,8 +51,8 @@ class TestSecureMemoryManagerBasic:
     def test_initialization(self, memory_manager):
         """Test memory manager initialization"""
         assert memory_manager is not None
-        assert hasattr(memory_manager, '_stats')
-        assert hasattr(memory_manager, '_lock')
+        assert hasattr(memory_manager, "_stats")
+        assert hasattr(memory_manager, "_lock")
 
     def test_secure_delete_string(self, memory_manager):
         """Test secure deletion of string data"""
@@ -85,7 +82,7 @@ class TestSecureMemoryManagerBasic:
 
     def test_secure_delete_array(self, memory_manager):
         """Test secure deletion of array data"""
-        test_array = array.array('b', [1, 2, 3, 4, 5])
+        test_array = array.array("b", [1, 2, 3, 4, 5])
 
         result = memory_manager.secure_delete(test_array)
         assert result is True
@@ -104,7 +101,7 @@ class TestSecureMemoryManagerBasic:
     def test_secure_delete_none_data(self, memory_manager):
         """Test handling of None data"""
         # Should handle gracefully without error
-        result = memory_manager.secure_delete(None)
+        _ = memory_manager.secure_delete(None)  # noqa: F841
         # Result may be True or False depending on implementation
 
 
@@ -224,7 +221,7 @@ class TestMemoryLocking:
     def test_unix_memory_locking(self, memory_manager):
         """Test Unix-specific memory locking"""
         # This test specifically for Unix-like systems
-        if hasattr(os, 'mlock'):
+        if hasattr(os, "mlock"):
             # Test would go here for Unix systems
             pass
 
@@ -248,19 +245,19 @@ class TestSecureContext:
         """Test basic secure context functionality"""
         with memory_manager.secure_context() as ctx:
             # Context should be a dictionary-like object
-            assert hasattr(ctx, '__setitem__')
-            assert hasattr(ctx, '__getitem__')
+            assert hasattr(ctx, "__setitem__")
+            assert hasattr(ctx, "__getitem__")
 
             # Can store data in context
-            ctx['sensitive_data'] = "secret_value"
-            assert ctx['sensitive_data'] == "secret_value"
+            ctx["sensitive_data"] = "secret_value"
+            assert ctx["sensitive_data"] == "secret_value"
 
     def test_secure_context_cleanup(self, memory_manager):
         """Test that secure context cleans up on exit"""
         test_data = "sensitive_context_data"
 
         with memory_manager.secure_context() as ctx:
-            ctx['data'] = test_data
+            ctx["data"] = test_data
 
         # Context should have been cleaned up
         # This is difficult to verify directly, but we trust the implementation
@@ -268,7 +265,7 @@ class TestSecureContext:
     def test_secure_context_no_cleanup(self, memory_manager):
         """Test secure context without cleanup"""
         with memory_manager.secure_context(clear_on_exit=False) as ctx:
-            ctx['data'] = "test_data"
+            ctx["data"] = "test_data"
 
         # Should complete without error
 
@@ -285,8 +282,8 @@ class TestStackVariableCleaning:
         # This test is limited because we can't easily verify
         # that stack variables were actually cleared
 
-        password = "sensitive_password"
-        secret_key = "secret_key_value"
+        _ = "sensitive_password"  # noqa: F841
+        _ = "secret_key_value"  # noqa: F841
 
         # Attempt to clear stack variables
         cleared_count = memory_manager.clear_stack_variables()
@@ -332,7 +329,7 @@ class TestMemoryStatistics:
             "failed_locks",
             "total_bytes_cleared",
             "deletion_success_rate",
-            "available_features"
+            "available_features",
         ]
 
         for field in required_fields:
@@ -397,13 +394,14 @@ class TestMemoryCleanup:
         initial_buffers = initial_stats["active_buffers"]
 
         # Create a buffer
-        buffer = memory_manager.create_secure_buffer(100)
+        _ = memory_manager.create_secure_buffer(100)  # noqa: F841
 
         updated_stats = memory_manager.get_memory_stats()
         assert updated_stats["active_buffers"] > initial_buffers
 
     def test_weak_reference_cleanup(self, memory_manager):
         """Test that weak references are cleaned up"""
+
         # Create buffer and let it go out of scope
         def create_and_destroy_buffer():
             buffer = memory_manager.create_secure_buffer(100)
@@ -414,7 +412,7 @@ class TestMemoryCleanup:
         gc.collect()
 
         # Getting stats should clean up dead references
-        stats = memory_manager.get_memory_stats()
+        _ = memory_manager.get_memory_stats()  # noqa: F841
         # Active buffers should reflect cleanup
 
 
@@ -561,7 +559,7 @@ class TestErrorHandling:
     def test_memory_locking_failure_handling(self, memory_manager):
         """Test handling of memory locking failures"""
         # Mock memory locking to fail
-        with patch('os.mlock', side_effect=OSError("Permission denied")):
+        with patch("os.mlock", side_effect=OSError("Permission denied")):
             # Should handle failure gracefully
             result = memory_manager.lock_memory_pages(0x1000, 4096)
             assert result is False
@@ -590,10 +588,10 @@ class TestPlatformSpecific:
         assert "secure_deletion" in features
 
         # Platform-specific features
-        if hasattr(os, 'mlock') or sys.platform == "win32":
+        if hasattr(os, "mlock") or sys.platform == "win32":
             assert "memory_locking" in features
 
-        if hasattr(os, 'setrlimit'):
+        if hasattr(os, "setrlimit"):
             assert "core_dump_disable" in features
 
     def test_cross_platform_compatibility(self, memory_manager):

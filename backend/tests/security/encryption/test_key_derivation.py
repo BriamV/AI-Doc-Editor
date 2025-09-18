@@ -23,22 +23,19 @@ SECURITY TEST AREAS:
 """
 
 import pytest
-import secrets
 import time
 import threading
-from unittest.mock import Mock, patch
 
 # Import modules under test
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 
 from app.security.encryption.key_derivation import (
     Argon2KeyDerivation,
     Argon2SecurityLevel,
-    Argon2DerivationError,
     Argon2ParameterError,
-    Argon2SecurityError
 )
 from app.security.encryption.encryption_interface import KeyDerivationFunction
 
@@ -61,7 +58,7 @@ class TestArgon2KeyDerivationBasic:
             "long": "a" * 100,
             "symbols": "!@#$%^&*()_+-=[]{}|;:,.<>?",
             "empty": "",
-            "spaces": "password with spaces"
+            "spaces": "password with spaces",
         }
 
     def test_basic_key_derivation(self, kdf, test_passwords):
@@ -70,23 +67,15 @@ class TestArgon2KeyDerivationBasic:
         salt = kdf.generate_salt(32)
 
         # Derive key
-        derived_key = kdf.derive_key(
-            password=password,
-            salt=salt,
-            key_length=32
-        )
+        derived_key = kdf.derive_key(password=password, salt=salt, key_length=32)
 
         # Verify key properties
         assert len(derived_key) == 32
-        assert derived_key != b'\x00' * 32  # Not all zeros
-        assert derived_key != b'\xff' * 32  # Not all ones
+        assert derived_key != b"\x00" * 32  # Not all zeros
+        assert derived_key != b"\xff" * 32  # Not all ones
 
         # Verify deterministic behavior
-        derived_key2 = kdf.derive_key(
-            password=password,
-            salt=salt,
-            key_length=32
-        )
+        derived_key2 = kdf.derive_key(password=password, salt=salt, key_length=32)
         assert derived_key == derived_key2
 
     def test_different_passwords_different_keys(self, kdf):
@@ -197,7 +186,7 @@ class TestArgon2PasswordHashing:
             "",
             "invalid_hash",
             "not_argon2_hash",
-            "$argon2id$v=19$m=65536,t=2,p=1$invalid"
+            "$argon2id$v=19$m=65536,t=2,p=1$invalid",
         ]
 
         for invalid_hash in invalid_hashes:
@@ -240,8 +229,8 @@ class TestArgon2SaltGeneration:
         salt = kdf.generate_salt(32)
 
         # Basic entropy checks
-        assert salt != b'\x00' * 32  # Not all zeros
-        assert salt != b'\xff' * 32  # Not all ones
+        assert salt != b"\x00" * 32  # Not all zeros
+        assert salt != b"\xff" * 32  # Not all ones
 
         # Check for reasonable byte distribution
         unique_bytes = len(set(salt))
@@ -319,7 +308,7 @@ class TestArgon2SecurityLevels:
             "memory_cost": 1024,  # 1 MiB
             "parallelism": 1,
             "hash_len": 32,
-            "salt_len": 16
+            "salt_len": 16,
         }
 
         kdf = Argon2KeyDerivation(custom_params=custom_params)
@@ -342,23 +331,27 @@ class TestArgon2ParameterValidation:
 
         # Invalid time cost
         with pytest.raises(Argon2ParameterError):
-            Argon2KeyDerivation(custom_params={
-                "time_cost": 0,  # Too low
-                "memory_cost": 1024,
-                "parallelism": 1,
-                "hash_len": 32,
-                "salt_len": 16
-            })
+            Argon2KeyDerivation(
+                custom_params={
+                    "time_cost": 0,  # Too low
+                    "memory_cost": 1024,
+                    "parallelism": 1,
+                    "hash_len": 32,
+                    "salt_len": 16,
+                }
+            )
 
         # Invalid memory cost
         with pytest.raises(Argon2ParameterError):
-            Argon2KeyDerivation(custom_params={
-                "time_cost": 1,
-                "memory_cost": 4,  # Too low
-                "parallelism": 1,
-                "hash_len": 32,
-                "salt_len": 16
-            })
+            Argon2KeyDerivation(
+                custom_params={
+                    "time_cost": 1,
+                    "memory_cost": 4,  # Too low
+                    "parallelism": 1,
+                    "hash_len": 32,
+                    "salt_len": 16,
+                }
+            )
 
     def test_key_derivation_input_validation(self):
         """Test input validation for key derivation"""
@@ -382,7 +375,7 @@ class TestArgon2ParameterValidation:
                 "password",
                 kdf.generate_salt(32),
                 key_length=32,
-                algorithm=KeyDerivationFunction.PBKDF2_SHA256
+                algorithm=KeyDerivationFunction.PBKDF2_SHA256,
             )
 
 
@@ -442,7 +435,7 @@ class TestArgon2Performance:
                 "memory_cost": memory_cost,
                 "parallelism": 1,
                 "hash_len": 32,
-                "salt_len": 16
+                "salt_len": 16,
             }
 
             kdf = Argon2KeyDerivation(custom_params=custom_params)
@@ -499,43 +492,74 @@ class TestArgon2ThreadSafety:
 
     def test_concurrent_password_verification(self, kdf):
         """Test concurrent password verification"""
-        # Create test password hashes
+        # Setup test data
+        test_passwords, password_hashes = self._setup_test_passwords(kdf)
+        verification_results, errors = self._run_concurrent_verification(
+            kdf, test_passwords, password_hashes
+        )
+
+        # Validate results
+        self._validate_verification_results(verification_results, errors)
+
+    def _setup_test_passwords(self, kdf):
+        """Setup test passwords and their hashes"""
         test_passwords = [f"password_{i}" for i in range(10)]
         password_hashes = [kdf.hash_password(pwd) for pwd in test_passwords]
+        return test_passwords, password_hashes
 
+    def _run_concurrent_verification(self, kdf, test_passwords, password_hashes):
+        """Run concurrent password verification threads"""
         verification_results = []
         errors = []
 
         def verification_worker():
-            try:
-                for i, (password, hash_value) in enumerate(zip(test_passwords, password_hashes)):
-                    # Verify correct password
-                    result = kdf.verify_password(password, hash_value)
-                    verification_results.append(("correct", result))
+            self._perform_password_verifications(
+                kdf, test_passwords, password_hashes, verification_results, errors
+            )
 
-                    # Verify incorrect password
-                    wrong_password = f"wrong_password_{i}"
-                    result = kdf.verify_password(wrong_password, hash_value)
-                    verification_results.append(("incorrect", result))
+        # Start and manage threads
+        threads = self._start_verification_threads(verification_worker, num_threads=3)
+        self._wait_for_thread_completion(threads)
 
-            except Exception as e:
-                errors.append(e)
+        return verification_results, errors
 
-        # Start multiple verification threads
+    def _perform_password_verifications(
+        self, kdf, test_passwords, password_hashes, verification_results, errors
+    ):
+        """Perform password verification operations in worker thread"""
+        try:
+            for i, (password, hash_value) in enumerate(zip(test_passwords, password_hashes)):
+                # Verify correct password
+                result = kdf.verify_password(password, hash_value)
+                verification_results.append(("correct", result))
+
+                # Verify incorrect password
+                wrong_password = f"wrong_password_{i}"
+                result = kdf.verify_password(wrong_password, hash_value)
+                verification_results.append(("incorrect", result))
+        except Exception as e:
+            errors.append(e)
+
+    def _start_verification_threads(self, worker_function, num_threads):
+        """Start verification worker threads"""
         threads = []
-        for _ in range(3):
-            thread = threading.Thread(target=verification_worker)
+        for _ in range(num_threads):
+            thread = threading.Thread(target=worker_function)
             threads.append(thread)
             thread.start()
+        return threads
 
-        # Wait for completion
+    def _wait_for_thread_completion(self, threads):
+        """Wait for all threads to complete"""
         for thread in threads:
             thread.join()
 
-        # Verify results
+    def _validate_verification_results(self, verification_results, errors):
+        """Validate verification results and check for errors"""
+        # Check for errors
         assert len(errors) == 0, f"Errors occurred: {errors}"
 
-        # Check verification results
+        # Separate and validate results
         correct_results = [r[1] for r in verification_results if r[0] == "correct"]
         incorrect_results = [r[1] for r in verification_results if r[0] == "incorrect"]
 
@@ -562,7 +586,7 @@ class TestArgon2Compliance:
             "side_channel_resistance",
             "gpu_asic_resistance",
             "salt_based_uniqueness",
-            "configurable_cost_parameters"
+            "configurable_cost_parameters",
         ]
 
         for feature in expected_features:
@@ -605,8 +629,8 @@ class TestArgon2Compliance:
         assert entropy_ratio >= 0.5
 
         # Should not be predictable patterns
-        assert derived_key != b'\x00' * 32
-        assert derived_key != b'\xff' * 32
+        assert derived_key != b"\x00" * 32
+        assert derived_key != b"\xff" * 32
         assert derived_key != bytes(range(32))
 
 
