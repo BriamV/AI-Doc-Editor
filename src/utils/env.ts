@@ -9,22 +9,33 @@
  * In E2E/Cypress: provides fallback handling for browser context
  */
 export const getEnvVar = (key: string): string | undefined => {
-  // Check if running in browser context (E2E tests, production)
-  if (typeof window !== 'undefined') {
-    // Browser context - use import.meta.env
+  // Check if running in test environment first (Jest)
+  if (
+    typeof process !== 'undefined' &&
+    (typeof jest !== 'undefined' || process.env.NODE_ENV === 'test')
+  ) {
+    // In test environment, use process.env which is set up in jest.setup.ts
     // eslint-disable-next-line security/detect-object-injection
-    return (import.meta.env as Record<string, string | undefined>)[key];
+    return process.env[key];
   }
 
-  // Check if process is available (Node.js context - Jest tests)
-  if (typeof process !== 'undefined') {
-    // In test environment, use process.env which is set up in jest.setup.ts
-    if (typeof jest !== 'undefined' || process.env.NODE_ENV === 'test') {
-      // eslint-disable-next-line security/detect-object-injection
-      return process.env[key];
+  // Check if running in browser context and try to access import.meta dynamically
+  if (typeof window !== 'undefined') {
+    try {
+      // Use dynamic access to avoid Jest parsing issues with import.meta
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const importMeta = (globalThis as any).import?.meta || (window as any).import?.meta;
+      if (importMeta && importMeta.env) {
+        // eslint-disable-next-line security/detect-object-injection
+        return importMeta.env[key];
+      }
+    } catch {
+      // If import.meta is not available, fall through to process.env
     }
+  }
 
-    // In non-test Node.js environment, fallback to process.env
+  // Fallback to process.env if available (Node.js context)
+  if (typeof process !== 'undefined' && process.env) {
     // eslint-disable-next-line security/detect-object-injection
     return process.env[key];
   }

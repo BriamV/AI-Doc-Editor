@@ -112,6 +112,16 @@ const restoreConsole = () => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).restoreConsole = restoreConsole;
 
+// Mock TextEncoder/TextDecoder for Node.js compatibility
+if (typeof global !== 'undefined') {
+  if (!global.TextEncoder) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { TextEncoder, TextDecoder } = require('util');
+    global.TextEncoder = TextEncoder;
+    global.TextDecoder = TextDecoder;
+  }
+}
+
 // Mock IndexedDB for browser storage tests
 if (typeof global !== 'undefined') {
   const mockIDB = {

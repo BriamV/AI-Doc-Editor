@@ -3,7 +3,9 @@
  * T-02: OAuth 2.0 + JWT backend integration
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+import { getEnvVar } from '@utils/env';
+
+const API_BASE_URL = getEnvVar('VITE_API_BASE_URL') || 'http://localhost:8000/api';
 
 export interface LoginResponse {
   auth_url: string;

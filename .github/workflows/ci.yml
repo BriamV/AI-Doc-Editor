@@ -136,16 +136,33 @@ jobs:
 
       - name: E2E Tests (Node 20 only)
         if: matrix.node-version == '20.x'
+        timeout-minutes: 8
         run: |
+          # Set up process tracking and cleanup
+          set -e
+          trap 'echo "🧹 Cleaning up background processes..."; pkill -f "uvicorn\|vite" || true; exit 0' EXIT INT TERM
+
           # Start backend with venv python in background
+          echo "🚀 Starting backend server..."
           backend/.venv/bin/python -m uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 8000 &
+          BACKEND_PID=$!
+
           # Start frontend
+          echo "🌐 Starting frontend server..."
           yarn vite &
-          # Wait for both services to be ready with timeout and retry limits
-          npx wait-on http://localhost:5173 --timeout 60000 --interval 1000
-          npx wait-on http://localhost:8000/api/healthz --timeout 60000 --interval 1000
-          # Run Playwright E2E tests
-          yarn test:playwright
+          FRONTEND_PID=$!
+
+          # Wait for both services to be ready with reduced timeout
+          echo "⏳ Waiting for services to be ready..."
+          npx wait-on http://localhost:5173 --timeout 45000 --interval 1000
+          npx wait-on http://localhost:8000/api/healthz --timeout 45000 --interval 1000
+
+          # Run Playwright E2E tests with timeout
+          echo "🧪 Running E2E tests with timeout..."
+          timeout 300s yarn test:playwright || {
+            echo "❌ E2E tests timed out or failed"
+            exit 1
+          }
 
       - name: Upload Playwright Report (Node 20 only)
         if: matrix.node-version == '20.x' && failure()
