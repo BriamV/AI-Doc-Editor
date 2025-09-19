@@ -17,3 +17,6 @@ safety
 # Security/code scanning CLI
 semgrep
 
+# Testing coverage (Week 4)
+pytest-cov
+

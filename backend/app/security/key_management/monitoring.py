@@ -899,3 +899,57 @@ class KeyManagementMonitor:
         """Check scheduler health"""
         # Placeholder - would check actual scheduler status
         return "healthy", "Scheduler running normally"
+
+    # Week 4 Credential Monitoring Extensions (30 LOC)
+    async def track_credential_event(
+        self,
+        session: AsyncSession,
+        key_id: str,
+        user_id: str,
+        event_type: str,
+        metadata: Dict[str, Any],
+    ) -> None:
+        """Track credential access events for Week 4 monitoring"""
+        try:
+            # Record credential-specific metric
+            self._metrics_collector.record_metric(
+                Metric(
+                    name=f"credential_{event_type.lower()}",
+                    value=1,
+                    metric_type=MetricType.COUNTER,
+                    timestamp=datetime.utcnow(),
+                    tags={"key_id": key_id, "user_id": user_id, "event_type": event_type},
+                )
+            )
+
+            # Check for suspicious patterns
+            if await self._is_suspicious_credential_activity(session, key_id, user_id, event_type):
+                self._alert_manager.add_alert_rule(
+                    f"suspicious_credential_{key_id}_{int(datetime.utcnow().timestamp())}",
+                    "Suspicious Credential Activity",
+                    f"credential_access_frequency_{key_id} > 10",
+                    AlertSeverity.HIGH,
+                    f"Suspicious {event_type} activity detected for credential {key_id} by user {user_id}",
+                )
+
+        except Exception as e:
+            self._logger.error(f"Error tracking credential event: {e}")
+
+    async def _is_suspicious_credential_activity(
+        self, session: AsyncSession, key_id: str, user_id: str, event_type: str
+    ) -> bool:
+        """Detect suspicious credential activity patterns"""
+        try:
+            # Check access frequency in last hour
+            frequency = (
+                self._metrics_collector.get_metric_value(
+                    f"credential_{event_type.lower()}", tags={"key_id": key_id, "user_id": user_id}
+                )
+                or 0
+            )
+
+            # Simple threshold-based detection
+            return frequency > 20  # More than 20 accesses per hour
+
+        except Exception:
+            return False

@@ -1220,3 +1220,159 @@ async def shutdown_rotation_scheduler():
     """Shutdown rotation scheduler (called from main.py shutdown)"""
     if rotation_scheduler:
         await rotation_scheduler.stop()
+
+
+# Week 4 Credential Monitoring Endpoints (60 LOC)
+
+
+@router.get(
+    "/credentials/monitoring/summary",
+    summary="Get Credential Monitoring Summary",
+    description="Get real-time credential access monitoring summary",
+)
+@rate_limit(requests=30, window=60)  # 30 requests per minute
+async def get_credential_monitoring_summary(
+    hours: int = Query(24, ge=1, le=168, description="Time window in hours"),
+    session: AsyncSession = Depends(get_session),
+    current_user: UserResponse = Depends(get_current_user),
+) -> Dict[str, Any]:
+    """
+    Get credential monitoring summary
+
+    Returns real-time summary of credential access patterns and security alerts.
+    """
+    try:
+        from app.security.key_management.credential_monitoring_week4 import (
+            CredentialMonitorExtension,
+        )
+
+        # Get recent credential access summary
+        monitor = CredentialMonitorExtension(alert_manager=None)  # Simplified for demo
+        summary = monitor.get_recent_access_summary(hours=hours)
+
+        return {
+            "timestamp": datetime.utcnow().isoformat(),
+            "monitoring_window_hours": hours,
+            "credential_access_summary": summary,
+            "security_status": "active",
+            "last_updated": datetime.utcnow().isoformat(),
+        }
+
+    except Exception as e:
+        logger.error(f"Error getting credential monitoring summary: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error retrieving credential monitoring summary",
+        )
+
+
+@router.post(
+    "/credentials/compliance/report",
+    summary="Generate Compliance Report",
+    description="Generate compliance report for credential usage (GDPR, SOX, HIPAA)",
+)
+@rate_limit(requests=5, window=300)  # 5 requests per 5 minutes
+async def generate_compliance_report(
+    report_config: Dict[str, Any] = Body(...),
+    session: AsyncSession = Depends(get_session),
+    current_user: UserResponse = Depends(validate_admin_access),
+) -> Dict[str, Any]:
+    """
+    Generate compliance report
+
+    Generates comprehensive compliance reports for various frameworks including
+    GDPR, SOX, HIPAA, and PCI-DSS based on credential access patterns.
+    """
+    try:
+        from app.security.key_management.credential_monitoring_week4 import ComplianceReporter
+        from app.db.session import get_session_factory
+
+        framework = report_config.get("framework", "gdpr").lower()
+        start_date = datetime.fromisoformat(report_config.get("start_date"))
+        end_date = datetime.fromisoformat(report_config.get("end_date"))
+
+        reporter = ComplianceReporter(get_session_factory())
+
+        if framework == "gdpr":
+            report = await reporter.generate_gdpr_report(start_date, end_date)
+        elif framework == "sox":
+            quarter = report_config.get("quarter", 1)
+            year = report_config.get("year", datetime.utcnow().year)
+            report = await reporter.generate_sox_report(quarter, year)
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unsupported compliance framework: {framework}",
+            )
+
+        logger.info(f"Generated {framework.upper()} compliance report by user {current_user.id}")
+        return report
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid date format: {e}"
+        )
+    except Exception as e:
+        logger.error(f"Error generating compliance report: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error generating compliance report",
+        )
+
+
+@router.post(
+    "/credentials/security/scan",
+    summary="Trigger Security Scan",
+    description="Trigger automated security scan for credential leaks",
+)
+@rate_limit(requests=3, window=300)  # 3 requests per 5 minutes
+async def trigger_credential_security_scan(
+    scan_config: Dict[str, Any] = Body(...),
+    current_user: UserResponse = Depends(validate_admin_access),
+) -> Dict[str, Any]:
+    """
+    Trigger security scan for credential leaks
+
+    Initiates automated scanning for credential leaks in repositories,
+    logs, and configuration files. Integrates with existing security pipeline.
+    """
+    try:
+        from app.security.key_management.credential_monitoring_week4 import CredentialScanAutomation
+
+        scanner = CredentialScanAutomation()
+        scope = scan_config.get("scope", "all")
+
+        # Trigger different scan types based on scope
+        findings = []
+
+        if scope in ["all", "repository"]:
+            repo_path = scan_config.get("repository_path", ".")
+            repo_findings = await scanner.scan_repository_commits(repo_path)
+            findings.extend(repo_findings)
+
+        if scope in ["all", "logs"]:
+            log_dir = scan_config.get("log_directory", "/var/log")
+            log_findings = await scanner.scan_log_files(log_dir)
+            findings.extend(log_findings)
+
+        scan_result = {
+            "scan_id": f"scan_{datetime.utcnow().timestamp()}",
+            "initiated_by": current_user.id,
+            "timestamp": datetime.utcnow().isoformat(),
+            "scope": scope,
+            "total_findings": len(findings),
+            "findings": findings[:10],  # Limit response size
+            "risk_level": "high" if any(f.get("severity") == "high" for f in findings) else "low",
+            "status": "completed",
+        }
+
+        logger.warning(
+            f"Security scan initiated by user {current_user.id}, found {len(findings)} potential issues"
+        )
+        return scan_result
+
+    except Exception as e:
+        logger.error(f"Error during security scan: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error during security scan"
+        )

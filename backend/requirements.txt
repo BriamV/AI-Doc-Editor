@@ -37,6 +37,10 @@ email-validator==2.2.0
 pytest==8.3.2
 pytest-asyncio==0.23.8
 
+# Week 4 Additional Dependencies
+pytz==2024.1                # Timezone handling for rotation scheduling
+aiohttp==3.10.5             # HTTP client for HSM integration
+
 # CORS
 # NOTE: fastapi-cors is unmaintained. Consider migrating to FastAPI's built-in CORSMiddleware.
 fastapi-cors==0.0.6
