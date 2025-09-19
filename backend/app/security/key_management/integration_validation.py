@@ -31,10 +31,10 @@ import asyncio
 import logging
 import secrets
 import time
-from datetime import datetime, timedelta
-from typing import Dict, Any, List
+from datetime import datetime
+from typing import Dict, Any
 
-from app.security.key_management.key_manager import KeyManager, KeyManagerError, KeySecurityError
+from app.security.key_management.key_manager import KeyManager, KeyManagerError
 from app.security.encryption.aes_gcm_engine import AESGCMEngine
 from app.security.encryption.key_derivation import Argon2KeyDerivation
 from app.security.encryption.memory_utils import SecureMemoryManager
@@ -50,7 +50,7 @@ class IntegrationValidator:
 
         # Create console handler
         handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
 
@@ -59,7 +59,7 @@ class IntegrationValidator:
             "tests_passed": 0,
             "tests_failed": 0,
             "failures": [],
-            "performance_metrics": {}
+            "performance_metrics": {},
         }
 
     async def run_validation(self) -> Dict[str, Any]:
@@ -77,7 +77,7 @@ class IntegrationValidator:
             self.test_error_handling,
             self.test_memory_security,
             self.test_performance_optimizations,
-            self.test_cache_integrity
+            self.test_cache_integrity,
         ]
 
         for test_suite in test_suites:
@@ -136,10 +136,7 @@ class IntegrationValidator:
             self._record_success("AESGCMEngine basic encryption")
 
             # Test decryption
-            decrypt_result = engine.decrypt(
-                encrypt_result.encrypted_data,
-                encrypt_result.metadata
-            )
+            decrypt_result = engine.decrypt(encrypt_result.encrypted_data, encrypt_result.metadata)
             assert decrypt_result.success, "Decryption should succeed"
             assert decrypt_result.integrity_verified, "Integrity should be verified"
             assert decrypt_result.decrypted_data.decode() == test_data
@@ -149,9 +146,7 @@ class IntegrationValidator:
             aad = b"additional_data_for_authentication"
             encrypt_result_aad = engine.encrypt(test_data, additional_data=aad)
             decrypt_result_aad = engine.decrypt(
-                encrypt_result_aad.encrypted_data,
-                encrypt_result_aad.metadata,
-                additional_data=aad
+                encrypt_result_aad.encrypted_data, encrypt_result_aad.metadata, additional_data=aad
             )
             assert decrypt_result_aad.success, "AAD decryption should succeed"
             self._record_success("AESGCMEngine AAD encryption/decryption")
@@ -174,7 +169,7 @@ class IntegrationValidator:
                 password=password,
                 salt=salt,
                 key_length=32,
-                algorithm=KeyDerivationFunction.ARGON2ID
+                algorithm=KeyDerivationFunction.ARGON2ID,
             )
 
             assert len(derived_key) == 32, "Derived key should be 32 bytes"
@@ -208,8 +203,7 @@ class IntegrationValidator:
             # Test key derivation through KeyManager
             password = "test_integration_password"
             derived_key, salt = await key_manager.derive_key_from_password(
-                password=password,
-                key_length=32
+                password=password, key_length=32
             )
 
             assert len(derived_key) == 32, "Derived key should be 32 bytes"
@@ -217,7 +211,6 @@ class IntegrationValidator:
             self._record_success("KeyManager password-based key derivation")
 
             # Test memory cleanup
-            memory_stats_before = key_manager._memory_manager.get_memory_stats()
             key_manager._memory_manager.secure_delete(derived_key)
             # Note: In production, would verify actual memory clearing
             self._record_success("Memory security cleanup")
@@ -298,14 +291,14 @@ class IntegrationValidator:
             key_manager = KeyManager()
 
             # Test cache functionality (if available)
-            if hasattr(key_manager, 'get_performance_metrics'):
+            if hasattr(key_manager, "get_performance_metrics"):
                 metrics = await key_manager.get_performance_metrics()
                 assert isinstance(metrics, dict)
                 assert "cache_stats" in metrics
                 self._record_success("Performance metrics")
 
             # Test cache cleanup
-            if hasattr(key_manager, 'cleanup_expired_cache_entries'):
+            if hasattr(key_manager, "cleanup_expired_cache_entries"):
                 cleaned_count = key_manager.cleanup_expired_cache_entries()
                 assert isinstance(cleaned_count, int)
                 self._record_success("Cache cleanup")
@@ -329,20 +322,8 @@ class IntegrationValidator:
             key_manager = KeyManager()
 
             # Test cache integrity validation (if available)
-            if hasattr(key_manager, '_validate_cached_key_integrity'):
-                # Create test cache entry
-                test_key = secrets.token_bytes(32)
-                test_metadata = {"test": "metadata"}
-
-                # Valid cache entry
-                valid_cache = {
-                    "key_bytes": test_key,
-                    "metadata": test_metadata,
-                    "cached_at": datetime.utcnow(),
-                    "checksum": key_manager._memory_manager.secure_delete.__module__.split('.')[0].join(['hashlib']).sha256(test_key).hexdigest() if hasattr(key_manager._memory_manager.secure_delete.__module__.split('.')[0], 'hashlib') else "dummy_checksum"
-                }
-
-                # Note: This is a simplified test - full implementation would use actual checksum
+            if hasattr(key_manager, "_validate_cached_key_integrity"):
+                # Note: Cache integrity validation would create test data in production
                 self._record_success("Cache integrity validation setup")
 
         except Exception as e:
@@ -358,18 +339,16 @@ class IntegrationValidator:
         """Record failed test"""
         self.results["tests_run"] += 1
         self.results["tests_failed"] += 1
-        self.results["failures"].append({
-            "test": test_name,
-            "error": error_message,
-            "timestamp": datetime.utcnow().isoformat()
-        })
+        self.results["failures"].append(
+            {"test": test_name, "error": error_message, "timestamp": datetime.utcnow().isoformat()}
+        )
         self.logger.error(f"✗ {test_name}: {error_message}")
 
     def _generate_report(self):
         """Generate final validation report"""
-        self.logger.info("\n" + "="*60)
+        self.logger.info("\n" + "=" * 60)
         self.logger.info("KEYMANAGER INTEGRATION VALIDATION REPORT")
-        self.logger.info("="*60)
+        self.logger.info("=" * 60)
 
         total_tests = self.results["tests_run"]
         passed_tests = self.results["tests_passed"]
@@ -394,7 +373,7 @@ class IntegrationValidator:
 
         status = "PASS" if failed_tests == 0 else "FAIL"
         self.logger.info(f"\nOVERALL STATUS: {status}")
-        self.logger.info("="*60)
+        self.logger.info("=" * 60)
 
 
 async def main():

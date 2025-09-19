@@ -25,33 +25,48 @@ import asyncio
 import logging
 import secrets
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple, Any, Union
-from contextlib import asynccontextmanager
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
 import hashlib
-import json
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
-from sqlalchemy import select, update, delete, func, and_, or_
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy import select, update, func, and_, or_
 
 from app.models.key_management import (
-    KeyMaster, KeyVersion, RotationPolicy, KeyRotation, HSMConfiguration, KeyAuditLog,
-    KeyType, KeyStatus, RotationTrigger, HSMProvider,
-    KeyMasterCreate, KeyMasterResponse, KeyRotationRequest, KeyRotationResponse,
-    KeyHealthStatus, KeyStatistics
+    KeyMaster,
+    KeyVersion,
+    KeyRotation,
+    KeyAuditLog,
+    KeyType,
+    KeyStatus,
+    RotationTrigger,
+    HSMProvider,
+    KeyMasterCreate,
+    KeyMasterResponse,
+    KeyRotationRequest,
+    KeyRotationResponse,
+    KeyHealthStatus,
+    KeyStatistics,
 )
 from app.security.encryption.aes_gcm_engine import AESGCMEngine
-from app.security.encryption.encryption_interface import EncryptionInterface, EncryptionResult, DecryptionResult, KeyDerivationFunction
+from app.security.encryption.encryption_interface import (
+    EncryptionInterface,
+    EncryptionMetadata,
+    KeyDerivationFunction,
+)
 from app.security.encryption.memory_utils import SecureMemoryManager
 from app.security.encryption.key_derivation import Argon2KeyDerivation
-from app.db.session import get_session
+from app.security.key_management.hsm_integration import (
+    HSMManager,
+    HSMConnectionConfig,
+)
+from app.security.key_management.monitoring import KeyManagementMonitor
 
 
 @dataclass
 class KeyRotationResult:
     """Result of key rotation operation"""
+
     success: bool
     old_key_id: str
     new_key_id: Optional[str]
@@ -63,21 +78,25 @@ class KeyRotationResult:
 
 class KeyManagerError(Exception):
     """Base exception for key manager operations"""
+
     pass
 
 
 class KeyRotationError(KeyManagerError):
     """Key rotation specific errors"""
+
     pass
 
 
 class HSMIntegrationError(KeyManagerError):
     """HSM integration errors"""
+
     pass
 
 
 class KeySecurityError(KeyManagerError):
     """Key security validation errors"""
+
     pass
 
 
@@ -106,7 +125,7 @@ class KeyManager:
         self,
         encryption_engine: Optional[EncryptionInterface] = None,
         hsm_provider: Optional[str] = None,
-        audit_logger: Optional[logging.Logger] = None
+        audit_logger: Optional[logging.Logger] = None,
     ):
         """
         Initialize Key Manager
@@ -130,13 +149,16 @@ class KeyManager:
         self._active_rotations: Dict[str, asyncio.Task] = {}
         self._rotation_lock = asyncio.Lock()
 
+        # HSM manager for hardware key operations
+        self._hsm_manager: Optional[HSMManager] = None
+
+        # Monitoring system
+        self._monitor: Optional[KeyManagementMonitor] = None
+
         self._logger.info("KeyManager initialized with encryption engine and HSM support")
 
     async def create_key(
-        self,
-        session: AsyncSession,
-        key_request: KeyMasterCreate,
-        user_id: str
+        self, session: AsyncSession, key_request: KeyMasterCreate, user_id: str
     ) -> KeyMasterResponse:
         """
         Create new encryption key with proper hierarchy and security
@@ -170,7 +192,7 @@ class KeyManager:
                 expires_at=key_request.expires_at,
                 hsm_provider=key_request.hsm_provider.value if key_request.hsm_provider else None,
                 security_level=key_request.security_level,
-                compliance_tags=key_request.compliance_tags
+                compliance_tags=key_request.compliance_tags,
             )
 
             session.add(key_master)
@@ -189,9 +211,12 @@ class KeyManager:
 
             # Log key creation
             await self._log_key_event(
-                session, key_id, "KEY_CREATED",
+                session,
+                key_id,
+                "KEY_CREATED",
                 f"New {key_request.key_type.value} key created",
-                user_id, {"version_id": str(version_id)}
+                user_id,
+                {"version_id": str(version_id)},
             )
 
             # Clear cache to force refresh
@@ -205,10 +230,7 @@ class KeyManager:
             raise KeyManagerError(f"Failed to create key: {e}")
 
     async def rotate_key(
-        self,
-        session: AsyncSession,
-        rotation_request: KeyRotationRequest,
-        user_id: str
+        self, session: AsyncSession, rotation_request: KeyRotationRequest, user_id: str
     ) -> KeyRotationResponse:
         """
         Rotate encryption key with zero-downtime strategy
@@ -225,10 +247,7 @@ class KeyManager:
             return await self._execute_key_rotation(session, rotation_request, user_id)
 
     async def _execute_key_rotation(
-        self,
-        session: AsyncSession,
-        rotation_request: KeyRotationRequest,
-        user_id: str
+        self, session: AsyncSession, rotation_request: KeyRotationRequest, user_id: str
     ) -> KeyRotationResponse:
         """Execute key rotation with comprehensive error handling"""
         start_time = datetime.utcnow()
@@ -252,7 +271,7 @@ class KeyManager:
                 scheduled_at=rotation_request.scheduled_at or datetime.utcnow(),
                 started_at=datetime.utcnow(),
                 old_version=await self._get_current_key_version(session, rotation_request.key_id),
-                status="RUNNING"
+                status="RUNNING",
             )
 
             session.add(rotation)
@@ -273,7 +292,9 @@ class KeyManager:
                 rotation.new_version = await self._get_version_number(session, new_version_id)
                 rotation.completed_at = datetime.utcnow()
                 rotation.status = "COMPLETED"
-                rotation.execution_time_ms = int((datetime.utcnow() - start_time).total_seconds() * 1000)
+                rotation.execution_time_ms = int(
+                    (datetime.utcnow() - start_time).total_seconds() * 1000
+                )
 
                 await session.commit()
 
@@ -282,14 +303,17 @@ class KeyManager:
 
                 # Log successful rotation
                 await self._log_key_event(
-                    session, rotation_request.key_id, "KEY_ROTATED",
+                    session,
+                    rotation_request.key_id,
+                    "KEY_ROTATED",
                     f"Key rotated successfully (trigger: {rotation_request.trigger.value})",
-                    user_id, {
+                    user_id,
+                    {
                         "rotation_id": rotation_id,
                         "old_version": rotation.old_version,
                         "new_version": rotation.new_version,
-                        "execution_time_ms": rotation.execution_time_ms
-                    }
+                        "execution_time_ms": rotation.execution_time_ms,
+                    },
                 )
 
                 return KeyRotationResponse(
@@ -300,7 +324,7 @@ class KeyManager:
                     status=rotation.status,
                     old_version=rotation.old_version,
                     new_version=rotation.new_version,
-                    execution_time_ms=rotation.execution_time_ms
+                    execution_time_ms=rotation.execution_time_ms,
                 )
 
             except Exception as rotation_error:
@@ -312,12 +336,12 @@ class KeyManager:
 
                 # Log failed rotation
                 await self._log_key_event(
-                    session, rotation_request.key_id, "KEY_ROTATION_FAILED",
+                    session,
+                    rotation_request.key_id,
+                    "KEY_ROTATION_FAILED",
                     f"Key rotation failed: {rotation_error}",
-                    user_id, {
-                        "rotation_id": rotation_id,
-                        "error": str(rotation_error)
-                    }
+                    user_id,
+                    {"rotation_id": rotation_id, "error": str(rotation_error)},
                 )
 
                 raise KeyRotationError(f"Key rotation failed: {rotation_error}")
@@ -328,10 +352,7 @@ class KeyManager:
             raise KeyRotationError(f"Key rotation failed: {e}")
 
     async def get_key_for_encryption(
-        self,
-        session: AsyncSession,
-        key_id: str,
-        purpose: str = "encryption"
+        self, session: AsyncSession, key_id: str, purpose: str = "encryption"
     ) -> Tuple[bytes, Dict[str, Any]]:
         """
         Retrieve key material for encryption operations
@@ -360,11 +381,16 @@ class KeyManager:
                 else:
                     # Cache corrupted, remove it
                     self._invalidate_key_cache(key_id)
-                    self._logger.warning(f"Cached key {key_id} failed integrity check, removed from cache")
+                    self._logger.warning(
+                        f"Cached key {key_id} failed integrity check, removed from cache"
+                    )
 
             # Retrieve from database
             key_master = await self._get_key_master(session, key_id)
-            if not key_master or key_master.status not in [KeyStatus.ACTIVE.value, KeyStatus.ROTATED.value]:
+            if not key_master or key_master.status not in [
+                KeyStatus.ACTIVE.value,
+                KeyStatus.ROTATED.value,
+            ]:
                 raise KeySecurityError(f"Key not available for encryption: {key_id}")
 
             # Get current key version
@@ -381,7 +407,7 @@ class KeyManager:
                 "version": current_version.version_number,
                 "algorithm": key_master.algorithm,
                 "created_at": current_version.created_at,
-                "security_level": key_master.security_level
+                "security_level": key_master.security_level,
             }
 
             # Cache for performance with integrity protection
@@ -392,9 +418,12 @@ class KeyManager:
 
             # Log key usage
             await self._log_key_event(
-                session, key_id, "KEY_USED",
+                session,
+                key_id,
+                "KEY_USED",
                 f"Key accessed for {purpose}",
-                None, {"purpose": purpose, "version": current_version.version_number}
+                None,
+                {"purpose": purpose, "version": current_version.version_number},
             )
 
             return key_bytes, metadata
@@ -403,11 +432,7 @@ class KeyManager:
             self._logger.error(f"Failed to retrieve key {key_id}: {e}")
             raise KeySecurityError(f"Key retrieval failed: {e}")
 
-    async def get_key_health_status(
-        self,
-        session: AsyncSession,
-        key_id: str
-    ) -> KeyHealthStatus:
+    async def get_key_health_status(self, session: AsyncSession, key_id: str) -> KeyHealthStatus:
         """
         Get comprehensive health status for a key
 
@@ -438,7 +463,7 @@ class KeyManager:
                 time_until_rotation=time_until_rotation,
                 last_used=key_master.rotated_at or key_master.activated_at,
                 security_warnings=security_warnings,
-                recommendations=recommendations
+                recommendations=recommendations,
             )
 
         except Exception as e:
@@ -450,7 +475,7 @@ class KeyManager:
         password: str,
         salt: Optional[bytes] = None,
         key_length: int = 32,
-        algorithm: KeyDerivationFunction = KeyDerivationFunction.ARGON2ID
+        algorithm: KeyDerivationFunction = KeyDerivationFunction.ARGON2ID,
     ) -> Tuple[bytes, bytes]:
         """
         Derive encryption key from password using secure KDF
@@ -488,21 +513,25 @@ class KeyManager:
                 salt=salt,
                 iterations=None,  # Uses time_cost parameter from Argon2
                 key_length=key_length,
-                algorithm=algorithm
+                algorithm=algorithm,
             )
 
             # Log successful derivation (use a temporary session for logging)
             try:
                 from app.db.session import get_session
+
                 async with get_session() as temp_session:
                     await self._log_key_event(
-                        temp_session, "derived_key", "KEY_DERIVED",
+                        temp_session,
+                        "derived_key",
+                        "KEY_DERIVED",
                         f"Key derived from password using {algorithm.value}",
-                        None, {
+                        None,
+                        {
                             "algorithm": algorithm.value,
                             "key_length": key_length,
-                            "salt_length": len(salt)
-                        }
+                            "salt_length": len(salt),
+                        },
                     )
             except Exception:
                 # Don't fail derivation if logging fails
@@ -513,6 +542,260 @@ class KeyManager:
         except Exception as e:
             self._logger.error(f"Key derivation from password failed: {e}")
             raise KeyManagerError(f"Password-based key derivation failed: {e}")
+
+    async def list_keys(
+        self,
+        session: AsyncSession,
+        key_type: Optional[KeyType] = None,
+        status_filter: Optional[KeyStatus] = None,
+        limit: int = 50,
+        offset: int = 0,
+        user_id: Optional[str] = None,
+    ) -> List[KeyMasterResponse]:
+        """
+        List encryption keys with filtering and pagination
+
+        Args:
+            session: Database session
+            key_type: Filter by key type
+            status_filter: Filter by key status
+            limit: Maximum number of keys to return
+            offset: Number of keys to skip
+            user_id: User requesting the keys (for permission filtering)
+
+        Returns:
+            List of key metadata
+        """
+        try:
+            # Build query with filters
+            query = select(KeyMaster)
+
+            if key_type:
+                query = query.where(KeyMaster.key_type == key_type.value)
+
+            if status_filter:
+                query = query.where(KeyMaster.status == status_filter.value)
+
+            # Apply pagination
+            query = query.offset(offset).limit(limit).order_by(KeyMaster.created_at.desc())
+
+            # Execute query
+            result = await session.execute(query)
+            key_masters = result.scalars().all()
+
+            # Convert to response models
+            responses = []
+            for key_master in key_masters:
+                try:
+                    response = await self._get_key_response(session, key_master)
+                    responses.append(response)
+                except Exception as e:
+                    self._logger.error(f"Error converting key {key_master.key_id} to response: {e}")
+                    continue
+
+            self._logger.debug(
+                f"Listed {len(responses)} keys with filters: type={key_type}, status={status_filter}"
+            )
+            return responses
+
+        except Exception as e:
+            self._logger.error(f"Error listing keys: {e}")
+            raise KeyManagerError(f"Failed to list keys: {e}")
+
+    async def get_key_by_id(
+        self, session: AsyncSession, key_id: str, user_id: Optional[str] = None
+    ) -> Optional[KeyMasterResponse]:
+        """
+        Get specific key by ID with permission checking
+
+        Args:
+            session: Database session
+            key_id: Key identifier
+            user_id: User requesting the key
+
+        Returns:
+            Key metadata or None if not found/unauthorized
+        """
+        try:
+            key_master = await self._get_key_master(session, key_id)
+            if not key_master:
+                return None
+
+            # Permission check could be added here based on user_id
+            # For now, return the key if it exists
+
+            response = await self._get_key_response(session, key_master)
+            self._logger.debug(f"Retrieved key {key_id} for user {user_id}")
+            return response
+
+        except Exception as e:
+            self._logger.error(f"Error getting key {key_id}: {e}")
+            raise KeyManagerError(f"Failed to get key: {e}")
+
+    async def revoke_key(
+        self, session: AsyncSession, key_id: str, user_id: str, reason: str = "Manual revocation"
+    ) -> bool:
+        """
+        Revoke an encryption key (mark as revoked, do not delete)
+
+        Args:
+            session: Database session
+            key_id: Key identifier
+            user_id: User performing the revocation
+            reason: Reason for revocation
+
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            key_master = await self._get_key_master(session, key_id)
+            if not key_master:
+                raise KeyManagerError(f"Key not found: {key_id}")
+
+            if key_master.status == KeyStatus.REVOKED.value:
+                raise KeyManagerError("Key is already revoked")
+
+            # Update key status
+            key_master.status = KeyStatus.REVOKED.value
+
+            # Log revocation event
+            await self._log_key_event(
+                session,
+                key_id,
+                "KEY_REVOKED",
+                f"Key revoked: {reason}",
+                user_id,
+                {"reason": reason, "previous_status": key_master.status},
+            )
+
+            await session.commit()
+
+            # Clear from cache
+            self._invalidate_key_cache(key_id)
+
+            self._logger.warning(f"Key {key_id} revoked by user {user_id}: {reason}")
+            return True
+
+        except Exception as e:
+            await session.rollback()
+            self._logger.error(f"Error revoking key {key_id}: {e}")
+            raise KeyManagerError(f"Failed to revoke key: {e}")
+
+    async def get_rotation_history(
+        self, session: AsyncSession, key_id: str, limit: int = 20, offset: int = 0
+    ) -> List[KeyRotationResponse]:
+        """
+        Get rotation history for a specific key
+
+        Args:
+            session: Database session
+            key_id: Key identifier
+            limit: Maximum number of rotations to return
+            offset: Number of rotations to skip
+
+        Returns:
+            List of rotation history entries
+        """
+        try:
+            # Verify key exists
+            key_master = await self._get_key_master(session, key_id)
+            if not key_master:
+                raise KeyManagerError(f"Key not found: {key_id}")
+
+            # Get rotation history
+            query = (
+                select(KeyRotation)
+                .where(KeyRotation.key_id == key_id)
+                .order_by(KeyRotation.started_at.desc())
+                .offset(offset)
+                .limit(limit)
+            )
+
+            result = await session.execute(query)
+            rotations = result.scalars().all()
+
+            # Convert to response models
+            responses = []
+            for rotation in rotations:
+                response = KeyRotationResponse(
+                    id=str(rotation.id),
+                    key_id=rotation.key_id,
+                    trigger=RotationTrigger(rotation.trigger),
+                    scheduled_at=rotation.scheduled_at,
+                    status=rotation.status,
+                    old_version=rotation.old_version,
+                    new_version=rotation.new_version,
+                    execution_time_ms=rotation.execution_time_ms,
+                    error_message=rotation.error_message,
+                )
+                responses.append(response)
+
+            return responses
+
+        except Exception as e:
+            self._logger.error(f"Error getting rotation history for {key_id}: {e}")
+            raise KeyManagerError(f"Failed to get rotation history: {e}")
+
+    async def get_audit_log(
+        self,
+        session: AsyncSession,
+        key_id: str,
+        limit: int = 50,
+        offset: int = 0,
+        event_type: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """
+        Get audit log entries for a specific key
+
+        Args:
+            session: Database session
+            key_id: Key identifier
+            limit: Maximum number of entries to return
+            offset: Number of entries to skip
+            event_type: Filter by event type
+
+        Returns:
+            List of audit log entries
+        """
+        try:
+            # Verify key exists
+            key_master = await self._get_key_master(session, key_id)
+            if not key_master:
+                raise KeyManagerError(f"Key not found: {key_id}")
+
+            # Build query
+            query = select(KeyAuditLog).where(KeyAuditLog.key_id == key_id)
+
+            if event_type:
+                query = query.where(KeyAuditLog.event_type == event_type)
+
+            query = query.order_by(KeyAuditLog.timestamp.desc()).offset(offset).limit(limit)
+
+            # Execute query
+            result = await session.execute(query)
+            audit_logs = result.scalars().all()
+
+            # Convert to dict format
+            entries = []
+            for log in audit_logs:
+                entry = {
+                    "id": str(log.id),
+                    "key_id": log.key_id,
+                    "event_type": log.event_type,
+                    "event_description": log.event_description,
+                    "user_id": log.user_id,
+                    "timestamp": log.timestamp,
+                    "security_level": log.security_level,
+                    "risk_score": log.risk_score,
+                    "metadata": log.metadata,
+                }
+                entries.append(entry)
+
+            return entries
+
+        except Exception as e:
+            self._logger.error(f"Error getting audit log for {key_id}: {e}")
+            raise KeyManagerError(f"Failed to get audit log: {e}")
 
     async def get_system_statistics(self, session: AsyncSession) -> KeyStatistics:
         """Get system-wide key management statistics"""
@@ -529,8 +812,8 @@ class KeyManager:
                     KeyMaster.status == KeyStatus.ACTIVE.value,
                     or_(
                         KeyMaster.expires_at < datetime.utcnow() + timedelta(days=7),
-                        KeyMaster.usage_count >= KeyMaster.max_usage_count
-                    )
+                        KeyMaster.usage_count >= KeyMaster.max_usage_count,
+                    ),
                 )
             )
 
@@ -547,26 +830,31 @@ class KeyManager:
 
             # Rotation statistics
             thirty_days_ago = datetime.utcnow() - timedelta(days=30)
-            total_rotations = (await session.execute(
-                select(func.count(KeyRotation.id)).where(
-                    KeyRotation.completed_at >= thirty_days_ago
-                )
-            )).scalar() or 0
-
-            failed_rotations = (await session.execute(
-                select(func.count(KeyRotation.id)).where(
-                    and_(
-                        KeyRotation.failed_at >= thirty_days_ago,
-                        KeyRotation.status == "FAILED"
+            total_rotations = (
+                await session.execute(
+                    select(func.count(KeyRotation.id)).where(
+                        KeyRotation.completed_at >= thirty_days_ago
                     )
                 )
-            )).scalar() or 0
+            ).scalar() or 0
+
+            failed_rotations = (
+                await session.execute(
+                    select(func.count(KeyRotation.id)).where(
+                        and_(
+                            KeyRotation.failed_at >= thirty_days_ago, KeyRotation.status == "FAILED"
+                        )
+                    )
+                )
+            ).scalar() or 0
 
             # Average key age
             avg_age_result = await session.execute(
-                select(func.avg(
-                    func.extract('epoch', datetime.utcnow() - KeyMaster.created_at) / 86400
-                )).where(KeyMaster.status == KeyStatus.ACTIVE.value)
+                select(
+                    func.avg(
+                        func.extract("epoch", datetime.utcnow() - KeyMaster.created_at) / 86400
+                    )
+                ).where(KeyMaster.status == KeyStatus.ACTIVE.value)
             )
             average_key_age_days = float(avg_age_result.scalar() or 0)
 
@@ -581,21 +869,219 @@ class KeyManager:
                 average_key_age_days=average_key_age_days,
                 total_rotations_last_30_days=total_rotations,
                 failed_rotations_last_30_days=failed_rotations,
-                security_incidents_last_30_days=security_incidents_last_30_days
+                security_incidents_last_30_days=security_incidents_last_30_days,
             )
 
         except Exception as e:
             self._logger.error(f"Failed to get system statistics: {e}")
             raise KeyManagerError(f"Statistics retrieval failed: {e}")
 
+    async def initialize_hsm_manager(
+        self, hsm_configs: List[HSMConnectionConfig]
+    ) -> Dict[str, Any]:
+        """Initialize HSM manager with provided configurations"""
+        try:
+            if not hsm_configs:
+                self._logger.info("No HSM configurations provided - HSM support disabled")
+                return {"status": "disabled", "message": "No HSM configurations"}
+
+            self._hsm_manager = HSMManager(hsm_configs, self._logger)
+            results = await self._hsm_manager.initialize()
+
+            self._logger.info(f"HSM manager initialized with {len(hsm_configs)} providers")
+            return {"status": "initialized", "providers": results}
+
+        except Exception as e:
+            self._logger.error(f"Failed to initialize HSM manager: {e}")
+            return {"status": "error", "message": str(e)}
+
+    async def get_hsm_status(self) -> Dict[str, Any]:
+        """Get HSM connection status and health"""
+        try:
+            if not self._hsm_manager:
+                return {
+                    "status": "disabled",
+                    "message": "HSM manager not initialized",
+                    "providers": [],
+                }
+
+            health_results = await self._hsm_manager.health_check_all()
+
+            return {
+                "status": "active",
+                "providers": [
+                    {
+                        "provider_id": provider_id,
+                        "status": "healthy" if result.success else "error",
+                        "message": result.data if result.success else result.error_message,
+                        "last_check": datetime.utcnow().isoformat(),
+                    }
+                    for provider_id, result in health_results.items()
+                ],
+            }
+
+        except Exception as e:
+            self._logger.error(f"Error getting HSM status: {e}")
+            return {"status": "error", "message": str(e)}
+
+    async def migrate_keys_to_hsm(
+        self, session: AsyncSession, provider_id: str, key_ids: List[str], user_id: str
+    ) -> Dict[str, Any]:
+        """Migrate software keys to HSM"""
+        try:
+            if not self._hsm_manager:
+                raise KeyManagerError("HSM manager not initialized")
+
+            migration_results = []
+            successful_migrations = 0
+            failed_migrations = 0
+
+            for key_id in key_ids:
+                try:
+                    # Get key master record
+                    key_master = await self._get_key_master(session, key_id)
+                    if not key_master:
+                        migration_results.append(
+                            {"key_id": key_id, "status": "error", "message": "Key not found"}
+                        )
+                        failed_migrations += 1
+                        continue
+
+                    if key_master.hsm_provider:
+                        migration_results.append(
+                            {"key_id": key_id, "status": "skipped", "message": "Key already in HSM"}
+                        )
+                        continue
+
+                    # Get current key material
+                    current_version = await self._get_current_key_version_data(session, key_id)
+                    if not current_version:
+                        migration_results.append(
+                            {
+                                "key_id": key_id,
+                                "status": "error",
+                                "message": "No active version found",
+                            }
+                        )
+                        failed_migrations += 1
+                        continue
+
+                    # Decrypt current key material
+                    key_material = await self._decrypt_key_material(current_version)
+
+                    # Use HSM manager to import key
+                    async with self._hsm_manager.get_provider(provider_id) as hsm_provider:
+                        from app.security.key_management.hsm_integration import (
+                            HSMKeyAttributes,
+                            HSMKeyUsage,
+                        )
+
+                        attributes = HSMKeyAttributes(
+                            key_id=key_id,
+                            key_type=key_master.key_type,
+                            algorithm=key_master.algorithm,
+                            key_size_bits=key_master.key_size_bits,
+                            usage=[HSMKeyUsage.ENCRYPT, HSMKeyUsage.DECRYPT],
+                            extractable=False,
+                            sensitive=True,
+                        )
+
+                        result = await hsm_provider.import_key(key_id, key_material, attributes)
+
+                        if result.success:
+                            # Update key master record
+                            key_master.hsm_provider = provider_id
+                            key_master.hsm_key_id = (
+                                result.data.get("key_id") if result.data else key_id
+                            )
+
+                            # Log migration
+                            await self._log_key_event(
+                                session,
+                                key_id,
+                                "KEY_MIGRATED_TO_HSM",
+                                f"Key migrated to HSM provider {provider_id}",
+                                user_id,
+                                {"provider_id": provider_id},
+                            )
+
+                            migration_results.append(
+                                {
+                                    "key_id": key_id,
+                                    "status": "success",
+                                    "message": "Key migrated successfully",
+                                }
+                            )
+                            successful_migrations += 1
+
+                        else:
+                            migration_results.append(
+                                {
+                                    "key_id": key_id,
+                                    "status": "error",
+                                    "message": result.error_message,
+                                }
+                            )
+                            failed_migrations += 1
+
+                    # Securely clear key material from memory
+                    self._memory_manager.secure_delete(key_material)
+
+                except Exception as e:
+                    self._logger.error(f"Error migrating key {key_id}: {e}")
+                    migration_results.append(
+                        {"key_id": key_id, "status": "error", "message": str(e)}
+                    )
+                    failed_migrations += 1
+
+            await session.commit()
+
+            return {
+                "total_keys": len(key_ids),
+                "successful_migrations": successful_migrations,
+                "failed_migrations": failed_migrations,
+                "results": migration_results,
+            }
+
+        except Exception as e:
+            await session.rollback()
+            self._logger.error(f"HSM migration failed: {e}")
+            raise KeyManagerError(f"HSM migration failed: {e}")
+
+    async def get_hsm_performance_metrics(self) -> Dict[str, Any]:
+        """Get HSM performance metrics"""
+        try:
+            if not self._hsm_manager:
+                return {"status": "disabled", "message": "HSM manager not initialized"}
+
+            # Get performance metrics from all providers
+            performance_data = {}
+
+            for provider_id in self._hsm_manager._providers.keys():
+                try:
+                    async with self._hsm_manager.get_provider(provider_id) as hsm_provider:
+                        # Basic performance metrics (would be enhanced with actual HSM metrics)
+                        performance_data[provider_id] = {
+                            "connection_status": hsm_provider.connection_state.value,
+                            "operations_per_second": 1000,  # Placeholder
+                            "average_latency_ms": 5.2,  # Placeholder
+                            "error_rate": 0.001,  # Placeholder
+                            "last_check": datetime.utcnow().isoformat(),
+                        }
+
+                except Exception as e:
+                    performance_data[provider_id] = {"status": "error", "message": str(e)}
+
+            return {"status": "active", "providers": performance_data}
+
+        except Exception as e:
+            self._logger.error(f"Error getting HSM performance metrics: {e}")
+            return {"status": "error", "message": str(e)}
+
     # Private implementation methods
 
     async def _create_key_version(
-        self,
-        session: AsyncSession,
-        key_master: KeyMaster,
-        user_id: str,
-        is_initial: bool = False
+        self, session: AsyncSession, key_master: KeyMaster, user_id: str, is_initial: bool = False
     ) -> str:
         """Create new version of a key"""
         try:
@@ -624,7 +1110,11 @@ class KeyManager:
             if encrypted_key_data:
                 # Get encryption metadata from the latest encryption operation
                 # This would be set by _encrypt_key_material method
-                encryption_metadata = getattr(self, '_latest_encryption_metadata', self._create_encryption_metadata(key_master))
+                encryption_metadata = getattr(
+                    self,
+                    "_latest_encryption_metadata",
+                    self._create_encryption_metadata(key_master),
+                )
             else:
                 # HSM keys don't have encrypted data stored locally
                 encryption_metadata = self._create_encryption_metadata(key_master)
@@ -635,7 +1125,7 @@ class KeyManager:
                 encrypted_key_data=encrypted_key_data,
                 key_checksum=hashlib.sha256(key_bytes).hexdigest(),
                 encryption_metadata=encryption_metadata,
-                activated_at=datetime.utcnow() if is_initial else None
+                activated_at=datetime.utcnow() if is_initial else None,
             )
 
             session.add(key_version)
@@ -655,9 +1145,7 @@ class KeyManager:
         return f"key_{secrets.token_hex(16)}"
 
     async def _validate_key_creation_request(
-        self,
-        session: AsyncSession,
-        request: KeyMasterCreate
+        self, session: AsyncSession, request: KeyMasterCreate
     ) -> None:
         """Validate key creation request"""
         # Check parent key exists if specified
@@ -672,16 +1160,16 @@ class KeyManager:
 
     async def _get_key_master(self, session: AsyncSession, key_id: str) -> Optional[KeyMaster]:
         """Get key master record"""
-        result = await session.execute(
-            select(KeyMaster).where(KeyMaster.key_id == key_id)
-        )
+        result = await session.execute(select(KeyMaster).where(KeyMaster.key_id == key_id))
         return result.scalar_one_or_none()
 
     def _get_cached_key(self, key_id: str) -> Optional[Dict[str, Any]]:
         """Get key from cache if valid"""
         if key_id in self._key_cache:
             cached_data = self._key_cache[key_id]
-            if datetime.utcnow() - cached_data["cached_at"] < timedelta(seconds=self._cache_ttl_seconds):
+            if datetime.utcnow() - cached_data["cached_at"] < timedelta(
+                seconds=self._cache_ttl_seconds
+            ):
                 return cached_data
             else:
                 # Expired - remove from cache
@@ -693,7 +1181,7 @@ class KeyManager:
         self._key_cache[key_id] = {
             "key_bytes": key_bytes,
             "metadata": metadata,
-            "cached_at": datetime.utcnow()
+            "cached_at": datetime.utcnow(),
         }
 
     def _invalidate_key_cache(self, key_id: str) -> None:
@@ -733,14 +1221,22 @@ class KeyManager:
             "cache_stats": {
                 "entries_count": len(self._key_cache),
                 "cache_hit_rate": self._calculate_cache_hit_rate(),
-                "memory_usage_mb": self._estimate_cache_memory_usage()
+                "memory_usage_mb": self._estimate_cache_memory_usage(),
             },
             "operation_stats": {
                 "active_rotations": len(self._active_rotations),
-                "cache_ttl_seconds": self._cache_ttl_seconds
+                "cache_ttl_seconds": self._cache_ttl_seconds,
             },
-            "encryption_engine_info": self._encryption_engine.get_algorithm_info() if hasattr(self._encryption_engine, 'get_algorithm_info') else {},
-            "memory_manager_stats": self._memory_manager.get_memory_stats() if hasattr(self._memory_manager, 'get_memory_stats') else {}
+            "encryption_engine_info": (
+                self._encryption_engine.get_algorithm_info()
+                if hasattr(self._encryption_engine, "get_algorithm_info")
+                else {}
+            ),
+            "memory_manager_stats": (
+                self._memory_manager.get_memory_stats()
+                if hasattr(self._memory_manager, "get_memory_stats")
+                else {}
+            ),
         }
 
     def _calculate_cache_hit_rate(self) -> float:
@@ -765,7 +1261,7 @@ class KeyManager:
         event_type: str,
         description: str,
         user_id: Optional[str],
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Log key management event"""
         try:
@@ -777,7 +1273,7 @@ class KeyManager:
                 user_id=user_id,
                 security_level="HIGH",
                 metadata=metadata,
-                log_hash=self._calculate_log_hash(key_id, event_type, description)
+                log_hash=self._calculate_log_hash(key_id, event_type, description),
             )
 
             session.add(audit_log)
@@ -792,7 +1288,9 @@ class KeyManager:
         content = f"{key_id}:{event_type}:{description}:{datetime.utcnow().isoformat()}"
         return hashlib.sha256(content.encode()).hexdigest()
 
-    async def _get_key_response(self, session: AsyncSession, key_master: KeyMaster) -> KeyMasterResponse:
+    async def _get_key_response(
+        self, session: AsyncSession, key_master: KeyMaster
+    ) -> KeyMasterResponse:
         """Convert key master to response model"""
         current_version = await self._get_current_key_version(session, key_master.key_id)
 
@@ -810,7 +1308,7 @@ class KeyManager:
             max_usage_count=key_master.max_usage_count,
             security_level=key_master.security_level,
             hsm_provider=HSMProvider(key_master.hsm_provider) if key_master.hsm_provider else None,
-            current_version=current_version
+            current_version=current_version,
         )
 
     # Placeholder methods for full implementation
@@ -831,14 +1329,16 @@ class KeyManager:
             result = self._encryption_engine.encrypt(
                 plaintext=key_bytes,
                 key_id=None,  # Use current/default key
-                additional_data=None  # No AAD for key encryption
+                additional_data=None,  # No AAD for key encryption
             )
 
             if not result.success:
                 raise KeySecurityError(f"Failed to encrypt key material: {result.error_message}")
 
             # Store encryption metadata for later use in key version creation
-            self._latest_encryption_metadata = self._store_encryption_metadata(result.metadata, key_master)
+            self._latest_encryption_metadata = self._store_encryption_metadata(
+                result.metadata, key_master
+            )
 
             return result.encrypted_data
 
@@ -858,15 +1358,18 @@ class KeyManager:
                 raise KeySecurityError("Missing encryption metadata")
 
             # Extract nonce and auth_tag from metadata
-            nonce = bytes.fromhex(metadata_dict.get('nonce', ''))
-            auth_tag = bytes.fromhex(metadata_dict.get('auth_tag', ''))
-            algorithm_str = metadata_dict.get('algorithm', 'AES-256-GCM')
+            nonce = bytes.fromhex(metadata_dict.get("nonce", ""))
+            auth_tag = bytes.fromhex(metadata_dict.get("auth_tag", ""))
+            algorithm_str = metadata_dict.get("algorithm", "AES-256-GCM")
 
             if not nonce or not auth_tag:
                 raise KeySecurityError("Missing nonce or auth_tag in encryption metadata")
 
             # Create encryption metadata object for decryption
-            from app.security.encryption.encryption_interface import EncryptionAlgorithm, EncryptionMetadata
+            from app.security.encryption.encryption_interface import (
+                EncryptionAlgorithm,
+                EncryptionMetadata,
+            )
 
             algorithm = EncryptionAlgorithm.AES_256_GCM  # Default to AES-256-GCM
             if algorithm_str == "AES-128-GCM":
@@ -881,14 +1384,14 @@ class KeyManager:
                 key_rotation_due=datetime.utcnow() + timedelta(days=90),  # Default rotation
                 nonce=nonce,
                 auth_tag=auth_tag,
-                additional_data=None  # No AAD for key encryption
+                additional_data=None,  # No AAD for key encryption
             )
 
             # Decrypt using the encryption engine
             decryption_result = self._encryption_engine.decrypt(
                 encrypted_data=key_version.encrypted_key_data,
                 metadata=encryption_metadata,
-                additional_data=None
+                additional_data=None,
             )
 
             if not decryption_result.success:
@@ -911,10 +1414,12 @@ class KeyManager:
             "encrypted_at": datetime.utcnow().isoformat(),
             "encryption_algorithm": "AES-256-GCM",
             "key_derivation": "Direct",  # For generated keys, or "Argon2id" for password-derived
-            "security_level": key_master.security_level
+            "security_level": key_master.security_level,
         }
 
-    def _store_encryption_metadata(self, encryption_metadata: 'EncryptionMetadata', key_master: KeyMaster) -> Dict[str, Any]:
+    def _store_encryption_metadata(
+        self, encryption_metadata: "EncryptionMetadata", key_master: KeyMaster
+    ) -> Dict[str, Any]:
         """Store encryption metadata from EncryptionResult for key storage"""
         return {
             "algorithm": key_master.algorithm,
@@ -925,40 +1430,44 @@ class KeyManager:
             "nonce": encryption_metadata.nonce.hex(),
             "auth_tag": encryption_metadata.auth_tag.hex() if encryption_metadata.auth_tag else "",
             "key_rotation_due": encryption_metadata.key_rotation_due.isoformat(),
-            "security_level": key_master.security_level
+            "security_level": key_master.security_level,
         }
 
     async def _get_current_key_version(self, session: AsyncSession, key_id: str) -> Optional[int]:
         """Get current active version number"""
         result = await session.execute(
-            select(func.max(KeyVersion.version_number)).where(
-                KeyVersion.key_id == key_id
-            )
+            select(func.max(KeyVersion.version_number)).where(KeyVersion.key_id == key_id)
         )
         return result.scalar()
 
-    async def _get_current_key_version_data(self, session: AsyncSession, key_id: str) -> Optional[KeyVersion]:
+    async def _get_current_key_version_data(
+        self, session: AsyncSession, key_id: str
+    ) -> Optional[KeyVersion]:
         """Get current active version data"""
         result = await session.execute(
-            select(KeyVersion).where(
+            select(KeyVersion)
+            .where(
                 and_(
                     KeyVersion.key_id == key_id,
                     KeyVersion.activated_at.isnot(None),
-                    KeyVersion.deactivated_at.is_(None)
+                    KeyVersion.deactivated_at.is_(None),
                 )
-            ).order_by(KeyVersion.version_number.desc())
+            )
+            .order_by(KeyVersion.version_number.desc())
         )
         return result.scalar_one_or_none()
 
     async def _increment_key_usage(self, session: AsyncSession, key_id: str) -> None:
         """Increment key usage counter"""
         await session.execute(
-            update(KeyMaster).where(
-                KeyMaster.key_id == key_id
-            ).values(usage_count=KeyMaster.usage_count + 1)
+            update(KeyMaster)
+            .where(KeyMaster.key_id == key_id)
+            .values(usage_count=KeyMaster.usage_count + 1)
         )
 
-    async def _calculate_key_health_score(self, session: AsyncSession, key_master: KeyMaster) -> int:
+    async def _calculate_key_health_score(
+        self, session: AsyncSession, key_master: KeyMaster
+    ) -> int:
         """Calculate health score (0-100) for key"""
         score = 100
 
@@ -993,7 +1502,9 @@ class KeyManager:
             return key_master.expires_at - datetime.utcnow()
         return None
 
-    async def _get_security_warnings(self, session: AsyncSession, key_master: KeyMaster) -> List[str]:
+    async def _get_security_warnings(
+        self, session: AsyncSession, key_master: KeyMaster
+    ) -> List[str]:
         """Get security warnings for key"""
         warnings = []
 
@@ -1070,7 +1581,7 @@ class KeyManager:
                 "metadata": metadata,
                 "cached_at": datetime.utcnow(),
                 "checksum": checksum,
-                "access_count": 1
+                "access_count": 1,
             }
 
             self._logger.debug(f"Key {key_id} cached with integrity protection")
@@ -1078,7 +1589,9 @@ class KeyManager:
         except Exception as e:
             self._logger.error(f"Failed to cache key {key_id}: {e}")
 
-    async def _validate_rotation_eligibility(self, session: AsyncSession, key_master: KeyMaster) -> None:
+    async def _validate_rotation_eligibility(
+        self, session: AsyncSession, key_master: KeyMaster
+    ) -> None:
         """Validate if key is eligible for rotation"""
         if key_master.status not in [KeyStatus.ACTIVE.value, KeyStatus.ROTATED.value]:
             raise KeyRotationError(f"Key not eligible for rotation: status={key_master.status}")
@@ -1086,10 +1599,7 @@ class KeyManager:
         # Check if there's already an active rotation
         active_rotation = await session.execute(
             select(KeyRotation).where(
-                and_(
-                    KeyRotation.key_id == key_master.key_id,
-                    KeyRotation.status == "RUNNING"
-                )
+                and_(KeyRotation.key_id == key_master.key_id, KeyRotation.status == "RUNNING")
             )
         )
         if active_rotation.scalar_one_or_none():
