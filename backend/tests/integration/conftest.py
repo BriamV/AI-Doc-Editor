@@ -32,8 +32,7 @@ from app.security.encryption.memory_utils import SecureMemoryManager
 from app.security.key_management.key_manager import KeyManager
 from app.security.key_management.hsm_integration import HSMManager
 from app.security.key_management.monitoring import KeyManagementMonitor
-from app.security.transport.tls_config import TLSConfig
-from app.security.transport.security_middleware import SecurityMiddleware
+from app.security.transport.security_middleware import TLSSecurityMiddleware
 from app.routers.key_management import router as key_management_router
 
 
@@ -157,11 +156,13 @@ async def key_manager(db_session, aes_gcm_engine, mock_hsm_manager):
 @pytest.fixture
 def mock_tls_config():
     """Provide mock TLS configuration for testing."""
-    mock_config = Mock(spec=TLSConfig)
-    mock_config.get_ssl_context.return_value = Mock()
-    mock_config.validate_certificate.return_value = True
-    mock_config.get_cipher_suites.return_value = ["TLS_AES_256_GCM_SHA384"]
-    mock_config.is_tls13_enabled.return_value = True
+    mock_config = Mock()
+    mock_config.create_ssl_context.return_value = Mock()
+    mock_config.verify_certificate_pin.return_value = True
+    mock_config.test_connection.return_value = {"status": "success"}
+    mock_ssl_context = Mock()
+    mock_ssl_context.cipher = Mock()
+    mock_config.ssl_context = mock_ssl_context
 
     return mock_config
 
@@ -169,7 +170,9 @@ def mock_tls_config():
 @pytest.fixture
 def security_middleware(mock_tls_config):
     """Provide security middleware for testing."""
-    return SecurityMiddleware(tls_config=mock_tls_config)
+    middleware = TLSSecurityMiddleware(app=Mock(), config=mock_tls_config)
+    middleware.tls_config = mock_tls_config
+    return middleware
 
 
 @pytest.fixture
@@ -178,7 +181,7 @@ def test_app(db_session, security_middleware):
     app = FastAPI(title="T-12 Integration Test API")
 
     # Add security middleware
-    app.add_middleware(SecurityMiddleware, tls_config=security_middleware.tls_config)
+    app.add_middleware(TLSSecurityMiddleware, tls_config=security_middleware.tls_config)
 
     # Include key management router
     app.include_router(key_management_router, prefix="/api/v1")

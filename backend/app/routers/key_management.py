@@ -94,7 +94,7 @@ from app.models.key_management import (
     HSMProvider,
 )
 from app.security.rate_limiter import rate_limit
-from app.security.oauth_security import get_current_user
+from app.services.auth import get_current_user
 from app.models.auth import UserResponse
 
 # Initialize router
@@ -1198,13 +1198,12 @@ async def get_key_audit_log(
 
 
 # Error handlers for this router
+# Note: exception_handler should be added to the FastAPI app instance, not the router
 
-
-@router.exception_handler(KeyManagerError)
-async def key_manager_exception_handler(request, exc: KeyManagerError):
-    """Handle key manager specific errors"""
-    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
-
+# @app.exception_handler(KeyManagerError)
+# async def key_manager_exception_handler(request, exc: KeyManagerError):
+#     """Handle key manager specific errors"""
+#     return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
 
 # Startup/Shutdown handlers would be in main.py
 
