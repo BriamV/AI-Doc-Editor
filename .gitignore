@@ -4,12 +4,23 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+yarn_err.txt
 pnpm-debug.log*
 lerna-debug.log*
 dev-debug.log
 
+# Code quality reports
+eslint-report.json
+*.eslint.json
+eslint-report*.txt
+*.lint-report.*
+
 # Dependency directories
 node_modules/
+.yarn/
+.yarn/cache/
+.yarn/install-state.gz
+!.yarn/patches/
 
 # Build outputs
 dist
@@ -53,4 +64,44 @@ __pycache__/
 # Environment variables
 .vscode
 tasks.json
-tasks/ 
+tasks/
+package-lock.json
+.eslintcache
+app.db
+backend/.venv/
+backend/app.db
+
+# Generated reports (auto-generated during QA/security scans)
+scripts/reports/security-audit.json
+reports/security-audit.json
+yarn-licenses.json
+npm-licenses.json
+
+# Python virtual environment (root level)
+.venv/
+*.coverage
+.coverage
+backend/.coverage
+
+# Test coverage reports
+coverage/
+nyc_output/
+
+# Temporary Claude session files
+.cc-session-start
+.cc-metrics-fail.json
+.cc-refactor-attempts
+venv/
+
+# E2E Test Artifacts
+# Playwright artifacts (primary E2E framework)
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Cypress test artifacts (legacy - deprecated)
+cypress/screenshots/
+cypress/videos/
+
+# Playwright MCP artifacts
+.playwright-mcp/
