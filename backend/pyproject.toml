@@ -28,7 +28,11 @@ markers = [
     "slow: marks tests as slow",
     "unit: unit tests",
     "integration: integration tests",
-    "api: API tests"
+    "api: API tests",
+    "hsm: HSM integration tests",
+    "security: security tests",
+    "performance: performance tests",
+    "enterprise: enterprise features tests"
 ]
 
 [tool.coverage.run]

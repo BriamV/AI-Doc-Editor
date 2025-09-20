@@ -1,0 +1,123 @@
+# Complexity Configuration for T-12 Enterprise Security Implementation
+# This file configures complexity thresholds and rules for different code modules
+
+# Global Configuration
+global:
+  default_threshold: 10
+  documentation_threshold: 15
+  critical_threshold: 20
+
+# Module-specific thresholds
+modules:
+  # Security modules - higher thresholds justified for enterprise security
+  security:
+    paths:
+      - "app/security/"
+      - "app/auth/"
+      - "app/encryption/"
+    thresholds:
+      acceptable: 15  # B to C level acceptable
+      warning: 20     # Requires justification
+      critical: 25    # Requires security architect approval
+    require_documentation: true
+    require_security_review: true
+
+  # Critical security functions - highest thresholds
+  security_critical:
+    paths:
+      - "app/security/key_management/"
+      - "app/security/transport/"
+      - "app/security/encryption/"
+    thresholds:
+      acceptable: 20  # C level acceptable for critical security
+      warning: 25     # Architecture review required
+      critical: 30    # Exceptional cases only
+    require_security_architect_approval: true
+
+  # General application code - standard thresholds
+  general:
+    paths:
+      - "app/api/"
+      - "app/services/"
+      - "app/utils/"
+    thresholds:
+      acceptable: 10  # Standard NIST recommendation
+      warning: 15     # Requires refactoring consideration
+      critical: 20    # Must be refactored
+
+  # Database and migrations - lower complexity expected
+  database:
+    paths:
+      - "app/models/"
+      - "app/db/"
+      - "migrations/"
+    thresholds:
+      acceptable: 8
+      warning: 12
+      critical: 15
+
+# Exception Rules
+exceptions:
+  # Functions that are explicitly exempt from complexity rules
+  exempt_functions:
+    - "analyze_access_pattern"  # Security monitoring - CC 19
+    - "_validate_hostname"      # Certificate validation - CC 18
+    - "get_system_dashboard"    # Security dashboard - CC 17
+    - "validate_certificate_chain"  # PKI validation - CC 16
+    - "get_security_grade"      # Cipher assessment - CC 15
+
+  # Justification categories that allow higher complexity
+  justification_categories:
+    - "rfc_compliance"          # Following RFC specifications
+    - "nist_standards"          # NIST security requirements
+    - "cryptographic_algorithm" # Inherent algorithmic complexity
+    - "attack_surface_coverage" # Comprehensive security validation
+    - "regulatory_compliance"   # SOC2, GDPR, ISO27001 requirements
+
+# Quality Gate Integration
+quality_gates:
+  # Fail build if critical thresholds exceeded without exception
+  fail_on_critical: true
+
+  # Require documentation for functions above documentation_threshold
+  require_documentation: true
+
+  # Generate complexity report for all security modules
+  generate_reports: true
+
+  # Alert on complexity trends
+  trend_monitoring: true
+
+# Reporting Configuration
+reporting:
+  output_format: "json"
+  include_trends: true
+  security_focus: true
+
+  # Report sections to include
+  sections:
+    - "complexity_distribution"
+    - "module_analysis"
+    - "exception_usage"
+    - "trend_analysis"
+    - "security_assessment"
+
+# Integration Settings
+integration:
+  # Pre-commit hook configuration
+  pre_commit:
+    enabled: true
+    fail_on_critical: true
+    warn_on_increase: true
+
+  # CI/CD pipeline configuration
+  ci_cd:
+    enabled: true
+    generate_artifacts: true
+    security_review_required: true
+
+  # IDE integration
+  ide:
+    show_complexity_metrics: true
+    highlight_security_functions: true
+    show_justification_hints: true

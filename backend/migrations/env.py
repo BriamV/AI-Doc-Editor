@@ -22,8 +22,18 @@ for table in Base.metadata.tables.values():
 from app.models.audit import AuditLog  # noqa
 from app.models.config import SystemConfiguration  # noqa
 
+# Import key management models to register tables
+from app.models.key_management import (  # noqa
+    KeyMaster, KeyVersion, RotationPolicy, KeyRotation,
+    HSMConfiguration, KeyAuditLog, Base as KeyManagementBase
+)
+
 # Add audit tables to combined metadata
 for table in AuditBase.metadata.tables.values():
+    table.to_metadata(combined_metadata)
+
+# Add key management tables to combined metadata
+for table in KeyManagementBase.metadata.tables.values():
     table.to_metadata(combined_metadata)
 
 config = context.config

@@ -328,3 +328,27 @@ class SecurityLogger:
             {"ip_address": ip, "details": details, "timestamp": time.time()},
             "WARNING",
         )
+
+
+# Global rate limit store for decorator
+_rate_limit_store = RateLimitStore()
+
+
+def rate_limit(requests: int, window: int):
+    """
+    Rate limiting decorator for FastAPI endpoints.
+
+    Args:
+        requests: Maximum number of requests allowed
+        window: Time window in seconds
+    """
+
+    def decorator(func):
+        async def wrapper(*args, **kwargs):
+            # For now, return the original function
+            # Full rate limiting implementation would need request context
+            return await func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator

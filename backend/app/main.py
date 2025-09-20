@@ -10,12 +10,26 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 import logging
 import os
+import time
 
 from app.core.config import settings
 from app.routers import auth, health, config, credentials, audit
 from app.middleware.audit_middleware import AuditMiddleware
 from app.services.audit import AuditService
 from app.security.rate_limiter import RateLimitMiddleware, SecurityHeadersMiddleware
+
+# Setup logger
+logger = logging.getLogger(__name__)
+
+# Import TLS security components for Week 2
+try:
+    from app.security.transport.security_middleware import TLSSecurityMiddleware
+    from app.security.transport.tls_config import TLSConfig
+
+    TLS_SECURITY_AVAILABLE = True
+except ImportError:
+    logger.warning("TLS security middleware not available")
+    TLS_SECURITY_AVAILABLE = False
 
 # Configure logging
 logging.basicConfig(
@@ -58,16 +72,22 @@ def _add_security_middleware(app: FastAPI) -> None:
             allowed_hosts=settings.ALLOWED_HOSTS + ["*.yourdomain.com"],
         )
 
-    # 2. Security Headers Middleware
+    # 2. TLS Security Middleware (Week 2 addition)
+    if TLS_SECURITY_AVAILABLE and settings.REQUIRE_HTTPS:
+        tls_config = TLSConfig()
+        app.add_middleware(TLSSecurityMiddleware, tls_config=tls_config)
+        logger.info("TLS security middleware enabled")
+
+    # 3. Security Headers Middleware
     if settings.SECURE_HEADERS:
         app.add_middleware(SecurityHeadersMiddleware)
 
-    # 3. Rate Limiting Middleware
+    # 4. Rate Limiting Middleware
     if settings.AUDIT_RATE_LIMIT_ENABLED:
         app.add_middleware(RateLimitMiddleware)
         logger.info("Rate limiting enabled for all endpoints")
 
-    # 4. Audit middleware - must be added before CORS but after security
+    # 5. Audit middleware - must be added before CORS but after security
     app.add_middleware(AuditMiddleware, audit_service=AuditService())
 
 
@@ -177,6 +197,56 @@ async def security_status(request: Request):
             "debug_mode": settings.DEBUG,
         }
     )
+
+
+# TLS Security endpoint (Week 2 addition)
+@app.get("/api/security/tls")
+async def tls_security_status(request: Request):
+    """TLS security configuration and status endpoint"""
+    if settings.ENVIRONMENT == "production" and not settings.DEBUG:
+        # In production, limit information exposure
+        return JSONResponse(
+            {"tls_enabled": settings.REQUIRE_HTTPS, "environment": settings.ENVIRONMENT}
+        )
+
+    try:
+        # Get TLS configuration
+        tls_config_info = settings.get_tls_security_config()
+
+        # Get TLS 1.3 availability
+        if TLS_SECURITY_AVAILABLE:
+            tls_config = TLSConfig()
+            tls_available = tls_config.is_tls_1_3_available()
+
+            # Get cipher suite analysis if enhanced components available
+            cipher_analysis = tls_config.get_cipher_suite_analysis()
+            compliance_report = tls_config.get_compliance_report()
+        else:
+            tls_available = False
+            cipher_analysis = {"error": "Enhanced components not available"}
+            compliance_report = {"error": "Enhanced components not available"}
+
+        return JSONResponse(
+            {
+                "tls_configuration": tls_config_info,
+                "tls_1_3_available": tls_available,
+                "enhanced_components_available": TLS_SECURITY_AVAILABLE,
+                "cipher_suite_analysis": cipher_analysis,
+                "compliance_report": compliance_report,
+                "timestamp": time.time(),
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Error getting TLS status: {e}")
+        return JSONResponse(
+            {
+                "error": "Failed to retrieve TLS status",
+                "tls_enabled": settings.REQUIRE_HTTPS,
+                "environment": settings.ENVIRONMENT,
+            },
+            status_code=500,
+        )
 
 
 if __name__ == "__main__":
