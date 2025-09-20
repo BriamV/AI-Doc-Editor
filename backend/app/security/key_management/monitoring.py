@@ -380,36 +380,112 @@ class AlertManager:
         )
 
     def _evaluate_alert_condition(self, condition: str, metrics: MetricsCollector) -> bool:
-        """Evaluate alert condition against metrics"""
+        """Evaluate alert condition against metrics using safe expression parsing"""
         try:
-            # Simple condition evaluation
-            # In production, this would use a more sophisticated rule engine
+            # Safe condition evaluation without eval()
+            # Supports: ==, !=, >, <, >=, <=
 
+            # Extract variable and value from condition
             if "rotation_failure_rate" in condition:
                 failure_rate = self._calculate_rotation_failure_rate(metrics)
-                return eval(condition.replace("rotation_failure_rate", str(failure_rate)))
+                return self._safe_compare(condition, "rotation_failure_rate", failure_rate)
 
             elif "key_usage_anomaly_score" in condition:
                 anomaly_score = self._calculate_usage_anomaly_score(metrics)
-                return eval(condition.replace("key_usage_anomaly_score", str(anomaly_score)))
+                return self._safe_compare(condition, "key_usage_anomaly_score", anomaly_score)
 
             elif "hsm_connection_status" in condition:
                 status = metrics.get_metric_value("hsm_connection_status") or 0
-                return eval(condition.replace("hsm_connection_status", str(status)))
+                return self._safe_compare(condition, "hsm_connection_status", status)
 
             elif "keys_expiring_soon" in condition:
                 count = metrics.get_metric_value("keys_expiring_soon") or 0
-                return eval(condition.replace("keys_expiring_soon", str(count)))
+                return self._safe_compare(condition, "keys_expiring_soon", count)
 
             elif "scheduler_status" in condition:
                 status = metrics.get_metric_value("scheduler_status") or "unknown"
-                return eval(condition.replace("scheduler_status", f"'{status}'"))
+                return self._safe_compare(condition, "scheduler_status", status)
 
             return False
 
         except Exception as e:
             self._logger.error(f"Error evaluating condition '{condition}': {e}")
             return False
+
+    def _safe_compare(self, condition: str, variable: str, actual_value) -> bool:
+        """Safely compare values without using eval()"""
+        try:
+            # Parse operator and expected value
+            operator, expected_str = self._parse_condition(condition.strip())
+            if not operator:
+                return False
+
+            # Parse expected value
+            expected_value = self._parse_expected_value(expected_str, actual_value)
+
+            # Perform comparison
+            return self._perform_comparison(operator, actual_value, expected_value)
+
+        except Exception as e:
+            self._logger.error(f"Error in safe comparison: {e}")
+            return False
+
+    def _parse_condition(self, condition: str) -> tuple:
+        """Parse condition to extract operator and expected value string"""
+        operators = [(">=", ">="), ("<=", "<="), ("!=", "!="), ("==", "=="), (">", ">"), ("<", "<")]
+
+        for op_str, op in operators:
+            if op_str in condition:
+                return op, condition.split(op_str)[1].strip()
+
+        self._logger.warning(f"Unsupported operator in condition: {condition}")
+        return None, None
+
+    def _parse_expected_value(self, expected_str: str, actual_value):
+        """Parse expected value string to appropriate type"""
+        # Remove quotes for strings
+        if (expected_str.startswith("'") and expected_str.endswith("'")) or (
+            expected_str.startswith('"') and expected_str.endswith('"')
+        ):
+            return expected_str[1:-1]
+
+        # Try numeric conversion
+        try:
+            expected_value = float(expected_str)
+            if isinstance(actual_value, (int, str)) and str(actual_value).isdigit():
+                actual_value = float(actual_value)
+            return expected_value
+        except ValueError:
+            return expected_str
+
+    def _perform_comparison(self, operator: str, actual_value, expected_value) -> bool:
+        """Perform the actual comparison safely"""
+        if operator in ["==", "!="]:
+            return (
+                actual_value == expected_value
+                if operator == "=="
+                else actual_value != expected_value
+            )
+
+        # Numeric operators
+        if operator in [">", ">=", "<", "<="]:
+            if not isinstance(actual_value, (int, float)) or not isinstance(
+                expected_value, (int, float)
+            ):
+                self._logger.warning(
+                    f"Non-numeric comparison: {actual_value} {operator} {expected_value}"
+                )
+                return False
+
+            comparisons = {
+                ">": lambda a, e: a > e,
+                ">=": lambda a, e: a >= e,
+                "<": lambda a, e: a < e,
+                "<=": lambda a, e: a <= e,
+            }
+            return comparisons[operator](actual_value, expected_value)
+
+        return False
 
     def _calculate_rotation_failure_rate(self, metrics: MetricsCollector) -> float:
         """Calculate key rotation failure rate"""

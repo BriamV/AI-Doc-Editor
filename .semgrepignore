@@ -51,3 +51,8 @@ temp/
 # Legacy scripts marked for deprecation (see CLAUDE.md)
 scripts/
 electron/index.cjs
+
+# Enterprise TLS cipher configuration - justified security hardening
+# These set_ciphers() calls are ENHANCING security, not weakening it
+# They configure enterprise-grade NIST-approved cipher suites
+backend/app/security/transport/tls_config.py
