@@ -45,7 +45,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
     "tsc-check": "tsc --noEmit",
-"//-- MERGE PROTECTION SYSTEM --//": "",
+    "//-- MERGE PROTECTION SYSTEM --//": "",
     "merge-safety-full": "node scripts/merge-protection.cjs validate-merge --source HEAD --target main",
     "pre-merge-check": "node scripts/merge-protection.cjs pre-merge-check",
     "install-merge-hooks": "node scripts/install-merge-hooks.cjs install",
