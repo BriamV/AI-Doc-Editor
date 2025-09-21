@@ -57,9 +57,10 @@ yarn run cmd validate-modified   # Code quality check
 ```bash
 # Daily Workflow Commands (Tier 1)
 /task-dev T-XX [complete]       # Task development with context
-/review-complete [--scope]      # Multi-agent code review  
+/review-complete [--scope]      # Multi-agent code review
 /commit-smart                   # Intelligent commits
 /pr-flow [--draft]              # Pull request automation
+/merge-safety [--source --target] # MANDATORY merge protection
 /health-check                   # System diagnostics
 /docs-update [scope]            # Documentation maintenance
 /auto-workflow [scope]          # Context-aware suggestions
@@ -96,6 +97,12 @@ yarn tsc-check        # Frontend TypeScript validation
 yarn python-quality   # Backend Python validation (format + lint + complexity)
 yarn python-format    # Python autofix formatting (Black)
 yarn python-lint      # Python autofix linting (Ruff)
+
+# 🛡️ MERGE PROTECTION (MANDATORY before merges)
+yarn merge-safety-full           # Complete merge safety validation
+yarn pre-merge-check            # Pre-merge safety checks
+yarn validate-merge-full        # Full branch comparison
+yarn install-merge-hooks        # Install git-level protection
 
 # Environment validation & diagnostics (NEW - Unified Multiplatform)
 yarn env-validate     # Comprehensive environment diagnostics
@@ -250,8 +257,37 @@ yarn quality-gate                       # Full quality pipeline
 # ❌ NO extensive documentation - keep compact
 ```
 
+## 🛡️ MERGE PROTECTION SYSTEM
+**CRITICAL: NEVER merge without running these commands first**
+
+```bash
+# 🚨 MANDATORY BEFORE ANY MERGE
+/merge-safety                    # Complete merge protection (REQUIRED)
+yarn merge-safety-full           # Alternative yarn command
+yarn install-merge-hooks         # Install git-level protection (once)
+
+# Emergency validation (if hooks fail)
+yarn pre-merge-check            # Pre-merge safety only
+yarn validate-merge-full        # Comprehensive validation
+yarn branch-audit               # File count audit
+
+# ⚠️ DANGER: Emergency override (NEVER use unless critical)
+# git merge --no-verify <branch>  # BYPASSES ALL PROTECTION
+```
+
+**Protection Features:**
+- 📊 File count comparison (prevents 250+ file loss)
+- 📁 Critical directory structure validation
+- 📄 Essential file existence checks
+- ⚙️ Configuration integrity verification
+- 📋 Development status consistency
+- 🏛️ ADR files presence validation
+- 🔒 Git hooks for native protection
+- 🚫 Automatic merge blocking on failures
+
 ## Quick Reference
 - 📋 **Task details**: `/task-dev T-XX`
 - 🔍 **Codebase analysis**: `/context-analyze`
+- 🛡️ **Merge safety**: `/merge-safety`
 - 🚀 **Full command list**: `/auto-workflow`
 - 📊 **Progress**: `tools/progress-dashboard.sh`

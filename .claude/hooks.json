@@ -2,6 +2,16 @@
   "hooks": {
     "preSubAgent": [
       {
+        "matcher": "pr-flow|commit-smart",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 15,
+            "command": "echo 'Pre-SubAgent: MANDATORY Merge Protection Check (timeout: 15s)...'; current_branch=$(git branch --show-current 2>/dev/null); if [[ \"$current_branch\" == \"main\" || \"$current_branch\" == \"master\" ]]; then echo '🚫 CANNOT CREATE PR FROM MAIN/MASTER BRANCH'; exit 1; fi; if [[ \"$current_branch\" =~ ^(feature|release|hotfix)/ ]]; then echo \"🔒 Running mandatory merge protection for $current_branch...\"; node scripts/merge-protection.cjs pre-merge-check || { echo '🚫 PRE-MERGE CHECK FAILED - BLOCKING OPERATION'; exit 1; }; echo '✅ Pre-merge check passed'; else echo '⚠️ Branch does not follow GitFlow naming convention'; fi"
+          }
+        ]
+      },
+      {
         "matcher": "task-dev|pr-flow|release-prep|commit-smart|adr-create|issue-generate|docs-update|intelligent-qa|multi-agent-orchestrator|review-complete|security-audit|architecture|debug-analyze",
         "hooks": [
           {
@@ -137,6 +147,16 @@
       }
     ],
     "postSubAgent": [
+      {
+        "matcher": "pr-flow",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 20,
+            "command": "echo 'Post-SubAgent: FINAL Merge Safety Validation (timeout: 20s)...'; current_branch=$(git branch --show-current 2>/dev/null); target_branch='main'; echo \"🔍 Final merge validation: $current_branch → $target_branch\"; node scripts/merge-protection.cjs validate-merge --source \"$current_branch\" --target \"$target_branch\" || { echo '😨 CRITICAL: Merge validation failed - PR creation blocked'; exit 1; }; echo '🎉 Merge validation passed - PR safe to create'"
+          }
+        ]
+      },
       {
         "matcher": "task-dev",
         "hooks": [
