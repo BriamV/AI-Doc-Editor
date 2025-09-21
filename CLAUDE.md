@@ -182,7 +182,7 @@ tools/qa-workflow.sh T-XX dev-complete   # Mark development complete
 - **Phase**: R0.WP3 (Seguridad y Auditoría) 
 - **Language**: Spanish docs, English code
 - **Pattern**: T-XX task identification
-- **Status**: docs/DEVELOPMENT-STATUS.md
+- **Status**: docs/project-management/DEVELOPMENT-STATUS.md
 
 ## Sub-Agent Architecture
 - **40+ Global Sub-Agents**: Built-in Claude Code specialists (security-auditor, backend-architect, etc.)
@@ -204,7 +204,7 @@ gh issue view <NUMBER>                                      # WRONG
 # PREFERRED: Direct commands
 yarn security-scan                         # Security scan (audit + semgrep)
 /docs-update                               # Traceability matrix via commands
-docs/adr/ADR-006-security.md              # Security architecture
+docs/architecture/adr/ADR-006-dependency-security-scanning.md  # Security architecture
 
 # ⚠️  LEGACY: Avoid these deprecated patterns
 # yarn run cmd security-scan  <- DEPRECATED
@@ -212,8 +212,8 @@ docs/adr/ADR-006-security.md              # Security architecture
 ```
 
 ## Do Not Touch
-- `docs/Sub Tareas v2.md` - Use tools/task-navigator.sh instead
-- `.claude/commands/legacy/` - Deprecated commands
+- `docs/project-management/Sub Tareas v2.md` - Use tools/task-navigator.sh instead
+- `.claude/commands/archive/` - Archived historical commands
 - `test-*.js` - Temporary debugging files
 - `.claude/hooks.json.backup` - Backup configuration
 - `legacy/` - Migrated Cypress files (see legacy/MIGRATION-README.md)
