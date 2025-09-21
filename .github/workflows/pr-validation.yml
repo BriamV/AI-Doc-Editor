@@ -13,7 +13,7 @@ jobs:
       - name: Check PR title format
         uses: deepakputhraya/action-pr-title@master
         with:
-          regex: '^(feat|fix|docs|style|refactor|test|chore)\(T-\d{2}\): .+'
+          regex: '^(feat|fix|docs|style|refactor|test|chore)\([^)]+\): .+'
           allowed_prefixes: 'feat,fix,docs,style,refactor,test,chore'
           prefix_case_sensitive: false
           min_length: 10
