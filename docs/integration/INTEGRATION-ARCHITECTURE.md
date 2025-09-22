@@ -394,7 +394,7 @@ Code Commit → Tests → Build → Security Scan → Deploy → Monitoring
 - [Error Handling Strategy](./error-handling/)
 - [Security Architecture](./security/)
 - [Monitoring Implementation](./monitoring/)
-- [Frontend Integration](../frontend/docs/api/)
+- [Frontend Integration](../../src/docs/api/)
 - [Backend Integration](../backend/docs/api/)
 - [Architecture ADRs](../architecture/adr/)
 

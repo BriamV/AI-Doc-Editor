@@ -770,9 +770,9 @@ class APIMetrics {
 
 ## 📚 Referencias
 
-- [Frontend API Integration](../../frontend/docs/api/)
+- [Frontend API Integration](../../../src/docs/api/)
 - [Backend API Documentation](../../backend/docs/api/)
-- [State Management Guide](../../frontend/docs/state/)
+- [State Management Guide](../../../src/docs/state/)
 - [Error Handling Strategy](../error-handling/)
 - [Performance Optimization](../../docs/development/guides/performance.md)
 

@@ -70,14 +70,14 @@ Especificaciones de API (Legacy - Ver [Architecture/API](./architecture/api/) pa
 
 ## 💻 Documentación de Implementación
 
-### 🖥️ [Frontend Implementation](../frontend/docs/)
+### 🖥️ [Frontend Implementation](../src/docs/)
 Documentación específica de implementación frontend:
-- **[Components](../frontend/docs/components/)** - Arquitectura y patrones de componentes React
-- **[State Management](../frontend/docs/state/)** - Zustand stores y gestión de estado
-- **[API Integration](../frontend/docs/api/)** - Integración con backend y servicios externos
-- **[Custom Hooks](../frontend/docs/hooks/)** - 18 hooks personalizados y lógica reutilizable
-- **[Architecture](../frontend/docs/architecture/)** - Decisiones arquitectónicas frontend
-- **[Testing](../frontend/docs/testing/)** - Estrategias de testing (Jest, RTL, Playwright)
+- **[Components](../src/docs/components/)** - Arquitectura y patrones de componentes React
+- **[State Management](../src/docs/state/)** - Zustand stores y gestión de estado
+- **[API Integration](../src/docs/api/)** - Integración con backend y servicios externos
+- **[Custom Hooks](../src/docs/hooks/)** - 18 hooks personalizados y lógica reutilizable
+- **[Architecture](../src/docs/architecture/)** - Decisiones arquitectónicas frontend
+- **[Testing](../src/docs/testing/)** - Estrategias de testing (Jest, RTL, Playwright)
 
 ### ⚙️ [Backend Implementation](../backend/docs/)
 Documentación específica de implementación backend:
@@ -99,12 +99,12 @@ Documentación de herramientas de desarrollo:
 - **Planificación**: [Project Management](./project-management/)
 - **Arquitectura**: [Architecture](./architecture/) → [ADRs](./architecture/adr/)
 - **Desarrollo**: [Development](./development/) → [Guides](./development/guides/)
-- **Implementación**: [Frontend](../frontend/docs/) + [Backend](../backend/docs/)
+- **Implementación**: [Frontend](../src/docs/) + [Backend](../backend/docs/)
 - **Histórico**: [Archive](./archive/)
 
 ### Por Tipo de Documento
 - **Guías Estratégicas**: [Development](./development/) + [Setup](./setup/)
-- **Implementación**: [Frontend Docs](../frontend/docs/) + [Backend Docs](../backend/docs/)
+- **Implementación**: [Frontend Docs](../src/docs/) + [Backend Docs](../backend/docs/)
 - **Decisiones**: [Architecture ADRs](./architecture/adr/)
 - **Planes**: [Project Management](./project-management/)
 - **Seguridad**: [Security](./security/)
@@ -112,7 +112,7 @@ Documentación de herramientas de desarrollo:
 - **Configuración**: [Setup](./setup/)
 
 ### Por Stack Tecnológico
-- **Frontend (React)**: [Frontend Implementation](../frontend/docs/)
+- **Frontend (React)**: [Frontend Implementation](../src/docs/)
 - **Backend (Python)**: [Backend Implementation](../backend/docs/)
 - **APIs**: [API Documentation](./architecture/api/) - Especificaciones y contratos completos
 - **Desarrollo**: [Development Tools](../.claude/docs/)

@@ -441,7 +441,7 @@ def log_auth_event(event_type: str, user_id: str, metadata: dict = None):
 
 - [OAuth 2.0 Specification](https://tools.ietf.org/html/rfc6749)
 - [JWT Best Practices](https://tools.ietf.org/html/rfc8725)
-- [Frontend Auth Store](../../frontend/docs/state/auth-store.md)
+- [Frontend Auth Store](../../../src/docs/state/auth-store.md)
 - [Backend Auth API](../../backend/docs/api/auth-endpoints.md)
 - [Security Architecture](../security/authentication-security.md)
 

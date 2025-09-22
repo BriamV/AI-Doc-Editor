@@ -153,7 +153,7 @@ class Document(BaseModel):
 
 ## 📚 Referencias
 
-- [Frontend State Management](../../frontend/docs/state/)
+- [Frontend State Management](../../../src/docs/state/)
 - [Backend API Documentation](../../backend/docs/api/)
 - [Architecture ADRs](../architecture/adr/)
 - [API Contracts](../api-contracts/)

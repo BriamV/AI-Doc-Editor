@@ -736,7 +736,7 @@ interface RateLimitHeaders {
 ## 📚 References
 
 - [Backend API Implementation](../../backend/docs/api/)
-- [Frontend API Integration](../../frontend/docs/api/)
+- [Frontend API Integration](../../../src/docs/api/)
 - [OpenAPI Specification](../api-spec/)
 - [Authentication Flow](../data-flow/authentication-flow.md)
 - [Error Handling Strategy](../error-handling/)

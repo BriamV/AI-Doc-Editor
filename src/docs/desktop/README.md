@@ -115,10 +115,10 @@ The AI Document Editor desktop application provides a native desktop experience 
 ## Cross-References
 
 ### Frontend Integration
-- **React Application**: [/frontend/docs/](../)
-- **Component Architecture**: [/frontend/docs/components/](../components/)
-- **State Management**: [/frontend/docs/state/](../state/)
-- **API Layer**: [/frontend/docs/api/](../api/)
+- **React Application**: [/src/docs/](../)
+- **Component Architecture**: [/src/docs/components/](../components/)
+- **State Management**: [/src/docs/state/](../state/)
+- **API Layer**: [/src/docs/api/](../api/)
 
 ### Backend Integration
 - **Backend API**: [/backend/docs/](../../../backend/docs/)
@@ -156,7 +156,7 @@ The AI Document Editor desktop application provides a native desktop experience 
 
 ### File Organization
 - **Main Process Code**: `/electron/index.cjs`
-- **Desktop Documentation**: `/frontend/docs/desktop/`
+- **Desktop Documentation**: `/src/docs/desktop/`
 - **Build Configuration**: `package.json` scripts section
 - **Icons and Assets**: `/public/` directory
 

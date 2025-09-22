@@ -70,13 +70,13 @@ Monitoreo y troubleshooting de integraciones:
 - [Development Guides](../development/guides/) - Guías de desarrollo
 
 ### Documentación de Implementación
-- [Frontend Implementation](../../frontend/docs/) - Implementación específica frontend
+- [Frontend Implementation](../../src/docs/) - Implementación específica frontend
 - [Backend Implementation](../../backend/docs/) - Implementación específica backend
 - [Claude Code Tools](../../.claude/docs/) - Herramientas de desarrollo
 
 ### Documentación de API
 - [API Specifications](../api-spec/) - Especificaciones OpenAPI
-- [Frontend API Integration](../../frontend/docs/api/) - Integración de APIs en frontend
+- [Frontend API Integration](../../src/docs/api/) - Integración de APIs en frontend
 - [Backend API Documentation](../../backend/docs/api/) - Documentación de APIs backend
 
 ## 🚀 Quick Start para Desarrolladores
@@ -152,7 +152,7 @@ docs/integration/security/api-security.md
 - **Arquitectura General**: [docs/architecture/README.md](../architecture/README.md)
 - **Guías de Desarrollo**: [docs/development/](../development/)
 - **Configuración de Proyecto**: [docs/setup/](../setup/)
-- **Documentación Frontend**: [frontend/docs/](../../frontend/docs/)
+- **Documentación Frontend**: [src/docs/](../../src/docs/)
 - **Documentación Backend**: [backend/docs/](../../backend/docs/)
 
 ---

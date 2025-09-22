@@ -687,7 +687,7 @@ export const ERROR_CODES = {
 
 ## 📚 Referencias
 
-- [Frontend Error Handling](../../frontend/docs/architecture/error-handling.md)
+- [Frontend Error Handling](../../../src/docs/architecture/error-handling.md)
 - [Backend Error Management](../../backend/docs/api/error-responses.md)
 - [Logging Strategy](./logging-strategy.md)
 - [Monitoring Setup](../monitoring/)

@@ -350,7 +350,7 @@ GET /api/v1/health
 - [OpenAPI Specification](https://swagger.io/specification/)
 - [JSON:API](https://jsonapi.org/)
 - [RESTful API Design](https://restfulapi.net/)
-- [Frontend API Integration](../../frontend/docs/api/)
+- [Frontend API Integration](../../../src/docs/api/)
 - [Backend API Documentation](../../backend/docs/api/)
 - [Data Flow Patterns](../data-flow/)
 

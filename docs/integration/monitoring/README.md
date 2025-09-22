@@ -751,7 +751,7 @@ class LogCorrelation {
 - [Performance Monitoring Setup](./performance-monitoring.md)
 - [Error Handling Strategy](../error-handling/)
 - [Integration Testing Guide](./integration-testing.md)
-- [Frontend Monitoring](../../frontend/docs/architecture/monitoring.md)
+- [Frontend Monitoring](../../../src/docs/architecture/monitoring.md)
 - [Backend Monitoring](../../backend/docs/api/monitoring.md)
 
 ---
