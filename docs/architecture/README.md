@@ -34,13 +34,21 @@ Registro formal de decisiones arquitectónicas importantes:
   - Recomendaciones de mejora
   - Roadmap de evolución arquitectónica
 
+### 🔌 [API Documentation](./api/)
+Documentación completa de APIs y contratos del sistema:
+- **[OpenAPI Specification](./api/openapi-specification.yaml)** - Especificación completa de la API FastAPI
+- **[TypeScript Client Documentation](./api/typescript-client-documentation.md)** - Integración y patrones del cliente frontend
+- **[Cross-System Contracts](./api/cross-system-contracts.md)** - Contratos formales entre sistemas
+- **[Versioning Strategy](./api/versioning-strategy.md)** - Estrategia de versionado y evolución de APIs
+
 ## 🧭 Navegación por Tema
 
 ### Por Stack Tecnológico
-- **Frontend**: ADR-007 (Node.js), UX-FLOW.md
-- **Backend**: ADR-001/004 (Pydantic), ADR-005 (API Keys)
+- **Frontend**: ADR-007 (Node.js), UX-FLOW.md, [API Client Documentation](./api/typescript-client-documentation.md)
+- **Backend**: ADR-001/004 (Pydantic), ADR-005 (API Keys), [OpenAPI Specification](./api/openapi-specification.yaml)
 - **DevOps**: ADR-003 (CI/CD), ADR-006 (Security), ADR-008/009 (QA)
 - **Testing**: ADR-010 (Playwright E2E)
+- **APIs**: [API Documentation](./api/) - Contratos, versionado y integración
 
 ### Por Tipo de Decisión
 - **Tecnológicas**: ADR-001, ADR-004, ADR-007, ADR-010
@@ -75,6 +83,8 @@ Registro formal de decisiones arquitectónicas importantes:
 - [Development](../development/) - Implementación de estas decisiones
 - [Security](../security/) - Documentación de seguridad específica
 - [Project Management](../project-management/) - Contexto de negocio
+- [Integration](../integration/) - Contratos de integración entre sistemas
+- [API Documentation](./api/) - Especificaciones completas de APIs
 
 ---
 *Documentación técnica actualizada y organizada*

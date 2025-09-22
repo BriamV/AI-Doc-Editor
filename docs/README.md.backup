@@ -15,7 +15,6 @@ Documentos de gestión de proyecto, planificación y seguimiento:
 ### 🏗️ [Architecture](./architecture/)
 Decisiones arquitectónicas, diseño del sistema y análisis técnico:
 - **[ADRs](./architecture/adr/)** - Architecture Decision Records
-- **[API Documentation](./architecture/api/)** - Especificaciones completas de APIs y contratos
 - **DESIGN_GUIDELINES.md** - Guías de diseño del sistema
 - **ARCH-GAP-ANALYSIS.md** - Análisis de brechas arquitectónicas
 - **UX-FLOW.md** - Flujos de experiencia de usuario
@@ -66,7 +65,7 @@ Certificaciones y actas de tareas completadas
 Matrices de trazabilidad y seguimiento de requisitos
 
 ### 🔌 [API Spec](./api-spec/)
-Especificaciones de API (Legacy - Ver [Architecture/API](./architecture/api/) para documentación actualizada)
+Especificaciones de API
 
 ## 💻 Documentación de Implementación
 
@@ -114,7 +113,6 @@ Documentación de herramientas de desarrollo:
 ### Por Stack Tecnológico
 - **Frontend (React)**: [Frontend Implementation](../frontend/docs/)
 - **Backend (Python)**: [Backend Implementation](../backend/docs/)
-- **APIs**: [API Documentation](./architecture/api/) - Especificaciones y contratos completos
 - **Desarrollo**: [Development Tools](../.claude/docs/)
 - **Arquitectura**: [System Architecture](./architecture/)
 

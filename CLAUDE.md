@@ -116,9 +116,11 @@ yarn env-info         # Detailed platform and tool information
 
 ## Project Structure
 - `src/components/` - React components (Chat, Document, Menu)
-- `src/store/` - Zustand stores (docs, auth, config)  
+- `src/store/` - Zustand stores (docs, auth, config)
 - `backend/` - Python FastAPI backend + .venv
 - `docs/` - Spanish documentation (primary)
+- `frontend/docs/` - **NEW** Frontend implementation docs (React, Zustand, hooks)
+- `backend/docs/` - Backend implementation docs (API, database, security)
 - `.claude/commands/` - 19 production slash commands
 - `tools/` - Task management scripts
 - `scripts/multiplatform.cjs` - **NEW** Unified cross-platform validator
