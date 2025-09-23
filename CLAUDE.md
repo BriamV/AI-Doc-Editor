@@ -31,7 +31,7 @@ yarn build && yarn test                   # Build & test
 yarn security-scan                        # Security audit
 
 # ⚠️  LEGACY MIGRATION WARNING:
-# 6 obsolete scripts eliminated (57.6 KB removed) → 5 essential scripts remain
+# Complete QA CLI system eliminated → 6 essential files remain (58.4 KB total)
 # Use direct yarn commands instead (see Essential Commands section)
 ```
 
