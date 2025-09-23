@@ -458,8 +458,37 @@ Todas las mejoras DEBEN:
 3. **Probarse** antes de documentar
 4. **Eliminar redundancias** y mantener consistencia
 
+## 📋 Documentation Standards
+
+### **README Template Compliance (MANDATORY)**
+Todos los nuevos READMEs DEBEN seguir las plantillas apropiadas:
+
+```bash
+# 1. Evaluar tipo de contenido
+docs/templates/DOCUMENTATION-PLACEMENT-GUIDELINES.md
+
+# 2. Seleccionar plantilla apropiada
+docs/templates/README.md  # Ver 6 categorías disponibles
+
+# 3. Validar cumplimiento antes de commit
+docs/templates/README-VALIDATION-CHECKLIST.md
+```
+
+### **Placement Guidelines**
+- **Implementación**: Documentación cerca del código (Conway's Law)
+- **Estratégica**: Documentación centralizada en `docs/`
+- **Usuario**: Bilingual content (Spanish user-facing, English technical)
+- **Navegación**: 4-tier table required para docs principales
+
+### **Quality Gates**
+✅ **Template compliance**: 90%+ adherencia
+✅ **Cross-references**: 95%+ enlaces funcionales
+✅ **Conway's Law**: Implementation docs ≤2 dirs from code
+✅ **Bilingual standards**: Spanish primary, English technical
+
 Para mayor información:
 - **Project Setup**: `CLAUDE.md`
 - **Work Plan**: `docs/WORK-PLAN v5.md`
 - **Development Status**: `docs/DEVELOPMENT-STATUS.md`
 - **Task Management**: `tools/` directory scripts
+- **Documentation Templates**: `docs/templates/README.md`

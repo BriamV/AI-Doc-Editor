@@ -56,7 +56,11 @@ Reportes de proyecto y análisis:
 - **[Archive](./reports/archive/)** - Reportes históricos y completados
 
 ### 📄 [Templates](./templates/)
-Plantillas para documentación:
+Plantillas y guías para documentación consistente:
+- **[README Templates](./templates/README.md)** - 6 plantillas especializadas para READMEs (Usuario, Infraestructura, Hub, Implementación, Arquitectura, Claude Code)
+- **[Implementation Quick Guide](./templates/IMPLEMENTATION-QUICK-GUIDE.md)** - Guía rápida de implementación paso a paso
+- **[Documentation Placement Guidelines](./templates/DOCUMENTATION-PLACEMENT-GUIDELINES.md)** - Guías completas para ubicación de documentación
+- **[Validation Checklist](./templates/README-VALIDATION-CHECKLIST.md)** - Lista de verificación para calidad de documentación
 - **ACTA-CERTIFICACION.md** - Plantilla para actas de certificación
 
 ### 🏆 [Certifications](./certifications/)
@@ -93,6 +97,28 @@ Documentación de herramientas de desarrollo:
 - **Commands** - Comandos personalizados de Claude Code
 - **Automation** - Workflows automatizados y validaciones
 
+## 📐 Guías de Documentación
+
+### 🎯 Uso de Plantillas
+**Para crear nueva documentación**:
+1. **Evaluar tipo de contenido**: Consultar [Placement Guidelines](./templates/DOCUMENTATION-PLACEMENT-GUIDELINES.md)
+2. **Seleccionar plantilla apropiada**: Ver [Template Selection Guide](./templates/README.md#usage-guidelines)
+3. **Aplicar plantilla**: Seguir estructura y directrices específicas
+4. **Validar calidad**: Usar [Validation Checklist](./templates/README-VALIDATION-CHECKLIST.md)
+
+### 📋 Plantillas Disponibles
+- **Usuario Final**: README principal de aplicación con navegación 4-tier
+- **Infraestructura Técnica**: Herramientas backend y utilidades
+- **Hub de Documentación**: Navegación central y organización
+- **Guía de Implementación**: Documentación próxima al código (Conway's Law)
+- **Referencia de Arquitectura**: ADRs y decisiones formales
+- **Integración Claude Code**: Comandos y automatización
+
+### 🔄 Estándares de Mantenimiento
+- **Revisión trimestral**: Validación de referencias cruzadas
+- **Actualización por cambios**: Arquitectura, workflow, estructura de equipo
+- **Métricas de calidad**: 95%+ enlaces funcionales, 90%+ cumplimiento de plantillas
+
 ## 🧭 Navegación Rápida
 
 ### Por Fase de Desarrollo
@@ -110,6 +136,7 @@ Documentación de herramientas de desarrollo:
 - **Seguridad**: [Security](./security/)
 - **Reportes**: [Reports](./reports/)
 - **Configuración**: [Setup](./setup/)
+- **Plantillas y Estándares**: [Templates](./templates/) + [Validation Guides](./templates/README-VALIDATION-CHECKLIST.md)
 
 ### Por Stack Tecnológico
 - **Frontend (React)**: [Frontend Implementation](../src/docs/)

@@ -139,6 +139,7 @@ semgrep, git-secrets, yarn audit         # Security scanning
 
 # Documentation
 markdownlint, yamlfix, yamllint, spectral # Docs quality
+# Template validation (README consistency + placement guidelines)
 
 # Configuration & Shell
 taplo, shellcheck, shfmt                 # Config + shell scripts
@@ -154,7 +155,7 @@ prettier (JSON/XML/CSS/HTML)             # Universal formatting
 - **Auto-formatting**: Real-time format on Edit/Write/MultiEdit
   - TypeScript/JavaScript: ESLint + Prettier
   - Python: Black + Ruff (autofix)
-  - Docs: markdownlint + yamlfix
+  - Docs: markdownlint + yamlfix + template validation
   - Shell: shellcheck + shfmt
   - Config: taplo (TOML) + prettier (JSON/XML/CSS)
 - **Design Metrics**: Complexity (CC≤15) + LOC (≤300) validation
@@ -252,6 +253,40 @@ yarn quality-gate                       # Full quality pipeline
 # ✅ ESPECÍFICO: Use placeholders (<NUMBER>, <FILE>)
 # ❌ NO extensive documentation - keep compact
 ```
+
+## 📋 Documentation Standards & Templates
+
+### **Template Usage (REQUIRED for README creation)**
+```bash
+# 1. Evaluate content type and placement
+docs/templates/DOCUMENTATION-PLACEMENT-GUIDELINES.md
+
+# 2. Select appropriate template from 6 categories:
+# - User-Facing Application (main project entry)
+# - Technical Infrastructure (tools/scripts)
+# - Documentation Hub (navigation/organization)
+# - Implementation Guide (code-proximate docs)
+# - Architecture Reference (ADRs/formal decisions)
+# - Claude Code Integration (commands/automation)
+
+# 3. Validate compliance before committing
+docs/templates/README-VALIDATION-CHECKLIST.md
+```
+
+### **Quality Requirements**
+✅ **MANDATORY**: Template compliance for all new READMEs
+✅ **MANDATORY**: Conway's Law compliance (implementation docs ≤2 dirs from code)
+✅ **MANDATORY**: 4-tier navigation table (user-facing docs)
+✅ **MANDATORY**: Bilingual standards (Spanish user-facing, English technical)
+✅ **VALIDATION**: 95%+ working cross-references, 90%+ template adherence
+
+### **Quick Template Selection**
+- **Main project README**: User-Facing Application template
+- **Tools/scripts dirs**: Technical Infrastructure template
+- **docs/ navigation**: Documentation Hub template
+- **src/docs/ or backend/docs/**: Implementation Guide template
+- **ADR collections**: Architecture Reference template
+- **.claude/ directories**: Claude Code Integration template
 
 ## 🛡️ MERGE PROTECTION SYSTEM
 **CRITICAL: NEVER merge without running these commands first**
