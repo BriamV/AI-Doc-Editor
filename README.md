@@ -1,5 +1,11 @@
 # <p align="center">AI Doc Editor</p>
 
+## ⚠️ Status Notice
+
+**Current Status**: Production-ready AI-powered document editor with comprehensive development toolchain
+**Architecture**: React 18 + TypeScript + Python FastAPI + AI integration
+**Role**: User-facing application with multi-tier documentation and infrastructure support
+
 <p align="center">
   <img src="https://github.com/BriamV/AI-Doc-Editor/raw/main/public/icon-rounded.png" width="100" alt="AI Doc Editor Logo">
 </p>
@@ -18,6 +24,20 @@
 ## 🔍 Visión General
 
 Este proyecto es un fork mejorado de [AI Text Editor](https://github.com/darrylschaefer/ai-text-editor), diseñado específicamente para la generación y edición de documentos.
+
+### 📚 Documentation Navigation (4-Tier Architecture)
+
+| Tier | Location | Purpose | Target Audience |
+|------|----------|---------|----------------|
+| **Tier 1** | [Root README](README.md) | **User-facing guide and installation** | **End users and contributors** |
+| **Tier 2** | [Frontend Docs](src/docs/) | React implementation details | Frontend developers |
+| **Tier 3** | [Backend Docs](backend/docs/) | API and database architecture | Backend developers |
+| **Tier 4** | [Infrastructure](scripts/README.md) | Cross-platform utilities | DevOps and infrastructure |
+
+**Cross-References:**
+- **[Development Guide](CLAUDE.md)** - Comprehensive developer setup and workflow
+- **[Architecture Documentation](docs/architecture/)** - Technical design and ADRs
+- **[Contributing Guide](docs/CONTRIBUTING.md)** - Contribution guidelines and standards
 
 ## 🚀 Características Principales
 
@@ -58,7 +78,7 @@ Este proyecto es un fork mejorado de [AI Text Editor](https://github.com/darryls
 
 4. Inicia el servidor de desarrollo:
    ```bash
-   yarn run cmd dev
+   yarn dev
    ```
 
 ## 🚀 Uso
@@ -85,13 +105,16 @@ Este proyecto está bajo la [Licencia MIT](LICENSE).
 
 ### Arquitectura
 
-- **Frontend**: React 18 + TypeScript + Monaco Editor
-- **Backend**: FastAPI 3.11
+- **Frontend**: React 18 + TypeScript + Vite + TailwindCSS + Monaco Editor
+- **Backend**: Python FastAPI + SQLAlchemy + Alembic
+- **AI Integration**: OpenAI GPT-4o + embeddings + LangChain + RAG
+- **Desktop**: Electron + auto-updater
+- **State Management**: Zustand + IndexedDB encryption
 - **Base de Datos**: SQLite (datos de usuario) + Chroma (vector store)
 - **Autenticación**: OAuth 2.0 (Google/Microsoft)
-- **IA**: OpenAI GPT-4o / GPT-4o-mini con ventana de contexto de 128k tokens
-- **Automatización**: Scripts Node.js modulares para desarrollo, pruebas, construcción y despliegue
-- **Gobernanza**: Validación de API y generación de matrices de trazabilidad en múltiples formatos (XLSX, JSON, Markdown)
+- **Testing**: Playwright E2E + Jest unit tests
+- **Quality Tools**: 40+ integrated tools (ESLint, Prettier, Black, Ruff, Semgrep, etc.)
+- **Infrastructure**: Cross-platform scripts, merge protection, automated hooks
 
 ### Seguridad
 
@@ -121,7 +144,7 @@ cp .env.example .env
 # Editar .env con tus configuraciones
 
 # Iniciar con Docker Compose
-yarn run cmd docker-prod
+yarn docker:prod
 ```
 
 ## 📈 Métricas y Monitoreo
@@ -151,35 +174,43 @@ Sí, el sistema está diseñado para cumplir con GDPR, HIPAA e ISO 27001, con ca
 
 Consulta nuestra [guía de contribución](docs/CONTRIBUTING.md) para más detalles sobre cómo contribuir con código, reportar errores o sugerir mejoras.
 
-### ¿Cómo utilizo los scripts de desarrollo?
+### ¿Cómo utilizo los comandos de desarrollo?
 
-El proyecto utiliza un sistema modular de scripts Node.js para todas las tareas de desarrollo, pruebas, construcción y despliegue. Consulta la [documentación de scripts](scripts/README.md) para ver todos los comandos disponibles.
+El proyecto utiliza comandos directos de yarn y comandos slash para desarrollo. Consulta la [documentación de desarrollo](CLAUDE.md) para ver todos los comandos disponibles.
 
-Ejemplos de comandos comunes:
+**Comandos Esenciales:**
 
 ```bash
-# Iniciar servidor de desarrollo
-yarn run cmd dev
+# Desarrollo
+yarn dev                          # Iniciar servidor de desarrollo
+yarn build                        # Construir para producción
+yarn test                         # Ejecutar todas las pruebas
+yarn test:e2e                     # Pruebas E2E con Playwright
 
-# Ejecutar pruebas
-yarn run cmd test
+# Calidad de Código
+yarn lint                         # Validar frontend
+yarn tsc-check                    # Verificar TypeScript
+yarn python-quality               # Validar backend Python
+yarn quality-gate                 # Pipeline completo de calidad
+yarn security-scan                # Auditoría de seguridad
 
-# Verificar calidad del código
-yarn run cmd qa-gate
+# Protección de Fusiones (OBLIGATORIO antes de merge)
+yarn merge-safety-full            # Validación completa de seguridad
+yarn install-merge-hooks          # Instalar protección git
 
-# Construir para producción
-yarn run cmd build
+# Documentación y Trazabilidad
+# Usar comandos slash en lugar de scripts:
+/docs-update                      # Actualizar documentación y matrices
+/health-check                     # Diagnóstico del sistema
+/context-analyze                  # Análisis del proyecto
+```
 
-# Generar matriz de trazabilidad en todos los formatos
-yarn run cmd traceability
-
-# Generar matriz de trazabilidad en formato específico
-yarn run cmd traceability --format=xlsx  # Solo Excel
-yarn run cmd traceability --format=json  # Solo JSON
-yarn run cmd traceability --format=md    # Solo Markdown
-
-# Ver todos los comandos disponibles
-yarn run cmd help
+**Comandos Slash Avanzados:**
+```bash
+/task-dev T-XX                    # Desarrollo de tareas con contexto
+/review-complete --scope T-XX     # Revisión multi-agente
+/commit-smart                     # Commits inteligentes
+/merge-safety                     # Protección de fusiones
 ```
 
 ## 🤝 Agradecimientos
