@@ -1,9 +1,90 @@
-# AI-Doc-Editor Scripts
+# AI-Doc-Editor Scripts (LEGACY - DEPRECATED)
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
+🚨 **CRITICAL DEPRECATION WARNING**: This scripts directory is FULLY DEPRECATED and scheduled for removal.
+
+## 🔄 **MIGRATION MANDATORY** - Use These Alternatives:
+
+### 🎯 **PREFERRED: Direct Yarn Commands (Tier 1)**
+```bash
+yarn dev|build|test|security-scan      # Core development commands
+yarn lint|format|tsc-check            # Quality commands
+yarn python-quality|python-format     # Backend Python validation
+```
+
+### ⚡ **PREFERRED: Slash Commands (Tier 2)**
+```bash
+/health-check          # System validation (replaces validate-*)
+/commit-smart          # Intelligent commits
+/review-complete       # Multi-agent code review
+/merge-safety          # Pre-merge validation (replaces qa-gate)
+/task-dev T-XX         # Task development workflow
+```
+
+### 🛡️ **AUTOMATED: Hooks System (Tier 3)**
+- **Location**: `.claude/hooks.json`
+- **Performance**: 54% faster (70s vs 152s)
+- **Coverage**: 40+ tools integrated automatically
+- **Trigger**: Auto-runs on Edit/Write/MultiEdit operations
+
+### 📋 **BASH TOOLS: Still Functional (Tier 4)**
+```bash
+tools/progress-dashboard.sh            # Project progress tracking
+tools/task-navigator.sh T-XX           # Task navigation
+tools/validate-dod.sh T-XX             # Definition of Done validation
+```
+
+[![Build Status](https://img.shields.io/badge/build-deprecated-orange.svg)]()
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)]()
 
-## 🌟 Características
+## 📚 **DOCUMENTATION NAVIGATION** - 4-Tier Architecture
+
+### 🎯 **WHERE TO FIND CURRENT DOCUMENTATION**
+
+| Documentation Type | Location | Purpose |
+|-------------------|----------|---------|
+| **Implementation Docs** | `src/docs/` | Frontend React/TypeScript patterns |
+| **Implementation Docs** | `backend/docs/` | Backend API/database architecture |
+| **Strategic Docs** | `docs/` | Project planning & architecture |
+| **Tool Integration** | `tools/README.md` | Bash scripts & task management |
+
+### 🔄 **COMPLETE MIGRATION REFERENCE**
+
+#### ✅ **DIRECT COMMANDS** (Use These Instead)
+```bash
+# Core Development (Tier 1)
+yarn dev|build|test|security-scan      # Replaces: yarn run cmd dev/build/test
+yarn lint|format|tsc-check            # Replaces: yarn run cmd lint/format
+yarn python-quality                    # Replaces: yarn run cmd validate-backend
+
+# Quality Gates (Automated)
+.claude/hooks.json                     # Replaces: yarn run cmd qa-gate
+/merge-safety                          # Replaces: yarn run cmd validate-all
+```
+
+#### ⚡ **SLASH COMMANDS** (Workflow Automation)
+```bash
+/health-check          # Replaces: yarn run cmd validate-*
+/commit-smart          # Replaces: manual commit workflows
+/review-complete       # Replaces: manual code review prep
+/merge-safety          # Replaces: yarn run cmd qa-gate
+/task-dev T-XX         # Replaces: manual task setup
+```
+
+#### 🛡️ **AUTOMATED HOOKS** (Background Quality)
+- **Location**: `.claude/hooks.json`
+- **Performance**: 54% faster (70s vs 152s)
+- **Coverage**: 40+ tools integrated automatically
+- **Replaces**: All manual quality commands
+
+### Migration Timeline
+- **Phase 1**: Direct yarn commands available ✅
+- **Phase 2**: Hooks integration complete ✅
+- **Phase 3**: Scripts marked deprecated (current)
+- **Phase 4**: Scripts removal (planned)
+
+## 🌟 Legacy Características
+
+⚠️ **Note**: The following information is for historical reference. New development should use the alternatives above.
 
 Este directorio contiene el sistema de scripts modular que reemplaza completamente al Makefile, proporcionando:
 
@@ -36,29 +117,48 @@ scripts/
 └── cli.cjs             # Punto de entrada principal
 ```
 
-## 🚀 Uso
+## 🚀 Uso (DEPRECATED)
 
-Todos los comandos se ejecutan a través del script CLI principal:
-
-```bash
-yarn run cmd <comando> [opciones]
-```
-
-Para ver la lista completa de comandos disponibles:
+⚠️ **DEPRECATED**: The following CLI pattern is being phased out:
 
 ```bash
-yarn run cmd help
+# DEPRECATED - DO NOT USE
+yarn run cmd <comando> [opciones]  # ❌ Old pattern
+yarn run cmd help                  # ❌ Old help system
 ```
 
-Para ver ayuda específica sobre un comando:
+**Use instead**:
+```bash
+# RECOMMENDED - Direct commands
+yarn <comando>                     # ✅ New pattern
+yarn --help                        # ✅ Built-in help
+/auto-workflow                     # ✅ Context-aware suggestions
+```
+
+### Legacy Usage (Historical Reference Only)
+
+⚠️ **For migration purposes only**. The following commands still work but are deprecated:
 
 ```bash
-yarn run cmd help <comando>
+yarn run cmd <comando> [opciones]  # Legacy CLI entry point
+yarn run cmd help                  # Legacy help system
+yarn run cmd help <comando>        # Legacy command-specific help
 ```
 
-## 📋 Comandos Disponibles
+## 📋 Comandos Disponibles (LEGACY)
 
-### Desarrollo
+⚠️ **All commands listed below are DEPRECATED**. Use direct yarn commands or Claude Code slash commands instead.
+
+**Quick Migration Reference**:
+| Legacy Command | Replacement | Status |
+|---------------|-------------|---------|
+| `yarn run cmd dev` | `yarn dev` | ✅ Available |
+| `yarn run cmd build` | `yarn build` | ✅ Available |
+| `yarn run cmd test` | `yarn test` | ✅ Available |
+| `yarn run cmd qa-gate` | `.claude/hooks.json` | ✅ Automated |
+| `yarn run cmd validate-*` | `/health-check` | ✅ Enhanced |
+
+### Desarrollo (Legacy)
 
 - `dev`: Inicia el servidor de desarrollo
 - `build`: Construye la aplicación para producción
