@@ -120,7 +120,9 @@ yarn env-info         # Detailed platform and tool information
 - `backend/` - Python FastAPI backend + .venv
 - `docs/` - Spanish documentation (primary)
 - `src/docs/` - **NEW** Frontend implementation docs (React, Zustand, hooks)
+- `src/docs/ai/` - **NEW** AI implementation docs (frontend patterns, integration)
 - `backend/docs/` - Backend implementation docs (API, database, security)
+- `docs/architecture/ai/` - **NEW** AI architecture docs (strategy, audit, implementation)
 - `.claude/commands/` - 19 production slash commands
 - `tools/` - Task management scripts
 - `scripts/` - **STREAMLINED** 5 essential scripts (55% reduction: 6 obsolete eliminated)

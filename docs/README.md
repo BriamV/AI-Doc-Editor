@@ -16,6 +16,7 @@ Documentos de gestión de proyecto, planificación y seguimiento:
 Decisiones arquitectónicas, diseño del sistema y análisis técnico:
 - **[ADRs](./architecture/adr/)** - Architecture Decision Records
 - **[API Documentation](./architecture/api/)** - Especificaciones completas de APIs y contratos
+- **[AI Architecture](./architecture/ai/)** - Arquitectura de IA, integración GPT-4o y LangChain
 - **DESIGN_GUIDELINES.md** - Guías de diseño del sistema
 - **ARCH-GAP-ANALYSIS.md** - Análisis de brechas arquitectónicas
 - **UX-FLOW.md** - Flujos de experiencia de usuario
@@ -79,6 +80,7 @@ Documentación específica de implementación frontend:
 - **[Components](../src/docs/components/)** - Arquitectura y patrones de componentes React
 - **[State Management](../src/docs/state/)** - Zustand stores y gestión de estado
 - **[API Integration](../src/docs/api/)** - Integración con backend y servicios externos
+- **[AI Integration](../src/docs/ai/)** - Implementación de IA frontend, patrones y integración
 - **[Custom Hooks](../src/docs/hooks/)** - 18 hooks personalizados y lógica reutilizable
 - **[Architecture](../src/docs/architecture/)** - Decisiones arquitectónicas frontend
 - **[Testing](../src/docs/testing/)** - Estrategias de testing (Jest, RTL, Playwright)
@@ -142,6 +144,7 @@ Documentación de herramientas de desarrollo:
 - **Frontend (React)**: [Frontend Implementation](../src/docs/)
 - **Backend (Python)**: [Backend Implementation](../backend/docs/)
 - **APIs**: [API Documentation](./architecture/api/) - Especificaciones y contratos completos
+- **AI (GPT-4o + LangChain)**: [AI Architecture](./architecture/ai/) + [AI Implementation](../src/docs/ai/)
 - **Desarrollo**: [Development Tools](../.claude/docs/)
 - **Arquitectura**: [System Architecture](./architecture/)
 

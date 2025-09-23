@@ -28,6 +28,12 @@ This directory contains implementation-specific documentation for the AI Documen
 - State management integration via hooks
 - Reusable business logic encapsulation
 
+### 📁 `ai/`
+- AI integration implementation documentation
+- Frontend AI patterns and best practices
+- GPT-4o and LangChain integration strategies
+- AI state management and data flow
+
 ### 📁 `architecture/`
 - Frontend-specific architectural decisions (ADRs)
 - Component architecture and design patterns
@@ -59,6 +65,7 @@ This directory contains implementation-specific documentation for the AI Documen
 - **Component Development**: See `components/` for React patterns
 - **State Management**: See `state/` for Zustand implementation
 - **API Integration**: See `api/` for backend communication
+- **AI Integration**: See `ai/` for AI implementation patterns
 - **Custom Logic**: See `hooks/` for reusable business logic
 - **Desktop Application**: See `desktop/` for Electron implementation
 
@@ -135,8 +142,9 @@ This directory contains implementation-specific documentation for the AI Documen
 2. **For Component Work**: Reference `components/` for React patterns
 3. **For State Management**: Use `state/` for Zustand implementation
 4. **For API Integration**: Check `api/` for backend communication
-5. **For Testing**: Use `testing/` for comprehensive test procedures
-6. **For Desktop Development**: Use `desktop/` for Electron implementation
+5. **For AI Integration**: Use `ai/` for AI implementation and integration patterns
+6. **For Testing**: Use `testing/` for comprehensive test procedures
+7. **For Desktop Development**: Use `desktop/` for Electron implementation
 
 ## Key Statistics
 

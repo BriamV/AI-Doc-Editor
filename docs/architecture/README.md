@@ -41,11 +41,19 @@ Documentación completa de APIs y contratos del sistema:
 - **[Cross-System Contracts](./api/cross-system-contracts.md)** - Contratos formales entre sistemas
 - **[Versioning Strategy](./api/versioning-strategy.md)** - Estrategia de versionado y evolución de APIs
 
+### 🤖 [AI Architecture](./ai/)
+Arquitectura de inteligencia artificial y documentación estratégica:
+- **[README.md](./ai/README.md)** - Visión general de la arquitectura de IA
+- **[Current Implementation](./ai/current-implementation.md)** - Estado actual de la implementación de IA
+- **[Documentation Strategy](./ai/documentation-strategy.md)** - Estrategia de documentación para componentes de IA
+- **[Implementation Audit](./ai/implementation-audit.md)** - Auditoría y análisis de la implementación actual
+
 ## 🧭 Navegación por Tema
 
 ### Por Stack Tecnológico
 - **Frontend**: ADR-007 (Node.js), UX-FLOW.md, [API Client Documentation](./api/typescript-client-documentation.md)
 - **Backend**: ADR-001/004 (Pydantic), ADR-005 (API Keys), [OpenAPI Specification](./api/openapi-specification.yaml)
+- **AI**: [AI Architecture](./ai/) - Arquitectura GPT-4o, LangChain, estrategia de IA
 - **DevOps**: ADR-003 (CI/CD), ADR-006 (Security), ADR-008/009 (QA)
 - **Testing**: ADR-010 (Playwright E2E)
 - **APIs**: [API Documentation](./api/) - Contratos, versionado y integración
@@ -85,6 +93,7 @@ Documentación completa de APIs y contratos del sistema:
 - [Project Management](../project-management/) - Contexto de negocio
 - [Integration](../integration/) - Contratos de integración entre sistemas
 - [API Documentation](./api/) - Especificaciones completas de APIs
+- [AI Implementation](../../src/docs/ai/) - Implementación frontend de IA
 
 ---
 *Documentación técnica actualizada y organizada*
