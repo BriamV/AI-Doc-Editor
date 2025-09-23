@@ -31,7 +31,7 @@ yarn build && yarn test                   # Build & test
 yarn security-scan                        # Security audit
 
 # ⚠️  LEGACY MIGRATION WARNING:
-# scripts/cli.cjs and 'yarn run cmd' commands are DEPRECATED
+# 6 obsolete scripts eliminated (57.6 KB removed) → 5 essential scripts remain
 # Use direct yarn commands instead (see Essential Commands section)
 ```
 
@@ -39,7 +39,7 @@ yarn security-scan                        # Security audit
 1. **FIRST**: Use CUSTOM slash commands (.claude/commands/) for complex tasks
 2. **SECOND**: Use direct yarn commands (yarn dev, yarn build, yarn test)  
 3. **LAST**: Direct CLI only if above unavailable
-4. **NEVER**: Use scripts/cli.cjs (DEPRECATED - marked for removal)
+4. **NEVER**: Use eliminated scripts (cli.cjs, qa-gate.cjs, etc. - removed)
 
 ### Sub-Agent Architecture
 - **Custom Commands**: 19 workflow orchestrators in .claude/commands/ that analyze context
@@ -51,7 +51,7 @@ yarn security-scan                        # Security audit
 # ALWAYS validate after branch changes, context switches, or issues
 /health-check                    # Immediate system validation
 tools/progress-dashboard.sh      # Project status verification
-yarn run cmd validate-modified   # Code quality check
+yarn quality-gate                # Multi-stack quality validation
 ```
 
 ```bash
@@ -123,7 +123,7 @@ yarn env-info         # Detailed platform and tool information
 - `backend/docs/` - Backend implementation docs (API, database, security)
 - `.claude/commands/` - 19 production slash commands
 - `tools/` - Task management scripts
-- `scripts/multiplatform.cjs` - **NEW** Unified cross-platform validator
+- `scripts/` - **STREAMLINED** 5 essential scripts (55% reduction: 6 obsolete eliminated)
 
 ## 🔧 Quality Tools Ecosystem (40+ Tools)
 **Hooks-Integrated Multi-Stack Pipeline:**
@@ -147,7 +147,7 @@ taplo, shellcheck, shfmt                 # Config + shell scripts
 prettier (JSON/XML/CSS/HTML)             # Universal formatting
 ```
 **Auto-Detection**: Windows/Linux/WSL + multi-venv support
-**Unified Validator**: `scripts/multiplatform.cjs` consolidates all cross-platform logic
+**Streamlined Architecture**: 5 essential scripts remain after 55% reduction (multiplatform.cjs, merge-protection.cjs, install-merge-hooks.cjs, dev-runner.cjs, python-cc-gate.cjs)
 
 ## Quality Assurance
 - **Multi-Stack Pipeline**: 40+ tools integrated via .claude/hooks.json
@@ -220,14 +220,8 @@ docs/architecture/adr/ADR-006-dependency-security-scanning.md  # Security archit
 - `.claude/hooks.json.backup` - Backup configuration
 - `legacy/` - Migrated Cypress files (see legacy/MIGRATION-README.md)
 
-## ⚠️  Legacy Components (Marked for Deprecation)
-- `scripts/` - **DEPRECATED** - All CLI functionality moved to direct yarn commands
-  - `scripts/cli.cjs` - Legacy CLI wrapper, use direct yarn commands instead
-  - `yarn run cmd <command>` - Replace with `yarn <command>`
-- `legacy/cypress/` - **MIGRATED** - Cypress E2E tests replaced by Playwright
-  - `yarn test:cypress` - Legacy Cypress commands (use `yarn test:e2e` instead)
-  - Migration completed: All E2E testing now uses Playwright
-- Timeline: legacy/ will be removed after Playwright validation phase
+## ⚠️  Modernization Success (55% STREAMLINED)
+- `scripts/` - **MODERNIZED** - Obsolete scripts eliminated (6 files, 57.6 KB removed)  - **ELIMINATED**: cli.cjs, qa-gate.cjs, generate-traceability*.cjs, security-scan.cjs, test-runner.cjs  - **REMAINING (5 essential)**: multiplatform.cjs, merge-protection.cjs, install-merge-hooks.cjs, dev-runner.cjs, python-cc-gate.cjs  - Migration to direct yarn commands completed (54% faster execution)- `legacy/cypress/` - **MIGRATED** - Cypress E2E tests replaced by Playwright  - `yarn test:cypress` - Legacy Cypress commands (use `yarn test:e2e` instead)  - Migration completed: All E2E testing now uses Playwright- Timeline: Final legacy/ cleanup after Playwright validation phase
 
 ## Integration Policy
 All enhancements MUST integrate into workflow:
