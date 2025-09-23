@@ -1,142 +1,189 @@
-# AI-Doc-Editor Scripts (COMPLETE QA CLI ELIMINATION ✅)
+# Infrastructure Scripts - AI-Doc-Editor
 
-🎉 **MODERNIZATION SUCCESS**: Complete QA CLI system eliminated → 6 essential files remain (58.4 KB total)
+## ⚠️ Status Notice
 
-## 📊 **COMPLETE ELIMINATION RESULTS**
+**Current Status**: Essential infrastructure layer for development automation
+**Preference**: Use direct yarn commands and slash commands for user-facing operations
+**Role**: Backend utilities powering cross-platform development and merge protection
 
-### ✅ **ELIMINATED QA CLI SYSTEM (196+ KB Legacy Infrastructure)**
-- **Subdirectories**: commands/, tests/, utils/, reports/ (complete elimination)
-- **Legacy Files**: cli.cjs, qa-gate.cjs, generate-traceability*.cjs, security-scan.cjs, test-runner.cjs
-- **Migration Path**: → Direct yarn commands and hooks system
+## Overview
 
-### 🛡️ **REMAINING ESSENTIAL FILES (6 files, 58.4 KB total)**
-- `multiplatform.cjs` - Cross-platform utilities (21.2 KB)
-- `merge-protection.cjs` - Safety system for merge validation (20.3 KB)
-- `install-merge-hooks.cjs` - Git protection installer (6.9 KB)
-- `dev-runner.cjs` - Development server orchestrator (0.9 KB)
-- `python-cc-gate.cjs` - Python complexity metrics validation (5.0 KB)
-- `README.md` - Documentation (5.4 KB)
+Core infrastructure scripts providing cross-platform utilities and safety systems for the AI-Doc-Editor development environment. These scripts solve critical infrastructure needs:
 
-## 🔄 **MIGRATION MANDATORY** - Use These Alternatives:
+- ✅ **Cross-platform compatibility** - Windows/Linux/WSL environment detection
+- ✅ **Merge safety validation** - Automated file count and structure protection
+- ✅ **Development orchestration** - Multi-service coordination for dev environment
+- ✅ **Quality gate enforcement** - Python complexity and design validation
+- ✅ **Git protection system** - Native hook installation and management
 
-### 🎯 **PREFERRED: Direct Yarn Commands (Tier 1)**
+## Infrastructure Scripts
+
+### **multiplatform.cjs** - Cross-Platform Environment Detection
+
 ```bash
-yarn dev|build|test|security-scan      # Core development commands
-yarn lint|format|tsc-check            # Quality commands
-yarn python-quality|python-format     # Backend Python validation
+# Used internally by yarn commands for environment detection
+# Automatically detects: Windows/Linux/WSL, Python venv, tool availability
 ```
 
-### ⚡ **PREFERRED: Slash Commands (Tier 2)**
+**Features:**
+- Cross-platform environment detection (Windows/Linux/WSL)
+- Python virtual environment management and activation
+- Tool availability verification across platforms
+- Multi-OS command translation and path handling
+
+### **merge-protection.cjs** - Merge Safety System
+
 ```bash
-/health-check          # System validation (replaces validate-*)
-/commit-smart          # Intelligent commits
-/review-complete       # Multi-agent code review
-/merge-safety          # Pre-merge validation (replaces qa-gate)
-/task-dev T-XX         # Task development workflow
+# Triggered by merge safety commands
+yarn merge-safety-full           # Uses this script for validation
+/merge-safety                    # Slash command wrapper
 ```
 
-### 🛡️ **AUTOMATED: Hooks System (Tier 3)**
+**Features:**
+- File count comparison validation (prevents accidental file loss)
+- Critical directory structure integrity checks
+- Configuration file existence verification
+- Automated merge blocking on validation failures
+
+### **install-merge-hooks.cjs** - Git Protection Installer
+
+```bash
+# Install native git-level protection
+yarn install-merge-hooks         # Installs hooks using this script
+```
+
+**Features:**
+- Git pre-merge hook installation
+- Native repository protection setup
+- Hook configuration management and updates
+- Integration with merge-protection system
+
+### **dev-runner.cjs** - Development Server Orchestrator
+
+```bash
+# Used by development commands for multi-service coordination
+yarn dev                         # Uses this for orchestration
+```
+
+**Features:**
+- Multi-service development server coordination
+- Frontend and backend service management
+- Environment variable coordination
+- Process lifecycle management
+
+### **python-cc-gate.cjs** - Python Quality Validation
+
+```bash
+# Integrated with Python quality commands
+yarn python-quality              # Includes complexity validation
+```
+
+**Features:**
+- Python cyclomatic complexity analysis
+- Code quality metrics validation
+- Design guideline enforcement (CC≤15, LOC≤300)
+- Integration with quality pipeline
+
+## Development Workflow Integration
+
+### **Tier 1: Direct Commands** (Preferred User Interface)
+```bash
+# Core development commands that use these infrastructure scripts
+yarn dev                         # Uses dev-runner.cjs for orchestration
+yarn build|test|security-scan    # Cross-platform via multiplatform.cjs
+yarn merge-safety-full           # Uses merge-protection.cjs for validation
+yarn python-quality              # Includes python-cc-gate.cjs validation
+yarn install-merge-hooks         # Uses install-merge-hooks.cjs
+```
+
+### **Tier 2: Slash Commands** (Workflow Automation)
+```bash
+# Workflow commands that leverage infrastructure scripts
+/health-check                    # System validation using multiplatform.cjs
+/merge-safety                    # Pre-merge validation via merge-protection.cjs
+/commit-smart                    # Intelligent commits with quality gates
+/review-complete                 # Multi-agent code review with validation
+/task-dev T-XX                   # Context-aware task development
+```
+
+### **Tier 3: Automated Hooks** (Background Integration)
 - **Location**: `.claude/hooks.json`
-- **Performance**: 54% faster (70s vs 152s)
-- **Coverage**: 40+ tools integrated automatically
+- **Integration**: Uses multiplatform.cjs for cross-platform tool execution
+- **Quality Gates**: Includes python-cc-gate.cjs for Python validation
+- **Performance**: 40+ tools integrated automatically
 - **Trigger**: Auto-runs on Edit/Write/MultiEdit operations
 
-### 📋 **BASH TOOLS: Still Functional (Tier 4)**
-```bash
-tools/progress-dashboard.sh            # Project progress tracking
-tools/task-navigator.sh T-XX           # Task navigation
-tools/validate-dod.sh T-XX             # Definition of Done validation
+### **Tier 4: Infrastructure Layer** (This Directory)
+- **Purpose**: Backend utilities powering higher-tier commands
+- **Maintenance**: Minimal - focused on cross-platform compatibility
+- **Integration**: Called by yarn commands and hooks system
+- **Architecture**: Essential infrastructure that cannot be replaced
+
+## Architecture Integration
+
+### **4-Tier Documentation Positioning**
+
+| Tier | Location | User Interface | Purpose |
+|------|----------|----------------|---------|
+| **Tier 1** | Direct Commands | `yarn dev`, `yarn build` | User-facing development interface |
+| **Tier 2** | Slash Commands | `/health-check`, `/merge-safety` | Workflow automation |
+| **Tier 3** | Hooks System | `.claude/hooks.json` | Background quality automation |
+| **Tier 4** | **Infrastructure** | **`scripts/` (this directory)** | **Backend utilities and platform support** |
+
+### **Cross-References**
+
+- **[Hooks System](.claude/docs/)** - Quality automation configuration
+- **[Direct Commands](../CLAUDE.md)** - User-facing yarn and slash commands
+- **[Development Tools](../tools/README.md)** - Bash task management scripts
+- **[Architecture Documentation](../docs/architecture/)** - Technical design and ADRs
+
+### **Integration Flow**
+
+```
+User Command (yarn dev)
+    ↓
+Infrastructure Script (dev-runner.cjs)
+    ↓
+Cross-Platform Detection (multiplatform.cjs)
+    ↓
+Service Orchestration
+    ↓
+Quality Validation (hooks + python-cc-gate.cjs)
+    ↓
+Development Environment Ready
 ```
 
-[![Build Status](https://img.shields.io/badge/build-streamlined-green.svg)]()
-[![Scripts](https://img.shields.io/badge/QA%20CLI-eliminated-brightgreen.svg)]()
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)]()
+## File Structure
 
-## 📚 **DOCUMENTATION NAVIGATION** - 4-Tier Architecture
-
-### 🎯 **WHERE TO FIND CURRENT DOCUMENTATION**
-
-| Documentation Type | Location | Purpose |
-|-------------------|----------|---------|
-| **Implementation Docs** | `src/docs/` | Frontend React/TypeScript patterns |
-| **Implementation Docs** | `backend/docs/` | Backend API/database architecture |
-| **Strategic Docs** | `docs/` | Project planning & architecture |
-| **Tool Integration** | `tools/README.md` | Bash scripts & task management |
-
-### 🔄 **COMPLETE MIGRATION REFERENCE**
-
-#### ✅ **DIRECT COMMANDS** (Use These Instead)
-```bash
-# Core Development (Tier 1)
-yarn dev|build|test|security-scan      # Replaces: eliminated CLI scripts
-yarn lint|format|tsc-check            # Replaces: eliminated qa-gate
-yarn python-quality                    # Replaces: eliminated validation scripts
-
-# Quality Gates (Automated)
-.claude/hooks.json                     # Replaces: eliminated qa-gate.cjs
-/merge-safety                          # Enhanced merge protection
+```
+scripts/
+├── README.md                    # This infrastructure documentation
+├── multiplatform.cjs           # Cross-platform environment detection
+├── merge-protection.cjs         # Merge safety validation system
+├── install-merge-hooks.cjs     # Git protection installer
+├── dev-runner.cjs              # Development server orchestrator
+└── python-cc-gate.cjs          # Python complexity validation
 ```
 
-#### ⚡ **SLASH COMMANDS** (Workflow Automation)
-```bash
-/health-check          # Replaces: eliminated validate-* scripts
-/commit-smart          # Enhanced commit workflows
-/review-complete       # Multi-agent code review
-/merge-safety          # Enhanced merge protection
-/task-dev T-XX         # Context-aware task management
-```
+## Infrastructure Benefits
 
-#### 🛡️ **AUTOMATED HOOKS** (Background Quality)
-- **Location**: `.claude/hooks.json`
-- **Performance**: 54% faster (70s vs 152s)
-- **Coverage**: 40+ tools integrated automatically
-- **Replaces**: All eliminated manual quality scripts
+### **Cross-Platform Compatibility** 🌐
+- **Windows/Linux/WSL**: Seamless environment detection
+- **Python Virtual Environments**: Automatic activation and management
+- **Tool Availability**: Dynamic detection and fallback handling
+- **Path Translation**: Cross-platform path and command handling
 
-### 📈 **Modernization Timeline**
-- **Phase 1**: Direct yarn commands available ✅
-- **Phase 2**: Hooks integration complete ✅
-- **Phase 3**: QA CLI subdirectories eliminated ✅ (commands/, tests/, utils/, reports/)
-- **Phase 4**: Legacy scripts eliminated ✅ (196+ KB infrastructure removed)
-- **Phase 5**: Final 6 essential files optimized ✅ (maximum streamlining achieved)
+### **Merge Safety Protection** 🛡️
+- **File Loss Prevention**: Automated file count validation
+- **Structure Integrity**: Critical directory existence checks
+- **Configuration Validation**: Essential file presence verification
+- **Native Git Integration**: Hook-based protection at repository level
 
-## 🌟 **Essential Scripts Architecture**
-
-The remaining 5 .cjs scripts + README.md represent the core infrastructure that cannot be replaced by direct commands:
-
-### **multiplatform.cjs** (21.2 KB)
-- Cross-platform environment detection
-- Python virtual environment management
-- Tool availability verification
-- Multi-OS command translation
-
-### **merge-protection.cjs** (20.3 KB)
-- File count comparison validation
-- Critical directory structure checks
-- Configuration integrity verification
-- Automated merge blocking
-
-### **install-merge-hooks.cjs** (6.9 KB)
-- Git hooks installation
-- Native protection setup
-- Hook configuration management
-
-### **dev-runner.cjs** (0.9 KB)
-- Development server orchestration
-- Multi-service coordination
-
-### **python-cc-gate.cjs** (5.0 KB)
-- Python complexity metrics
-- Code quality validation
-- Design guidelines enforcement
-
-## 🔄 **Migration Complete - Success Metrics**
-
-✅ **QA CLI System**: Complete elimination (196+ KB legacy infrastructure removed)
-✅ **Subdirectories**: All QA CLI subdirectories eliminated (commands/, tests/, utils/, reports/)
-✅ **Final Architecture**: 6 essential files only (58.4 KB total)
-✅ **Performance**: 54% faster execution via direct commands and hooks system
-✅ **Automation**: Hooks system integrated with 40+ tools
-✅ **Maintenance**: Maximum streamlining achieved
+### **Quality Enforcement** 🎯
+- **Design Guidelines**: Python complexity metrics (CC≤15, LOC≤300)
+- **Automated Validation**: Integration with quality pipeline
+- **Performance Optimization**: Efficient complexity analysis
+- **Standards Compliance**: Consistent code quality across project
 
 ## 📄 **License**
 
