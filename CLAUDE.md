@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 AI Document Editor: React 18 + TypeScript + Python FastAPI + AI integration
-Features: Document generation with RAG, real-time collaboration, OAuth security
+Features: AI-powered document generation, real-time collaboration, OAuth security
 Repository: https://github.com/BriamV/AI-Doc-Editor/
 
 ## Tech Stack
 - Frontend: React 18 + TypeScript + Vite + TailwindCSS
 - Backend: Python FastAPI + SQLAlchemy + Alembic
-- AI: OpenAI GPT-4o + embeddings + LangChain
+- AI: OpenAI Chat Completions (GPT-4o, GPT-4, GPT-3.5-turbo) + Frontend Streaming
 - Desktop: Electron + auto-updater
 - State: Zustand + IndexedDB encryption
 - Testing: Playwright E2E + Jest unit tests

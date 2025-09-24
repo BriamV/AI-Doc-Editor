@@ -42,7 +42,7 @@ Este proyecto es un fork mejorado de [AI Text Editor](https://github.com/darryls
 ## 🚀 Características Principales
 
 - **Generación de Documentos con IA**: Utiliza GPT-4o para crear documentos a partir de prompts o plantillas predefinidas.
-- **RAG (Retrieval-Augmented Generation)**: Integración con base de conocimiento vectorial para respuestas contextuales.
+- **Generación en Tiempo Real**: Respuestas de IA con streaming para mejor experiencia de usuario.
 - **Editor Markdown Avanzado**: Basado en Monaco Editor con vista previa en tiempo real.
 - **Exportación Segura**: Soporte para exportar a múltiples formatos (PDF, DOCX, MD) con cifrado.
 - **Versionado y Auditoría**: Historial de cambios completo con capacidad de rollback.
@@ -107,7 +107,7 @@ Este proyecto está bajo la [Licencia MIT](LICENSE).
 
 - **Frontend**: React 18 + TypeScript + Vite + TailwindCSS + Monaco Editor
 - **Backend**: Python FastAPI + SQLAlchemy + Alembic
-- **AI Integration**: OpenAI GPT-4o + embeddings + LangChain + RAG
+- **AI Integration**: OpenAI Chat Completions (GPT-4o, GPT-4, GPT-3.5-turbo) + Frontend Streaming
 - **Desktop**: Electron + auto-updater
 - **State Management**: Zustand + IndexedDB encryption
 - **Base de Datos**: SQLite (datos de usuario) + Chroma (vector store)
