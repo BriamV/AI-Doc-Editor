@@ -108,6 +108,12 @@ yarn install-merge-hooks        # Install git-level protection
 yarn env-validate     # Comprehensive environment diagnostics
 yarn env-info         # Detailed platform and tool information
 
+# 📋 DOCUMENT ORGANIZATION (NEW - Organizational Failure Prevention)
+yarn validate-docs           # Document placement validation
+yarn validate-docs:fix       # Auto-fix misplaced documents
+yarn validate-docs:strict    # Strict validation (CI/CD mode)
+yarn validate-docs:report    # Generate placement report
+
 # ⚠️  LEGACY DEPRECATION NOTICE:
 # OLD: yarn run cmd <command>  <- DEPRECATED, will be removed
 # NEW: yarn <command>          <- Use this instead

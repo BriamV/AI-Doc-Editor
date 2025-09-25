@@ -153,6 +153,41 @@ bash tools/validate-dod.sh T-02
 - Specific actions required for failures
 - Overall DoD satisfaction status
 
+### 8. **validate-document-placement.sh** - 📁 Document Organization Validator (NEW)
+
+```bash
+# Basic validation
+bash tools/validate-document-placement.sh
+
+# Auto-fix misplaced files
+bash tools/validate-document-placement.sh --fix
+
+# Generate detailed report
+bash tools/validate-document-placement.sh --report
+
+# Strict mode for CI/CD
+bash tools/validate-document-placement.sh --strict
+```
+
+**Features:**
+- **Conway's Law Compliance**: Validates documentation proximity to implementation
+- **Auto-fix Mode**: Automatically moves misplaced files to correct locations
+- **CI/CD Integration**: Strict mode for pipeline validation
+- **Organizational Failure Prevention**: Prevents documentation chaos
+- **Template System Integration**: Works with docs/templates/ guidelines
+
+**Validates:**
+- Root directory cleanup (migration artifacts → proper locations)
+- Template placement (docs/templates/)
+- Architecture docs (docs/architecture/)
+- Strategic documents (ADRs)
+- Migration artifacts proper organization
+
+**Exit Codes:**
+- `0` - All documents properly placed
+- `1` - Placement violations found (with suggestions)
+- `2` - Critical violations requiring manual intervention
+
 ## Development Workflow Integration
 
 ### **Enhanced Daily Workflow with QA (Updated)**
@@ -172,7 +207,8 @@ bash tools/mark-subtask-complete.sh T-02 R0.WP2-T02-ST2  # Complete subtasks
 # 3. Mark Development Complete (Ready for QA)
 bash tools/qa-workflow.sh T-02 dev-complete
 
-# 4. QA & Validation Phase (NEW: DoD Enforcement)
+# 4. Document & Organizational Validation (NEW)
+bash tools/validate-document-placement.sh      # Organizational compliance
 bash tools/validate-dod.sh T-02               # Validate Definition of Done
 # If validation passes:
 bash tools/qa-workflow.sh T-02 qa-passed      # Mark QA passed
@@ -216,15 +252,28 @@ git commit -m "T-02-ST1: OAuth providers configured"
 
 ```
 tools/
-├── README.md                    # This documentation
-├── progress-dashboard.sh        # Project overview & progress tracking
-├── task-navigator.sh           # Task navigation & details
-├── extract-subtasks.sh         # Subtask extraction for development
-├── status-updater.sh           # Fast status updates
-└── (future tools)
-    ├── mark-subtask-complete.sh # Granular subtask completion
-    ├── git-integration.sh       # Auto-status from git activity
-    └── vs-code-tasks.json       # IDE integration
+├── README.md                         # This documentation
+├── progress-dashboard.sh             # Project overview & progress tracking
+├── task-navigator.sh                 # Task navigation & details
+├── extract-subtasks.sh               # Subtask extraction for development
+├── status-updater.sh                 # Fast status updates
+├── mark-subtask-complete.sh          # Granular subtask completion
+├── qa-workflow.sh                    # QA workflow management
+├── validate-dod.sh                   # Definition of Done validation
+├── validate-document-placement.sh    # Document organization validation
+├── batch-task-generator.sh           # Batch task generation
+├── database-abstraction.sh           # Database management abstraction
+├── dual-system-validation-test.sh    # System validation testing
+├── migration-validator.sh            # Migration validation
+├── rollback-manager.sh               # Migration rollback management
+├── setup-migration-tools.sh          # Migration tools setup
+├── sync-systems.sh                   # System synchronization
+├── task-data-parser.sh               # Task data parsing
+├── task-navigator-fixed.sh           # Enhanced task navigation
+├── traceability-manager.sh           # Requirements traceability
+├── *.ps1                            # PowerShell equivalents
+└── (legacy)
+    └── universal-runner.ps1          # Legacy PowerShell runner
 ```
 
 ## Problem-Solution Mapping
@@ -254,6 +303,11 @@ tools/
 - **Before**: Tasks marked "Completado 100%" without validating DoD criteria
 - **After**: `bash tools/validate-dod.sh T-02` enforces Definition of Done validation before completion
 
+### **Problem 6: Documentation Chaos** ❌ → ✅ **Solved** (NEW)
+
+- **Before**: Documents scattered across repository root, organizational failure
+- **After**: `bash tools/validate-document-placement.sh --fix` maintains Conway's Law compliance and professional structure
+
 ## Benefits Achieved
 
 ### **Development Velocity** 🚀
@@ -269,6 +323,8 @@ tools/
 - **Work Visibility**: Hidden → Real-time dashboard
 - **QA Enforcement**: Manual/Optional → Automated DoD validation (NEW)
 - **Task Completion Integrity**: Unreliable → Guaranteed DoD satisfaction (NEW)
+- **Documentation Organization**: Manual/Chaotic → Automated Conway's Law compliance (NEW)
+- **Repository Professionalism**: Scattered files → Structured, validated placement (NEW)
 
 ### **Developer Experience** 💡
 
@@ -281,10 +337,11 @@ tools/
 ### Current: Bash Tools (Still Functional)
 ```bash
 tools/progress-dashboard.sh              # Project progress
-tools/task-navigator.sh T-XX             # Task details  
+tools/task-navigator.sh T-XX             # Task details
 tools/extract-subtasks.sh T-XX           # Development planning
 tools/validate-dod.sh T-XX               # Definition of Done validation
 tools/qa-workflow.sh T-XX dev-complete   # Mark development complete
+tools/validate-document-placement.sh     # Document organization validation
 ```
 
 ### Preferred: Slash Commands (Integrated Sub-Agents)
@@ -324,6 +381,7 @@ tools/qa-workflow.sh T-XX dev-complete   # Mark development complete
 
 ---
 
-_Tools Status: Phase 1 Complete ✅ + QA Workflow Enhanced ✅_  
-_Usage: R0.WP2 Successfully Completed with DoD Validation_  
-_Next Enhancement: R0.WP3 workflow integration_
+_Tools Status: Phase 1 Complete ✅ + QA Workflow Enhanced ✅ + Document Validation System ✅_
+_Usage: R0.WP2 Successfully Completed with DoD Validation + Organizational Failure Prevention_
+_Current: 24+ production tools available + migration/validation systems_
+_Next Enhancement: R0.WP3 workflow integration + continued slash command migration_

@@ -1,0 +1,40 @@
+name: Document Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  validate-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.16.0'
+        cache: 'yarn'
+
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile
+
+    - name: Validate document placement
+      run: yarn validate-docs:strict
+
+    - name: Generate placement report
+      if: failure()
+      run: |
+        yarn validate-docs:report
+        echo "::error title=Document Placement Violations::Check the validation report for details"
+
+    - name: Upload validation report
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: document-validation-report
+        path: docs/validation/placement-report.md
+        retention-days: 30

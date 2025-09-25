@@ -1,36 +1,116 @@
 #!/bin/bash
-# Progress Dashboard Generator
+# Progress Dashboard Generator with Database Abstraction
 # Usage: ./tools/progress-dashboard.sh [release]
 
 RELEASE_FILTER="$1"
-FILE="docs/Sub Tareas v2.md"
 
-if [[ ! -f "$FILE" ]]; then
-    echo "❌ File not found: $FILE"
+# Source abstraction layer (required for dual system support)
+if [[ -f "tools/database-abstraction.sh" ]]; then
+    source tools/database-abstraction.sh
+    # Initialize with error checking (suppress normal output but show errors)
+    if ! init_abstraction_layer 2>/dev/null | grep -q "ready"; then
+        echo "❌ Failed to initialize database abstraction layer"
+        exit 1
+    fi
+else
+    echo "❌ Database abstraction layer not found: tools/database-abstraction.sh"
     exit 1
 fi
 
 echo "📊 AI-Doc-Editor Development Progress Dashboard"
 echo "=============================================="
-echo "Generated: $(date '+%Y-%m-%d %H:%M:%S')"
+echo "Generated: $(date '+%Y-%m-%d %H:%M:%S') ($DATABASE_MODE mode)"
 echo ""
 
-# Extract all tasks with status
+# Extract all tasks with status using database abstraction
 declare -A release_stats
 declare -A task_details
 
-while IFS=: read -r line_num task_line; do
-    # Extract task ID and title  
-    task_id=$(echo "$task_line" | grep -o "T-[0-9]\+" | head -1)
-    task_title=$(echo "$task_line" | sed 's/### \*\*Tarea [^:]*: //' | sed 's/\*\*$//')
-    
-    # Extract release from task details
-    task_section=$(sed -n "${line_num},/### \*\*Tarea/p" "$FILE" | head -15)
-    release=$(echo "$task_section" | grep "Release:" | sed 's/.*Release: *//' | sed 's/ .*//')
-    
-    # Get status
-    status=$(echo "$task_section" | grep "Estado:" | head -1 | sed 's/- \*\*Estado:\*\* //')
-    
+get_all_tasks() {
+    case "$DATABASE_MODE" in
+        "distributed")
+            # List tasks from distributed files
+            if [[ -d "$DISTRIBUTED_DIR" ]]; then
+                find "$DISTRIBUTED_DIR" -name "*-STATUS.md" 2>/dev/null | sort | while read -r file; do
+                    if [[ -f "$file" ]]; then
+                        task_id=$(basename "$file" | sed 's/-STATUS.md$//')
+                        echo "$task_id"
+                    fi
+                done
+            else
+                # Fallback to monolith if distributed directory doesn't exist
+                echo "⚠️ Distributed directory not found, falling back to monolith" >&2
+                if [[ -f "$MONOLITH_FILE" ]]; then
+                    grep -o "T-[0-9]\+" "$MONOLITH_FILE" | sort -u
+                fi
+            fi
+            ;;
+        "monolith"|*)
+            # List tasks from monolith file
+            if [[ -f "$MONOLITH_FILE" ]]; then
+                grep -o "T-[0-9]\+" "$MONOLITH_FILE" | sort -u
+            fi
+            ;;
+    esac
+}
+
+# Process each task using abstraction layer
+while IFS= read -r task_id; do
+    if [[ -z "$task_id" ]]; then
+        continue
+    fi
+
+    # Get task metadata using abstraction layer
+    task_metadata=$(get_task_data "$task_id" "metadata" 2>/dev/null)
+    if [[ $? -ne 0 ]]; then
+        continue
+    fi
+
+    # Extract details from metadata using abstraction layer
+    case "$DATABASE_MODE" in
+        "distributed")
+            # For distributed mode, parse YAML-style output
+            release=$(echo "$task_metadata" | grep "^release:" | cut -d: -f2- | sed 's/^ *//' | sed 's/"//g')
+            status=$(echo "$task_metadata" | grep "^estado:" | cut -d: -f2- | sed 's/^ *//' | sed 's/"//g')
+
+            # Get title from distributed file
+            if [[ -f "$DISTRIBUTED_DIR/${task_id}-STATUS.md" ]]; then
+                title=$(parse_yaml_value "$DISTRIBUTED_DIR/${task_id}-STATUS.md" "titulo" 2>/dev/null || echo "No title")
+            else
+                title="No title"
+            fi
+            ;;
+        "monolith"|*)
+            # For monolith mode, parse markdown-style output
+            # Try both "Release:" and "Release Target:" patterns
+            release=$(echo "$task_metadata" | grep -E "(Release:|Release Target:)" | sed 's/.*Release[^:]*: *//' | sed 's/ .*//')
+            status=$(echo "$task_metadata" | grep "Estado:" | head -1 | sed 's/- \*\*Estado:\*\* //')
+
+            # Get title from full task data
+            task_full=$(get_task_data "$task_id" "full" 2>/dev/null)
+            if [[ -n "$task_full" ]]; then
+                title=$(echo "$task_full" | head -1 | sed 's/### \*\*Tarea [^:]*: //' | sed 's/\*\*$//')
+            else
+                title="No title"
+            fi
+
+            # If no release found in metadata, extract from full data
+            if [[ -z "$release" && -n "$task_full" ]]; then
+                release=$(echo "$task_full" | grep -E "(Release:|Release Target:)" | head -1 | sed 's/.*Release[^:]*: *//' | sed 's/ .*//')
+            fi
+            ;;
+    esac
+
+    # Clean up values
+    release=$(echo "$release" | sed 's/[[:space:]]*$//' | sed 's/^[[:space:]]*//')
+    status=$(echo "$status" | sed 's/[[:space:]]*$//' | sed 's/^[[:space:]]*//')
+    title=$(echo "$title" | sed 's/[[:space:]]*$//' | sed 's/^[[:space:]]*//')
+
+    # Skip if essential data is missing
+    if [[ -z "$release" || -z "$status" ]]; then
+        continue
+    fi
+
     # Determine completion
     if [[ "$status" =~ "Completado" ]]; then
         completion="✅"
@@ -38,13 +118,13 @@ while IFS=: read -r line_num task_line; do
     else
         completion="⏳"
     fi
-    
+
     ((release_stats["${release}_total"]++))
-    
+
     # Store task details
-    task_details["$task_id"]="$release|$task_title|$status|$completion"
-    
-done < <(grep -n "### \*\*Tarea" "$FILE")
+    task_details["$task_id"]="$release|$title|$status|$completion"
+
+done < <(get_all_tasks)
 
 # Display by release
 for release in $(printf '%s\n' "${!release_stats[@]}" | grep "_total$" | sed 's/_total$//' | sort -V); do

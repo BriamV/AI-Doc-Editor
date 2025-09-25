@@ -122,6 +122,16 @@
             "command": "echo 'Validando API spec (timeout: 2s)...'; spectral lint api-spec.yaml || true"
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 8,
+            "command": "echo 'Organizational Safety: Document placement validation (timeout: 8s)...'; if [ -f tools/validate-document-placement.sh ]; then bash tools/validate-document-placement.sh --strict 2>/dev/null && echo '✅ Document placement validated' || { echo '⚠️ Document placement issues detected - run yarn validate-docs:fix to correct'; exit 0; }; else echo '⚠️ Document validator not found'; fi"
+          }
+        ]
       }
     ],
     "PostToolUse": [

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Task Navigator for Sub Tareas v2.md with Database Abstraction
-# Usage: ./tools/task-navigator.sh [TASK_ID]
+# Usage: ./tools/task-navigator-fixed.sh [TASK_ID]
 
 TASK_ID="$1"
 FILE="docs/project-management/Sub Tareas v2.md"
@@ -64,14 +64,16 @@ echo "🔍 Searching for Task: $TASK_ID ($DATABASE_MODE mode)"
 echo "================================"
 
 # Use database abstraction layer to get task data
-task_data=$(get_task_data "$TASK_ID" "full" 2>/dev/null)
+# Don't redirect stderr to check for actual errors
+task_data=$(get_task_data "$TASK_ID" "full")
+return_code=$?
 
-if [[ -z "$task_data" ]] || [[ $? -ne 0 ]]; then
+if [[ -z "$task_data" ]] || [[ $return_code -ne 0 ]]; then
     echo "❌ Task $TASK_ID not found in $DATABASE_MODE mode"
     if [[ "$DATABASE_MODE" == "distributed" ]]; then
         echo "💡 Trying monolith fallback..."
         export DATABASE_MODE="monolith"
-        task_data=$(get_task_data "$TASK_ID" "full" 2>/dev/null)
+        task_data=$(get_task_data "$TASK_ID" "full")
         if [[ -n "$task_data" ]]; then
             echo "✅ Found in monolith system"
         else
