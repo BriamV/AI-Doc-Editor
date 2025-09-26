@@ -57,7 +57,8 @@ yarn security-scan                        # Security audit
 # ALWAYS validate after branch changes, context switches, or issues
 /health-check                    # Immediate system validation
 tools/progress-dashboard.sh      # Project status verification
-yarn quality-gate                # Multi-stack quality validation
+yarn quality-gate                # Multi-stack quality validation (~70s)
+yarn quality-gate:dev             # Development mode validation (~45s)
 ```
 
 ```bash
@@ -99,6 +100,12 @@ yarn test:e2e:report       # Show HTML test report
 # Quality (automated via hooks - 54% performance optimized)
 yarn lint|format|tsc-check
 
+# Quality Gates (Multi-stack validation with timing optimization)
+yarn quality-gate           # Full quality pipeline (~70s)
+yarn quality-gate:dev       # Development mode (~45s, skip heavy tools)
+yarn quality-gate:fast      # Fast validation (~30s, essential only)
+yarn quality-gate:full      # Complete validation (~90s, all tools + reports)
+
 # Multi-tech validation (TypeScript + Python auto-detection)
 yarn tsc-check        # Frontend TypeScript validation
 yarn python-quality   # Backend Python validation (format + lint + complexity)
@@ -119,8 +126,8 @@ yarn install-merge-hooks        # Install git-level protection
 yarn env-validate     # Comprehensive environment diagnostics
 yarn env-info         # Detailed platform and tool information
 
-# 📋 DOCUMENT ORGANIZATION (NEW - Organizational Failure Prevention)
-yarn validate-docs           # Document placement validation
+# 📋 DOCUMENT ORGANIZATION (NEW - Cross-Platform Compatible)
+yarn validate-docs           # Document placement validation (PowerShell/WSL/Linux)
 yarn validate-docs:fix       # Auto-fix misplaced documents
 yarn validate-docs:strict    # Strict validation (CI/CD mode)
 yarn validate-docs:report    # Generate placement report
@@ -217,7 +224,7 @@ prettier (JSON/XML/CSS/HTML)             # Universal formatting
 ```
 
 **Auto-Detection**: Windows/Linux/WSL + multi-venv support
-**Streamlined Architecture**: 5 essential scripts remain after 55% reduction (ADR-011 compliance)
+**Streamlined Architecture**: 6 essential scripts remain after 55% reduction (ADR-011 compliance + cross-platform wrapper)
 **Error Handling**: Standardized exit codes + structured logging
 **Integration Testing**: Cross-directory interface validation
 
@@ -331,10 +338,11 @@ All enhancements MUST integrate into workflow:
 yarn install --frozen-lockfile          # Verify dependencies
 yarn build                              # Ensure build doesn't break
 yarn tsc-check                          # TypeScript validation
-yarn quality-gate                       # Full quality pipeline
+yarn quality-gate                       # Full quality pipeline (~70s)
 # ✅ Multi-tech validation (Python + TypeScript + Frontend)
-# ✅ Autofix priorized: Use --fix flags when available
+# ✅ Autofix prioritized: Use --fix flags when available
 # ✅ Validate CI/CD integration works end-to-end
+# ✅ Pytest timeout fixes integrated (resolves hanging test issues)
 ```
 
 ## CLAUDE.md Editing Rules

@@ -19,4 +19,5 @@ semgrep
 
 # Testing coverage (Week 4)
 pytest-cov
+pytest-timeout
 
