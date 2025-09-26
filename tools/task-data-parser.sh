@@ -6,7 +6,7 @@
 set -euo pipefail
 
 # Configuration
-MONOLITH_FILE="docs/project-management/Sub Tareas v2.md"
+MONOLITH_FILE="docs/project-management/archive/task-breakdown-detailed-v1.md"
 DISTRIBUTED_DIR="docs/tasks"
 PARSER_LOG="logs/task-parser.log"
 TEMP_DIR="logs/parser-temp"

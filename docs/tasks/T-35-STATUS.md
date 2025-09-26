@@ -6,7 +6,7 @@ dependencias: "T-13, T-22"
 prioridad: "Crítica"
 release_target: "Release 5"
 complejidad: 10
-descripcion: "Implementar la funcionalidad que permite a un usuario solicitar el borrado definitivo de un documento, en cumplimiento con el "
+descripcion: "Implementar la funcionalidad que permite a un usuario solicitar el borrado definitivo de un documento, en cumplimiento con el \"derecho al olvido\" del GDPR."
 
 # Technical Details
 detalles_tecnicos: |
@@ -73,7 +73,7 @@ sync_metadata:
 **Complejidad Total:** 10
 
 ## Descripción
-Implementar la funcionalidad que permite a un usuario solicitar el borrado definitivo de un documento, en cumplimiento con el 
+Implementar la funcionalidad que permite a un usuario solicitar el borrado definitivo de un documento, en cumplimiento con el "derecho al olvido" del GDPR.
 
 ## Detalles Técnicos
 **Backend:** Endpoint DELETE /docs/{id}/erase que marca un documento para purga inmediata.

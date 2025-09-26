@@ -6,7 +6,7 @@
 set -euo pipefail
 
 # Configuration
-MONOLITH_FILE="docs/project-management/Sub Tareas v2.md"
+MONOLITH_FILE="docs/project-management/archive/task-breakdown-detailed-v1.md"
 DISTRIBUTED_DIR="docs/tasks"
 TRACEABILITY_LOG="logs/traceability.log"
 AUDIT_REPORT_DIR="logs/traceability-reports"
@@ -311,7 +311,7 @@ generate_audit_report() {
 
 ## Executive Summary
 
-This report provides a comprehensive audit of the Phase 1 migration from the monolithic Sub Tareas v2.md file to the distributed T-XX-STATUS.md architecture.
+This report provides a comprehensive audit of the Phase 1 migration from the monolithic task-breakdown-detailed-v1.md file to the distributed T-XX-STATUS.md architecture.
 
 ### Migration Statistics
 

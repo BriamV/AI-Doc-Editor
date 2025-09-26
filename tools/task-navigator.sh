@@ -3,7 +3,7 @@
 # Usage: ./tools/task-navigator.sh [TASK_ID]
 
 TASK_ID="$1"
-FILE="docs/project-management/Sub Tareas v2.md"
+FILE="docs/project-management/archive/task-breakdown-detailed-v1.md"
 
 # Source abstraction layer (required for dual system support)
 if [[ -f "tools/database-abstraction.sh" ]]; then

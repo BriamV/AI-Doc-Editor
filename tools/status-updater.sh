@@ -4,7 +4,7 @@
 
 TASK_ID="${1:-}"
 NEW_STATUS="${2:-}"
-FILE="docs/project-management/Sub Tareas v2.md"
+FILE="docs/project-management/archive/task-breakdown-detailed-v1.md"
 
 if [[ -z "$TASK_ID" || -z "$NEW_STATUS" ]]; then
     echo "❌ Usage: $0 <TASK_ID> <NEW_STATUS>"

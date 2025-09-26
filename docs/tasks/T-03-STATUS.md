@@ -6,7 +6,7 @@ dependencias: "T-44"
 prioridad: "Alta"
 release_target: "Release 1"
 complejidad: 11
-descripcion: "Implementar mecanismos de control para prevenir el abuso y garantizar la estabilidad del sistema. Esto incluye limitar la cantidad de datos que un usuario puede ingestar y la frecuencia de las peticiones a los endpoints más costosos. **Nota de Dependencia Crítica:** Esta tarea depende del servicio "
+descripcion: "Implementar mecanismos de control para prevenir el abuso y garantizar la estabilidad del sistema. Esto incluye limitar la cantidad de datos que un usuario puede ingestar y la frecuencia de las peticiones a los endpoints más costosos. **Nota de Dependencia Crítica:** Esta tarea depende del servicio \"Config Store\" (T-44) para leer y persistir los límites. La API de T-44 debe ser diseñada teniendo en cuenta este requisito."
 
 # Technical Details
 detalles_tecnicos: |
@@ -73,7 +73,7 @@ sync_metadata:
 **Complejidad Total:** 11
 
 ## Descripción
-Implementar mecanismos de control para prevenir el abuso y garantizar la estabilidad del sistema. Esto incluye limitar la cantidad de datos que un usuario puede ingestar y la frecuencia de las peticiones a los endpoints más costosos. **Nota de Dependencia Crítica:** Esta tarea depende del servicio 
+Implementar mecanismos de control para prevenir el abuso y garantizar la estabilidad del sistema. Esto incluye limitar la cantidad de datos que un usuario puede ingestar y la frecuencia de las peticiones a los endpoints más costosos. **Nota de Dependencia Crítica:** Esta tarea depende del servicio "Config Store" (T-44) para leer y persistir los límites. La API de T-44 debe ser diseñada teniendo en cuenta este requisito.
 
 ## Detalles Técnicos
 **Rate Limiting:** Middleware en FastAPI usando un backend de Redis para el conteo.

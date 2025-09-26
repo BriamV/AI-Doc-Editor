@@ -4,7 +4,7 @@
 # Purpose: Extract DoD criteria from task and guide developer on what to validate
 
 TASK_ID="${1:-}"
-FILE="docs/project-management/Sub Tareas v2.md"
+FILE="docs/project-management/archive/task-breakdown-detailed-v1.md"
 
 if [[ -z "$TASK_ID" ]]; then
     echo "❌ Usage: $0 <TASK_ID>"

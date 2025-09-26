@@ -6,7 +6,7 @@
 set -euo pipefail
 
 # Configuration
-MONOLITH_FILE="docs/project-management/Sub Tareas v2.md"
+MONOLITH_FILE="docs/project-management/archive/task-breakdown-detailed-v1.md"
 DISTRIBUTED_DIR="docs/tasks"
 TEST_RESULTS_DIR="logs/migration-tests"
 VALIDATION_LOG="logs/migration-validation.log"

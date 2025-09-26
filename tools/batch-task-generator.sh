@@ -21,7 +21,7 @@ log_batch() {
 
 # Get all task IDs from the monolith
 get_all_task_ids() {
-    grep "### \*\*Tarea T-" "docs/project-management/Sub Tareas v2.md" | \
+    grep "### \*\*Tarea T-" "docs/project-management/archive/task-breakdown-detailed-v1.md" | \
         grep -o "T-[0-9]\+" | sort -V
 }
 
@@ -189,7 +189,7 @@ main() {
         exit 1
     fi
 
-    if [[ ! -f "docs/project-management/Sub Tareas v2.md" ]]; then
+    if [[ ! -f "docs/project-management/archive/task-breakdown-detailed-v1.md" ]]; then
         log_batch "❌ Source monolith not found"
         exit 1
     fi

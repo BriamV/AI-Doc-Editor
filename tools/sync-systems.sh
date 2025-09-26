@@ -6,7 +6,7 @@
 set -euo pipefail
 
 # Configuration
-MONOLITH_FILE="docs/project-management/Sub Tareas v2.md"
+MONOLITH_FILE="docs/project-management/archive/task-breakdown-detailed-v1.md"
 DISTRIBUTED_DIR="docs/tasks"
 BACKUP_DIR="backups/migration"
 MIGRATION_LOG="logs/sync.log"
@@ -221,7 +221,7 @@ $(echo "$task_content" | head -20)
 \`\`\`
 
 ---
-*Archivo generado automáticamente desde Sub Tareas v2.md*
+*Archivo generado automáticamente desde task-breakdown-detailed-v1.md*
 *Última sincronización: $(date)*
 EOF
 
@@ -419,8 +419,8 @@ main() {
             ;;
         *)
             echo "Usage: $0 [monolith-to-distributed|distributed-to-monolith|bidirectional|validate]"
-            echo "  monolith-to-distributed (m2d): Sync from Sub Tareas v2.md to T-XX-STATUS.md files"
-            echo "  distributed-to-monolith (d2m): Sync from T-XX-STATUS.md files to Sub Tareas v2.md"
+            echo "  monolith-to-distributed (m2d): Sync from task-breakdown-detailed-v1.md to T-XX-STATUS.md files"
+            echo "  distributed-to-monolith (d2m): Sync from T-XX-STATUS.md files to task-breakdown-detailed-v1.md"
             echo "  bidirectional (default):        Perform both syncs with conflict detection"
             echo "  validate:                       Validate sync integrity and checksums"
             exit 1

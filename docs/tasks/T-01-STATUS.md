@@ -10,23 +10,37 @@ descripcion: "Establecer la infraestructura de código, el entorno de desarrollo
 
 # Technical Details
 detalles_tecnicos: |
-
+  **Stack:** Docker, Docker Compose, Makefile, GitHub Actions.
+  **Librerías Clave:** Migración a Pydantic v2.
+  **Linters:** ruff, black (Python), eslint (TypeScript/JS).
+  **Análisis de Calidad:** radon (complejidad ciclomática), SonarJS o similar.
+  **Gobernanza:** CODEOWNERS, plantillas de PR y ADR.
 
 # Test Strategy
 estrategia_test: |
-
+  **Unit Tests:** El pipeline debe ejecutar los tests unitarios de backend y frontend. Cobertura inicial > 80%.
+  **Integration Tests:** El pipeline debe ser capaz de construir las imágenes de Docker y ejecutar un test de humo.
+  **Performance Tests:** Un benchmark debe validar la mejora de rendimiento tras la migración a Pydantic v2.
 
 # Documentation
 documentacion: |
-
+  Crear CONTRIBUTING.md con instrucciones de setup.
+  Crear la primera entrada en /docs/adr/000-initial-architecture-decision.md.
 
 # Acceptance Criteria
 criterios_aceptacion: |
-
+  El pipeline se ejecuta y pasa (verde) en el commit inicial del monorepo.
+  El fichero ADR-000 está registrado y versionado.
+  El job qa-gate integra análisis estático (radon, SonarJS) y falla si se superan umbrales críticos de complejidad.
+  El pipeline valida que los títulos de los Pull Requests sigan la convención feat(T-XX): ....
+  La migración a Pydantic v2 está completada y un benchmark demuestra una mejora de rendimiento significativa.
 
 # Definition of Done
 definicion_hecho: |
-
+  Código revisado y aprobado.
+  Todos los tests del pipeline inicial pasan.
+  Documentación (CONTRIBUTING.md, ADR-000) completada.
+  Todas las subtareas verificadas como completas.
 
 # WII Subtasks
 wii_subtasks:
@@ -73,19 +87,33 @@ sync_metadata:
 Establecer la infraestructura de código, el entorno de desarrollo local y el pipeline de Integración Continua (CI) que servirá como base para todo el proyecto. Esta tarea es fundamental para garantizar la calidad, consistencia y automatización desde el primer día. **El alcance incluye la migración del backend a Pydantic v2 y el freeze de dependencias de producción para aprovechar sus mejoras de rendimiento.**
 
 ## Detalles Técnicos
-
+**Stack:** Docker, Docker Compose, Makefile, GitHub Actions.
+**Librerías Clave:** Migración a Pydantic v2.
+**Linters:** ruff, black (Python), eslint (TypeScript/JS).
+**Análisis de Calidad:** radon (complejidad ciclomática), SonarJS o similar.
+**Gobernanza:** CODEOWNERS, plantillas de PR y ADR.
 
 ## Estrategia de Test
-
+**Unit Tests:** El pipeline debe ejecutar los tests unitarios de backend y frontend. Cobertura inicial > 80%.
+**Integration Tests:** El pipeline debe ser capaz de construir las imágenes de Docker y ejecutar un test de humo.
+**Performance Tests:** Un benchmark debe validar la mejora de rendimiento tras la migración a Pydantic v2.
 
 ## Documentación Requerida
-
+Crear CONTRIBUTING.md con instrucciones de setup.
+Crear la primera entrada en /docs/adr/000-initial-architecture-decision.md.
 
 ## Criterios de Aceptación
-
+El pipeline se ejecuta y pasa (verde) en el commit inicial del monorepo.
+El fichero ADR-000 está registrado y versionado.
+El job qa-gate integra análisis estático (radon, SonarJS) y falla si se superan umbrales críticos de complejidad.
+El pipeline valida que los títulos de los Pull Requests sigan la convención feat(T-XX): ....
+La migración a Pydantic v2 está completada y un benchmark demuestra una mejora de rendimiento significativa.
 
 ## Definición de Hecho (DoD)
-
+Código revisado y aprobado.
+Todos los tests del pipeline inicial pasan.
+Documentación (CONTRIBUTING.md, ADR-000) completada.
+Todas las subtareas verificadas como completas.
 
 ## Subtareas WII
 ### id: "R0.WP1-T01-ST1"

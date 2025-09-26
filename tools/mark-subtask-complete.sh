@@ -4,7 +4,7 @@
 
 TASK_ID="$1"
 SUBTASK_ID="$2"
-FILE="docs/project-management/Sub Tareas v2.md"
+FILE="docs/project-management/archive/task-breakdown-detailed-v1.md"
 
 if [[ -z "$TASK_ID" || -z "$SUBTASK_ID" ]]; then
     echo "❌ Usage: $0 <TASK_ID> <SUBTASK_ID>"

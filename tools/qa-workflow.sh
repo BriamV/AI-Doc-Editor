@@ -5,7 +5,7 @@
 TASK_ID="${1:-}"
 ACTION="${2:-}"
 REASON="${3:-}"
-FILE="docs/project-management/Sub Tareas v2.md"
+FILE="docs/project-management/archive/task-breakdown-detailed-v1.md"
 
 # Estado mapping with emojis
 declare -A STATES=(

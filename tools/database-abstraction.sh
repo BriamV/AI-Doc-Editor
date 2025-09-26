@@ -5,7 +5,7 @@
 
 # Migration mode control
 DATABASE_MODE="${DATABASE_MODE:-monolith}"  # monolith|distributed|hybrid
-MONOLITH_FILE="docs/project-management/Sub Tareas v2.md"
+MONOLITH_FILE="docs/project-management/archive/task-breakdown-detailed-v1.md"
 DISTRIBUTED_DIR="docs/tasks"
 MIGRATION_LOG="logs/migration.log"
 

@@ -6,7 +6,7 @@ dependencias: "T-01"
 prioridad: "Alta"
 release_target: "Release 0"
 complejidad: 8
-descripcion: "Establecer un proceso de gobernanza automatizado para la documentación de la arquitectura y la API. Esto asegura que la documentación se mantenga actualizada, sea consistente y trazable a lo largo del proyecto. **El alcance incluye la creación de una plantilla estándar para "
+descripcion: "Establecer un proceso de gobernanza automatizado para la documentación de la arquitectura y la API. Esto asegura que la documentación se mantenga actualizada, sea consistente y trazable a lo largo del proyecto. **El alcance incluye la creación de una plantilla estándar para \"Actas de Certificación\" de tareas críticas.**"
 
 # Technical Details
 detalles_tecnicos: |
@@ -77,7 +77,7 @@ sync_metadata:
 **Complejidad Total:** 8
 
 ## Descripción
-Establecer un proceso de gobernanza automatizado para la documentación de la arquitectura y la API. Esto asegura que la documentación se mantenga actualizada, sea consistente y trazable a lo largo del proyecto. **El alcance incluye la creación de una plantilla estándar para 
+Establecer un proceso de gobernanza automatizado para la documentación de la arquitectura y la API. Esto asegura que la documentación se mantenga actualizada, sea consistente y trazable a lo largo del proyecto. **El alcance incluye la creación de una plantilla estándar para "Actas de Certificación" de tareas críticas.**
 
 ## Detalles Técnicos
 **API Spec:** OpenAPI 3.1.
