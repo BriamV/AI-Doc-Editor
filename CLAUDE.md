@@ -3,11 +3,13 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
+
 AI Document Editor: React 18 + TypeScript + Python FastAPI + AI integration
 Features: AI-powered document generation, real-time collaboration, OAuth security
 Repository: https://github.com/BriamV/AI-Doc-Editor/
 
 ## Tech Stack
+
 - Frontend: React 18 + TypeScript + Vite + TailwindCSS
 - Backend: Python FastAPI + SQLAlchemy + Alembic
 - AI: OpenAI Chat Completions (GPT-4o, GPT-4, GPT-3.5-turbo) + Frontend Streaming
@@ -24,6 +26,7 @@ Repository: https://github.com/BriamV/AI-Doc-Editor/
   - **Infrastructure**: Docker, GitHub Actions, Claude Code hooks
 
 ## Development Setup
+
 ```bash
 # Prerequisites: Node.js 18.16.0, Python 3.11+, WSL2 (Windows)
 yarn install && yarn dev                  # Start development
@@ -36,17 +39,20 @@ yarn security-scan                        # Security audit
 ```
 
 ## 🚨 MANDATORY: Sub-Agent First Workflow
+
 1. **FIRST**: Use CUSTOM slash commands (.claude/commands/) for complex tasks
-2. **SECOND**: Use direct yarn commands (yarn dev, yarn build, yarn test)  
+2. **SECOND**: Use direct yarn commands (yarn dev, yarn build, yarn test)
 3. **LAST**: Direct CLI only if above unavailable
 4. **NEVER**: Use eliminated scripts (cli.cjs, qa-gate.cjs, etc. - removed)
 
 ### Sub-Agent Architecture
+
 - **Custom Commands**: 19 workflow orchestrators in .claude/commands/ that analyze context
 - **Global Sub-Agents**: 40+ Claude Code specialists (security-auditor, frontend-developer, etc.)
 - **Invocation**: Commands auto-select and delegate to appropriate sub-agents
 
 ## ⚡ CONSTANT VALIDATION Required
+
 ```bash
 # ALWAYS validate after branch changes, context switches, or issues
 /health-check                    # Immediate system validation
@@ -67,10 +73,10 @@ yarn quality-gate                # Multi-stack quality validation
 /context-analyze [--depth]      # Project analysis
 
 # Specialized Commands (Tier 2) - Use as needed
-/security-audit /architecture /debug-analyze /pipeline-check 
+/security-audit /architecture /debug-analyze /pipeline-check
 /deploy-validate /adr-create /issue-generate
 
-# Advanced Commands (Tier 3) - Production/Emergency  
+# Advanced Commands (Tier 3) - Production/Emergency
 /release-prep /hotfix-flow /search-web /explain-codebase
 
 # Sub-Agent Invocation Pattern (Auto-handled by commands)
@@ -78,6 +84,7 @@ yarn quality-gate                # Multi-stack quality validation
 ```
 
 ## Essential Commands
+
 ```bash
 # Development (PREFERRED - Direct commands)
 yarn dev|build|test|security-scan
@@ -97,6 +104,10 @@ yarn tsc-check        # Frontend TypeScript validation
 yarn python-quality   # Backend Python validation (format + lint + complexity)
 yarn python-format    # Python autofix formatting (Black)
 yarn python-lint      # Python autofix linting (Ruff)
+
+# Architecture & Integration (NEW)
+yarn validate-architecture           # Dual directory compliance (ADR-011)
+yarn integration-test                # Cross-directory interface testing
 
 # 🛡️ MERGE PROTECTION (MANDATORY before merges)
 yarn merge-safety-full           # Complete merge safety validation
@@ -121,6 +132,7 @@ yarn validate-docs:report    # Generate placement report
 ```
 
 ## Project Structure
+
 - `src/components/` - React components (Chat, Document, Menu)
 - `src/store/` - Zustand stores (docs, auth, config)
 - `backend/` - Python FastAPI backend + .venv
@@ -134,16 +146,60 @@ yarn validate-docs:report    # Generate placement report
 - `backend/docs/` - Backend implementation docs (API, database, security)
 - `docs/architecture/ai/` - **NEW** AI architecture docs (strategy, audit, implementation)
 - `.claude/commands/` - 19 production slash commands
-- `tools/` - Task management scripts
-- `scripts/` - **STREAMLINED** 5 essential scripts (55% reduction: 6 obsolete eliminated)
+- `tools/` - Task management scripts (project workflow)
+- `scripts/` - **STREAMLINED** Infrastructure automation (5 essential scripts)
+
+## 🏗️ Dual Directory Architecture (ADR-011)
+
+**GOVERNANCE: Strict separation between workflow tools and infrastructure scripts**
+
+### **tools/ - Project Workflow Management**
+
+```bash
+# ✅ Project-specific workflows, task management, progress tracking
+tools/task-navigator.sh T-XX         # Task development workflows
+tools/progress-dashboard.sh          # Project status dashboards
+tools/extract-subtasks.sh T-XX       # Development planning
+tools/validate-dod.sh T-XX           # Definition of Done validation
+tools/qa-workflow.sh T-XX            # Quality assurance workflows
+```
+
+### **scripts/ - Infrastructure Automation**
+
+```bash
+# ✅ Build tools, CI/CD automation, development environment setup
+scripts/multiplatform.cjs            # Platform detection & environment
+scripts/merge-protection.cjs         # Git merge safety automation
+scripts/install-merge-hooks.cjs      # Git hooks installation
+scripts/dev-runner.cjs               # Development server automation
+scripts/python-cc-gate.cjs           # Python quality gate automation
+```
+
+### **Integration Validation**
+
+```bash
+# ✅ Validate dual directory compliance
+yarn validate-architecture           # Directory structure compliance
+/architecture                        # Architecture integrity check
+yarn integration-test                # Cross-directory interface testing
+```
+
+**Scopes & Interface Contracts:**
+
+- **tools/**: Project domain, task context, workflow orchestration
+- **scripts/**: Infrastructure domain, build automation, environment setup
+- **Error Handling**: Standardized exit codes, structured logging
+- **Integration**: Clear APIs between workflow and infrastructure layers
 
 ## 🔧 Quality Tools Ecosystem (40+ Tools)
+
 **Hooks-Integrated Multi-Stack Pipeline:**
+
 ```bash
 # Frontend Quality
 eslint, prettier, jest, tsc              # TypeScript/JavaScript
 
-# Python Backend Quality  
+# Python Backend Quality
 black, ruff, radon, mypy, pip-audit      # Python quality gates
 
 # Security & Secrets
@@ -159,10 +215,14 @@ taplo, shellcheck, shfmt                 # Config + shell scripts
 # Multi-Format Support
 prettier (JSON/XML/CSS/HTML)             # Universal formatting
 ```
+
 **Auto-Detection**: Windows/Linux/WSL + multi-venv support
-**Streamlined Architecture**: 5 essential scripts remain after 55% reduction (multiplatform.cjs, merge-protection.cjs, install-merge-hooks.cjs, dev-runner.cjs, python-cc-gate.cjs)
+**Streamlined Architecture**: 5 essential scripts remain after 55% reduction (ADR-011 compliance)
+**Error Handling**: Standardized exit codes + structured logging
+**Integration Testing**: Cross-directory interface validation
 
 ## Quality Assurance
+
 - **Multi-Stack Pipeline**: 40+ tools integrated via .claude/hooks.json
 - **Auto-formatting**: Real-time format on Edit/Write/MultiEdit
   - TypeScript/JavaScript: ESLint + Prettier
@@ -177,34 +237,38 @@ prettier (JSON/XML/CSS/HTML)             # Universal formatting
 - **Compliance**: OAuth 2.0, TLS 1.3+, AES-256, GDPR
 
 ## Task Management Workflow
+
 ```bash
 # Use custom slash commands for workflow automation (PREFERRED)
 /context-analyze                         # Project progress analysis
-/task-dev T-XX                          # Task development with context  
+/task-dev T-XX                          # Task development with context
 /review-complete --scope T-XX           # Validation and review
 /commit-smart                           # Mark development complete
 
 # Legacy bash tools (still functional but use slash commands when possible)
 tools/progress-dashboard.sh              # Project progress
-tools/task-navigator.sh T-XX             # Task details  
+tools/task-navigator.sh T-XX             # Task details
 tools/extract-subtasks.sh T-XX           # Development planning
 tools/validate-dod.sh T-XX               # Definition of Done validation
 tools/qa-workflow.sh T-XX dev-complete   # Mark development complete
 ```
 
 ## Current Context
+
 - **Branch**: develop
-- **Phase**: R0.WP3 (Seguridad y Auditoría) 
+- **Phase**: R0.WP3 (Seguridad y Auditoría)
 - **Language**: Spanish docs, English code
 - **Pattern**: T-XX task identification
 - **Status**: docs/project-management/status/R0-RELEASE-STATUS.md
 
 ## Sub-Agent Architecture
+
 - **40+ Global Sub-Agents**: Built-in Claude Code specialists (security-auditor, backend-architect, etc.)
 - **Local Project Agent**: workflow-architect - Specialized for this project's workflow orchestration
 - **Custom Commands**: Auto-select appropriate sub-agents (global + local) based on project context
 
 ## GitHub Issues Management
+
 ```bash
 # ✅ ALWAYS specify target repository (this repo has forks)
 gh issue view <NUMBER> --repo BriamV/AI-Doc-Editor          # View issue
@@ -215,6 +279,7 @@ gh issue view <NUMBER>                                      # WRONG
 ```
 
 ## Security & Compliance
+
 ```bash
 # PREFERRED: Direct commands
 yarn security-scan                         # Security scan (audit + semgrep)
@@ -227,24 +292,40 @@ docs/architecture/adr/ADR-006-dependency-security-scanning.md  # Security archit
 ```
 
 ## Do Not Touch
+
 - Historical task file archived - Use tools/task-navigator.sh for current tasks
 - `.claude/commands/archive/` - Archived historical commands
 - `test-*.js` - Temporary debugging files
 - `.claude/hooks.json.backup` - Backup configuration
 - `legacy/` - Migrated Cypress files (see legacy/MIGRATION-README.md)
 
-## ⚠️  Modernization Success (55% STREAMLINED)
-- `scripts/` - **MODERNIZED** - Obsolete scripts eliminated (6 files, 57.6 KB removed)  - **ELIMINATED**: cli.cjs, qa-gate.cjs, generate-traceability*.cjs, security-scan.cjs, test-runner.cjs  - **REMAINING (5 essential)**: multiplatform.cjs, merge-protection.cjs, install-merge-hooks.cjs, dev-runner.cjs, python-cc-gate.cjs  - Migration to direct yarn commands completed (54% faster execution)- `legacy/cypress/` - **MIGRATED** - Cypress E2E tests replaced by Playwright  - `yarn test:cypress` - Legacy Cypress commands (use `yarn test:e2e` instead)  - Migration completed: All E2E testing now uses Playwright- Timeline: Final legacy/ cleanup after Playwright validation phase
+## ⚠️ Modernization Success (55% STREAMLINED + ADR-011 Compliance)
+
+- **Dual Directory Architecture**: tools/ (workflow) vs scripts/ (infrastructure) - ADR-011
+- `scripts/` - **MODERNIZED** - Infrastructure automation (5 essential scripts)
+  - **ELIMINATED**: cli.cjs, qa-gate.cjs, generate-traceability\*.cjs, security-scan.cjs, test-runner.cjs
+  - **REMAINING**: multiplatform.cjs, merge-protection.cjs, install-merge-hooks.cjs, dev-runner.cjs, python-cc-gate.cjs
+  - Migration to direct yarn commands completed (54% faster execution)
+- `tools/` - **SPECIALIZED** - Project workflow management (task navigation, progress tracking)
+- **Error Handling**: Standardized across both directories with structured logging
+- `legacy/cypress/` - **MIGRATED** - Cypress E2E tests replaced by Playwright
+  - `yarn test:cypress` - Legacy Cypress commands (use `yarn test:e2e` instead)
+  - Migration completed: All E2E testing now uses Playwright
+- Timeline: Final legacy/ cleanup after Playwright validation phase
 
 ## Integration Policy
+
 All enhancements MUST integrate into workflow:
+
 1. Document in CLAUDE.md with concrete commands
-2. Map to existing tools/scripts  
+2. Map to existing tools/scripts
 3. Test before documenting
 4. Remove redundancies
 
 ## 🔨 POST-BUILD VALIDATION Protocol
+
 **MANDATORY after package.json changes or new scripts:**
+
 ```bash
 # ✅ ALWAYS run after modifying package.json or adding scripts
 yarn install --frozen-lockfile          # Verify dependencies
@@ -257,6 +338,7 @@ yarn quality-gate                       # Full quality pipeline
 ```
 
 ## CLAUDE.md Editing Rules
+
 ```bash
 # ✅ MANDATORY: Follow existing structure and style
 # ✅ CONCISO: Max 3-5 lines per concept
@@ -269,6 +351,7 @@ yarn quality-gate                       # Full quality pipeline
 ## 📋 Documentation Standards & Templates
 
 ### **Template Usage (REQUIRED for README creation)**
+
 ```bash
 # 1. Evaluate content type and placement
 docs/templates/DOCUMENTATION-PLACEMENT-GUIDELINES.md
@@ -286,6 +369,7 @@ docs/templates/README-VALIDATION-CHECKLIST.md
 ```
 
 ### **Quality Requirements**
+
 ✅ **MANDATORY**: Template compliance for all new READMEs
 ✅ **MANDATORY**: Conway's Law compliance (implementation docs ≤2 dirs from code)
 ✅ **MANDATORY**: 4-tier navigation table (user-facing docs)
@@ -293,6 +377,7 @@ docs/templates/README-VALIDATION-CHECKLIST.md
 ✅ **VALIDATION**: 95%+ working cross-references, 90%+ template adherence
 
 ### **Quick Template Selection**
+
 - **Main project README**: User-Facing Application template
 - **Tools/scripts dirs**: Technical Infrastructure template
 - **docs/ navigation**: Documentation Hub template
@@ -301,6 +386,7 @@ docs/templates/README-VALIDATION-CHECKLIST.md
 - **.claude/ directories**: Claude Code Integration template
 
 ## 🛡️ MERGE PROTECTION SYSTEM
+
 **CRITICAL: NEVER merge without running these commands first**
 
 ```bash
@@ -319,6 +405,7 @@ yarn branch-audit               # File count audit
 ```
 
 **Protection Features:**
+
 - 📊 File count comparison (prevents 250+ file loss)
 - 📁 Critical directory structure validation
 - 📄 Essential file existence checks
@@ -329,6 +416,7 @@ yarn branch-audit               # File count audit
 - 🚫 Automatic merge blocking on failures
 
 ## Quick Reference
+
 - 📋 **Task details**: `/task-dev T-XX`
 - 🔍 **Codebase analysis**: `/context-analyze`
 - 🛡️ **Merge safety**: `/merge-safety`
