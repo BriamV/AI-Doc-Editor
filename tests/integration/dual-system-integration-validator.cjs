@@ -26,7 +26,7 @@ const os = require('os');
 const { performance } = require('perf_hooks');
 
 // Import existing validators
-const ContractComplianceValidator = require('./contract-compliance-validator.js');
+const ContractComplianceValidator = require('./contract-compliance-validator.cjs');
 
 // Import error handling for integration testing
 const { ErrorCodes, createError, ErrorHandler } = require('../../scripts/lib/error-codes.cjs');

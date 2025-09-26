@@ -34,6 +34,13 @@ Registro formal de decisiones arquitectónicas importantes:
   - Recomendaciones de mejora
   - Roadmap de evolución arquitectónica
 
+### 🔗 Contratos de Integración
+- **[INTERFACE-CONTRACTS.md](./INTERFACE-CONTRACTS.md)** - Contratos formales de interfaz entre directorios
+  - Especificación de comunicación scripts/ ↔ tools/
+  - Protocolos de intercambio de datos y manejo de errores
+  - Patrones de integración y puntos de dependencia
+  - Contratos API-like y requisitos de testing
+
 ### 🔌 [API Documentation](./api/)
 Documentación completa de APIs y contratos del sistema:
 - **[OpenAPI Specification](./api/openapi-specification.yaml)** - Especificación completa de la API FastAPI
@@ -57,6 +64,7 @@ Arquitectura de inteligencia artificial y documentación estratégica:
 - **DevOps**: ADR-003 (CI/CD), ADR-006 (Security), ADR-008/009 (QA)
 - **Testing**: ADR-010 (Playwright E2E)
 - **APIs**: [API Documentation](./api/) - Contratos, versionado y integración
+- **Infrastructure**: [INTERFACE-CONTRACTS.md](./INTERFACE-CONTRACTS.md) - Contratos entre scripts/ y tools/
 
 ### Por Tipo de Decisión
 - **Tecnológicas**: ADR-001, ADR-004, ADR-007, ADR-010
@@ -94,6 +102,8 @@ Arquitectura de inteligencia artificial y documentación estratégica:
 - [Integration](../integration/) - Contratos de integración entre sistemas
 - [API Documentation](./api/) - Especificaciones completas de APIs
 - [AI Implementation](../../src/docs/ai/) - Implementación frontend de IA
+- [Scripts Directory](../../scripts/) - Infraestructura implementando estos contratos
+- [Tools Directory](../../tools/) - Utilidades de gestión usando estos contratos
 
 ---
 *Documentación técnica actualizada y organizada*

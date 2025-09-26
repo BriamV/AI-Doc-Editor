@@ -1,6 +1,6 @@
 # Document Placement Validation Report
 
-**Generated:** Thu, Sep 25, 2025  9:51:19 PM
+**Generated:** Fri, Sep 26, 2025 11:31:54 AM
 **Validator:** tools/validate-document-placement.sh
 
 ## Summary
