@@ -2,6 +2,12 @@
 Simple script to create test database tables for validation
 """
 
+import sys
+import os
+
+# Add backend root to path
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
+
 import asyncio
 from app.db.session import engine
 from app.models.audit import Base as AuditBase

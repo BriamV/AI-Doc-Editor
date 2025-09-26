@@ -12,6 +12,7 @@ from typing import List, Tuple
 def _check_security_files() -> List[str]:
     """Ensure critical security-related files exist."""
     issues: List[str] = []
+    backend_root = os.path.join(os.path.dirname(__file__), "..", "..")
     security_files = [
         "app/security/rate_limiter.py",
         "app/main.py",
@@ -20,7 +21,8 @@ def _check_security_files() -> List[str]:
     ]
 
     for file in security_files:
-        if os.path.exists(file):
+        full_path = os.path.join(backend_root, file)
+        if os.path.exists(full_path):
             print(f"[OK] {file} - EXISTS")
         else:
             print(f"[FAIL] {file} - MISSING")
@@ -31,7 +33,7 @@ def _check_security_files() -> List[str]:
 def _load_settings():
     """Load application settings safely for validation."""
     try:
-        sys.path.append(os.path.dirname(__file__))
+        sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
         from app.core.config import settings  # type: ignore
 
         return settings, None
@@ -111,8 +113,10 @@ def _validate_production_env_example() -> List[str]:
     print("-" * 38)
     issues: List[str] = []
 
-    if os.path.exists(".env.production.example"):
-        with open(".env.production.example", "r") as f:
+    backend_root = os.path.join(os.path.dirname(__file__), "..", "..")
+    env_file = os.path.join(backend_root, ".env.production.example")
+    if os.path.exists(env_file):
+        with open(env_file, "r") as f:
             content = f.read()
             prod_checks = [
                 ("Environment Production", "ENVIRONMENT=production" in content),

@@ -124,6 +124,10 @@ yarn validate-docs:report    # Generate placement report
 - `src/components/` - React components (Chat, Document, Menu)
 - `src/store/` - Zustand stores (docs, auth, config)
 - `backend/` - Python FastAPI backend + .venv
+  - `backend/app/` - Main FastAPI application code
+  - `backend/tests/` - Integration, performance, security tests
+  - `backend/scripts/` - Database utilities, security validation
+  - `backend/reports/` - Generated analysis reports
 - `docs/` - Spanish documentation (primary)
 - `src/docs/` - **NEW** Frontend implementation docs (React, Zustand, hooks)
 - `src/docs/ai/` - **NEW** AI implementation docs (frontend patterns, integration)

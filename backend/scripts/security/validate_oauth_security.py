@@ -16,7 +16,7 @@ from typing import Dict, Any
 from urllib.parse import urlparse
 
 # Add app directory to path for imports
-sys.path.append(str(Path(__file__).parent / "app"))
+sys.path.append(str(Path(__file__).parent.parent.parent / "app"))
 
 from app.core.config import settings
 
