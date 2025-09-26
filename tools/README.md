@@ -8,7 +8,7 @@
 
 ## Overview
 
-Scripts para gestión eficiente de "Sub Tareas v2.md" y desarrollo basado en subtareas. Estos tools resuelven los problemas de:
+Scripts para gestión eficiente de tareas del proyecto y desarrollo basado en subtareas. Estos tools resuelven los problemas de:
 
 - ✅ **Actualización lenta** de estados de tareas
 - ✅ **Navegación ineficiente** en archivo de 123KB

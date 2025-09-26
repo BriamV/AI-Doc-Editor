@@ -193,7 +193,7 @@ tools/qa-workflow.sh T-XX dev-complete   # Mark development complete
 - **Phase**: R0.WP3 (Seguridad y Auditoría) 
 - **Language**: Spanish docs, English code
 - **Pattern**: T-XX task identification
-- **Status**: docs/project-management/DEVELOPMENT-STATUS.md
+- **Status**: docs/project-management/status/R0-RELEASE-STATUS.md
 
 ## Sub-Agent Architecture
 - **40+ Global Sub-Agents**: Built-in Claude Code specialists (security-auditor, backend-architect, etc.)
@@ -223,7 +223,7 @@ docs/architecture/adr/ADR-006-dependency-security-scanning.md  # Security archit
 ```
 
 ## Do Not Touch
-- `docs/project-management/Sub Tareas v2.md` - Use tools/task-navigator.sh instead
+- Historical task file archived - Use tools/task-navigator.sh for current tasks
 - `.claude/commands/archive/` - Archived historical commands
 - `test-*.js` - Temporary debugging files
 - `.claude/hooks.json.backup` - Backup configuration

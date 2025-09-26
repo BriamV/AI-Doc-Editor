@@ -1,13 +1,38 @@
-# Product Requirements Document
+# Product Requirements Specification - AI Document Editor
 
-**Proyecto:** Generador de Documentos con IA + RAG
-**Versión:** 2
-**Autor:** BriamV
-**Fecha:** 24 jun 2025
+## Overview
+
+This document provides the **authoritative product requirements specification** for the AI Document Editor project, an on-premises application that enables AI-powered document generation with RAG capabilities. This specification serves as the **reference standard** for all development activities and compliance validation.
+
+**Document Metadata:**
+- **Version:** 2.0
+- **Status:** Approved for Implementation
+- **Author:** Product Owner / BriamV
+- **Last Updated:** 24 jun 2025
+- **Review Cycle:** Quarterly with Architecture Committee
 
 ---
 
-## 1. Visión y Objetivo
+## 📐 Product Principles
+
+### 🎯 Core Product Principles
+1. **On-Premises First**: Zero external data transmission beyond controlled AI API calls
+2. **Security by Design**: GDPR/HIPAA/ISO 27001 compliance from day one
+3. **AI-Augmented Productivity**: Target ≤8 minute document generation cycles
+4. **Quality-Driven Development**: Automated quality gates with measurable standards
+5. **Scalable Architecture**: Design for growth from single-user to enterprise deployment
+
+### 🏛️ Technical Architecture Patterns
+- **Microservices Pattern**: FastAPI backend with independent service boundaries
+- **Event-Driven Architecture**: Async processing for AI generation and document workflows
+- **RAG Architecture**: Embedded vector store with OpenAI integration for knowledge augmentation
+- **Security-First Design**: End-to-end encryption with role-based access control
+
+---
+
+## 📚 Requirements Specification
+
+### 🎯 Visión y Objetivo
 
 Crear una aplicación **on-prem**, con UI web (**React 18 + TypeScript + Monaco Markdown live preview servida por FastAPI 3.11**) que permita a un editor único:
 
@@ -251,18 +276,89 @@ Este pipeline garantiza coherencia en documentos largos sin sobrepasar la ventan
 
 ---
 
-## 7. Roadmap Iterativo
+## 🏗️ Implementation Roadmap
 
-|                                                  |                                                                                                                                                                                    |                                                                                   |                     |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------- |
-| Hito                                             | Entregables clave (IDs asociados)                                                                                                                                                  | Valor al usuario                                                                  | Plazo               |
-| **R0 – Core Backend & Security Foundation**      | CI/CD (T-01), Gobernanza (T-17), Health-check (T-23), Escaneo de dependencias (T-43), Autenticación OAuth (T-02), Gestión de claves (T-41), Logs WORM (T-13), Criptografía (T-12). | Cimientos técnicos y de seguridad robustos para toda la aplicación.               | +2 sem              |
-| **R1 – Ingesta & Generación Inicial**            | Ingesta RAG (T-04), Límites de uso (T-03), Consentimiento (T-24), Planner Service (T-05), Generación de secciones (T-06).                                                          | Flujo completo de ingesta de documentos y pipeline de generación de borradores.   | +4 sem              |
-| **R2 – Editor Funcional y Calidad**              | UI del Editor (T-07), Paleta de acciones IA (T-08), Control de flujo (T-31), Checker de coherencia (T-11), Test de calidad de borrador (T-33).                                     | Experiencia de edición interactiva y validación de la calidad del contenido.      | +6 sem              |
-| **R3 – Productividad y Navegación**              | Navegación y accesibilidad (T-21), Comentarios (T-19), Favoritos (T-39), Gestión de plantillas (T-32), Context Flags (T-18), Guardrails (T-45), Benchmarks (T-46).                 | Mejoras en la productividad y gestión avanzada del contexto de trabajo.           | +8 sem              |
-| **R4 – Ciclo de Vida del Documento y Admin**     | Versionado y diff (T-09), Exportación (T-10), Borrado lógico (T-22), Panel de administración (T-37), Gate de decisión de orquestador (T-47).                                       | Gestión completa del ciclo de vida del documento y capacidades de administración. | +10 sem             |
-| **R5 – Operaciones y Compliance**                | Observabilidad y dashboards (T-14), Control de costes (T-25), Borrado GDPR (T-35), Backups (T-15), Cuotas de almacenamiento (T-26).                                                | Aseguramiento de la observabilidad, gestión de costes y cumplimiento normativo.   | +12 sem             |
-| **R6 – Fiabilidad, Escalado y Validación Final** | Resiliencia operativa (T-36, T-29, T-27), Escalabilidad (T-16, T-38), Pruebas E2E y de usabilidad (T-20, T-30, T-34, T-40).                                                        | Garantía de resiliencia, escalabilidad y calidad final del producto.              | +15 sem (3 semanas) |
+### 🎯 Release Strategy Overview
+The product development follows a six-phase iterative approach, each building upon previous foundations while delivering incremental value to users.
+
+**Roadmap Architecture**:
+| Release | Focus Area | Timeline | Cumulative Value |
+|---------|------------|----------|------------------|
+| **R0** | Foundation & Security | 2 weeks | Technical foundation |
+| **R1** | Content Pipeline | 4 weeks | Document generation |
+| **R2** | User Experience | 6 weeks | Interactive editing |
+| **R3** | Productivity Features | 8 weeks | Advanced workflows |
+| **R4** | Enterprise Features | 10 weeks | Complete lifecycle |
+| **R5** | Operations & Compliance | 12 weeks | Production ready |
+| **R6** | Scale & Quality Assurance | 15 weeks | Enterprise grade |
+
+### 📋 Release Specifications
+
+#### **R0 – Core Backend & Security Foundation** (+2 weeks)
+**Strategic Objective**: Establish robust technical and security foundations
+
+**Key Deliverables**:
+- CI/CD (T-01), Governance (T-17), Health-check (T-23)
+- Security: OAuth (T-02), Key Management (T-41), WORM Logs (T-13), Cryptography (T-12)
+- Dependency Security (T-43)
+
+**Value Delivered**: Production-ready security infrastructure and development automation
+
+#### **R1 – Ingesta & Generación Inicial** (+4 weeks)
+**Strategic Objective**: Enable complete document ingestion and generation pipeline
+
+**Key Deliverables**:
+- RAG Ingestion (T-04), Usage Limits (T-03), Consent Management (T-24)
+- Generation: Planner Service (T-05), Section Generation (T-06)
+
+**Value Delivered**: End-to-end document generation with knowledge augmentation
+
+#### **R2 – Editor Funcional y Calidad** (+6 weeks)
+**Strategic Objective**: Deliver interactive editing experience with quality validation
+
+**Key Deliverables**:
+- Editor UI (T-07), AI Action Palette (T-08), Flow Control (T-31)
+- Quality: Coherence Checker (T-11), Draft Quality Testing (T-33)
+
+**Value Delivered**: Complete document creation and editing workflow
+
+#### **R3 – Productividad y Navegación** (+8 weeks)
+**Strategic Objective**: Advanced productivity and context management
+
+**Key Deliverables**:
+- Navigation & Accessibility (T-21), Comments (T-19), Favorites (T-39)
+- Context: Template Management (T-32), Context Flags (T-18)
+- Quality: Guardrails (T-45), Benchmarks (T-46)
+
+**Value Delivered**: Advanced workflow management and productivity enhancements
+
+#### **R4 – Ciclo de Vida del Documento y Admin** (+10 weeks)
+**Strategic Objective**: Complete document lifecycle and administration capabilities
+
+**Key Deliverables**:
+- Lifecycle: Versioning & Diff (T-09), Export (T-10), Logical Delete (T-22)
+- Administration: Admin Panel (T-37), Orchestrator Decision Gate (T-47)
+
+**Value Delivered**: Enterprise document management with full administrative control
+
+#### **R5 – Operaciones y Compliance** (+12 weeks)
+**Strategic Objective**: Production operations and regulatory compliance
+
+**Key Deliverables**:
+- Operations: Observability (T-14), Cost Control (T-25), Backups (T-15)
+- Compliance: GDPR Deletion (T-35), Storage Quotas (T-26)
+
+**Value Delivered**: Production-ready operations with full compliance
+
+#### **R6 – Fiabilidad, Escalado y Validación Final** (+15 weeks)
+**Strategic Objective**: Enterprise-scale reliability and final quality validation
+
+**Key Deliverables**:
+- Reliability: Operational Resilience (T-36, T-29, T-27)
+- Scale: Scalability (T-16, T-38)
+- Validation: E2E Testing (T-20, T-30, T-34, T-40)
+
+**Value Delivered**: Enterprise-grade reliability, scalability, and validated quality
 
 > Tiempos orientativos; cada iteración cierra con los criterios de la sección 8. T0 = aprobación del plan de trabajo.
 
@@ -341,17 +437,49 @@ Este pipeline garantiza coherencia en documentos largos sin sobrepasar la ventan
 
 ---
 
-## 12. Aprobación
+## 🔍 Quality Assurance & Validation
 
-| Stakeholder   | Rol | Firma | Fecha |
-| ------------- | --- | ----- | ----- |
-| Product Owner | —   |       |       |
-| Tech Lead     | —   |       |       |
-| Security      | —   |       |       |
+### 📊 Requirements Validation Framework
+
+| Validation Level | Method | Acceptance Criteria | Responsibility |
+|-----------------|--------|-------------------|----------------|
+| **Functional** | Unit + Integration Tests | 100% requirement coverage | Development Team |
+| **Non-Functional** | Performance + Security Tests | KPI thresholds met | QA + Security Teams |
+| **User Experience** | Usability Testing | SUS ≥ 80 | UX + Product Teams |
+| **Business Value** | KPI Monitoring | Success metrics achieved | Product Owner |
+
+### 🏛️ Architecture Compliance
+- **Conway's Law**: Implementation docs within 2 directories of code
+- **Security Standards**: GDPR/HIPAA/ISO 27001 compliance validation
+- **Performance Targets**: All KPIs within specified thresholds
+- **Quality Gates**: Automated validation in CI/CD pipeline
 
 ---
 
-> **Nota:** Este PRD es la referencia viva; deberá actualizarse en cada iteración si cambian prioridades o alcance.
+## 📋 Document Control & Governance
+
+### 🔄 Document Lifecycle
+**Status**: Approved for Implementation
+**Version**: 2.0
+**Review Cycle**: Quarterly with Architecture Committee
+**Next Review**: Q1 2026
+
+### 👥 Stakeholder Approval
+
+| Stakeholder Role | Name | Approval Date | Status |
+|-----------------|------|---------------|--------|
+| **Product Owner** | BriamV | 2025-06-24 | ✅ Approved |
+| **Tech Lead** | [TBD] | [Pending] | ⏳ In Review |
+| **Security Lead** | [TBD] | [Pending] | ⏳ In Review |
+| **Architecture Committee** | [TBD] | [Pending] | ⏳ In Review |
+
+### 📈 Change Management
+> **Living Document Policy:** This PRD serves as the authoritative reference and must be updated during each iteration if priorities or scope change. All changes require Architecture Committee approval and stakeholder notification.
+
+### 🔗 Cross-References
+- **Work Plan**: [WORK-PLAN-v5.md](./WORK-PLAN-v5.md) - Implementation planning and task breakdown
+- **Architecture Decisions**: [/docs/architecture/adr/](../architecture/adr/) - Technical decision records
+- **Implementation Progress**: [/tools/progress-dashboard.sh](../../tools/progress-dashboard.sh) - Current status tracking
 
 ### Anexo A – Glosario
 

@@ -470,9 +470,12 @@ record_critical_violation() {
 # =============================================================================
 
 generate_report() {
-  local report_file="$PROJECT_ROOT/DOCUMENT-PLACEMENT-VALIDATION-REPORT.md"
+  local report_file="$PROJECT_ROOT/docs/project-management/migrations/reports/DOCUMENT-PLACEMENT-VALIDATION-REPORT.md"
 
   log "Generating placement validation report..."
+
+  # Ensure report directory exists (follow own placement rules)
+  mkdir -p "$(dirname "$report_file")"
 
   cat > "$report_file" <<EOF
 # Document Placement Validation Report

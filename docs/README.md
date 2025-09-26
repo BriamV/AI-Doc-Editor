@@ -6,9 +6,9 @@ Este directorio contiene toda la documentación del proyecto AI Document Editor,
 
 ### 📋 [Project Management](./project-management/)
 Documentos de gestión de proyecto, planificación y seguimiento:
-- **Sub Tareas v2.md** - Detalle completo de tareas y subtareas (161KB)
-- **WORK-PLAN v5.md** - Plan de trabajo actualizado (85KB)
-- **PRD v2.md** - Product Requirements Document (41KB)
+- **[Task Breakdown](./project-management/archive/task-breakdown-detailed-v1.md)** - Detalle completo de tareas y subtareas (161KB) - Archivo archivado
+- **[WORK-PLAN-v5.md](./project-management/WORK-PLAN-v5.md)** - Plan de trabajo actualizado (85KB)
+- **[PRD-v2.md](./project-management/PRD-v2.md)** - Product Requirements Document (41KB)
 - **DEVELOPMENT-STATUS.md** - Estado actual del desarrollo
 - **T-13** - Documentación técnica y resúmenes de implementación
 

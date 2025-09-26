@@ -5,22 +5,22 @@ Esta carpeta contiene todos los documentos relacionados con la gestión del proy
 ## 📋 Documentos Principales
 
 ### Planificación y Requisitos
-- **[PRD v2.md](./PRD%20v2.md)** (41KB) - Product Requirements Document
+- **[PRD-v2.md](./PRD-v2.md)** (41KB) - Product Requirements Document
   - Requisitos funcionales y no funcionales
   - Especificaciones del producto
   - Criterios de aceptación
 
-- **[WORK-PLAN v5.md](./WORK-PLAN%20v5.md)** (85KB) - Plan de Trabajo
+- **[WORK-PLAN-v5.md](./WORK-PLAN-v5.md)** (85KB) - Plan de Trabajo
   - Cronograma detallado del proyecto
   - Fases de desarrollo y entregables
   - Recursos y estimaciones
 
 ### Gestión de Tareas
-- **[Sub Tareas v2.md](./Sub%20Tareas%20v2.md)** (161KB) - Sistema de Tareas Detallado
+- **[Task Breakdown](./archive/task-breakdown-detailed-v1.md)** (161KB) - Sistema de Tareas Detallado (Archivado)
   - Descomposición completa de tareas
   - Subtareas y dependencias
   - Estado y progreso de implementación
-  - ⚠️ **Nota**: Este documento es muy extenso. Use las herramientas de navegación del proyecto para consultas específicas.
+  - ⚠️ **Nota**: Este documento está archivado. Use las herramientas de navegación del proyecto (`tools/task-navigator.sh`) para consultas específicas de tareas activas.
 
 ### Estado del Proyecto
 - **[DEVELOPMENT-STATUS.md](./DEVELOPMENT-STATUS.md)** - Estado Actual de Desarrollo

@@ -1,12 +1,38 @@
-# Plan de Trabajo: Generador de Documentos con IA + RAG
+# Work Plan Architecture - AI Document Editor
 
-**Documento** Plan de Trabajo
-**Versión** 5.0 (Nomenclatura Corregida)
-**Fecha** 24 de junio de 2025
-**Autor** Tech Lead / Project Manager
-**Estado** Aprobado para Ejecución
+## Overview
 
-## 1. Introducción y Objetivos
+This document provides the **authoritative implementation work plan** for the AI Document Editor project execution, defining the structured approach for delivering an on-premises AI-powered document generation application. This specification serves as the **reference standard** for all project management activities, resource allocation, and delivery coordination.
+
+**Document Metadata:**
+- **Version:** 5.0 (Corrected Nomenclature)
+- **Status:** Approved for Execution
+- **Author:** Tech Lead / Project Manager
+- **Last Updated:** 24 jun 2025
+- **Review Cycle:** Sprint retrospectives with milestone reviews
+
+---
+
+## 📐 Project Management Principles
+
+### 🎯 Core Planning Principles
+1. **Iterative Delivery**: Six releases (R0-R6) with measurable value increments
+2. **Predictable Workload**: Work packages balanced at 29-35 complexity points
+3. **Traceability**: Global Task Identifiers (GTI) with Work Item Identifiers (WII)
+4. **Quality Integration**: CI/CD gates and Definition of Done validation
+5. **Risk Management**: Proactive risk assessment and mitigation at each milestone
+
+### 🏛️ Execution Patterns
+- **Sprint-Based Development**: 2-week iterations with 3-week final validation
+- **Task-Driven Approach**: Atomic tasks with verifiable deliverables
+- **Dependency Management**: Clear prerequisite chains with critical path optimization
+- **Quality Gates**: Automated validation with manual oversight checkpoints
+
+---
+
+## 📚 Work Breakdown Architecture
+
+### 🎯 Planning Methodology Overview
 
 Este documento detalla el plan de trabajo para la ejecución del proyecto "Generador de Documentos con IA + RAG", según lo definido en el Documento de Requisitos del Producto (PRD v2). El objetivo principal es desarrollar y entregar una aplicación on-premise que permita a los editores generar, editar, versionar y exportar documentos de alta calidad de manera eficiente y segura.
 
@@ -28,16 +54,33 @@ La ejecución del proyecto se regirá por los siguientes principios y procesos:
 
 - **Gestión de Riesgos**: La matriz de riesgos (definida en `PRD v2.md`, §10) será revisada al final de cada hito, como formaliza la tarea de proceso `T-42`.
 
-## 3. Metodología de Análisis de Complejidad
+### 📊 Complexity Analysis Framework
 
-Para cuantificar la complejidad de cada tarea de forma objetiva, se ha diseñado un modelo de puntuación basado en cuatro criterios fundamentales, puntuados en una escala de 1 (Bajo) a 5 (Muy Alto).
+#### **Complexity Quantification Model**
+The project employs an objective complexity scoring system based on four fundamental criteria, each scored on a 1-5 scale:
 
-- **C1: Esfuerzo de Implementación (Effort)**: Volumen de trabajo (código, configuración, pruebas).
-- **C2: Riesgo Técnico y Novedad (Risk)**: Incertidumbre técnica, uso de tecnologías nuevas, I+D.
-- **C3: Dependencias e Integración (Deps)**: Interconexión con otras tareas o sistemas.
-- **C4: Ambigüedad de Alcance y UX (Scope)**: Claridad de requisitos y complejidad de la UI/UX.
+**Complexity Dimensions**:
+| Dimension | Code | Description | Scale |
+|-----------|------|-------------|-------|
+| **Implementation Effort** | C1 | Volume of work (code, config, tests) | 1 (Minimal) - 5 (Extensive) |
+| **Technical Risk & Innovation** | C2 | Technology uncertainty, R&D components | 1 (Known) - 5 (Experimental) |
+| **Dependencies & Integration** | C3 | Inter-task and system interconnections | 1 (Isolated) - 5 (Highly Coupled) |
+| **Scope & UX Ambiguity** | C4 | Requirements clarity and UI complexity | 1 (Clear) - 5 (Ambiguous) |
 
-La Complejidad Total de una tarea es `C1 + C2 + C3 + C4` (rango: 4-20). Una tarea con Complejidad Total > 8 debe desglosarse en Subtareas (ST) manejables (idealmente 4-8 puntos cada una). _Nota: Las tareas de proceso (ej. T-42, T-47) pueden tener una complejidad total > 0 que representa el overhead de gestión, coordinación y documentación, aunque sus subtareas de desarrollo sean de complejidad 0._
+#### **Complexity Calculation**
+**Total Complexity = C1 + C2 + C3 + C4** (Range: 4-20)
+
+**Decomposition Rules**:
+- **Complexity > 8**: Must decompose into manageable subtasks (4-8 points each)
+- **Process Tasks**: May have complexity > 0 representing coordination overhead
+- **Atomic Tasks**: Should be directly implementable without further breakdown
+
+#### **Quality Thresholds**
+| Complexity Range | Classification | Action Required |
+|------------------|----------------|-----------------|
+| **4-8 points** | Atomic Task | Direct implementation |
+| **9-12 points** | Complex Task | Decompose into 2-3 subtasks |
+| **13-20 points** | Epic Task | Decompose into 3-5 subtasks |
 
 ### Tabla de Evaluación de Complejidad por Tarea
 
@@ -288,11 +331,30 @@ La siguiente tabla contiene el detalle de cada una de las tareas, identificadas 
 | **WII**   | Identificador de Elemento de Trabajo. Código jerárquico (R.WP-TXX-ST) que ubica una subtarea en el plan.                                                                                             |
 | **WORM**  | Write Once, Read Many. Propiedad de un dispositivo de almacenamiento que solo permite escribir datos una vez, impidiendo su modificación.                                                            |
 
-## 9. Aprobación del Plan
+## 📋 Plan Control & Governance
+
+### 🔄 Plan Lifecycle Management
+**Status**: Approved for Execution
+**Version**: 5.0 (Corrected Nomenclature)
+**Review Cycle**: Sprint retrospectives with milestone reviews
+**Next Review**: End of R0 (Sprint 1)
+
+### 👥 Plan Approval Authority
 
 La firma de este documento implica la aceptación del alcance, la metodología y la planificación aquí descritos, y autoriza el inicio de la ejecución de la Release 0.
 
-| Rol               | Nombre | Firma | Fecha |
-| :---------------- | :----- | :---- | :---- |
-| **Product Owner** |        |       |       |
-| **Tech Lead**     |        |       |       |
+| Stakeholder Role | Name | Approval Date | Status |
+|-----------------|------|---------------|--------|
+| **Product Owner** | [TBD] | [Pending] | ⏳ In Review |
+| **Tech Lead** | [TBD] | [Pending] | ⏳ In Review |
+| **Project Manager** | Tech Lead | 2025-06-24 | ✅ Approved |
+| **Architecture Committee** | [TBD] | [Pending] | ⏳ In Review |
+
+### 📈 Change Control Process
+> **Living Plan Policy:** This work plan serves as the execution framework and must be updated when scope, dependencies, or complexity assessments change. All changes require stakeholder approval and team notification.
+
+### 🔗 Cross-References
+- **Product Requirements**: [PRD-v2.md](./PRD-v2.md) - Authoritative product specification
+- **Architecture Decisions**: [/docs/architecture/adr/](../architecture/adr/) - Technical decision records
+- **Task Status Tracking**: [/tools/progress-dashboard.sh](../../tools/progress-dashboard.sh) - Real-time progress monitoring
+- **Historical Task Details**: [/docs/project-management/archive/task-breakdown-detailed-v1.md](./archive/task-breakdown-detailed-v1.md) - Archived detailed breakdown

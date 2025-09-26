@@ -3,7 +3,7 @@
 
 param([string]$TaskId)
 
-$FILE = "docs/Sub Tareas v2.md"
+$FILE = "docs/project-management/Sub Tareas v2.md"
 
 if (-not (Test-Path $FILE)) {
     Write-Host "File not found: $FILE"

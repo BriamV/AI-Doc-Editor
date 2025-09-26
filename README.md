@@ -32,7 +32,7 @@ Este proyecto es un fork mejorado de [AI Text Editor](https://github.com/darryls
 | **Tier 1** | [Root README](README.md) | **User-facing guide and installation** | **End users and contributors** |
 | **Tier 2** | [Frontend Docs](src/docs/) | React implementation details | Frontend developers |
 | **Tier 3** | [Backend Docs](backend/docs/) | API and database architecture | Backend developers |
-| **Tier 4** | [Infrastructure](scripts/README.md) | Cross-platform utilities | DevOps and infrastructure |
+| **Tier 4** | [Infrastructure](tools/README.md) | Cross-platform utilities | DevOps and infrastructure |
 
 **Cross-References:**
 - **[Development Guide](CLAUDE.md)** - Comprehensive developer setup and workflow

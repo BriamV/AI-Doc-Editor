@@ -70,7 +70,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: document-validation-report
-          path: DOCUMENT-PLACEMENT-VALIDATION-REPORT.md
+          path: docs/project-management/migrations/reports/DOCUMENT-PLACEMENT-VALIDATION-REPORT.md
 ```
 
 **Behavior**:

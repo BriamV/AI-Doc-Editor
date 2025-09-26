@@ -225,7 +225,7 @@ test_developer_workflow() {
 
   # 5. Developer generates report
   bash tools/validate-document-placement.sh --report
-  test -f "DOCUMENT-PLACEMENT-VALIDATION-REPORT.md" || fail "Report not generated"
+  test -f "docs/project-management/migrations/reports/DOCUMENT-PLACEMENT-VALIDATION-REPORT.md" || fail "Report not generated"
 
   # Cleanup
   cd / && rm -rf "$test_dir"
@@ -469,7 +469,7 @@ jobs:
         with:
           name: validation-test-results
           path: |
-            DOCUMENT-PLACEMENT-VALIDATION-REPORT.md
+            docs/project-management/migrations/reports/DOCUMENT-PLACEMENT-VALIDATION-REPORT.md
             tests/logs/
 ```
 
