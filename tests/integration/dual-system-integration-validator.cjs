@@ -28,6 +28,9 @@ const { performance } = require('perf_hooks');
 // Import existing validators
 const ContractComplianceValidator = require('./contract-compliance-validator.cjs');
 
+// Security: Define allowlist of safe CLI commands
+const SAFE_CLI_COMMANDS = new Set(['bash', 'node', 'git', 'yarn', 'npm', 'python', 'python3']);
+
 // Import error handling for integration testing
 const { ErrorCodes, createError, ErrorHandler } = require('../../scripts/lib/error-codes.cjs');
 
@@ -1678,11 +1681,36 @@ EOF
    * Execute command with timeout and structured result
    */
   async executeCommand(command, args, options = {}) {
+    // Enhanced security validation
+    if (!SAFE_CLI_COMMANDS.has(command)) {
+      return Promise.reject(new Error(`Unsupported command: ${command}`));
+    }
+
+    if (!Array.isArray(args) || args.some(arg => typeof arg !== 'string')) {
+      return Promise.reject(new Error('Command arguments must be provided as an array of strings'));
+    }
+
+    // Sanitize command arguments to prevent injection
+    const sanitizedArgs = args.map(arg => {
+      // Remove dangerous characters and escape sequences
+      return arg.replace(/[;&|`$(){}[\]\\]/g, '').trim();
+    });
+
+    // Additional validation: reject arguments containing path traversal attempts
+    const hasPathTraversal = sanitizedArgs.some(arg =>
+      arg.includes('..') || arg.includes('~') || arg.startsWith('/')
+    );
+
+    if (hasPathTraversal) {
+      return Promise.reject(new Error('Path traversal attempts detected in arguments'));
+    }
+
     return new Promise((resolve) => {
-      const proc = spawn(command, args, {
+      const proc = spawn(command, sanitizedArgs, {
         cwd: process.cwd(),
         timeout: this.options.timeout,
         stdio: ['pipe', 'pipe', 'pipe'],
+        shell: false,  // Prevent shell injection
         ...options
       });
 

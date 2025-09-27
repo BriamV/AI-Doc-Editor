@@ -28,6 +28,23 @@ const path = require('path');
 const os = require('os');
 const { performance } = require('perf_hooks');
 
+// Security: Define allowlist of safe CLI commands
+const SAFE_CLI_COMMANDS = new Set(['bash', 'node', 'git', 'yarn', 'npm', 'python', 'python3']);
+
+// Security: Path sanitization utility
+const sanitizePath = (inputPath, baseDir) => {
+  // Remove dangerous characters and resolve path
+  const cleanPath = inputPath.replace(/[<>:"|?*]/g, '').replace(/\.\./g, '');
+  const resolvedPath = path.resolve(baseDir, cleanPath);
+
+  // Ensure the resolved path stays within the base directory
+  if (!resolvedPath.startsWith(path.resolve(baseDir))) {
+    throw new Error('Path traversal attempt detected');
+  }
+
+  return resolvedPath;
+};
+
 // Import error handling for testing
 const { ErrorCodes, createError, ErrorHandler, ProtocolBridge } = require('../../scripts/lib/error-codes.cjs');
 
@@ -366,7 +383,9 @@ class ErrorSimulationSuite {
    */
   async testErrorPropagation(errorCode) {
     const testStart = performance.now();
-    const errorFile = path.join(this.options.tempDir, `propagation_${errorCode.code}_${Date.now()}.env`);
+    // Security: Sanitize the errorCode.code to prevent path traversal
+    const sanitizedFileName = `propagation_${String(errorCode.code).replace(/[^a-zA-Z0-9_-]/g, '')}_${Date.now()}.env`;
+    const errorFile = sanitizePath(sanitizedFileName, this.options.tempDir);
 
     try {
       // Step 1: Generate error in Node.js
@@ -658,7 +677,9 @@ class ErrorSimulationSuite {
     ];
 
     const errorPromises = concurrentErrors.map(async (errorCode, index) => {
-      const errorFile = path.join(this.options.tempDir, `concurrent_${index}_${Date.now()}.env`);
+      // Security: Sanitize the index to prevent path traversal
+      const sanitizedFileName = `concurrent_${String(index).replace(/[^0-9]/g, '')}_${Date.now()}.env`;
+      const errorFile = sanitizePath(sanitizedFileName, this.options.tempDir);
 
       try {
         // Generate concurrent errors
@@ -1769,11 +1790,36 @@ class ErrorSimulationSuite {
    * Execute command with proper error handling
    */
   async executeCommand(command, args, options = {}) {
+    // Enhanced security validation
+    if (!SAFE_CLI_COMMANDS.has(command)) {
+      return Promise.reject(new Error(`Unsupported command: ${command}`));
+    }
+
+    if (!Array.isArray(args) || args.some(arg => typeof arg !== 'string')) {
+      return Promise.reject(new Error('Command arguments must be provided as an array of strings'));
+    }
+
+    // Sanitize command arguments to prevent injection
+    const sanitizedArgs = args.map(arg => {
+      // Remove dangerous characters and escape sequences
+      return arg.replace(/[;&|`$(){}[\]\\]/g, '').trim();
+    });
+
+    // Additional validation: reject arguments containing path traversal attempts
+    const hasPathTraversal = sanitizedArgs.some(arg =>
+      arg.includes('..') || arg.includes('~') || arg.startsWith('/')
+    );
+
+    if (hasPathTraversal) {
+      return Promise.reject(new Error('Path traversal attempts detected in arguments'));
+    }
+
     return new Promise((resolve) => {
-      const proc = spawn(command, args, {
+      const proc = spawn(command, sanitizedArgs, {
         cwd: process.cwd(),
         timeout: this.options.timeout,
         stdio: ['pipe', 'pipe', 'pipe'],
+        shell: false,  // Prevent shell injection
         ...options
       });
 

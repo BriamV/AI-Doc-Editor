@@ -1,4 +1,4 @@
-/**
+﻿/**
  * CI/CD Integration Hooks for Cross-System Validation
  *
  * Provides automated integration testing hooks for continuous integration
@@ -30,6 +30,8 @@ const DualSystemIntegrationValidator = require('./dual-system-integration-valida
 const PerformanceBenchmarkSuite = require('./performance-benchmark-suite.js');
 const ErrorSimulationSuite = require('./error-simulation-suite.js');
 const ContractComplianceValidator = require('./contract-compliance-validator.js');
+
+const SAFE_CLI_COMMANDS = new Set(['bash', 'node', 'git']);
 
 class CICDIntegrationHooks {
   constructor(options = {}) {
@@ -247,16 +249,16 @@ class CICDIntegrationHooks {
    */
   async validateDependencies() {
     const dependencies = [
-      { name: 'node', command: 'node --version' },
-      { name: 'bash', command: 'bash --version' },
-      { name: 'git', command: 'git --version' }
+      { name: 'node', command: 'node', args: ['--version'] },
+      { name: 'bash', command: 'bash', args: ['--version'] },
+      { name: 'git', command: 'git', args: ['--version'] }
     ];
 
     const missingDependencies = [];
 
     for (const dep of dependencies) {
       try {
-        const result = await this.executeCommand('bash', ['-c', dep.command]);
+        const result = await this.executeCommand(dep.command, dep.args || []);
         if (result.exitCode !== 0) {
           missingDependencies.push(dep.name);
         }
@@ -1198,13 +1200,38 @@ class CICDIntegrationHooks {
   /**
    * Execute command with proper error handling
    */
-  async executeCommand(command, args, options = {}) {
+  async executeCommand(command, args = [], options = {}) {
+    // Enhanced security validation
+    if (!SAFE_CLI_COMMANDS.has(command)) {
+      return Promise.reject(new Error(`Unsupported command: ${command}`));
+    }
+
+    if (!Array.isArray(args) || args.some(arg => typeof arg !== 'string')) {
+      return Promise.reject(new Error('Command arguments must be provided as an array of strings'));
+    }
+
+    // Sanitize command arguments to prevent injection
+    const sanitizedArgs = args.map(arg => {
+      // Remove dangerous characters and escape sequences
+      return arg.replace(/[;&|`$(){}[\]\\]/g, '').trim();
+    });
+
+    // Additional validation: reject arguments containing path traversal attempts
+    const hasPathTraversal = sanitizedArgs.some(arg =>
+      arg.includes('..') || arg.includes('~') || arg.startsWith('/')
+    );
+
+    if (hasPathTraversal) {
+      return Promise.reject(new Error('Path traversal attempts detected in arguments'));
+    }
+
     return new Promise((resolve) => {
-      const proc = spawn(command, args, {
+      const proc = spawn(command, sanitizedArgs, {
         cwd: process.cwd(),
         timeout: this.options.timeout,
         stdio: ['pipe', 'pipe', 'pipe'],
-        ...options
+        ...options,
+        shell: false
       });
 
       let stdout = '';
@@ -1247,3 +1274,4 @@ if (require.main === module) {
       process.exit(2);
     });
 }
+

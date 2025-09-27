@@ -234,10 +234,31 @@ extract_cross_references() {
 
     export DATABASE_MODE="monolith"  # Reset
 
-    # Format as JSON arrays
-    local adr_array="[$(IFS=','; echo "${adr_refs[*]}")]"
-    local template_array="[$(IFS=','; echo "${template_refs[*]}")]"
-    local wii_array="[$(IFS=','; echo "${wii_refs[*]}")]"
+    # Format as JSON arrays - using printf to avoid IFS tampering
+    local adr_array="["
+    local template_array="["
+    local wii_array="["
+
+    # Safely build ADR array
+    if [ ${#adr_refs[@]} -gt 0 ]; then
+        printf -v adr_array '%s%s' "$adr_array" "$(printf '%s,' "${adr_refs[@]}")"
+        adr_array="${adr_array%,}"  # Remove trailing comma
+    fi
+    adr_array+="]"
+
+    # Safely build template array
+    if [ ${#template_refs[@]} -gt 0 ]; then
+        printf -v template_array '%s%s' "$template_array" "$(printf '%s,' "${template_refs[@]}")"
+        template_array="${template_array%,}"  # Remove trailing comma
+    fi
+    template_array+="]"
+
+    # Safely build WII array
+    if [ ${#wii_refs[@]} -gt 0 ]; then
+        printf -v wii_array '%s%s' "$wii_array" "$(printf '%s,' "${wii_refs[@]}")"
+        wii_array="${wii_array%,}"  # Remove trailing comma
+    fi
+    wii_array+="]"
 
     cat << EOF
 {
