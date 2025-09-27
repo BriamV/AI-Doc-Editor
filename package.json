@@ -52,7 +52,7 @@
     "install-merge-hooks": "node scripts/install-merge-hooks.cjs install",
     "//-- QUALITY GATE & SECURITY --//": "",
     "qa-gate": "echo '⚠️ DEPRECATED: Use quality-gate instead'",
-    "security-scan": "yarn npm audit --all --recursive --no-deprecations --severity high && node scripts/multiplatform.cjs tool semgrep scan --config=auto .",
+    "security-scan": "yarn npm audit --all --recursive --no-deprecations --severity high && node scripts/multiplatform.cjs tool semgrep scan --config=auto --error .",
     "security-scan-full": "yarn npm audit --all --recursive --no-deprecations --severity high && node scripts/multiplatform.cjs tool semgrep scan --config=auto . && yarn lint",
     "quality-gate": "yarn run validate-docs:strict && yarn run lint && yarn run tsc-check && yarn run python-quality && yarn run test:frontend && yarn run test:backend && yarn run test:integration && yarn run test:security && yarn run security-scan",
     "quality-gate:fast": "yarn run lint && yarn run tsc-check && yarn run python-quality && yarn run test:frontend && yarn run test:backend --timeout=60",
