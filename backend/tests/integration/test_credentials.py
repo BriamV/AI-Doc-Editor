@@ -4,36 +4,18 @@ Security and functionality tests for credentials endpoints
 """
 
 import pytest
-from fastapi.testclient import TestClient
-from fastapi import FastAPI
 from app.services.credentials import credentials_service
+
 
 @pytest.fixture
 def client():
-    """Create a minimal test client for credentials testing"""
-    # Create a minimal FastAPI app for testing credentials endpoints
-    test_app = FastAPI()
+    """Return a stub client until API endpoints are wired for testing."""
 
-    # Add minimal endpoints if they exist
-    try:
-        from app.routers.credentials import router as credentials_router
-        test_app.include_router(credentials_router, prefix="/api")
-    except ImportError:
-        # Credentials router doesn't exist yet, create mock endpoints
-        @test_app.post("/api/user/credentials")
-        async def mock_post_credentials():
-            return {"error": "Authentication required"}, 401
+    class StubClient:
+        def __getattr__(self, name):
+            raise RuntimeError("Credentials API client not configured for this test suite yet")
 
-        @test_app.get("/api/user/credentials")
-        async def mock_get_credentials():
-            return {"error": "Authentication required"}, 401
-
-        @test_app.delete("/api/user/credentials")
-        async def mock_delete_credentials():
-            return {"error": "Authentication required"}, 401
-
-    with TestClient(test_app) as test_client:
-        yield test_client
+    return StubClient()
 
 
 class TestCredentialsService:
@@ -104,7 +86,9 @@ class TestCredentialsAPI:
             # assert response.status_code == 400
             pass  # Placeholder for future implementation
 
-    @pytest.mark.skip(reason="TestClient hanging issue - temporarily disabled until FastAPI app issues resolved")
+    @pytest.mark.skip(
+        reason="TestClient hanging issue - temporarily disabled until FastAPI app issues resolved"
+    )
     def test_credentials_endpoints_require_auth(self, client):
         """Test that credentials endpoints require authentication"""
         pass  # Temporarily disabled due to TestClient hanging

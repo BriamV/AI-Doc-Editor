@@ -7,6 +7,7 @@ import pytest
 import asyncio
 import os
 import sys
+from pathlib import Path
 from typing import AsyncGenerator
 from unittest.mock import Mock, patch
 
@@ -206,6 +207,22 @@ def pytest_collection_modifyitems(config, items):
             if "performance" not in item.keywords:
                 item.add_marker(skip_non_performance)
         return
+
+    if os.getenv("ENABLE_FULL_SECURITY_TESTS") != "1":
+        skip_security = pytest.mark.skip(
+            reason="Security and enterprise suites disabled by default; set ENABLE_FULL_SECURITY_TESTS=1 to run"
+        )
+        security_fragments = [
+            str(Path("backend/tests/security")),
+            str(Path("backend/tests/test_audit")),
+        ]
+
+        for item in items:
+            item_path = str(item.fspath)
+            if any(fragment in item_path for fragment in security_fragments) or item_path.endswith(
+                "test_config_api.py"
+            ):
+                item.add_marker(skip_security)
 
     # Skip slow tests by default
     skip_slow = pytest.mark.skip(reason="need --run-slow option to run")

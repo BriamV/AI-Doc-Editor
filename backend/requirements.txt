@@ -22,6 +22,7 @@ alembic==1.13.2
 # Install it from requirements-optional.txt if you need PostgreSQL async driver.
 # asyncpg==0.29.0  # PostgreSQL async driver
 aiosqlite==0.20.0  # SQLite async driver (for development)
+greenlet==3.2.4  # Required by SQLAlchemy async engine
 
 # Encryption & Security (T-12: Credential Store Security)
 cryptography==43.0.0    # AES-256-GCM authenticated encryption

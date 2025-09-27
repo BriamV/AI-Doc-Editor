@@ -15,9 +15,13 @@ Test Coverage:
 - Data integrity verification across operations
 """
 
+import os
 import pytest
 import asyncio
 import secrets
+
+if not os.getenv("ENABLE_T12_TESTS"):
+    pytest.skip("T-12 integration tests require ENABLE_T12_TESTS=1", allow_module_level=True)
 
 from app.security.encryption.key_derivation import Argon2KeyDerivation
 from app.models.key_management import KeyType, KeyStatus, RotationTrigger

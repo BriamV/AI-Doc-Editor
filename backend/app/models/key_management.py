@@ -15,10 +15,26 @@ Security Design:
 - HSM pointer references for external key storage
 """
 
-from sqlalchemy import Column, String, Integer, DateTime, Boolean, Text, JSON, ForeignKey, Index
+from sqlalchemy import (
+    Column,
+    String,
+    Integer,
+    DateTime,
+    Boolean,
+    Text,
+    JSON,
+    ForeignKey,
+    Index,
+    LargeBinary,
+)
+from sqlalchemy.types import TypeDecorator, CHAR
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID, BYTEA
+
+try:
+    from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+except ImportError:
+    PG_UUID = None
 from pydantic import BaseModel, Field, validator
 from typing import Optional, Dict, List, Any, Literal
 from datetime import datetime, timedelta
@@ -26,6 +42,33 @@ from enum import Enum
 import uuid
 
 Base = declarative_base()
+
+
+class GUID(TypeDecorator):
+    """Platform-independent GUID type."""
+
+    impl = CHAR
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == "postgresql" and PG_UUID is not None:
+            return dialect.type_descriptor(PG_UUID(as_uuid=True))
+        return dialect.type_descriptor(CHAR(36))
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+        if isinstance(value, uuid.UUID):
+            return value if dialect.name == "postgresql" else str(value)
+        value = uuid.UUID(str(value))
+        return value if dialect.name == "postgresql" else str(value)
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return value
+        if isinstance(value, uuid.UUID):
+            return value
+        return uuid.UUID(str(value))
 
 
 class KeyType(str, Enum):
@@ -82,7 +125,7 @@ class KeyMaster(Base):
 
     __tablename__ = "key_masters"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     key_id = Column(String(64), unique=True, nullable=False, index=True)
     key_type = Column(String(20), nullable=False)
     algorithm = Column(String(50), nullable=False)  # AES-256-GCM, RSA-4096, etc.
@@ -136,12 +179,12 @@ class KeyVersion(Base):
 
     __tablename__ = "key_versions"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     key_id = Column(String(64), ForeignKey("key_masters.key_id"), nullable=False)
     version_number = Column(Integer, nullable=False)
 
     # Encrypted key storage (only if not using HSM)
-    encrypted_key_data = Column(BYTEA, nullable=True)  # KEK-encrypted DEK
+    encrypted_key_data = Column(LargeBinary, nullable=True)  # KEK-encrypted DEK
     key_checksum = Column(String(64), nullable=False)  # SHA-256 hash for integrity
     encryption_metadata = Column(JSON, nullable=False)  # Nonce, algorithm, etc.
 
@@ -171,7 +214,7 @@ class RotationPolicy(Base):
 
     __tablename__ = "rotation_policies"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     policy_name = Column(String(100), unique=True, nullable=False)
     key_type = Column(String(20), nullable=False)
 
@@ -213,9 +256,9 @@ class KeyRotation(Base):
 
     __tablename__ = "key_rotations"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     key_id = Column(String(64), ForeignKey("key_masters.key_id"), nullable=False)
-    policy_id = Column(UUID(as_uuid=True), ForeignKey("rotation_policies.id"), nullable=True)
+    policy_id = Column(GUID(), ForeignKey("rotation_policies.id"), nullable=True)
 
     # Rotation details
     trigger = Column(String(50), nullable=False)  # RotationTrigger enum
@@ -267,7 +310,7 @@ class HSMConfiguration(Base):
 
     __tablename__ = "hsm_configurations"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     provider = Column(String(50), nullable=False)  # HSMProvider enum
     configuration_name = Column(String(100), unique=True, nullable=False)
 
@@ -304,7 +347,7 @@ class KeyAuditLog(Base):
 
     __tablename__ = "key_audit_logs"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
     key_id = Column(String(64), ForeignKey("key_masters.key_id"), nullable=True)
 
     # Event details

@@ -18,6 +18,7 @@ safety
 semgrep
 
 # Testing coverage (Week 4)
+greenlet==3.2.4  # Required by SQLAlchemy async engine for tests
 pytest-cov
 pytest-timeout
 
