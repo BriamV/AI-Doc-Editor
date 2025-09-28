@@ -55,6 +55,7 @@ The application uses electron-builder with configuration embedded in package.jso
 ### Local Development
 
 #### Setup and Dependencies
+
 ```bash
 # Install dependencies
 yarn install --frozen-lockfile
@@ -65,6 +66,7 @@ yarn electron         # Runs Electron with dev server
 ```
 
 #### Development Workflow
+
 1. **Frontend Development**: `yarn dev` starts Vite dev server on port 5173
 2. **Electron Development**: `yarn electron` connects Electron to dev server
 3. **Hot Reload**: Changes automatically reflected in Electron window
@@ -90,10 +92,11 @@ win.loadURL(`http://localhost:${PORT}`);
 
 ```bash
 # Build React application for production
-yarn build             # Vite build → /dist/ directory
+yarn fe:build          # Vite build → /dist/ directory
 ```
 
 **Build Output:**
+
 - **Location**: `/dist/` directory
 - **Assets**: Optimized HTML, CSS, JavaScript, images
 - **Bundling**: Vite optimization and tree-shaking
@@ -115,9 +118,10 @@ yarn electron:make
 // Built-in HTTP server for production
 const createServer = () => {
   const server = http.createServer((request, response) => {
-    let filePath = request.url === '/'
-      ? path.join(__dirname, '../dist/index.html')
-      : path.join(__dirname, `../dist/${request.url}`);
+    let filePath =
+      request.url === '/'
+        ? path.join(__dirname, '../dist/index.html')
+        : path.join(__dirname, `../dist/${request.url}`);
 
     // Serve static assets with proper MIME types
     fs.readFile(filePath, (error, content) => {
@@ -140,12 +144,14 @@ const createServer = () => {
 ### Windows Build Process
 
 #### Windows Prerequisites
+
 ```bash
 # Windows-specific dependencies
 npm install -g windows-build-tools  # Visual Studio Build Tools
 ```
 
 #### Windows Build Configuration
+
 ```json
 {
   "build": {
@@ -167,6 +173,7 @@ npm install -g windows-build-tools  # Visual Studio Build Tools
 ```
 
 #### Windows Build Commands
+
 ```bash
 # Windows-specific builds
 yarn electron:pack --win
@@ -178,6 +185,7 @@ yarn electron:make --win --ia32
 ```
 
 #### Windows Output Formats
+
 - **NSIS Installer**: Full-featured installer with custom options
 - **Squirrel**: Auto-updater compatible format
 - **Portable**: Standalone executable (future enhancement)
@@ -185,12 +193,14 @@ yarn electron:make --win --ia32
 ### macOS Build Process
 
 #### macOS Prerequisites
+
 ```bash
 # macOS-specific requirements
 xcode-select --install     # Command Line Tools
 ```
 
 #### macOS Build Configuration
+
 ```json
 {
   "build": {
@@ -213,6 +223,7 @@ xcode-select --install     # Command Line Tools
 ```
 
 #### macOS Build Commands
+
 ```bash
 # macOS-specific builds
 yarn electron:pack --mac
@@ -223,6 +234,7 @@ yarn electron:make --mac --universal
 ```
 
 #### macOS Output Formats
+
 - **DMG**: macOS disk image for distribution
 - **ZIP**: Compressed application bundle
 - **Universal Binary**: Intel and Apple Silicon support
@@ -230,12 +242,14 @@ yarn electron:make --mac --universal
 ### Linux Build Process
 
 #### Linux Prerequisites
+
 ```bash
 # Linux build dependencies
 sudo apt-get install -y build-essential libnss3-dev libatk-bridge2.0-dev libdrm2 libxss1 libgconf-2-4 libxrandr2 libasound2-dev libpangocairo-1.0-0 libatk1.0-dev libgtk2.0-dev libgdk-pixbuf2.0-dev libgtk-3-dev libglib2.0-dev
 ```
 
 #### Linux Build Configuration
+
 ```json
 {
   "build": {
@@ -262,6 +276,7 @@ sudo apt-get install -y build-essential libnss3-dev libatk-bridge2.0-dev libdrm2
 ```
 
 #### Linux Build Commands
+
 ```bash
 # Linux-specific builds
 yarn electron:pack --linux
@@ -274,6 +289,7 @@ yarn electron:make --linux rpm
 ```
 
 #### Linux Output Formats
+
 - **AppImage**: Universal Linux executable
 - **DEB**: Debian/Ubuntu package format
 - **RPM**: Red Hat/Fedora package format
@@ -285,12 +301,14 @@ yarn electron:make --linux rpm
 ### Windows Code Signing
 
 #### Certificate Requirements
+
 ```bash
 # Windows code signing certificate
 # Required for Windows Defender trust and auto-updater
 ```
 
 #### Signing Configuration
+
 ```json
 {
   "build": {
@@ -304,6 +322,7 @@ yarn electron:make --linux rpm
 ```
 
 #### Signing Process
+
 ```bash
 # Sign Windows builds
 yarn electron:make --win --publish=never
@@ -312,6 +331,7 @@ yarn electron:make --win --publish=never
 ### macOS Code Signing and Notarization
 
 #### Certificate Requirements
+
 ```bash
 # Apple Developer certificates required:
 # - Developer ID Application
@@ -319,6 +339,7 @@ yarn electron:make --win --publish=never
 ```
 
 #### Signing Configuration
+
 ```json
 {
   "build": {
@@ -335,6 +356,7 @@ yarn electron:make --win --publish=never
 ```
 
 #### Notarization Process
+
 ```bash
 # Build and notarize for macOS
 yarn electron:make --mac --publish=always
@@ -343,6 +365,7 @@ yarn electron:make --mac --publish=always
 ### Linux Security
 
 #### Package Signing
+
 ```bash
 # GPG signing for Linux packages
 gpg --detach-sign package.deb
@@ -354,13 +377,15 @@ gpg --detach-sign package.rpm
 ### Development Distribution
 
 #### Local Testing
+
 ```bash
 # Build and test locally
-yarn build
+yarn fe:build
 yarn electron:pack
 ```
 
 #### Internal Distribution
+
 - **Direct File Sharing**: Packaged applications via file sharing
 - **Internal Repositories**: Private npm/package repositories
 - **CI/CD Artifacts**: Build artifacts from CI/CD pipelines
@@ -368,11 +393,13 @@ yarn electron:pack
 ### Production Distribution
 
 #### Public Release Channels
+
 - **GitHub Releases**: Public release distribution
 - **Official Website**: Direct download links
 - **Package Managers**: Platform-specific package managers
 
 #### Auto-Update Distribution
+
 ```javascript
 // Auto-updater configuration
 const { autoUpdater } = require('electron-updater');
@@ -400,7 +427,7 @@ jobs:
         with:
           node-version: '18'
       - run: yarn install --frozen-lockfile
-      - run: yarn build
+      - run: yarn fe:build
       - run: yarn electron:make --win
 
   build-macos:
@@ -412,7 +439,7 @@ jobs:
         with:
           node-version: '18'
       - run: yarn install --frozen-lockfile
-      - run: yarn build
+      - run: yarn fe:build
       - run: yarn electron:make --mac
 
   build-linux:
@@ -424,7 +451,7 @@ jobs:
         with:
           node-version: '18'
       - run: yarn install --frozen-lockfile
-      - run: yarn build
+      - run: yarn fe:build
       - run: yarn electron:make --linux
 ```
 
@@ -447,12 +474,14 @@ strategy:
 ### Performance Optimization
 
 #### Bundle Size Optimization
+
 ```bash
 # Analyze bundle size
 yarn build:analyze
 ```
 
 #### Asset Optimization
+
 - **Image Compression**: Optimized PNG/ICO icons
 - **JavaScript Minification**: Vite build optimization
 - **CSS Optimization**: TailwindCSS purging
@@ -461,12 +490,14 @@ yarn build:analyze
 ### Build Speed Optimization
 
 #### Caching Strategies
+
 ```bash
 # Use yarn cache for faster builds
 yarn install --immutable --check-cache
 ```
 
 #### Parallel Builds
+
 ```bash
 # Build multiple platforms in parallel
 yarn electron:make --parallel
@@ -477,16 +508,19 @@ yarn electron:make --parallel
 ### Common Build Issues
 
 #### Windows Issues
+
 - **Visual Studio Build Tools**: Missing C++ compiler
 - **Python Dependencies**: Native module compilation failures
 - **Certificate Issues**: Code signing certificate problems
 
 #### macOS Issues
+
 - **Xcode Command Line Tools**: Missing development tools
 - **Notarization Failures**: Apple notarization process issues
 - **Architecture Conflicts**: Intel vs Apple Silicon build issues
 
 #### Linux Issues
+
 - **Missing Dependencies**: System library requirements
 - **AppImage Issues**: FUSE filesystem requirements
 - **Package Conflicts**: Distribution-specific package issues
@@ -494,12 +528,14 @@ yarn electron:make --parallel
 ### Build Debugging
 
 #### Verbose Logging
+
 ```bash
 # Enable detailed build logging
 DEBUG=electron-builder yarn electron:make
 ```
 
 #### Build Cache Clearing
+
 ```bash
 # Clear build cache
 yarn clean
@@ -525,7 +561,7 @@ yarn install --frozen-lockfile
 ```bash
 # Version bump and build
 npm version patch
-yarn build
+yarn fe:build
 yarn electron:make --publish=always
 ```
 
@@ -534,12 +570,14 @@ yarn electron:make --publish=always
 ### Build Validation
 
 #### Automated Testing
+
 ```bash
 # Post-build testing
-yarn test:e2e:packaged
+yarn e2e:fe:packaged
 ```
 
 #### Manual Validation Checklist
+
 - [ ] Application launches successfully
 - [ ] All features function correctly
 - [ ] Auto-updater operates properly
@@ -549,6 +587,7 @@ yarn test:e2e:packaged
 ### Security Validation
 
 #### Code Signing Verification
+
 ```bash
 # Verify Windows code signing
 signtool verify /pa app.exe
@@ -565,18 +604,21 @@ gpg --verify package.deb.sig package.deb
 ### Planned Improvements
 
 #### Enhanced CI/CD
+
 - **Multi-platform builds**: Simultaneous platform builds
 - **Automated testing**: Post-build automated validation
 - **Security scanning**: Automated security vulnerability scanning
 - **Performance monitoring**: Build performance metrics
 
 #### Distribution Enhancements
+
 - **Snap packages**: Ubuntu Snap store distribution
 - **Flatpak packages**: Flathub distribution
 - **Windows Store**: Microsoft Store distribution
 - **Mac App Store**: Apple App Store distribution
 
 #### Build Optimization
+
 - **Incremental builds**: Faster development builds
 - **Module federation**: Micro-frontend architecture
 - **Progressive loading**: Lazy-loaded application modules

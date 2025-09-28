@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { setupTestEnvironment } from '../test-setup';
 
 test.describe('Admin Settings Page', () => {
   test('redirects non-admin users', async ({ page }) => {
+    // Set up test environment
+    await setupTestEnvironment(page);
+
     await page.goto('/settings');
     await page.waitForLoadState('networkidle');
 
@@ -14,6 +18,9 @@ test.describe('Admin Settings Page', () => {
   });
 
   test('allows admin users to access settings', async ({ page }) => {
+    // Set up test environment
+    await setupTestEnvironment(page);
+
     // Mock admin user authentication
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
@@ -45,6 +52,9 @@ test.describe('Admin Settings Page', () => {
   });
 
   test('denies access to editor users', async ({ page }) => {
+    // Set up test environment
+    await setupTestEnvironment(page);
+
     // Login as editor
     await page.goto('/login');
     await page.waitForLoadState('networkidle');

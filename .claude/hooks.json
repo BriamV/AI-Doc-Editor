@@ -7,7 +7,7 @@
           {
             "type": "command",
             "timeout": 15,
-            "command": "echo 'Pre-SubAgent: MANDATORY Merge Protection Check (timeout: 15s)...'; current_branch=$(git branch --show-current 2>/dev/null); if [[ \"$current_branch\" == \"main\" || \"$current_branch\" == \"master\" ]]; then echo '🚫 CANNOT CREATE PR FROM MAIN/MASTER BRANCH'; exit 1; fi; if [[ \"$current_branch\" =~ ^(feature|release|hotfix)/ ]]; then echo \"🔒 Running mandatory merge protection for $current_branch...\"; node scripts/merge-protection.cjs pre-merge-check || { echo '🚫 PRE-MERGE CHECK FAILED - BLOCKING OPERATION'; exit 1; }; echo '✅ Pre-merge check passed'; else echo '⚠️ Branch does not follow GitFlow naming convention'; fi"
+            "command": "echo 'Pre-SubAgent: MANDATORY Merge Protection Check (timeout: 15s)...'; current_branch=$(git branch --show-current 2>/dev/null); if [[ \"$current_branch\" == \"main\" || \"$current_branch\" == \"master\" ]]; then echo '🚫 CANNOT CREATE PR FROM MAIN/MASTER BRANCH'; exit 1; fi; if [[ \"$current_branch\" =~ ^(feature|release|hotfix)/ ]]; then echo \"🔒 Running mandatory merge protection for $current_branch...\"; yarn repo:merge:precheck || { echo '🚫 PRE-MERGE CHECK FAILED - BLOCKING OPERATION'; exit 1; }; echo '✅ Pre-merge check passed'; else echo '⚠️ Branch does not follow GitFlow naming convention'; fi"
           }
         ]
       },
@@ -89,7 +89,7 @@
           {
             "type": "command",
             "timeout": 10,
-            "command": "echo 'Quality Gate: Pre-commit security scan (timeout: 10s)...'; if command -v semgrep >/dev/null 2>&1; then files=$(find . -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' | head -10); if [ -n \"$files\" ]; then echo \"$files\" | xargs semgrep --config=auto --severity=ERROR --quiet 2>/dev/null || echo '✅ Security scan passed'; else echo 'No JavaScript/TypeScript files to scan'; fi; else echo '⚠️ Semgrep not available - install with: pip install semgrep'; fi"
+            "command": "echo 'Quality Gate: Pre-commit security scan (timeout: 10s)...'; files=$(find . -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' | head -10); if [ -n \"$files\" ]; then yarn sec:sast 2>/dev/null && echo '✅ Security scan passed' || echo '⚠️ Security scan detected issues'; else echo 'No JavaScript/TypeScript files to scan'; fi"
           }
         ]
       },
@@ -99,7 +99,7 @@
           {
             "type": "command",
             "timeout": 8,
-            "command": "echo 'Quality Gate: ESLint check with granular config (timeout: 8s)...'; if [ -f yarn.lock ]; then ESLINT_CMD='./node_modules/.bin/eslint'; elif command -v npx >/dev/null 2>&1; then ESLINT_CMD='npx eslint'; else echo '⚠️ ESLint not available'; exit 0; fi; changed_files=$(git status --porcelain 2>/dev/null | grep -E '\\.(ts|tsx|js|jsx)$' | awk '{print $2}' | head -5); if [ -n \"$changed_files\" ]; then echo \"Checking files: $changed_files\"; echo \"$changed_files\" | xargs $ESLINT_CMD --max-warnings=0 2>/dev/null && echo '✅ ESLint check passed with granular config' || echo '❌ ESLint issues detected'; else echo 'No JavaScript/TypeScript files changed'; fi"
+            "command": "echo 'Quality Gate: Frontend linting check (timeout: 8s)...'; changed_files=$(git status --porcelain 2>/dev/null | grep -E '\\.(ts|tsx|js|jsx)$' | awk '{print $2}' | head -5); if [ -n \"$changed_files\" ]; then echo \"Checking files: $changed_files\"; yarn fe:lint 2>/dev/null && echo '✅ Frontend lint check passed' || echo '❌ Frontend lint issues detected'; else echo 'No JavaScript/TypeScript files changed'; fi"
           }
         ]
       },
@@ -129,7 +129,7 @@
           {
             "type": "command",
             "timeout": 8,
-            "command": "echo 'Organizational Safety: Document placement validation (timeout: 8s)...'; if [ -f tools/validate-document-placement.sh ]; then bash tools/validate-document-placement.sh --strict 2>/dev/null && echo '✅ Document placement validated' || { echo '⚠️ Document placement issues detected - run yarn validate-docs:fix to correct'; exit 0; }; else echo '⚠️ Document validator not found'; fi"
+            "command": "echo 'Organizational Safety: Document placement validation (timeout: 8s)...'; yarn docs:validate:strict 2>/dev/null && echo '✅ Document placement validated' || { echo '⚠️ Document placement issues detected - run yarn docs:validate:fix to correct'; exit 0; }"
           }
         ]
       }
@@ -163,7 +163,7 @@
           {
             "type": "command",
             "timeout": 20,
-            "command": "echo 'Post-SubAgent: FINAL Merge Safety Validation (timeout: 20s)...'; current_branch=$(git branch --show-current 2>/dev/null); target_branch='main'; echo \"🔍 Final merge validation: $current_branch → $target_branch\"; node scripts/merge-protection.cjs validate-merge --source \"$current_branch\" --target \"$target_branch\" || { echo '😨 CRITICAL: Merge validation failed - PR creation blocked'; exit 1; }; echo '🎉 Merge validation passed - PR safe to create'"
+            "command": "echo 'Post-SubAgent: FINAL Merge Safety Validation (timeout: 20s)...'; current_branch=$(git branch --show-current 2>/dev/null); target_branch='main'; echo \"🔍 Final merge validation: $current_branch → $target_branch\"; yarn repo:merge:validate --source \"$current_branch\" --target \"$target_branch\" || { echo '😨 CRITICAL: Merge validation failed - PR creation blocked'; exit 1; }; echo '🎉 Merge validation passed - PR safe to create'"
           }
         ]
       },

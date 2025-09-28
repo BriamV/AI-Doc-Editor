@@ -62,8 +62,8 @@ The Claude Code integration provides:
 ```bash
 # Quality Pipeline (hooks-integrated)
 yarn dev|build|test|security-scan
-yarn lint|format|tsc-check
-yarn python-quality             # Python validation
+yarn fe:lint|fe:format|fe:typecheck
+yarn be:quality                 # Python validation
 yarn merge-safety-full          # Merge protection
 ```
 

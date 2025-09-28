@@ -26,9 +26,7 @@ function venvPath(repoRoot) {
 function toolPath(repoRoot, tool) {
   const venv = venvPath(repoRoot);
   const exe = isWin() ? `${tool}.exe` : tool;
-  return isWin()
-    ? path.join(venv, 'Scripts', exe)
-    : path.join(venv, 'bin', exe);
+  return isWin() ? path.join(venv, 'Scripts', exe) : path.join(venv, 'bin', exe);
 }
 
 function ensureToolExists(filePath) {
@@ -57,7 +55,7 @@ function loadApprovedExceptions(repoRoot) {
     'get_certificate_info',
     'get_cipher_suites_for_security_level',
     'get_compliance_report',
-    'get_system_health'
+    'get_system_health',
   ]);
 
   const approvedFiles = new Set([
@@ -68,7 +66,7 @@ function loadApprovedExceptions(repoRoot) {
     'policy_engine.py',
     'rotation_scheduler.py',
     'tls_config.py',
-    'key_management.py'
+    'key_management.py',
   ]);
 
   return { approvedFunctions, approvedFiles };
@@ -162,4 +160,3 @@ function main() {
 }
 
 main();
-

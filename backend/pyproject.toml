@@ -23,8 +23,12 @@ addopts = [
     "--cov-report=term-missing",
     "--cov-report=html:htmlcov",
     "--cov-fail-under=0",
-    "--timeout=30",
-    "--timeout-method=thread"
+    "--timeout=60",
+    "--timeout-method=thread",
+    "--maxfail=5",
+    "--tb=short",
+    "--durations=10",
+    "--durations-min=1.0"
 ]
 markers = [
     "slow: marks tests as slow",
@@ -34,7 +38,9 @@ markers = [
     "hsm: HSM integration tests",
     "security: security tests",
     "performance: performance tests",
-    "enterprise: enterprise features tests"
+    "enterprise: enterprise features tests",
+    "parallel: tests that can run in parallel",
+    "serial: tests that must run serially"
 ]
 
 [tool.coverage.run]

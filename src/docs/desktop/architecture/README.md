@@ -88,6 +88,7 @@ if (!instanceLock) {
 ```
 
 **Design Decisions:**
+
 - **Single Instance Enforcement**: Prevents multiple app instances for better user experience
 - **Focus Management**: Second instance attempts focus existing window
 - **Resource Conservation**: Reduces memory and system resource usage
@@ -110,6 +111,7 @@ function createWindow() {
 ```
 
 **Design Decisions:**
+
 - **Auto-Hide Menu Bar**: Clean desktop application experience
 - **Show False Initially**: Prevents flash during window creation
 - **Immediate Maximize**: Provides full workspace on startup
@@ -121,8 +123,20 @@ function createWindow() {
 const createTray = window => {
   const tray = new Tray(iconPath);
   const contextMenu = Menu.buildFromTemplate([
-    { label: 'Show', click: () => { win.maximize(); window.show(); } },
-    { label: 'Exit', click: () => { app.isQuiting = true; app.quit(); } }
+    {
+      label: 'Show',
+      click: () => {
+        win.maximize();
+        window.show();
+      },
+    },
+    {
+      label: 'Exit',
+      click: () => {
+        app.isQuiting = true;
+        app.quit();
+      },
+    },
   ]);
 
   tray.setContextMenu(contextMenu);
@@ -131,6 +145,7 @@ const createTray = window => {
 ```
 
 **Design Decisions:**
+
 - **Persistent Tray Icon**: Always-available application access
 - **Minimal Context Menu**: Essential actions only (Show/Exit)
 - **Click Handler**: Single-click to restore window
@@ -150,6 +165,7 @@ Frontend (Renderer) ──HTTP──→ Backend API (FastAPI)
 ```
 
 **Benefits:**
+
 - **Simplified Architecture**: No complex IPC message handling
 - **Web Compatibility**: Same codebase works in browser and desktop
 - **Security**: Reduced attack surface by avoiding IPC channels
@@ -158,11 +174,13 @@ Frontend (Renderer) ──HTTP──→ Backend API (FastAPI)
 ### Asset Serving Strategy
 
 **Development Mode:**
+
 - Renderer connects to Vite dev server (port 5173)
 - Hot module replacement and development features
 - Direct asset serving from Vite
 
 **Production Mode:**
+
 - Built-in HTTP server serves static assets (port 51735)
 - Optimized asset delivery
 - Self-contained application package
@@ -185,6 +203,7 @@ app.on('window-all-closed', () => {
 ```
 
 **Design Decisions:**
+
 - **User-Friendly Error Dialogs**: Clear error communication
 - **Graceful Degradation**: Proper cleanup before exit
 - **Platform-Specific Behavior**: macOS dock behavior preservation
@@ -217,6 +236,7 @@ const win = new BrowserWindow({
 ## Development vs Production Architecture
 
 ### Development Configuration
+
 - **Server**: Vite dev server (external)
 - **Port**: 5173 (standard Vite port)
 - **DevTools**: Automatically opened
@@ -224,6 +244,7 @@ const win = new BrowserWindow({
 - **Icons**: Loaded from `/public/` directory
 
 ### Production Configuration
+
 - **Server**: Built-in HTTP server (internal)
 - **Port**: 51735 (custom port for packaged app)
 - **DevTools**: Disabled for security
@@ -250,6 +271,7 @@ app.on('window-all-closed', () => {
 ```
 
 **Performance Benefits:**
+
 - **Automatic Cleanup**: App quits when all windows closed (non-macOS)
 - **Memory Efficiency**: Resources freed on application exit
 - **System Integration**: Follows platform conventions
@@ -267,6 +289,7 @@ app.on('window-all-closed', () => {
 ### Plugin Architecture
 
 The current design supports extension through:
+
 - **HTTP API Integration**: Additional backend endpoints
 - **Frontend Plugin System**: React component-based extensions
 - **Configuration Management**: Runtime configuration updates
@@ -286,6 +309,7 @@ if (isDev) {
 ```
 
 **Platform Support:**
+
 - **Windows**: Standard Electron Windows support
 - **macOS**: App store compliance ready
 - **Linux**: Standard Linux desktop integration
@@ -299,21 +323,25 @@ if (isDev) {
 ## Architecture Decision Records (ADRs)
 
 ### ADR-001: No IPC Communication Pattern
+
 **Decision**: Use HTTP communication instead of IPC
 **Rationale**: Simplified architecture, web compatibility, security benefits
 **Status**: Accepted
 
 ### ADR-002: Single Window Application
+
 **Decision**: Single maximized window with system tray
 **Rationale**: Focused user experience, resource efficiency
 **Status**: Accepted
 
 ### ADR-003: Built-in Production Server
+
 **Decision**: HTTP server in main process for production
 **Rationale**: Self-contained application, consistent asset serving
 **Status**: Accepted
 
 ### ADR-004: Auto-Hide Menu Bar
+
 **Decision**: Hide traditional menu bar by default
 **Rationale**: Clean modern desktop application experience
 **Status**: Accepted

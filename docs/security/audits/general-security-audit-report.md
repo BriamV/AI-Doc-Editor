@@ -91,13 +91,13 @@ op.execute(text("""
 ### Automated Security Pipeline
 ```bash
 # Primary security scan (ERROR level only)
-yarn security-scan
+yarn sec:all
 
 # Comprehensive security scan (all findings)
-yarn security-scan-full
+yarn sec:all:full
 
 # Complete quality gate (includes security)
-yarn quality-gate
+yarn qa:gate
 ```
 
 ### Multi-Layer Security Validation

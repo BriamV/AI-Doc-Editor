@@ -29,7 +29,7 @@ class CrossPlatformTester {
     const result = spawnSync(command, args, {
       cwd: this.repoRoot,
       stdio: 'pipe',
-      encoding: 'utf8'
+      encoding: 'utf8',
     });
     const duration = Date.now() - startTime;
 
@@ -41,7 +41,7 @@ class CrossPlatformTester {
       duration,
       stdout: result.stdout?.substring(0, 500) || '',
       stderr: result.stderr?.substring(0, 500) || '',
-      error: result.error?.message || null
+      error: result.error?.message || null,
     };
 
     this.testResults.push(testResult);
@@ -77,7 +77,11 @@ class CrossPlatformTester {
       ['TypeScript check', 'yarn', ['tsc-check']],
 
       // Test the wrapper directly
-      ['Cross-platform wrapper direct', 'node', ['scripts/cross-platform-wrapper.cjs', 'validate-docs']],
+      [
+        'Cross-platform wrapper direct',
+        'node',
+        ['scripts/cross-platform-wrapper.cjs', 'validate-docs'],
+      ],
     ];
 
     for (const [testName, command, args] of tests) {
@@ -117,12 +121,15 @@ class CrossPlatformTester {
 // Run tests if called directly
 if (require.main === module) {
   const tester = new CrossPlatformTester();
-  tester.runAllTests().then(success => {
-    process.exit(success ? 0 : 1);
-  }).catch(error => {
-    console.error('Test suite failed:', error.message);
-    process.exit(1);
-  });
+  tester
+    .runAllTests()
+    .then(success => {
+      process.exit(success ? 0 : 1);
+    })
+    .catch(error => {
+      console.error('Test suite failed:', error.message);
+      process.exit(1);
+    });
 }
 
 module.exports = CrossPlatformTester;

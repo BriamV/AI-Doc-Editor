@@ -9,6 +9,7 @@ This directory contains documentation for the frontend API integration layer, co
 The frontend API layer consists of 4 core files that handle different aspects of backend communication:
 
 #### 🔗 **Core API Files**
+
 - **api.ts**: Main API client configuration and base HTTP operations
 - **auth-api.ts**: Authentication and authorization API endpoints
 - **google-api.ts**: Google Cloud services integration (OAuth, Drive, etc.)
@@ -17,6 +18,7 @@ The frontend API layer consists of 4 core files that handle different aspects of
 ## API Client Configuration
 
 ### Base API Setup (api.ts)
+
 ```typescript
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
@@ -29,7 +31,7 @@ class ApiClient {
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
-      }
+      },
     });
 
     this.setupInterceptors();
@@ -38,20 +40,20 @@ class ApiClient {
   private setupInterceptors() {
     // Request interceptor for authentication
     this.client.interceptors.request.use(
-      (config) => {
+      config => {
         const token = getAuthToken();
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      error => Promise.reject(error)
     );
 
     // Response interceptor for error handling
     this.client.interceptors.response.use(
-      (response) => response,
-      (error) => {
+      response => response,
+      error => {
         if (error.response?.status === 401) {
           handleUnauthorized();
         }
@@ -63,8 +65,10 @@ class ApiClient {
 ```
 
 ### Authentication API (auth-api.ts)
+
 **Purpose**: Handle user authentication, session management, and authorization
 **Key Endpoints**:
+
 - `POST /auth/login`: User authentication
 - `POST /auth/logout`: Session termination
 - `POST /auth/refresh`: Token refresh
@@ -72,6 +76,7 @@ class ApiClient {
 - `PUT /auth/profile`: Profile updates
 
 **Implementation Pattern**:
+
 ```typescript
 export class AuthApi {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
@@ -96,26 +101,29 @@ export class AuthApi {
 ```
 
 ### Google API Integration (google-api.ts)
+
 **Purpose**: Google Cloud services integration and OAuth management
 **Key Features**:
+
 - OAuth 2.0 authentication flow
 - Google Drive integration
 - Google Cloud Storage operations
 - Real-time collaboration APIs
 
 **Implementation Pattern**:
+
 ```typescript
 export class GoogleApi {
   private gapi: any;
 
   async initializeGoogleAuth(): Promise<void> {
-    await new Promise((resolve) => {
+    await new Promise(resolve => {
       gapi.load('auth2', resolve);
     });
 
     await gapi.auth2.init({
       client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/drive.file'
+      scope: 'https://www.googleapis.com/auth/drive.file',
     });
   }
 
@@ -124,15 +132,17 @@ export class GoogleApi {
     const user = await authInstance.signIn();
     return {
       token: user.getAuthResponse().access_token,
-      profile: user.getBasicProfile()
+      profile: user.getBasicProfile(),
     };
   }
 }
 ```
 
 ### API Helpers (helper.ts)
+
 **Purpose**: Common utility functions and shared API operations
 **Key Functions**:
+
 - Request/response transformation
 - Error handling utilities
 - Data validation functions
@@ -141,13 +151,14 @@ export class GoogleApi {
 ## API Integration Patterns
 
 ### 1. Request/Response Transformation
+
 ```typescript
 // Request transformation
 export const transformRequest = (data: any): any => {
   return {
     ...data,
     timestamp: Date.now(),
-    clientVersion: process.env.REACT_APP_VERSION
+    clientVersion: process.env.REACT_APP_VERSION,
   };
 };
 
@@ -156,12 +167,13 @@ export const transformResponse = (response: AxiosResponse): any => {
   return {
     data: response.data,
     status: response.status,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
 };
 ```
 
 ### 2. Error Handling Strategy
+
 ```typescript
 export class ApiError extends Error {
   public status: number;
@@ -186,6 +198,7 @@ export const handleApiError = (error: any): ApiError => {
 ```
 
 ### 3. Retry Mechanism
+
 ```typescript
 export const withRetry = async <T>(
   operation: () => Promise<T>,
@@ -214,6 +227,7 @@ export const withRetry = async <T>(
 ```
 
 ### 4. Request Caching
+
 ```typescript
 interface CacheEntry<T> {
   data: T;
@@ -240,7 +254,7 @@ class ApiCache {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      ttl
+      ttl,
     });
   }
 }
@@ -249,6 +263,7 @@ class ApiCache {
 ## API Endpoint Documentation
 
 ### Authentication Endpoints
+
 ```typescript
 // User authentication
 POST /api/auth/login
@@ -267,6 +282,7 @@ Response: { user: User }
 ```
 
 ### Document Endpoints
+
 ```typescript
 // Get documents
 GET /api/documents
@@ -285,6 +301,7 @@ Response: { document: Document }
 ```
 
 ### Chat/AI Endpoints
+
 ```typescript
 // Send chat message
 POST /api/chat/send
@@ -304,6 +321,7 @@ Response: Server-Sent Events stream
 ## Integration with Frontend Stores
 
 ### Store Integration Pattern
+
 ```typescript
 // Document store API integration
 export const useDocumentApi = () => {
@@ -337,6 +355,7 @@ export const useDocumentApi = () => {
 ```
 
 ### Authentication Integration
+
 ```typescript
 // Auth store API integration
 export const useAuthApi = () => {
@@ -361,6 +380,7 @@ export const useAuthApi = () => {
 ## Real-time Communication
 
 ### WebSocket Integration
+
 ```typescript
 class WebSocketClient {
   private ws: WebSocket | null = null;
@@ -376,7 +396,7 @@ class WebSocketClient {
       this.reconnectAttempts = 0;
     };
 
-    this.ws.onmessage = (event) => {
+    this.ws.onmessage = event => {
       const message = JSON.parse(event.data);
       this.handleMessage(message);
     };
@@ -388,10 +408,13 @@ class WebSocketClient {
 
   private handleReconnect(): void {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      setTimeout(() => {
-        this.reconnectAttempts++;
-        this.connect();
-      }, 1000 * Math.pow(2, this.reconnectAttempts));
+      setTimeout(
+        () => {
+          this.reconnectAttempts++;
+          this.connect();
+        },
+        1000 * Math.pow(2, this.reconnectAttempts)
+      );
     }
   }
 }
@@ -400,6 +423,7 @@ class WebSocketClient {
 ## Security Implementation
 
 ### Token Management
+
 ```typescript
 class TokenManager {
   private static readonly TOKEN_KEY = 'auth_token';
@@ -423,6 +447,7 @@ class TokenManager {
 ```
 
 ### Request Validation
+
 ```typescript
 export const validateApiRequest = (data: any, schema: any): boolean => {
   try {
@@ -438,6 +463,7 @@ export const validateApiRequest = (data: any, schema: any): boolean => {
 ## Testing Strategies
 
 ### API Testing with MSW
+
 ```typescript
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
@@ -447,7 +473,7 @@ const server = setupServer(
     return res(
       ctx.json({
         token: 'mock-token',
-        user: { id: 1, email: 'test@example.com' }
+        user: { id: 1, email: 'test@example.com' },
       })
     );
   })
@@ -459,6 +485,7 @@ afterAll(() => server.close());
 ```
 
 ### Integration Testing
+
 ```typescript
 import { render, waitFor } from '@testing-library/react';
 import { DocumentList } from './DocumentList';
@@ -475,6 +502,7 @@ test('fetches and displays documents', async () => {
 ## Performance Optimization
 
 ### Request Batching
+
 ```typescript
 class RequestBatcher {
   private batch: Promise<any>[] = [];
@@ -503,31 +531,36 @@ class RequestBatcher {
 ## Cross-References
 
 ### Related Documentation
+
 - **Backend API**: [../../backend/docs/api/](../../backend/docs/api/) for backend contract details
 - **Authentication**: [../../docs/security/](../../docs/security/) for security architecture
 - **State Management**: [../state/](../state/) for store integration patterns
 - **Components**: [../components/](../components/) for API usage in components
 
 ### Source Code References
+
 - **API Files**: [/src/api/](../../../src/api/)
-- **API Tests**: [/src/api/**/*.test.ts](../../../src/api/)
+- **API Tests**: [/src/api/\*_/_.test.ts](../../../src/api/)
 - **API Types**: [/src/types/api.ts](../../../src/types/api.ts)
 
 ## Best Practices
 
 ### API Design
+
 - Use TypeScript for type safety
 - Implement proper error handling
 - Use consistent naming conventions
 - Document all endpoints and responses
 
 ### Performance
+
 - Implement request caching
 - Use request batching for multiple calls
 - Implement proper retry mechanisms
 - Monitor API performance metrics
 
 ### Security
+
 - Always validate API responses
 - Implement proper token management
 - Use HTTPS for all communications

@@ -38,7 +38,7 @@ const ErrorCodes = {
     MISSING_REQUIRED_PARAM: { code: 1002, severity: 'error', tier: 'user' },
     INVALID_COMMAND: { code: 1003, severity: 'error', tier: 'user' },
     PERMISSION_DENIED: { code: 1004, severity: 'error', tier: 'user' },
-    CONFIGURATION_ERROR: { code: 1005, severity: 'error', tier: 'user' }
+    CONFIGURATION_ERROR: { code: 1005, severity: 'error', tier: 'user' },
   },
 
   // ============================================================================
@@ -51,7 +51,7 @@ const ErrorCodes = {
     CRITICAL_FILES_MISSING: { code: 2004, severity: 'error', tier: 'workflow' },
     CONFIG_INTEGRITY_FAILURE: { code: 2005, severity: 'error', tier: 'workflow' },
     WORKING_TREE_DIRTY: { code: 2006, severity: 'warning', tier: 'workflow' },
-    DEVELOPMENT_STATUS_INCONSISTENT: { code: 2007, severity: 'warning', tier: 'workflow' }
+    DEVELOPMENT_STATUS_INCONSISTENT: { code: 2007, severity: 'warning', tier: 'workflow' },
   },
 
   // ============================================================================
@@ -64,7 +64,7 @@ const ErrorCodes = {
     SECURITY_VULNERABILITY: { code: 3004, severity: 'error', tier: 'quality' },
     TEST_FAILURES: { code: 3005, severity: 'error', tier: 'quality' },
     COVERAGE_INSUFFICIENT: { code: 3006, severity: 'warning', tier: 'quality' },
-    DEPENDENCY_OUTDATED: { code: 3007, severity: 'info', tier: 'quality' }
+    DEPENDENCY_OUTDATED: { code: 3007, severity: 'info', tier: 'quality' },
   },
 
   // ============================================================================
@@ -78,7 +78,7 @@ const ErrorCodes = {
     PATH_RESOLUTION_FAILED: { code: 4005, severity: 'error', tier: 'infrastructure' },
     COMMAND_EXECUTION_FAILED: { code: 4006, severity: 'error', tier: 'infrastructure' },
     FILE_SYSTEM_ERROR: { code: 4007, severity: 'error', tier: 'infrastructure' },
-    NETWORK_ERROR: { code: 4008, severity: 'error', tier: 'infrastructure' }
+    NETWORK_ERROR: { code: 4008, severity: 'error', tier: 'infrastructure' },
   },
 
   // ============================================================================
@@ -89,8 +89,8 @@ const ErrorCodes = {
     DATA_SYNC_FAILURE: { code: 5002, severity: 'error', tier: 'integration' },
     PROTOCOL_MISMATCH: { code: 5003, severity: 'error', tier: 'integration' },
     TIMEOUT: { code: 5004, severity: 'warning', tier: 'integration' },
-    RESOURCE_EXHAUSTED: { code: 5005, severity: 'error', tier: 'integration' }
-  }
+    RESOURCE_EXHAUSTED: { code: 5005, severity: 'error', tier: 'integration' },
+  },
 };
 
 // ================================================================================
@@ -125,7 +125,7 @@ class StandardizedError extends Error {
       tier: this.tier,
       context: this.context,
       timestamp: this.timestamp,
-      stack: this.stack
+      stack: this.stack,
     };
   }
 
@@ -152,9 +152,13 @@ function createError(errorCode, message, context = {}) {
  * Create error from shell script (for tools/ integration)
  */
 function createErrorFromShell(shellError) {
-  const match = shellError.match(/ERROR_CODE=(\d+) ERROR_SEVERITY=(\w+) ERROR_TIER=(\w+) ERROR_MESSAGE="([^"]+)"/);
+  const match = shellError.match(
+    /ERROR_CODE=(\d+) ERROR_SEVERITY=(\w+) ERROR_TIER=(\w+) ERROR_MESSAGE="([^"]+)"/
+  );
   if (!match) {
-    return createError(ErrorCodes.INTEGRATION.PROTOCOL_MISMATCH, 'Invalid shell error format', { shellError });
+    return createError(ErrorCodes.INTEGRATION.PROTOCOL_MISMATCH, 'Invalid shell error format', {
+      shellError,
+    });
   }
 
   const [, code, severity, tier, message] = match;
@@ -173,16 +177,16 @@ class ErrorHandler {
       logFile: options.logFile || null,
       exitOnError: options.exitOnError !== false, // default true
       colorOutput: options.colorOutput !== false, // default true
-      ...options
+      ...options,
     };
 
     // Color codes for console output
     this.colors = {
-      error: '\x1b[31m',    // Red
-      warning: '\x1b[33m',  // Yellow
-      info: '\x1b[36m',     // Cyan
-      success: '\x1b[32m',  // Green
-      reset: '\x1b[0m'      // Reset
+      error: '\x1b[31m', // Red
+      warning: '\x1b[33m', // Yellow
+      info: '\x1b[36m', // Cyan
+      success: '\x1b[32m', // Green
+      reset: '\x1b[0m', // Reset
     };
   }
 
@@ -193,9 +197,7 @@ class ErrorHandler {
     const config = { ...this.options, ...options };
 
     // Ensure we have a StandardizedError
-    const standardError = error instanceof StandardizedError
-      ? error
-      : this.wrapError(error);
+    const standardError = error instanceof StandardizedError ? error : this.wrapError(error);
 
     // Log the error
     this.logError(standardError, config);
@@ -236,7 +238,7 @@ class ErrorHandler {
     return createError(errorCode, error.message, {
       originalError: error.name,
       originalCode: error.code,
-      originalStack: error.stack
+      originalStack: error.stack,
     });
   }
 
@@ -282,7 +284,7 @@ class ErrorHandler {
     try {
       const logEntry = {
         timestamp: new Date().toISOString(),
-        error: error.toJSON()
+        error: error.toJSON(),
       };
 
       const logLine = JSON.stringify(logEntry) + '\n';
@@ -334,9 +336,8 @@ class ProtocolBridge {
    * Convert Node.js error to shell environment variables
    */
   static toShellEnv(error) {
-    const standardError = error instanceof StandardizedError
-      ? error
-      : new ErrorHandler().wrapError(error);
+    const standardError =
+      error instanceof StandardizedError ? error : new ErrorHandler().wrapError(error);
 
     return {
       ERROR_CODE: standardError.code,
@@ -344,7 +345,7 @@ class ProtocolBridge {
       ERROR_TIER: standardError.tier,
       ERROR_MESSAGE: standardError.message,
       ERROR_TIMESTAMP: standardError.timestamp,
-      ERROR_CONTEXT: JSON.stringify(standardError.context)
+      ERROR_CONTEXT: JSON.stringify(standardError.context),
     };
   }
 
@@ -371,7 +372,7 @@ class ProtocolBridge {
     const errorCode = {
       code: parseInt(env.ERROR_CODE),
       severity: env.ERROR_SEVERITY,
-      tier: env.ERROR_TIER
+      tier: env.ERROR_TIER,
     };
 
     const context = env.ERROR_CONTEXT ? JSON.parse(env.ERROR_CONTEXT) : {};
@@ -455,7 +456,7 @@ module.exports = {
   ProtocolBridge,
   ErrorValidation,
   createError,
-  createErrorFromShell
+  createErrorFromShell,
 };
 
 // ================================================================================

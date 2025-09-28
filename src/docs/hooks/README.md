@@ -7,12 +7,14 @@ This directory contains documentation for the 18 custom React hooks that encapsu
 ### Hook Categories
 
 #### 🔐 **Authentication & Security**
+
 - **useAuth.ts**: Authentication state and user session management
 - **useRouteProtection.ts**: Route-level authorization and access control
 - **useComponentProtection.ts**: Component-level security and permissions
 - **useRoles.ts**: Role-based access control and permission validation
 
 #### 📄 **Document Management**
+
 - **useAddDocument.ts**: Document creation and initialization
 - **useInitialiseNewDocument.ts**: New document setup and configuration
 - **useSaveToLocalStorage.ts**: Local document persistence and synchronization
@@ -20,6 +22,7 @@ This directory contains documentation for the 18 custom React hooks that encapsu
 - **useReplaceHistory.ts**: Document history replacement and cleanup
 
 #### 💬 **Chat & AI Integration**
+
 - **useSubmit.ts**: Chat message submission and processing
 - **useSubmitPromptAdjust.ts**: Prompt adjustment and optimization
 - **useStreamProcessor.ts**: AI response streaming and processing
@@ -29,12 +32,14 @@ This directory contains documentation for the 18 custom React hooks that encapsu
 - **useTitleGeneration.ts**: AI-powered title generation
 
 #### 🛠️ **UI & Utility**
+
 - **useHideOnOutsideClick.ts**: Outside click detection and modal management
 - **useApiValidation.ts**: API response validation and error handling
 
 ## Hook Implementation Patterns
 
 ### 1. State Management Hook Pattern
+
 ```typescript
 import { useCallback, useEffect } from 'react';
 import { useDocumentStore } from '@/store/document-slice';
@@ -44,34 +49,35 @@ export const useAddDocument = () => {
   const { documents, addDocument: addToStore } = useDocumentStore();
   const { showToast } = useToastStore();
 
-  const addDocument = useCallback(async (documentData: DocumentData) => {
-    try {
-      const newDocument = await createDocument(documentData);
-      addToStore(newDocument);
-      showToast('Document created successfully', 'success');
-      return newDocument;
-    } catch (error) {
-      showToast('Failed to create document', 'error');
-      throw error;
-    }
-  }, [addToStore, showToast]);
+  const addDocument = useCallback(
+    async (documentData: DocumentData) => {
+      try {
+        const newDocument = await createDocument(documentData);
+        addToStore(newDocument);
+        showToast('Document created successfully', 'success');
+        return newDocument;
+      } catch (error) {
+        showToast('Failed to create document', 'error');
+        throw error;
+      }
+    },
+    [addToStore, showToast]
+  );
 
   return {
     documents,
     addDocument,
-    documentCount: documents.length
+    documentCount: documents.length,
   };
 };
 ```
 
 ### 2. Side Effect Hook Pattern
+
 ```typescript
 import { useEffect, useRef } from 'react';
 
-export const useHideOnOutsideClick = (
-  onOutsideClick: () => void,
-  enabled: boolean = true
-) => {
+export const useHideOnOutsideClick = (onOutsideClick: () => void, enabled: boolean = true) => {
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -92,6 +98,7 @@ export const useHideOnOutsideClick = (
 ```
 
 ### 3. Business Logic Hook Pattern
+
 ```typescript
 import { useState, useCallback } from 'react';
 import { useAuthStore } from '@/store/auth-slice';
@@ -114,7 +121,7 @@ export const useRouteProtection = (requiredRoles: string[] = []) => {
     loading,
     user,
     isAuthenticated,
-    checkAccess
+    checkAccess,
   };
 };
 ```
@@ -124,8 +131,10 @@ export const useRouteProtection = (requiredRoles: string[] = []) => {
 ### Authentication Hooks
 
 #### useAuth
+
 **Purpose**: Central authentication state management and operations
 **Returns**:
+
 - `user`: Current user object
 - `isAuthenticated`: Authentication status
 - `login()`: Authenticate user
@@ -133,28 +142,35 @@ export const useRouteProtection = (requiredRoles: string[] = []) => {
 - `refreshToken()`: Refresh authentication
 
 **Usage**:
+
 ```typescript
 const { user, isAuthenticated, login, logout } = useAuth();
 ```
 
 #### useRouteProtection
+
 **Purpose**: Route-level access control and authorization
 **Parameters**:
+
 - `requiredRoles`: Array of required roles for access
-**Returns**:
+  **Returns**:
 - `hasAccess`: Boolean indicating access permission
 - `loading`: Loading state for permission check
 - `checkAccess()`: Manual access verification
 
 #### useComponentProtection
+
 **Purpose**: Component-level security and conditional rendering
 **Parameters**:
+
 - `permissions`: Required permissions array
 - `fallback`: Fallback component for unauthorized access
 
 #### useRoles
+
 **Purpose**: Role-based access control utilities
 **Returns**:
+
 - `hasRole()`: Check if user has specific role
 - `hasAnyRole()`: Check if user has any of specified roles
 - `getAllRoles()`: Get all user roles
@@ -162,31 +178,39 @@ const { user, isAuthenticated, login, logout } = useAuth();
 ### Document Management Hooks
 
 #### useAddDocument
+
 **Purpose**: Document creation with validation and error handling
 **Returns**:
+
 - `addDocument()`: Create new document function
 - `loading`: Creation loading state
 - `error`: Creation error state
 
 #### useInitialiseNewDocument
+
 **Purpose**: New document initialization with templates
 **Parameters**:
+
 - `template`: Document template type
-**Returns**:
+  **Returns**:
 - `initializeDocument()`: Initialize new document
 - `availableTemplates`: List of available templates
 
 #### useSaveToLocalStorage
+
 **Purpose**: Local document persistence and synchronization
 **Returns**:
+
 - `saveDocument()`: Save document locally
 - `loadDocument()`: Load document from storage
 - `clearStorage()`: Clear local storage
 - `syncStatus`: Synchronization status
 
 #### useUpdateHistory
+
 **Purpose**: Document version history management
 **Returns**:
+
 - `addVersion()`: Add new document version
 - `getHistory()`: Retrieve version history
 - `revertToVersion()`: Revert to specific version
@@ -194,34 +218,42 @@ const { user, isAuthenticated, login, logout } = useAuth();
 ### Chat & AI Hooks
 
 #### useSubmit
+
 **Purpose**: Chat message submission and AI communication
 **Returns**:
+
 - `submitMessage()`: Send chat message
 - `loading`: Submission loading state
 - `response`: AI response data
 - `error`: Submission error state
 
 #### useStreamProcessor
+
 **Purpose**: Real-time AI response streaming
 **Parameters**:
+
 - `onChunk`: Callback for stream chunks
 - `onComplete`: Callback for stream completion
-**Returns**:
+  **Returns**:
 - `processStream()`: Start stream processing
 - `stopStream()`: Stop current stream
 - `isStreaming`: Streaming status
 
 #### useMessageHistory
+
 **Purpose**: Chat history management and persistence
 **Returns**:
+
 - `messages`: Current message history
 - `addMessage()`: Add message to history
 - `clearHistory()`: Clear message history
 - `exportHistory()`: Export history data
 
 #### useTitleGeneration
+
 **Purpose**: AI-powered document title generation
 **Returns**:
+
 - `generateTitle()`: Generate title from content
 - `suggestedTitles`: Array of title suggestions
 - `loading`: Generation loading state
@@ -229,19 +261,23 @@ const { user, isAuthenticated, login, logout } = useAuth();
 ### Utility Hooks
 
 #### useHideOnOutsideClick
+
 **Purpose**: Detect clicks outside component for modal/dropdown management
 **Parameters**:
+
 - `onOutsideClick`: Callback for outside click
 - `enabled`: Enable/disable detection
-**Returns**:
+  **Returns**:
 - `ref`: Ref to attach to target element
 
 #### useApiValidation
+
 **Purpose**: API response validation and error handling
 **Parameters**:
+
 - `schema`: Validation schema
 - `onError`: Error callback
-**Returns**:
+  **Returns**:
 - `validateResponse()`: Validate API response
 - `isValid`: Validation status
 - `errors`: Validation errors
@@ -249,6 +285,7 @@ const { user, isAuthenticated, login, logout } = useAuth();
 ## Hook Composition Patterns
 
 ### 1. Hook Chaining
+
 ```typescript
 const useDocumentWorkflow = (documentId: string) => {
   const { document, loading: docLoading } = useDocument(documentId);
@@ -257,16 +294,20 @@ const useDocumentWorkflow = (documentId: string) => {
 
   const loading = docLoading || saveLoading || titleLoading;
 
-  const saveWithTitle = useCallback(async (content: string) => {
-    const title = await generateTitle(content);
-    return saveDocument({ ...document, title, content });
-  }, [document, generateTitle, saveDocument]);
+  const saveWithTitle = useCallback(
+    async (content: string) => {
+      const title = await generateTitle(content);
+      return saveDocument({ ...document, title, content });
+    },
+    [document, generateTitle, saveDocument]
+  );
 
   return { document, loading, saveWithTitle };
 };
 ```
 
 ### 2. Conditional Hook Usage
+
 ```typescript
 const useConditionalFeatures = (user: User) => {
   const authResult = useAuth();
@@ -284,6 +325,7 @@ const useConditionalFeatures = (user: User) => {
 ```
 
 ### 3. Hook Abstraction
+
 ```typescript
 const useDocumentOperations = () => {
   const add = useAddDocument();
@@ -294,7 +336,7 @@ const useDocumentOperations = () => {
     createDocument: add.addDocument,
     saveDocument: save.saveDocument,
     updateHistory: history.addVersion,
-    loading: add.loading || save.loading || history.loading
+    loading: add.loading || save.loading || history.loading,
   };
 };
 ```
@@ -302,6 +344,7 @@ const useDocumentOperations = () => {
 ## Testing Strategies
 
 ### Hook Testing with React Testing Library
+
 ```typescript
 import { renderHook, act } from '@testing-library/react';
 import { useAddDocument } from './useAddDocument';
@@ -332,6 +375,7 @@ describe('useAddDocument', () => {
 ```
 
 ### Integration Testing
+
 ```typescript
 // Test hook integration with components
 import { render, fireEvent, screen } from '@testing-library/react';
@@ -349,6 +393,7 @@ test('creates document through component', async () => {
 ## Performance Optimization
 
 ### Memoization Patterns
+
 ```typescript
 export const useOptimizedSubmit = () => {
   const submitMessage = useCallback(async (message: string) => {
@@ -365,14 +410,12 @@ export const useOptimizedSubmit = () => {
 ```
 
 ### Debounced Hooks
+
 ```typescript
 export const useDebouncedSave = (document: Document, delay: number = 1000) => {
   const { saveDocument } = useSaveToLocalStorage();
 
-  const debouncedSave = useMemo(
-    () => debounce(saveDocument, delay),
-    [saveDocument, delay]
-  );
+  const debouncedSave = useMemo(() => debounce(saveDocument, delay), [saveDocument, delay]);
 
   useEffect(() => {
     if (document) {
@@ -385,6 +428,7 @@ export const useDebouncedSave = (document: Document, delay: number = 1000) => {
 ## Security Considerations
 
 ### Hook Security Patterns
+
 ```typescript
 export const useSecureOperation = (operation: () => Promise<any>) => {
   const { hasPermission } = useRoles();
@@ -410,31 +454,36 @@ export const useSecureOperation = (operation: () => Promise<any>) => {
 ## Cross-References
 
 ### Related Documentation
+
 - **Components**: [../components/](../components/) for hook usage in components
 - **State Management**: [../state/](../state/) for store integration patterns
 - **API Layer**: [../api/](../api/) for API integration hooks
 - **Testing**: [../testing/](../testing/) for hook testing strategies
 
 ### Source Code References
+
 - **Hook Files**: [/src/hooks/](../../../src/hooks/)
-- **Hook Tests**: [/src/hooks/**/*.test.ts](../../../src/hooks/)
+- **Hook Tests**: [/src/hooks/\*_/_.test.ts](../../../src/hooks/)
 - **Hook Types**: [/src/types/hooks.ts](../../../src/types/hooks.ts)
 
 ## Best Practices
 
 ### Hook Design
+
 - Single responsibility principle
 - Proper dependency arrays
 - Error handling and loading states
 - TypeScript for type safety
 
 ### Performance
+
 - Use useMemo and useCallback appropriately
 - Implement proper cleanup in useEffect
 - Avoid unnecessary re-renders
 - Consider hook composition carefully
 
 ### Testing
+
 - Test both success and error scenarios
 - Mock external dependencies
 - Test hook composition patterns

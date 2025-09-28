@@ -3,6 +3,7 @@
  * Handles global configuration and setup before running tests
  */
 import { chromium, FullConfig } from '@playwright/test';
+import { setupTestEnvironment, verifyTestLoginButtonsAvailable } from './test-setup';
 
 async function globalSetup(config: FullConfig) {
   console.log('🚀 Starting Playwright global setup...');
@@ -19,12 +20,23 @@ async function globalSetup(config: FullConfig) {
     await page.goto(baseURL, { timeout: 30000 });
     console.log('✅ Development server is ready');
 
-    // Pre-warm the application
+    // Pre-warm the application and enable test mode
     console.log('🔥 Pre-warming application...');
+
+    // Set up test environment
+    await setupTestEnvironment(page);
 
     // Visit key pages to ensure they load properly
     await page.goto(`${baseURL}/login`);
     await page.waitForLoadState('networkidle');
+
+    // Verify test login buttons are available
+    const testButtonsAvailable = await verifyTestLoginButtonsAvailable(page, baseURL);
+    if (testButtonsAvailable) {
+      console.log('✅ Test login buttons are available');
+    } else {
+      console.log('⚠️ Test login buttons not visible, might need dev server restart');
+    }
 
     console.log('✅ Application pre-warming complete');
 

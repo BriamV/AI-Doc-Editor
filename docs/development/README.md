@@ -56,9 +56,9 @@ Guías específicas para diferentes aspectos del desarrollo:
 ```bash
 # Comandos esenciales documentados en CONTRIBUTING.md
 yarn dev                    # Desarrollo
-yarn build                  # Build
-yarn test                   # Testing
-yarn security-scan         # Seguridad
+yarn fe:build               # Build
+yarn fe:test                # Testing
+yarn sec:all                # Seguridad
 ```
 
 ### Control de Calidad
@@ -71,11 +71,11 @@ yarn security-scan         # Seguridad
 ### Comandos Principales
 ```bash
 # Desarrollo (documentado en CONTRIBUTING.md)
-yarn dev|build|test|security-scan
+yarn dev|fe:build|fe:test|sec:all
 
 # Calidad (40+ herramientas integradas)
-yarn lint|format|tsc-check
-yarn python-quality         # Backend Python
+yarn fe:lint|fe:format|fe:typecheck
+yarn be:quality             # Backend Python
 yarn merge-safety-full      # Protección de merges
 ```
 

@@ -77,11 +77,11 @@ legacy/
 ### ✅ Package.json Scripts
 ```bash
 # Primary E2E Commands (Playwright)
-yarn test:e2e              # Run all E2E tests
-yarn test:e2e:headed       # Run with browser visible
-yarn test:e2e:debug        # Debug mode with inspector
-yarn test:e2e:ui           # Interactive UI mode
-yarn test:e2e:report       # Show HTML report
+yarn e2e:fe              # Run all E2E tests
+yarn e2e:fe:headed       # Run with browser visible
+yarn e2e:fe:debug        # Debug mode with inspector
+yarn e2e:fe:ui           # Interactive UI mode
+yarn e2e:fe:report       # Show HTML report
 
 # Legacy Cypress (Deprecated but functional)
 yarn test:cypress          # Legacy Cypress tests

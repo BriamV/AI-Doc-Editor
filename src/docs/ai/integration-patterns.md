@@ -12,6 +12,7 @@ The AI-Doc-Editor implements a **frontend-only OpenAI integration** using React 
 ### 1. API Layer (`src/api/api.ts`)
 
 #### Primary Functions
+
 ```typescript
 // Standard chat completion
 getChatCompletion(params: {
@@ -33,12 +34,14 @@ getChatCompletionStream(params: {
 ```
 
 #### Key Features
+
 - **Azure OpenAI Support:** Automatic endpoint detection and path adjustment
 - **Authentication:** Bearer token and Azure API key support
 - **Error Handling:** Rate limiting, quota, and model availability detection
 - **Streaming:** Server-sent events for real-time responses
 
 #### Azure Integration Pattern
+
 ```typescript
 if (isAzureEndpoint(endpoint) && apiKey) {
   headers['api-key'] = apiKey;
@@ -52,6 +55,7 @@ if (isAzureEndpoint(endpoint) && apiKey) {
 ### 2. Stream Processing (`src/hooks/useStreamProcessor.ts`)
 
 #### Stream Handler Architecture
+
 ```typescript
 const processStream = async (
   stream: ReadableStream,
@@ -66,10 +70,11 @@ const processStream = async (
     const result = parseEventSource(partial + new TextDecoder().decode(value));
     // Process streaming delta content
   }
-}
+};
 ```
 
 #### Stream Features
+
 - **Real-time Processing:** Immediate content updates
 - **Cancellation Support:** User can stop generation
 - **Error Recovery:** Handles network interruptions
@@ -78,6 +83,7 @@ const processStream = async (
 ### 3. API Validation (`src/hooks/useApiValidation.ts`)
 
 #### Validation Pattern
+
 ```typescript
 const validateApiKey = (): void => {
   if (!apiKey || apiKey.length === 0) {
@@ -102,6 +108,7 @@ const getValidatedStream = async (
 ```
 
 #### Security Features
+
 - **API Key Validation:** Required for official OpenAI endpoint
 - **Endpoint Flexibility:** Support for custom endpoints
 - **Error Localization:** Multi-language error messages
@@ -109,6 +116,7 @@ const getValidatedStream = async (
 ### 4. Message Management (`src/hooks/useSubmit.ts`)
 
 #### Submission Flow
+
 ```typescript
 const handleSubmit = async () => {
   // 1. Validate chat state
@@ -116,10 +124,11 @@ const handleSubmit = async () => {
   // 3. Update UI immediately
   // 4. Process streaming response
   // 5. Update token usage and generate title
-}
+};
 ```
 
 #### State Management Pattern
+
 - **Immutable Updates:** No direct state mutation
 - **Optimistic UI:** Immediate placeholder creation
 - **Error Recovery:** Rollback on API failures
@@ -146,6 +155,7 @@ Token Counting & Title Generation
 ## Configuration Management
 
 ### Model Configuration (`src/types/document.ts`)
+
 ```typescript
 export interface ConfigInterface {
   model: string;
@@ -170,6 +180,7 @@ export type ModelOptions =
 ```
 
 ### Authentication Configuration (`src/constants/auth.ts`)
+
 ```typescript
 export const officialAPIEndpoint = 'https://api.openai.com/v1/chat/completions';
 const customAPIEndpoint = getEnvVar('VITE_CUSTOM_API_ENDPOINT') || '';
@@ -179,6 +190,7 @@ export const defaultAPIEndpoint = getEnvVar('VITE_DEFAULT_API_ENDPOINT') || offi
 ## Error Handling Patterns
 
 ### API Error Categories
+
 1. **Authentication Errors:** Missing or invalid API keys
 2. **Rate Limiting:** 429 status codes with retry logic
 3. **Quota Errors:** Insufficient_quota detection
@@ -186,6 +198,7 @@ export const defaultAPIEndpoint = getEnvVar('VITE_DEFAULT_API_ENDPOINT') || offi
 5. **Network Errors:** Connection timeouts and failures
 
 ### Error Processing Flow
+
 ```typescript
 if (response.status === 404 || response.status === 405) {
   const text = await response.text();
@@ -211,12 +224,14 @@ if (response.status === 429 || !response.ok) {
 ## State Management Integration
 
 ### Zustand Store Integration
+
 - **API Keys:** Encrypted storage in browser
 - **Chat History:** Message persistence and management
 - **Configuration:** Model and parameter storage
 - **UI State:** Loading, error, and generation states
 
 ### Store Structure (Relevant AI Parts)
+
 ```typescript
 interface AIState {
   apiKey: string;
@@ -232,6 +247,7 @@ interface AIState {
 ## Title Generation Feature
 
 ### Auto-Title Generation (`src/hooks/useTitleGeneration.ts`)
+
 ```typescript
 const generateAndSetTitle = async (config: ConfigInterface) => {
   // Generate title from chat context
@@ -250,12 +266,14 @@ const generateAndSetTitle = async (config: ConfigInterface) => {
 ## Performance Considerations
 
 ### Optimization Patterns
+
 1. **Stream Processing:** Real-time updates without blocking UI
 2. **Cancellation:** User can stop expensive operations
 3. **Debouncing:** Input validation and API calls
 4. **Memory Management:** Proper stream and resource cleanup
 
 ### Token Management (Infrastructure)
+
 - **tiktoken Integration:** `@dqbd/tiktoken` dependency
 - **Cost Calculation:** Infrastructure for usage tracking
 - **Display Component:** `TokenCount.tsx` (currently disabled)
@@ -263,12 +281,14 @@ const generateAndSetTitle = async (config: ConfigInterface) => {
 ## Security Implementation
 
 ### Current Security Measures
+
 1. **API Key Encryption:** Frontend storage encryption
 2. **Input Validation:** Message content validation
 3. **Request Sanitization:** Safe API parameter handling
 4. **Error Filtering:** No sensitive data in error messages
 
 ### Security Limitations
+
 1. **Frontend-Only:** API keys stored in browser
 2. **No Rate Limiting:** Client-side only rate control
 3. **No Usage Monitoring:** No centralized usage tracking
@@ -277,12 +297,14 @@ const generateAndSetTitle = async (config: ConfigInterface) => {
 ## Integration Points
 
 ### Frontend Integration
+
 - **Chat UI:** Direct integration with React components
 - **Document Editor:** AI-generated content insertion
 - **Settings:** API configuration management
 - **History:** Chat persistence and retrieval
 
 ### Missing Backend Integration
+
 - **No Server-Side AI:** All processing is client-side
 - **No Database AI Records:** No AI operation persistence
 - **No Enterprise Features:** No centralized management
@@ -291,13 +313,15 @@ const generateAndSetTitle = async (config: ConfigInterface) => {
 ## Dependencies
 
 ### AI-Related Dependencies
+
 ```json
 {
-  "@dqbd/tiktoken": "^1.0.2"  // Token counting (only AI dependency)
+  "@dqbd/tiktoken": "^1.0.2" // Token counting (only AI dependency)
 }
 ```
 
 ### Notable Absence
+
 - No `openai` package
 - No `langchain` libraries
 - No vector database clients
@@ -308,12 +332,14 @@ const generateAndSetTitle = async (config: ConfigInterface) => {
 The AI implementation is a **well-architected frontend solution** for OpenAI chat completions with proper streaming, error handling, and state management. However, it lacks the advanced features (RAG, LangChain, embeddings) mentioned in project documentation.
 
 **Strengths:**
+
 - Clean hook-based architecture
 - Proper stream processing
 - Azure OpenAI support
 - Good error handling
 
 **Limitations:**
+
 - Frontend-only implementation
 - No advanced AI workflows
 - No knowledge base integration

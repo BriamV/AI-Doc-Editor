@@ -776,7 +776,7 @@ tools/qa-workflow.sh T-02 mark-complete  # Final completion
 | **Linting** | ✅ Complete | 21 issues fixed automatically, zero remaining |
 | **CI/CD Integration** | ✅ Complete | Python quality gates in .github/workflows/ci.yml |
 | **Hooks Enhancement** | ✅ Complete | Multi-OS venv activation (Windows/Linux/WSL) |
-| **Package Scripts** | ✅ Complete | yarn python-quality, python-format, python-lint |
+| **Package Scripts** | ✅ Complete | yarn be:quality, be:format, be:lint |
 
 ### Quality Metrics Achieved
 
@@ -802,9 +802,9 @@ tools/qa-workflow.sh T-02 mark-complete  # Final completion
 ```bash
 # Mandatory after package.json changes
 yarn install --frozen-lockfile    # Dependencies validation
-yarn build                       # Build integrity check
-yarn tsc-check                   # TypeScript validation
-yarn quality-gate                # Full quality pipeline
+yarn fe:build                    # Build integrity check
+yarn fe:typecheck                # TypeScript validation
+yarn qa:gate                     # Full quality pipeline
 ```
 
 **Protocol Documentation**: Added to CLAUDE.md for future compliance

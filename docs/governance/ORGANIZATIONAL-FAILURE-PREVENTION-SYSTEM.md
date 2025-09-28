@@ -38,7 +38,7 @@ graph TD
 # Automatically runs during file modifications
 Organizational Safety: Document placement validation (timeout: 8s)...
 ✅ Document placement validated
-⚠️ Document placement issues detected - run yarn validate-docs:fix to correct
+⚠️ Document placement issues detected - run yarn docs:validate:fix to correct
 ```
 
 **Features:**
@@ -95,10 +95,10 @@ jobs:
 
 ```bash
 # Basic validation
-yarn validate-docs           # Document placement validation
-yarn validate-docs:fix       # Auto-fix misplaced documents
-yarn validate-docs:strict    # Strict validation (CI/CD mode)
-yarn validate-docs:report    # Generate placement report
+yarn docs:validate           # Document placement validation
+yarn docs:validate:fix       # Auto-fix misplaced documents
+yarn docs:validate:strict    # Strict validation (CI/CD mode)
+yarn docs:validate:report    # Generate placement report
 ```
 
 **Features:**
@@ -220,7 +220,7 @@ README.md → Context-appropriate location
 
 2. **Correction Phase**
    - Automatic fix suggestions
-   - One-command correction (`yarn validate-docs:fix`)
+   - One-command correction (`yarn docs:validate:fix`)
    - Manual intervention for complex cases
 
 3. **Verification Phase**
@@ -233,10 +233,10 @@ README.md → Context-appropriate location
 **Critical Violation Response:**
 ```bash
 # Immediate assessment
-yarn validate-docs:report
+yarn docs:validate:report
 
 # Emergency auto-fix
-yarn validate-docs:fix --verbose
+yarn docs:validate:fix --verbose
 
 # Manual intervention checklist
 # 1. Review generated report
@@ -275,15 +275,15 @@ yarn validate-docs:fix --verbose
 ### Daily Workflow Integration
 
 **Best Practices:**
-1. Run `yarn validate-docs` before major commits
-2. Use `yarn validate-docs:fix` for quick corrections
+1. Run `yarn docs:validate` before major commits
+2. Use `yarn docs:validate:fix` for quick corrections
 3. Review placement reports during PR creation
 4. Follow template guidelines for new documentation
 
 ### Troubleshooting Common Issues
 
 **Issue:** Document validation timeout
-**Solution:** Run `yarn validate-docs` separately, then retry operation
+**Solution:** Run `yarn docs:validate` separately, then retry operation
 
 **Issue:** False positive violations
 **Solution:** Review classification patterns, update if needed

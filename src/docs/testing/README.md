@@ -7,18 +7,21 @@ This directory contains comprehensive testing strategies, procedures, and best p
 ### Testing Pyramid Architecture
 
 #### 🔬 **Unit Tests (Jest) - Foundation Layer**
+
 - **Component Logic**: Individual component behavior testing
 - **Custom Hooks**: Hook functionality and edge cases
 - **Utility Functions**: Pure function testing
 - **Store Actions**: State management logic validation
 
 #### 🔗 **Integration Tests (React Testing Library) - Middle Layer**
+
 - **Component + Store Integration**: Component-state interaction
 - **API Integration**: Frontend-backend communication
 - **Hook Composition**: Multiple hook interactions
 - **User Workflow Testing**: Multi-component user journeys
 
 #### 🌐 **End-to-End Tests (Playwright) - Top Layer**
+
 - **Critical User Journeys**: Complete application workflows
 - **Authentication Flows**: Login, logout, and session management
 - **Cross-Browser Testing**: Multi-browser compatibility
@@ -27,6 +30,7 @@ This directory contains comprehensive testing strategies, procedures, and best p
 ## Testing Framework Configuration
 
 ### Jest Configuration (Unit Tests)
+
 ```typescript
 // jest.config.js
 export default {
@@ -34,26 +38,27 @@ export default {
   setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
   moduleNameMapping: {
     '^@/(.*)$': '<rootDir>/src/$1',
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy'
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
     '!src/**/*.stories.tsx',
-    '!src/test/**/*'
+    '!src/test/**/*',
   ],
   coverageThreshold: {
     global: {
       branches: 80,
       functions: 80,
       lines: 80,
-      statements: 80
-    }
-  }
+      statements: 80,
+    },
+  },
 };
 ```
 
 ### React Testing Library Setup
+
 ```typescript
 // src/test/setup.ts
 import '@testing-library/jest-dom';
@@ -63,7 +68,7 @@ import { server } from './mocks/server';
 global.IntersectionObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
-  disconnect: jest.fn()
+  disconnect: jest.fn(),
 }));
 
 // Setup MSW
@@ -73,6 +78,7 @@ afterAll(() => server.close());
 ```
 
 ### Playwright Configuration (E2E Tests)
+
 ```typescript
 // playwright.config.ts
 import { defineConfig, devices } from '@playwright/test';
@@ -87,33 +93,34 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure'
+    screenshot: 'only-on-failure',
   },
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] }
+      use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] }
+      use: { ...devices['Desktop Firefox'] },
     },
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] }
-    }
+      use: { ...devices['Desktop Safari'] },
+    },
   ],
   webServer: {
     command: 'npm run dev',
     port: 3000,
-    reuseExistingServer: !process.env.CI
-  }
+    reuseExistingServer: !process.env.CI,
+  },
 });
 ```
 
 ## Unit Testing Patterns
 
 ### Component Testing
+
 ```typescript
 import { render, screen, fireEvent } from '@testing-library/react';
 import { DocumentCreator } from './DocumentCreator';
@@ -162,6 +169,7 @@ describe('DocumentCreator', () => {
 ```
 
 ### Hook Testing
+
 ```typescript
 import { renderHook, act } from '@testing-library/react';
 import { useAddDocument } from './useAddDocument';
@@ -204,6 +212,7 @@ describe('useAddDocument', () => {
 ```
 
 ### Store Testing
+
 ```typescript
 import { renderHook, act } from '@testing-library/react';
 import { useDocumentStore } from './document-slice';
@@ -221,7 +230,7 @@ describe('DocumentStore', () => {
       result.current.addDocument({
         id: '1',
         title: 'Test Document',
-        content: 'Test content'
+        content: 'Test content',
       });
     });
 
@@ -236,13 +245,13 @@ describe('DocumentStore', () => {
       result.current.addDocument({
         id: '1',
         title: 'Original Title',
-        content: 'Original content'
+        content: 'Original content',
       });
     });
 
     act(() => {
       result.current.updateDocument('1', {
-        title: 'Updated Title'
+        title: 'Updated Title',
       });
     });
 
@@ -255,6 +264,7 @@ describe('DocumentStore', () => {
 ## Integration Testing Patterns
 
 ### Component + Store Integration
+
 ```typescript
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DocumentList } from './DocumentList';
@@ -308,6 +318,7 @@ describe('DocumentList Integration', () => {
 ```
 
 ### API Integration Testing
+
 ```typescript
 import { render, screen, waitFor } from '@testing-library/react';
 import { server } from '../../test/mocks/server';
@@ -363,6 +374,7 @@ describe('DocumentDashboard API Integration', () => {
 ## End-to-End Testing Patterns
 
 ### Authentication Flow Testing
+
 ```typescript
 // e2e/auth.spec.ts
 import { test, expect } from '@playwright/test';
@@ -408,6 +420,7 @@ test.describe('Authentication Flow', () => {
 ```
 
 ### Document Management E2E
+
 ```typescript
 // e2e/documents.spec.ts
 import { test, expect } from '@playwright/test';
@@ -433,9 +446,7 @@ test.describe('Document Management', () => {
       'Document created successfully'
     );
 
-    await expect(page.locator('[data-testid="document-list"]')).toContainText(
-      'E2E Test Document'
-    );
+    await expect(page.locator('[data-testid="document-list"]')).toContainText('E2E Test Document');
   });
 
   test('should edit existing document', async ({ page }) => {
@@ -456,6 +467,7 @@ test.describe('Document Management', () => {
 ```
 
 ### Chat Interface E2E
+
 ```typescript
 // e2e/chat.spec.ts
 import { test, expect } from '@playwright/test';
@@ -476,7 +488,7 @@ test.describe('AI Chat Interface', () => {
 
     // Wait for AI response
     await expect(page.locator('[data-testid="ai-response"]')).toBeVisible({
-      timeout: 10000
+      timeout: 10000,
     });
 
     await expect(page.locator('[data-testid="chat-messages"]')).toContainText(
@@ -502,6 +514,7 @@ test.describe('AI Chat Interface', () => {
 ## Test Utilities and Helpers
 
 ### Test Wrapper Component
+
 ```typescript
 // src/test/TestWrapper.tsx
 import React from 'react';
@@ -536,6 +549,7 @@ export const TestWrapper: React.FC<TestWrapperProps> = ({
 ```
 
 ### Mock Service Worker Setup
+
 ```typescript
 // src/test/mocks/handlers.ts
 import { rest } from 'msw';
@@ -545,17 +559,13 @@ export const handlers = [
     return res(
       ctx.json({
         token: 'mock-token',
-        user: { id: 1, email: 'test@example.com' }
+        user: { id: 1, email: 'test@example.com' },
       })
     );
   }),
 
   rest.get('/api/documents', (req, res, ctx) => {
-    return res(
-      ctx.json([
-        { id: '1', title: 'Mock Document', content: 'Mock content' }
-      ])
-    );
+    return res(ctx.json([{ id: '1', title: 'Mock Document', content: 'Mock content' }]));
   }),
 
   rest.post('/api/documents', (req, res, ctx) => {
@@ -563,10 +573,10 @@ export const handlers = [
       ctx.json({
         id: '2',
         title: 'New Document',
-        content: 'New content'
+        content: 'New content',
       })
     );
-  })
+  }),
 ];
 
 // src/test/mocks/server.ts
@@ -577,6 +587,7 @@ export const server = setupServer(...handlers);
 ```
 
 ### Custom Testing Hooks
+
 ```typescript
 // src/test/hooks/useTestAuth.ts
 import { useEffect } from 'react';
@@ -600,6 +611,7 @@ export const useTestAuth = (user = null) => {
 ## Performance Testing
 
 ### Load Testing with Playwright
+
 ```typescript
 // e2e/performance.spec.ts
 import { test, expect } from '@playwright/test';
@@ -630,23 +642,27 @@ test('should handle large document list efficiently', async ({ page }) => {
 ## Testing Best Practices
 
 ### Code Coverage Requirements
+
 - **Unit Tests**: Minimum 80% coverage
 - **Integration Tests**: Critical paths covered
 - **E2E Tests**: User journeys covered
 
 ### Test Organization
+
 - Group related tests in describe blocks
 - Use descriptive test names
 - Follow AAA pattern (Arrange, Act, Assert)
 - Clean up after each test
 
 ### Test Data Management
+
 - Use factories for test data creation
 - Mock external dependencies
 - Reset state between tests
 - Use realistic test data
 
 ### CI/CD Integration
+
 ```yaml
 # .github/workflows/test.yml
 name: Test Suite
@@ -679,25 +695,29 @@ jobs:
 ## Cross-References
 
 ### Related Documentation
+
 - **Components**: [../components/](../components/) for component testing patterns
 - **State Management**: [../state/](../state/) for store testing strategies
 - **API Layer**: [../api/](../api/) for API testing approaches
 - **Architecture**: [../architecture/](../architecture/) for testing architecture
 
 ### Source Code References
-- **Test Files**: [/src/**/*.test.ts](../../../src/)
+
+- **Test Files**: [/src/\*_/_.test.ts](../../../src/)
 - **E2E Tests**: [/e2e/](../../../e2e/)
 - **Test Utilities**: [/src/test/](../../../src/test/)
 
 ## Maintenance Guidelines
 
 ### Test Maintenance
+
 - Update tests when components change
 - Maintain test data factories
 - Review and update mock data
 - Monitor test performance
 
 ### Quality Metrics
+
 - Track test coverage trends
 - Monitor test execution time
 - Identify flaky tests

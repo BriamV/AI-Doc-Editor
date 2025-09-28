@@ -140,7 +140,7 @@ If merge protection fails:
 
 ### 3. Configuration Errors
 - Validate JSON syntax in configuration files
-- Run `yarn tsc-check` for TypeScript issues
+- Run `yarn fe:typecheck` for TypeScript issues
 - Fix malformed configuration files
 
 ### 4. Development Status Issues

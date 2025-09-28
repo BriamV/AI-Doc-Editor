@@ -22,18 +22,18 @@ The following legacy patterns are deprecated and marked for removal:
 ```bash
 # OLD (DEPRECATED)                    # NEW (PREFERRED)
 yarn run cmd dev                  →   yarn dev
-yarn run cmd build                →   yarn build  
-yarn run cmd test                 →   yarn test
-yarn run cmd security-scan        →   yarn security-scan
+yarn run cmd build                →   yarn fe:build
+yarn run cmd test                 →   yarn fe:test
+yarn run cmd security-scan        →   yarn sec:all
 ```
 
 ### Quality & Validation Commands
 ```bash
 # OLD (DEPRECATED)                    # NEW (PREFERRED)
-yarn run cmd lint                 →   yarn lint
-yarn run cmd format               →   yarn format
-yarn run cmd tsc-check            →   yarn tsc-check
-yarn run cmd qa-gate              →   yarn qa-gate
+yarn run cmd lint                 →   yarn fe:lint
+yarn run cmd format               →   yarn fe:format
+yarn run cmd tsc-check            →   yarn fe:typecheck
+yarn run cmd qa-gate              →   yarn qa:gate
 ```
 
 ### Governance & Documentation Commands
@@ -47,7 +47,7 @@ yarn run cmd validate-task T-XX   →   /task-dev T-XX command
 ### Task Management Commands
 ```bash
 # OLD (DEPRECATED)                    # NEW (PREFERRED)
-yarn run cmd validate-frontend    →   yarn tsc-check
+yarn run cmd validate-frontend    →   yarn fe:typecheck
 yarn run cmd validate-backend     →   Python venv activation
 yarn run cmd validate-modified    →   Use .claude/hooks.json auto-validation
 ```

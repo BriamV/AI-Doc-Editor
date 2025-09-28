@@ -194,4 +194,4 @@ jobs:
         env:
           CC_MAX_RANK: B
         run: |
-          node scripts/python-cc-gate.cjs
+          yarn be:complexity

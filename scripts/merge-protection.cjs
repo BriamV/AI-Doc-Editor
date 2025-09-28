@@ -37,7 +37,7 @@ class MergeProtectionSystem {
       'docs',
       'docs/adr',
       'tools',
-      'scripts'
+      'scripts',
     ];
 
     this.criticalFiles = [
@@ -49,7 +49,7 @@ class MergeProtectionSystem {
       'backend/app/main.py',
       'vite.config.ts',
       'tsconfig.json',
-      'tailwind.config.cjs'
+      'tailwind.config.cjs',
     ];
 
     this.configFiles = [
@@ -59,18 +59,18 @@ class MergeProtectionSystem {
       '.semgrepignore',
       'eslint.config.js',
       'jest.config.js',
-      'playwright.config.ts'
+      'playwright.config.ts',
     ];
   }
 
   log(level, message) {
     const timestamp = new Date().toISOString();
     const colors = {
-      info: '\x1b[36m',    // Cyan
+      info: '\x1b[36m', // Cyan
       success: '\x1b[32m', // Green
-      warn: '\x1b[33m',    // Yellow
-      error: '\x1b[31m',   // Red
-      reset: '\x1b[0m'     // Reset
+      warn: '\x1b[33m', // Yellow
+      error: '\x1b[31m', // Red
+      reset: '\x1b[0m', // Reset
     };
 
     const color = colors[level] || colors.info;
@@ -81,7 +81,7 @@ class MergeProtectionSystem {
     const result = spawnSync(command, args, {
       encoding: 'utf8',
       cwd: process.cwd(),
-      ...options
+      ...options,
     });
 
     if (result.error) {
@@ -95,7 +95,7 @@ class MergeProtectionSystem {
     return {
       stdout: result.stdout || '',
       stderr: result.stderr || '',
-      status: result.status
+      status: result.status,
     };
   }
 
@@ -171,7 +171,6 @@ class MergeProtectionSystem {
       this.log('success', '🔓 MERGE APPROVED - Safe to proceed');
 
       return { passed: true, results };
-
     } catch (error) {
       this.log('error', `💥 MERGE VALIDATION ERROR: ${error.message}`);
       this.log('error', '🛑 MERGE BLOCKED DUE TO CRITICAL ERROR');
@@ -196,21 +195,23 @@ class MergeProtectionSystem {
     checks.push({
       name: 'Working Tree Clean',
       passed: workingTreeClean,
-      message: workingTreeClean ? 'Working tree is clean' : 'Working tree has uncommitted changes'
+      message: workingTreeClean ? 'Working tree is clean' : 'Working tree has uncommitted changes',
     });
 
     // Uncommitted changes
     checks.push({
       name: 'No Uncommitted Changes',
       passed: !hasUncommittedChanges,
-      message: hasUncommittedChanges ? 'Has uncommitted changes - commit first' : 'No uncommitted changes'
+      message: hasUncommittedChanges
+        ? 'Has uncommitted changes - commit first'
+        : 'No uncommitted changes',
     });
 
     // Current branch check
     checks.push({
       name: 'Valid Branch Context',
       passed: currentBranch !== 'main' && currentBranch !== 'master',
-      message: `Current branch: ${currentBranch}`
+      message: `Current branch: ${currentBranch}`,
     });
 
     // Display results
@@ -244,25 +245,35 @@ class MergeProtectionSystem {
 
     this.log('info', `   Source (${sourceBranch}): ${sourceCount} files`);
     this.log('info', `   Target (${targetBranch}): ${targetCount} files`);
-    this.log('info', `   Difference: ${difference > 0 ? '+' : ''}${difference} files (${percentChange}%)`);
+    this.log(
+      'info',
+      `   Difference: ${difference > 0 ? '+' : ''}${difference} files (${percentChange}%)`
+    );
 
     // Alert if more than 10% file loss or more than 50 files lost
-    const majorLoss = difference < -50 || (difference < 0 && Math.abs(difference) / targetCount > 0.1);
+    const majorLoss =
+      difference < -50 || (difference < 0 && Math.abs(difference) / targetCount > 0.1);
 
     if (majorLoss) {
-      this.log('error', `🚨 CRITICAL: Major file loss detected (${Math.abs(difference)} files, ${Math.abs(percentChange)}%)`);
+      this.log(
+        'error',
+        `🚨 CRITICAL: Major file loss detected (${Math.abs(difference)} files, ${Math.abs(percentChange)}%)`
+      );
       this.log('error', '   This indicates potential merge issues or data loss');
 
       return {
         name: 'File Count Validation',
         passed: false,
         data: { sourceCount, targetCount, difference, percentChange },
-        message: `Major file loss detected: ${Math.abs(difference)} files (${Math.abs(percentChange)}%)`
+        message: `Major file loss detected: ${Math.abs(difference)} files (${Math.abs(percentChange)}%)`,
       };
     }
 
     if (difference < 0) {
-      this.log('warn', `⚠️  File count decreased by ${Math.abs(difference)} files (${Math.abs(percentChange)}%)`);
+      this.log(
+        'warn',
+        `⚠️  File count decreased by ${Math.abs(difference)} files (${Math.abs(percentChange)}%)`
+      );
       this.log('warn', '   Please verify this is expected');
     }
 
@@ -270,7 +281,7 @@ class MergeProtectionSystem {
       name: 'File Count Validation',
       passed: true,
       data: { sourceCount, targetCount, difference, percentChange },
-      message: `File count difference: ${difference > 0 ? '+' : ''}${difference} files (${percentChange}%)`
+      message: `File count difference: ${difference > 0 ? '+' : ''}${difference} files (${percentChange}%)`,
     };
   }
 
@@ -297,7 +308,9 @@ class MergeProtectionSystem {
       name: 'Critical Directories',
       passed,
       data: { missingDirs, totalDirs: this.criticalDirectories.length },
-      message: passed ? 'All critical directories present' : `Missing directories: ${missingDirs.join(', ')}`
+      message: passed
+        ? 'All critical directories present'
+        : `Missing directories: ${missingDirs.join(', ')}`,
     };
   }
 
@@ -324,7 +337,7 @@ class MergeProtectionSystem {
       name: 'Critical Files',
       passed,
       data: { missingFiles, totalFiles: this.criticalFiles.length },
-      message: passed ? 'All critical files present' : `Missing files: ${missingFiles.join(', ')}`
+      message: passed ? 'All critical files present' : `Missing files: ${missingFiles.join(', ')}`,
     };
   }
 
@@ -360,7 +373,7 @@ class MergeProtectionSystem {
       name: 'Configuration Integrity',
       passed,
       data: { issues, totalConfigs: this.configFiles.length },
-      message: passed ? 'All configuration files valid' : `Configuration issues: ${issues.length}`
+      message: passed ? 'All configuration files valid' : `Configuration issues: ${issues.length}`,
     };
   }
 
@@ -379,7 +392,8 @@ class MergeProtectionSystem {
       const content = this.getFileContent(statusFile, sourceBranch);
 
       // Check for basic consistency markers
-      const hasCurrentPhase = content.includes('## Fase Actual') || content.includes('## Current Phase');
+      const hasCurrentPhase =
+        content.includes('## Fase Actual') || content.includes('## Current Phase');
       const hasProgress = content.includes('Progress') || content.includes('Progreso');
       const hasTimestamp = /\d{4}-\d{2}-\d{2}/.test(content);
 
@@ -398,7 +412,7 @@ class MergeProtectionSystem {
       name: 'Development Status',
       passed,
       data: { issues },
-      message: passed ? 'Development status consistent' : `Status issues: ${issues.join(', ')}`
+      message: passed ? 'Development status consistent' : `Status issues: ${issues.join(', ')}`,
     };
   }
 
@@ -426,7 +440,7 @@ class MergeProtectionSystem {
       // Check for required ADR patterns (flexible naming)
       const requiredADRPatterns = [
         { pattern: /^ADR-001-.*\.md$/, description: 'ADR-001 (Architecture)' },
-        { pattern: /^ADR-006-.*\.md$/, description: 'ADR-006 (Security)' }
+        { pattern: /^ADR-006-.*\.md$/, description: 'ADR-006 (Security)' },
       ];
 
       for (const { pattern, description } of requiredADRPatterns) {
@@ -446,7 +460,7 @@ class MergeProtectionSystem {
       name: 'ADR Files',
       passed,
       data: { issues },
-      message: passed ? 'ADR files complete' : `ADR issues: ${issues.join(', ')}`
+      message: passed ? 'ADR files complete' : `ADR issues: ${issues.join(', ')}`,
     };
   }
 
@@ -512,7 +526,10 @@ class MergeProtectionSystem {
   getFileCount(branch) {
     try {
       const result = this.runCommand('git', ['ls-tree', '-r', '--name-only', branch]);
-      return result.stdout.trim().split('\n').filter(line => line.length > 0).length;
+      return result.stdout
+        .trim()
+        .split('\n')
+        .filter(line => line.length > 0).length;
     } catch {
       return 0;
     }
@@ -549,7 +566,9 @@ class MergeProtectionSystem {
     try {
       // Use git ls-tree with -r to recursively list files in the directory
       const result = this.runCommand('git', ['ls-tree', '-r', '--name-only', branch, '--', dir]);
-      return result.stdout.trim().split('\n')
+      return result.stdout
+        .trim()
+        .split('\n')
         .filter(line => line.length > 0)
         .map(file => path.basename(file)); // Extract just the filename
     } catch {
@@ -609,7 +628,10 @@ class MergeProtectionSystem {
         this.log('info', `Branch ${branch} contains ${fileCount} files`);
         return { branch, fileCount };
       default:
-        this.log('error', 'Unknown command. Available commands: validate-merge, pre-merge-check, branch-audit');
+        this.log(
+          'error',
+          'Unknown command. Available commands: validate-merge, pre-merge-check, branch-audit'
+        );
         process.exit(1);
     }
   }
@@ -618,7 +640,7 @@ class MergeProtectionSystem {
 // Execute if called directly
 if (require.main === module) {
   const mergeProtection = new MergeProtectionSystem();
-  mergeProtection.execute().catch((error) => {
+  mergeProtection.execute().catch(error => {
     console.error('Unhandled error:', error.message);
     process.exit(1);
   });

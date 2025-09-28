@@ -78,7 +78,7 @@ Este proyecto es un fork mejorado de [AI Text Editor](https://github.com/darryls
 
 4. Inicia el servidor de desarrollo:
    ```bash
-   yarn dev
+   yarn all:dev
    ```
 
 ## 🚀 Uso
@@ -183,20 +183,20 @@ El proyecto utiliza comandos directos de yarn y comandos slash para desarrollo. 
 ```bash
 # Desarrollo
 yarn dev                          # Iniciar servidor de desarrollo
-yarn build                        # Construir para producción
-yarn test                         # Ejecutar todas las pruebas
-yarn test:e2e                     # Pruebas E2E con Playwright
+yarn fe:build                     # Construir para producción
+yarn fe:test                      # Ejecutar todas las pruebas
+yarn e2e:fe                       # Pruebas E2E con Playwright
 
 # Calidad de Código
-yarn lint                         # Validar frontend
-yarn tsc-check                    # Verificar TypeScript
-yarn python-quality               # Validar backend Python
-yarn quality-gate                 # Pipeline completo de calidad
-yarn security-scan                # Auditoría de seguridad
+yarn fe:lint                      # Validar frontend
+yarn fe:typecheck                 # Verificar TypeScript
+yarn be:quality                   # Validar backend Python
+yarn qa:gate                      # Pipeline completo de calidad
+yarn sec:all                      # Auditoría de seguridad
 
 # Protección de Fusiones (OBLIGATORIO antes de merge)
-yarn merge-safety-full            # Validación completa de seguridad
-yarn install-merge-hooks          # Instalar protección git
+yarn repo:merge:validate          # Validación completa de seguridad
+yarn repo:merge:hooks:install     # Instalar protección git
 
 # Documentación y Trazabilidad
 # Usar comandos slash en lugar de scripts:

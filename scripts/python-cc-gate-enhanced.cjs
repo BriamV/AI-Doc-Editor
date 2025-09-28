@@ -19,7 +19,7 @@ const {
   ErrorCodes,
   createError,
   ProtocolBridge,
-  ErrorValidation
+  ErrorValidation,
 } = require('./lib/error-codes.cjs');
 
 class PythonComplexityGate {
@@ -29,7 +29,7 @@ class PythonComplexityGate {
       maxRank: options.maxRank || (process.env.CC_MAX_RANK || 'B').toUpperCase(),
       target: options.target || process.env.CC_TARGET,
       exitOnError: options.exitOnError !== false,
-      ...options
+      ...options,
     };
 
     // Initialize error handler with project-specific configuration
@@ -37,7 +37,7 @@ class PythonComplexityGate {
       verbose: this.options.verbose,
       exitOnError: this.options.exitOnError,
       logFile: 'logs/python-cc-gate.log',
-      colorOutput: true
+      colorOutput: true,
     });
 
     // Initialize performance tracking
@@ -101,7 +101,7 @@ class PythonComplexityGate {
           platform: process.platform,
           venvPath: path.dirname(path.dirname(toolPath)),
           suggestion: 'Try: yarn python:install',
-          helpUrl: 'https://radon.readthedocs.io/en/latest/intro.html'
+          helpUrl: 'https://radon.readthedocs.io/en/latest/intro.html',
         }
       );
       this.errorHandler.handleError(error);
@@ -133,7 +133,7 @@ class PythonComplexityGate {
         'get_certificate_info',
         'get_cipher_suites_for_security_level',
         'get_compliance_report',
-        'get_system_health'
+        'get_system_health',
       ]);
 
       const approvedFiles = new Set([
@@ -144,7 +144,7 @@ class PythonComplexityGate {
         'policy_engine.py',
         'rotation_scheduler.py',
         'tls_config.py',
-        'key_management.py'
+        'key_management.py',
       ]);
 
       return { approvedFunctions, approvedFiles };
@@ -155,7 +155,7 @@ class PythonComplexityGate {
         {
           originalError: error.message,
           configType: 'security_exceptions',
-          task: 'T-12'
+          task: 'T-12',
         }
       );
       this.errorHandler.handleError(enhancedError, { exitOnError: false });
@@ -163,7 +163,7 @@ class PythonComplexityGate {
       // Return empty sets as fallback
       return {
         approvedFunctions: new Set(),
-        approvedFiles: new Set()
+        approvedFiles: new Set(),
       };
     }
   }
@@ -172,9 +172,9 @@ class PythonComplexityGate {
    * Check if file is a test file
    */
   isTestFile(filePath) {
-    return filePath.includes('/tests/') ||
-           filePath.includes('\\tests\\') ||
-           filePath.includes('test_');
+    return (
+      filePath.includes('/tests/') || filePath.includes('\\tests\\') || filePath.includes('test_')
+    );
   }
 
   /**
@@ -188,8 +188,7 @@ class PythonComplexityGate {
       return true;
     }
 
-    return exceptions.approvedFiles.has(fileName) &&
-           exceptions.approvedFunctions.has(functionName);
+    return exceptions.approvedFiles.has(fileName) && exceptions.approvedFunctions.has(functionName);
   }
 
   /**
@@ -207,7 +206,7 @@ class PythonComplexityGate {
       const result = spawnSync(radonPath, args, {
         cwd: process.cwd(),
         encoding: 'utf8',
-        timeout: 30000 // 30 second timeout
+        timeout: 30000, // 30 second timeout
       });
 
       if (result.error) {
@@ -219,7 +218,7 @@ class PythonComplexityGate {
             args: args,
             workingDirectory: process.cwd(),
             error: result.error.code,
-            timeout: 30000
+            timeout: 30000,
           }
         );
         this.errorHandler.handleError(error);
@@ -234,7 +233,7 @@ class PythonComplexityGate {
             args: args,
             exitCode: result.status,
             stderr: result.stderr,
-            stdout: result.stdout
+            stdout: result.stdout,
           }
         );
         this.errorHandler.handleError(error);
@@ -249,7 +248,7 @@ class PythonComplexityGate {
           command: radonPath,
           args: args,
           originalError: error.message,
-          stack: error.stack
+          stack: error.stack,
         }
       );
       this.errorHandler.handleError(enhancedError);
@@ -269,7 +268,7 @@ class PythonComplexityGate {
         {
           stdout: stdout,
           parseError: parseError.message,
-          expectedFormat: 'JSON'
+          expectedFormat: 'JSON',
         }
       );
       this.errorHandler.handleError(error);
@@ -304,7 +303,7 @@ class PythonComplexityGate {
               name: item.name,
               line: item.lineno,
               rank: rank,
-              complexity: item.complexity
+              complexity: item.complexity,
             };
 
             // Check if this is an approved security exception
@@ -325,7 +324,7 @@ class PythonComplexityGate {
         {
           dataKeys: Object.keys(data),
           maxRank: maxRank,
-          originalError: error.message
+          originalError: error.message,
         }
       );
       this.errorHandler.handleError(enhancedError);
@@ -350,7 +349,9 @@ class PythonComplexityGate {
     if (approvedExceptions.length > 0) {
       console.log(`\n✅ Approved security exceptions (${approvedExceptions.length}):`);
       approvedExceptions.forEach(({ file, name, line, rank, complexity }) => {
-        console.log(`  - [${rank}] ${path.basename(file)}:${line} ${name} (T-12 security, CC=${complexity})`);
+        console.log(
+          `  - [${rank}] ${path.basename(file)}:${line} ${name} (T-12 security, CC=${complexity})`
+        );
       });
     }
 
@@ -366,10 +367,10 @@ class PythonComplexityGate {
             function: o.name,
             line: o.line,
             rank: o.rank,
-            complexity: o.complexity
+            complexity: o.complexity,
           })),
           approvedExceptions: approvedExceptions.length,
-          totalFunctions: Object.values(counts).reduce((a, b) => a + b, 0)
+          totalFunctions: Object.values(counts).reduce((a, b) => a + b, 0),
         }
       );
 
@@ -387,7 +388,9 @@ class PythonComplexityGate {
 
     if (this.options.verbose) {
       console.log(`[DEBUG] Total analysis time: ${duration}ms`);
-      console.log(`[DEBUG] Functions analyzed: ${Object.values(counts).reduce((a, b) => a + b, 0)}`);
+      console.log(
+        `[DEBUG] Functions analyzed: ${Object.values(counts).reduce((a, b) => a + b, 0)}`
+      );
     }
   }
 
@@ -413,7 +416,9 @@ class PythonComplexityGate {
   async execute() {
     try {
       if (this.options.verbose) {
-        console.log(`[DEBUG] Starting Python complexity analysis (operation: ${this.operationName})`);
+        console.log(
+          `[DEBUG] Starting Python complexity analysis (operation: ${this.operationName})`
+        );
       }
 
       const repoRoot = this.getRepoRoot();
@@ -431,7 +436,7 @@ class PythonComplexityGate {
           {
             target: target,
             repoRoot: repoRoot,
-            expectedPath: backendDir
+            expectedPath: backendDir,
           }
         );
         this.errorHandler.handleError(error);
@@ -458,9 +463,8 @@ class PythonComplexityGate {
       return {
         success: true,
         analysis: analysis,
-        duration: Date.now() - this.startTime
+        duration: Date.now() - this.startTime,
       };
-
     } catch (error) {
       // Ensure all errors go through our error handling system
       if (error.name !== 'StandardizedError') {
@@ -470,7 +474,7 @@ class PythonComplexityGate {
           {
             originalError: error.message,
             stack: error.stack,
-            operation: this.operationName
+            operation: this.operationName,
           }
         );
         this.writeErrorForTools(wrappedError);
@@ -496,7 +500,7 @@ function runSelfTest() {
     // Test gate initialization
     const gate = new PythonComplexityGate({
       verbose: true,
-      exitOnError: false
+      exitOnError: false,
     });
 
     console.log('✅ Gate initialization: PASS');
@@ -534,7 +538,7 @@ async function main() {
   const options = {
     verbose: process.argv.includes('--verbose'),
     maxRank: process.env.CC_MAX_RANK || 'B',
-    target: process.env.CC_TARGET
+    target: process.env.CC_TARGET,
   };
 
   // Execute complexity gate
@@ -544,7 +548,7 @@ async function main() {
 
 // Execute if called directly
 if (require.main === module) {
-  main().catch((error) => {
+  main().catch(error => {
     console.error('Unhandled error:', error.message);
     process.exit(1);
   });

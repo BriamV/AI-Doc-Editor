@@ -44,6 +44,7 @@ function createWindow() {
 ### Update Configuration
 
 #### Package.json Configuration
+
 ```json
 {
   "dependencies": {
@@ -60,11 +61,12 @@ function createWindow() {
 ```
 
 #### Auto-Updater Settings
+
 ```javascript
 // Auto-updater configuration options
-autoUpdater.autoDownload = true;          // Automatic download
-autoUpdater.autoInstallOnAppQuit = true;  // Install on app exit
-autoUpdater.checkForUpdatesAndNotify();   // Check on startup
+autoUpdater.autoDownload = true; // Automatic download
+autoUpdater.autoInstallOnAppQuit = true; // Install on app exit
+autoUpdater.checkForUpdatesAndNotify(); // Check on startup
 ```
 
 ## Update Flow and Lifecycle
@@ -89,26 +91,26 @@ autoUpdater.on('checking-for-update', () => {
   console.log('Checking for update...');
 });
 
-autoUpdater.on('update-available', (info) => {
+autoUpdater.on('update-available', info => {
   console.log('Update available.');
 });
 
-autoUpdater.on('update-not-available', (info) => {
+autoUpdater.on('update-not-available', info => {
   console.log('Update not available.');
 });
 
-autoUpdater.on('error', (err) => {
+autoUpdater.on('error', err => {
   console.log('Error in auto-updater. ' + err);
 });
 
-autoUpdater.on('download-progress', (progressObj) => {
-  let log_message = "Download speed: " + progressObj.bytesPerSecond;
+autoUpdater.on('download-progress', progressObj => {
+  let log_message = 'Download speed: ' + progressObj.bytesPerSecond;
   log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
-  log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+  log_message = log_message + ' (' + progressObj.transferred + '/' + progressObj.total + ')';
   console.log(log_message);
 });
 
-autoUpdater.on('update-downloaded', (info) => {
+autoUpdater.on('update-downloaded', info => {
   console.log('Update downloaded');
   autoUpdater.quitAndInstall();
 });
@@ -119,12 +121,14 @@ autoUpdater.on('update-downloaded', (info) => {
 ### GitHub Releases Integration
 
 #### Release Workflow
+
 1. **Version Tagging**: Create git tag with semantic version
 2. **CI/CD Build**: Automated build on tag push
 3. **Release Creation**: GitHub release with build artifacts
 4. **Update Detection**: electron-updater checks GitHub releases
 
 #### Release Asset Structure
+
 ```
 Releases/
 ├── latest.yml              # Update metadata
@@ -136,18 +140,21 @@ Releases/
 ### Update Channels
 
 #### Production Channel
+
 - **Source**: GitHub Releases (latest)
 - **Stability**: Stable production releases
 - **Frequency**: Major/minor version updates
 - **Target**: All users
 
 #### Beta Channel (Future Enhancement)
+
 - **Source**: GitHub Pre-releases
 - **Stability**: Beta testing releases
 - **Frequency**: Regular beta updates
 - **Target**: Beta testers and early adopters
 
 #### Development Channel (Future Enhancement)
+
 - **Source**: Nightly builds
 - **Stability**: Development builds
 - **Frequency**: Daily/continuous builds
@@ -158,6 +165,7 @@ Releases/
 ### Windows Updates
 
 #### Squirrel Integration
+
 ```json
 {
   "build": {
@@ -174,12 +182,14 @@ Releases/
 ```
 
 #### Windows Update Process
+
 1. **Check**: electron-updater checks GitHub releases
 2. **Download**: Background download of Squirrel package
 3. **Notification**: User notification of available update
 4. **Install**: Silent installation on next application restart
 
 #### Windows-Specific Features
+
 - **Silent Updates**: Background update installation
 - **Delta Updates**: Incremental update patches (future enhancement)
 - **Rollback**: Automatic rollback on update failure (future enhancement)
@@ -187,6 +197,7 @@ Releases/
 ### macOS Updates
 
 #### Auto-Update Configuration
+
 ```json
 {
   "build": {
@@ -203,12 +214,14 @@ Releases/
 ```
 
 #### macOS Update Process
+
 1. **Check**: electron-updater checks for updates
 2. **Download**: Background download of DMG package
 3. **Verification**: Code signature and notarization verification
 4. **Install**: User-prompted installation or auto-install
 
 #### macOS-Specific Considerations
+
 - **Gatekeeper**: Notarized updates for security compliance
 - **Quarantine**: Proper quarantine attribute handling
 - **Permissions**: System permission requirements for updates
@@ -216,6 +229,7 @@ Releases/
 ### Linux Updates
 
 #### AppImage Auto-Updates
+
 ```json
 {
   "build": {
@@ -232,12 +246,14 @@ Releases/
 ```
 
 #### Linux Update Process
+
 1. **Check**: electron-updater checks for AppImage updates
 2. **Download**: Background download of new AppImage
 3. **Replacement**: Atomic replacement of application file
 4. **Restart**: Application restart with new version
 
 #### Linux Package Manager Integration (Future Enhancement)
+
 - **APT Integration**: Debian/Ubuntu package updates
 - **RPM Integration**: Red Hat/Fedora package updates
 - **Snap Updates**: Automatic snap package updates
@@ -248,6 +264,7 @@ Releases/
 ### Update Security Model
 
 #### Code Signing Verification
+
 ```javascript
 // Auto-updater automatically verifies code signatures
 // Windows: Authenticode signature verification
@@ -256,6 +273,7 @@ Releases/
 ```
 
 #### Update Integrity Checks
+
 - **Checksum Verification**: SHA-256 hash verification
 - **Signature Validation**: Digital signature verification
 - **Channel Security**: HTTPS-only update downloads
@@ -264,12 +282,14 @@ Releases/
 ### Security Best Practices
 
 #### Secure Update Distribution
+
 1. **HTTPS Only**: All update communications over HTTPS
 2. **Signed Packages**: All update packages digitally signed
 3. **Integrity Verification**: Cryptographic hash verification
 4. **Source Validation**: Update source authentication
 
 #### Attack Vector Mitigation
+
 - **Man-in-the-Middle**: HTTPS and certificate pinning
 - **Package Tampering**: Digital signature verification
 - **Downgrade Attacks**: Version validation and monotonic updates
@@ -280,20 +300,22 @@ Releases/
 ### Update Notifications
 
 #### Silent Updates (Current Implementation)
+
 ```javascript
 // Current: Silent background updates
 autoUpdater.checkForUpdatesAndNotify();
 ```
 
 #### Enhanced User Interface (Future Enhancement)
+
 ```javascript
 // Future: User-friendly update notifications
-autoUpdater.on('update-available', (info) => {
+autoUpdater.on('update-available', info => {
   // Show in-app notification
   showUpdateNotification({
     title: 'Update Available',
     message: `Version ${info.version} is available`,
-    actions: ['Download Now', 'Later']
+    actions: ['Download Now', 'Later'],
   });
 });
 ```
@@ -301,26 +323,28 @@ autoUpdater.on('update-available', (info) => {
 ### Update Progress Indication
 
 #### Download Progress (Future Enhancement)
+
 ```javascript
-autoUpdater.on('download-progress', (progressObj) => {
+autoUpdater.on('download-progress', progressObj => {
   // Update UI with download progress
   updateProgressBar({
     percent: progressObj.percent,
     speed: progressObj.bytesPerSecond,
     transferred: progressObj.transferred,
-    total: progressObj.total
+    total: progressObj.total,
   });
 });
 ```
 
 #### Installation Status (Future Enhancement)
+
 ```javascript
-autoUpdater.on('update-downloaded', (info) => {
+autoUpdater.on('update-downloaded', info => {
   // Show installation ready notification
   showInstallNotification({
     title: 'Update Ready',
     message: 'Restart to install the latest version',
-    action: 'Restart Now'
+    action: 'Restart Now',
   });
 });
 ```
@@ -330,6 +354,7 @@ autoUpdater.on('update-downloaded', (info) => {
 ### Update Settings
 
 #### User Preferences (Future Enhancement)
+
 ```json
 {
   "autoUpdate": {
@@ -343,6 +368,7 @@ autoUpdater.on('update-downloaded', (info) => {
 ```
 
 #### Administrative Control (Future Enhancement)
+
 ```json
 {
   "enterpriseSettings": {
@@ -357,6 +383,7 @@ autoUpdater.on('update-downloaded', (info) => {
 ### Environment Configuration
 
 #### Development Environment
+
 ```javascript
 // Development: Disable auto-updates
 if (isDev) {
@@ -366,6 +393,7 @@ if (isDev) {
 ```
 
 #### Production Environment
+
 ```javascript
 // Production: Enable auto-updates
 if (!isDev) {
@@ -378,12 +406,14 @@ if (!isDev) {
 ### Update Testing Strategy
 
 #### Automated Testing
+
 ```bash
 # Automated update testing
 yarn test:updates
 ```
 
 #### Manual Testing Checklist
+
 - [ ] Update check functionality
 - [ ] Download process verification
 - [ ] Installation process validation
@@ -393,12 +423,14 @@ yarn test:updates
 ### Update Simulation
 
 #### Development Testing
+
 ```bash
 # Simulate update process in development
 yarn test:update-simulation
 ```
 
 #### Staging Environment
+
 - **Test Releases**: Staging release environment
 - **Update Scenarios**: Various update scenario testing
 - **Platform Testing**: Multi-platform update validation
@@ -408,12 +440,14 @@ yarn test:update-simulation
 ### Update Metrics (Future Enhancement)
 
 #### Update Success Rates
+
 - **Download Success**: Successful update downloads
 - **Installation Success**: Successful update installations
 - **Failure Rates**: Update failure analytics
 - **Rollback Frequency**: Rollback occurrence tracking
 
 #### User Behavior Analytics
+
 - **Update Adoption**: Update adoption rates
 - **User Preferences**: User update preference analytics
 - **Performance Impact**: Update performance metrics
@@ -421,8 +455,9 @@ yarn test:update-simulation
 ### Error Reporting and Diagnostics
 
 #### Update Error Handling
+
 ```javascript
-autoUpdater.on('error', (err) => {
+autoUpdater.on('error', err => {
   // Log error for diagnostic purposes
   console.error('Auto-updater error:', err);
 
@@ -431,7 +466,7 @@ autoUpdater.on('error', (err) => {
     component: 'auto-updater',
     error: err.message,
     stack: err.stack,
-    version: app.getVersion()
+    version: app.getVersion(),
   });
 });
 ```
@@ -441,16 +476,19 @@ autoUpdater.on('error', (err) => {
 ### Common Update Issues
 
 #### Network-Related Issues
+
 - **Connectivity Problems**: Network timeout and retry mechanisms
 - **Proxy Configuration**: Corporate proxy support (future enhancement)
 - **Bandwidth Limitations**: Metered connection handling
 
 #### Platform-Specific Issues
+
 - **Windows**: Windows Defender interference with updates
 - **macOS**: Gatekeeper blocking unsigned updates
 - **Linux**: File permission issues with AppImage updates
 
 #### Application-Specific Issues
+
 - **Version Conflicts**: Version compatibility validation
 - **Database Migration**: Data migration between versions
 - **Configuration Updates**: Settings migration and validation
@@ -458,12 +496,14 @@ autoUpdater.on('error', (err) => {
 ### Diagnostic Tools
 
 #### Update Logs
+
 ```javascript
 // Enable detailed update logging
 process.env.ELECTRON_ENABLE_LOGGING = true;
 ```
 
 #### Manual Update Trigger
+
 ```javascript
 // Manual update check for debugging
 autoUpdater.checkForUpdates();
@@ -474,24 +514,28 @@ autoUpdater.checkForUpdates();
 ### Planned Update Features
 
 #### Enhanced User Interface
+
 - **Update Notifications**: In-app update notifications
 - **Progress Indicators**: Visual download and installation progress
 - **Release Notes**: Display update changelog and features
 - **User Control**: User-configurable update preferences
 
 #### Advanced Update Mechanisms
+
 - **Delta Updates**: Incremental update patches
 - **Rollback System**: Automatic rollback on update failure
 - **A/B Testing**: Gradual rollout and feature testing
 - **Background Updates**: Completely silent background updates
 
 #### Enterprise Features
+
 - **Update Policies**: Administrative update control
 - **Custom Servers**: Private update server support
 - **Staged Rollouts**: Controlled enterprise update deployment
 - **Update Analytics**: Comprehensive update analytics dashboard
 
 #### Platform Integration
+
 - **OS Integration**: Native OS update notification integration
 - **Package Managers**: Integration with system package managers
 - **Store Updates**: App store update mechanism integration
@@ -509,12 +553,14 @@ autoUpdater.checkForUpdates();
 ### Best Practices
 
 #### Code Organization
+
 - **Update Logic**: Centralized update handling
 - **Error Handling**: Comprehensive error management
 - **User Interface**: Consistent update UI patterns
 - **Testing**: Automated update testing
 
 #### Quality Assurance
+
 - **Update Testing**: Platform-specific update validation
 - **Regression Testing**: Update impact assessment
 - **Performance Testing**: Update performance metrics

@@ -7,24 +7,28 @@ This directory contains frontend-specific architectural decisions, design patter
 ### Technology Stack Architecture
 
 #### 🏗️ **Core Framework Stack**
+
 - **React 18**: Component-based UI with concurrent features
 - **TypeScript**: Type-safe JavaScript development
 - **Vite**: Fast build tool and development server
 - **TailwindCSS**: Utility-first CSS framework
 
 #### 🔄 **State Management Architecture**
+
 - **Zustand**: Lightweight state management (8 stores)
 - **React Context**: Provider pattern for specific use cases
 - **Local Storage**: Encrypted persistence via IndexedDB
 - **State Composition**: Cross-store coordination patterns
 
 #### 🎨 **UI/UX Architecture**
+
 - **Component Composition**: Reusable component patterns
 - **Design System**: Consistent UI components and tokens
 - **Responsive Design**: Mobile-first responsive patterns
 - **Accessibility**: WCAG 2.1 AA compliance
 
 #### ⚡ **Performance Architecture**
+
 - **Code Splitting**: Route-based and component-based splitting
 - **Lazy Loading**: Dynamic imports for optimization
 - **Memoization**: React.memo, useMemo, useCallback patterns
@@ -33,6 +37,7 @@ This directory contains frontend-specific architectural decisions, design patter
 ## Architectural Patterns
 
 ### 1. Component Architecture Pattern
+
 ```
 Application Layer
 ├── App.tsx                 # Application root and routing
@@ -55,19 +60,20 @@ Application Layer
 ```
 
 ### 2. State Management Pattern
+
 ```typescript
 // Store Architecture Pattern
 interface ApplicationState {
   // Domain-specific stores
-  auth: AuthState;           // User authentication
-  documents: DocumentState;  // Document management
-  chat: ChatState;          // AI conversation
-  ui: UIState;              // UI state and preferences
+  auth: AuthState; // User authentication
+  documents: DocumentState; // Document management
+  chat: ChatState; // AI conversation
+  ui: UIState; // UI state and preferences
 
   // Cross-cutting concerns
-  audit: AuditState;        // Security and logging
-  toast: ToastState;        // Notifications
-  config: ConfigState;      // Application configuration
+  audit: AuditState; // Security and logging
+  toast: ToastState; // Notifications
+  config: ConfigState; // Application configuration
 }
 
 // Store Composition Pattern
@@ -81,6 +87,7 @@ const useApplicationState = () => {
 ```
 
 ### 3. Data Flow Architecture
+
 ```
 User Interaction → Component → Custom Hook → Store Action → API Call
                                     ↓
@@ -90,6 +97,7 @@ Component Re-render ← State Subscription ← Store Notification
 ```
 
 ### 4. Error Handling Architecture
+
 ```typescript
 // Hierarchical Error Handling
 Application Level
@@ -109,6 +117,7 @@ interface ErrorRecovery {
 ## Performance Optimization Strategies
 
 ### 1. React Performance Optimizations
+
 ```typescript
 // Component Memoization
 const DocumentList = React.memo(({ documents, onSelect }) => {
@@ -146,6 +155,7 @@ const useStableCallback = () => {
 ```
 
 ### 2. Bundle Optimization
+
 ```typescript
 // Code Splitting with React.lazy
 const DocumentEditor = React.lazy(() => import('./DocumentEditor'));
@@ -170,6 +180,7 @@ const loadHeavyLibrary = async () => {
 ```
 
 ### 3. State Management Optimization
+
 ```typescript
 // Selective State Subscriptions
 const DocumentMetadata = () => {
@@ -198,6 +209,7 @@ const useOptimizedDocumentStore = () => {
 ## Security Architecture
 
 ### 1. Authentication Security
+
 ```typescript
 // Token Management Security
 class SecureTokenManager {
@@ -229,6 +241,7 @@ const ProtectedRoute = ({ children, requiredRoles = [] }) => {
 ```
 
 ### 2. Input Validation and Sanitization
+
 ```typescript
 // Input Sanitization
 import DOMPurify from 'dompurify';
@@ -236,26 +249,30 @@ import DOMPurify from 'dompurify';
 const sanitizeInput = (input: string): string => {
   return DOMPurify.sanitize(input, {
     ALLOWED_TAGS: ['b', 'i', 'em', 'strong'],
-    ALLOWED_ATTR: []
+    ALLOWED_ATTR: [],
   });
 };
 
 // Form Validation
 const useFormValidation = (schema: ValidationSchema) => {
-  const validate = useCallback((data: any) => {
-    try {
-      schema.parse(data);
-      return { isValid: true, errors: {} };
-    } catch (error) {
-      return { isValid: false, errors: formatErrors(error) };
-    }
-  }, [schema]);
+  const validate = useCallback(
+    (data: any) => {
+      try {
+        schema.parse(data);
+        return { isValid: true, errors: {} };
+      } catch (error) {
+        return { isValid: false, errors: formatErrors(error) };
+      }
+    },
+    [schema]
+  );
 
   return { validate };
 };
 ```
 
 ### 3. Content Security Policy
+
 ```typescript
 // CSP Implementation
 const securityHeaders = {
@@ -264,14 +281,15 @@ const securityHeaders = {
     "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https:",
-    "connect-src 'self' https://api.openai.com"
-  ].join('; ')
+    "connect-src 'self' https://api.openai.com",
+  ].join('; '),
 };
 ```
 
 ## Testing Architecture
 
 ### 1. Testing Strategy Pyramid
+
 ```
 E2E Tests (Playwright)
 ├── Critical User Journeys
@@ -290,6 +308,7 @@ Unit Tests (Jest)
 ```
 
 ### 2. Component Testing Patterns
+
 ```typescript
 // Component Testing with RTL
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -320,6 +339,7 @@ test('should handle document creation', async () => {
 ```
 
 ### 3. Store Testing Patterns
+
 ```typescript
 // Store Testing
 import { renderHook, act } from '@testing-library/react';
@@ -344,6 +364,7 @@ test('should update document correctly', () => {
 ## Build and Deployment Architecture
 
 ### 1. Build Optimization
+
 ```typescript
 // Vite Configuration
 export default defineConfig({
@@ -353,19 +374,20 @@ export default defineConfig({
         manualChunks: {
           vendor: ['react', 'react-dom'],
           ui: ['@headlessui/react', '@heroicons/react'],
-          utils: ['lodash', 'date-fns']
-        }
-      }
+          utils: ['lodash', 'date-fns'],
+        },
+      },
     },
-    chunkSizeWarningLimit: 1000
+    chunkSizeWarningLimit: 1000,
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'zustand']
-  }
+    include: ['react', 'react-dom', 'zustand'],
+  },
 });
 ```
 
 ### 2. Environment Configuration
+
 ```typescript
 // Environment-specific Configuration
 interface EnvironmentConfig {
@@ -380,7 +402,7 @@ const getConfig = (): EnvironmentConfig => {
     API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
     GOOGLE_CLIENT_ID: import.meta.env.VITE_GOOGLE_CLIENT_ID,
     OPENAI_API_KEY: import.meta.env.VITE_OPENAI_API_KEY,
-    ENVIRONMENT: import.meta.env.MODE as any
+    ENVIRONMENT: import.meta.env.MODE as any,
   };
 };
 ```
@@ -388,6 +410,7 @@ const getConfig = (): EnvironmentConfig => {
 ## Accessibility Architecture
 
 ### 1. WCAG 2.1 AA Compliance
+
 ```typescript
 // Accessibility Patterns
 const AccessibleButton = ({ children, onClick, ariaLabel, disabled = false }) => {
@@ -426,27 +449,31 @@ const useScreenReader = () => {
 ```
 
 ### 2. Keyboard Navigation
+
 ```typescript
 // Keyboard Navigation Patterns
 const useKeyboardNavigation = (items: any[], onSelect: (item: any) => void) => {
   const [focusedIndex, setFocusedIndex] = useState(0);
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        setFocusedIndex(prev => Math.min(prev + 1, items.length - 1));
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        setFocusedIndex(prev => Math.max(prev - 1, 0));
-        break;
-      case 'Enter':
-        e.preventDefault();
-        onSelect(items[focusedIndex]);
-        break;
-    }
-  }, [items, focusedIndex, onSelect]);
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setFocusedIndex(prev => Math.min(prev + 1, items.length - 1));
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setFocusedIndex(prev => Math.max(prev - 1, 0));
+          break;
+        case 'Enter':
+          e.preventDefault();
+          onSelect(items[focusedIndex]);
+          break;
+      }
+    },
+    [items, focusedIndex, onSelect]
+  );
 
   return { focusedIndex, handleKeyDown };
 };
@@ -455,12 +482,14 @@ const useKeyboardNavigation = (items: any[], onSelect: (item: any) => void) => {
 ## Cross-References
 
 ### Related Documentation
+
 - **Backend Architecture**: [../../backend/docs/](../../backend/docs/) for backend integration
 - **Security Strategy**: [../../docs/security/](../../docs/security/) for security architecture
 - **Components**: [../components/](../components/) for component implementation
 - **State Management**: [../state/](../state/) for state architecture details
 
 ### Source Code References
+
 - **Architecture Files**: [/src/](../../../src/)
 - **Configuration**: [/vite.config.ts](../../../vite.config.ts)
 - **Type Definitions**: [/src/types/](../../../src/types/)
@@ -468,16 +497,19 @@ const useKeyboardNavigation = (items: any[], onSelect: (item: any) => void) => {
 ## Architectural Decision Records (ADRs)
 
 ### ADR-001: State Management Library Selection
+
 **Decision**: Zustand over Redux Toolkit
 **Rationale**: Simpler API, better TypeScript support, smaller bundle size
 **Consequences**: Reduced boilerplate, easier testing, learning curve for team
 
 ### ADR-002: Build Tool Selection
+
 **Decision**: Vite over Create React App
 **Rationale**: Faster development server, better ES modules support, smaller bundle
 **Consequences**: Improved DX, faster builds, potential compatibility issues
 
 ### ADR-003: CSS Framework Selection
+
 **Decision**: TailwindCSS over Styled Components
 **Rationale**: Utility-first approach, consistent design system, smaller runtime
 **Consequences**: Faster development, consistent styling, initial learning curve
@@ -485,24 +517,28 @@ const useKeyboardNavigation = (items: any[], onSelect: (item: any) => void) => {
 ## Best Practices
 
 ### Code Organization
+
 - Feature-based directory structure
 - Consistent naming conventions
 - Proper TypeScript usage
 - Comprehensive documentation
 
 ### Performance
+
 - Implement proper memoization
 - Use code splitting strategically
 - Monitor bundle sizes
 - Optimize re-render cycles
 
 ### Security
+
 - Validate all inputs
 - Implement proper authentication
 - Use Content Security Policy
 - Regular security audits
 
 ### Testing
+
 - Maintain high test coverage
 - Test user interactions
 - Mock external dependencies

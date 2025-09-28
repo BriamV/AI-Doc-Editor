@@ -44,8 +44,7 @@ class CrossPlatformWrapper {
     if (this.isWin) return false;
     try {
       const release = fs.readFileSync('/proc/version', 'utf8');
-      return release.toLowerCase().includes('microsoft') ||
-             release.toLowerCase().includes('wsl');
+      return release.toLowerCase().includes('microsoft') || release.toLowerCase().includes('wsl');
     } catch {
       return false;
     }
@@ -151,14 +150,22 @@ class CrossPlatformWrapper {
     const shell = this.findShellInterpreter();
 
     if (shell.type === 'bash') {
-      // Use bash execution
+      // Use bash execution with timeout
       const result = spawnSync(shell.interpreter, [scriptPath, ...args], {
         stdio: 'inherit',
         cwd: this.repoRoot,
-        env: process.env
+        env: process.env,
+        timeout: 30000, // 30 second timeout
       });
 
       if (result.error) {
+        if (result.error.code === 'ETIMEDOUT') {
+          this.log(
+            'warn',
+            'Bash script execution timed out, falling back to Node.js implementation'
+          );
+          throw new Error('FALLBACK_REQUIRED');
+        }
         throw new Error(`Failed to execute script: ${result.error.message}`);
       }
 
@@ -175,6 +182,12 @@ class CrossPlatformWrapper {
   async runDocumentValidation(args = []) {
     this.log('info', 'Running cross-platform document validation...');
 
+    // On Windows, prefer Node.js fallback due to bash compatibility issues
+    if (this.isWin) {
+      this.log('info', 'Using Node.js implementation for Windows compatibility...');
+      return this.runDocumentValidationNodeFallback(args);
+    }
+
     const validationScript = path.join(this.toolsDir, 'validate-document-placement.sh');
 
     if (!this.fileExists(validationScript)) {
@@ -186,9 +199,15 @@ class CrossPlatformWrapper {
       this.log('info', `Document validation completed with exit code: ${exitCode}`);
       return exitCode;
     } catch (error) {
-      if (error.message === 'FALLBACK_REQUIRED' || error.message.includes('Bash script execution not available')) {
+      if (
+        error.message === 'FALLBACK_REQUIRED' ||
+        error.message.includes('Bash script execution not available')
+      ) {
         // Use Node.js fallback implementation
-        this.log('info', 'Using Node.js fallback for document validation (no suitable bash found)...');
+        this.log(
+          'info',
+          'Using Node.js fallback for document validation (bash execution failed)...'
+        );
         return this.runDocumentValidationNodeFallback(args);
       }
       throw error;
@@ -213,7 +232,7 @@ class CrossPlatformWrapper {
       checked: 0,
       misplacedFiles: [],
       missingFiles: [],
-      findings: []
+      findings: [],
     };
 
     try {
@@ -229,7 +248,7 @@ class CrossPlatformWrapper {
         '.claude/commands',
         'backend',
         'backend/docs',
-        'src/docs'
+        'src/docs',
       ];
 
       this.log('info', '1. Validating directory structure...');
@@ -250,7 +269,7 @@ class CrossPlatformWrapper {
         'docs/templates/DOCUMENTATION-PLACEMENT-GUIDELINES.md',
         'docs/templates/README-VALIDATION-CHECKLIST.md',
         'CLAUDE.md',
-        'README.md'
+        'README.md',
       ];
 
       this.log('info', '2. Validating essential files...');
@@ -269,13 +288,19 @@ class CrossPlatformWrapper {
       // 3. Check for misplaced files in root directory
       this.log('info', '3. Checking for misplaced files in root...');
       try {
-        const rootFiles = fs.readdirSync(this.repoRoot)
+        const rootFiles = fs
+          .readdirSync(this.repoRoot)
           .filter(file => {
             const filePath = path.join(this.repoRoot, file);
             const stat = fs.statSync(filePath);
             return stat.isFile() && file.endsWith('.md');
           })
-          .filter(file => !['README.md', 'CLAUDE.md', 'CHANGELOG.md', 'LICENSE.md', 'CONTRIBUTING.md'].includes(file));
+          .filter(
+            file =>
+              !['README.md', 'CLAUDE.md', 'CHANGELOG.md', 'LICENSE.md', 'CONTRIBUTING.md'].includes(
+                file
+              )
+          );
 
         for (const file of rootFiles) {
           this.log('warn', `✗ Potentially misplaced file in root: ${file}`);
@@ -312,14 +337,16 @@ class CrossPlatformWrapper {
       const claudeCommandsPath = path.join(this.repoRoot, '.claude', 'commands');
       if (this.fileExists(claudeCommandsPath)) {
         try {
-          const commandFiles = fs.readdirSync(claudeCommandsPath)
+          const commandFiles = fs
+            .readdirSync(claudeCommandsPath)
             .filter(file => file.endsWith('.md'));
 
           if (commandFiles.length === 0) {
             this.log('warn', '✗ No command files found in .claude/commands');
             validationResults.violations++;
           } else {
-            if (verboseMode) this.log('debug', `✓ Found ${commandFiles.length} command files in .claude/commands`);
+            if (verboseMode)
+              this.log('debug', `✓ Found ${commandFiles.length} command files in .claude/commands`);
           }
           validationResults.checked++;
         } catch (error) {
@@ -368,7 +395,6 @@ class CrossPlatformWrapper {
         this.log('info', '✓ All document placement validation checks passed');
         return 0; // Success
       }
-
     } catch (error) {
       this.log('error', `Document validation failed: ${error.message}`);
       if (verboseMode) {
@@ -382,7 +408,7 @@ class CrossPlatformWrapper {
    * Main command router
    */
   async execute() {
-    const [,, command, ...args] = process.argv;
+    const [, , command, ...args] = process.argv;
 
     if (!command) {
       console.error('Usage: node scripts/cross-platform-wrapper.cjs <command> [args...]');
@@ -429,7 +455,7 @@ class CrossPlatformWrapper {
 // Execute if called directly
 if (require.main === module) {
   const wrapper = new CrossPlatformWrapper();
-  wrapper.execute().catch((error) => {
+  wrapper.execute().catch(error => {
     console.error('Unhandled error:', error.message);
     process.exit(1);
   });

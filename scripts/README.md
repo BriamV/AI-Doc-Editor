@@ -26,6 +26,7 @@ Core infrastructure scripts providing cross-platform utilities and safety system
 ```
 
 **Features:**
+
 - Cross-platform environment detection (Windows/Linux/WSL)
 - Python virtual environment management and activation
 - Tool availability verification across platforms
@@ -35,11 +36,12 @@ Core infrastructure scripts providing cross-platform utilities and safety system
 
 ```bash
 # Triggered by merge safety commands
-yarn merge-safety-full           # Uses this script for validation
+yarn repo:merge:validate         # Uses this script for validation
 /merge-safety                    # Slash command wrapper
 ```
 
 **Features:**
+
 - File count comparison validation (prevents accidental file loss)
 - Critical directory structure integrity checks
 - Configuration file existence verification
@@ -49,10 +51,11 @@ yarn merge-safety-full           # Uses this script for validation
 
 ```bash
 # Install native git-level protection
-yarn install-merge-hooks         # Installs hooks using this script
+yarn repo:merge:hooks:install    # Installs hooks using this script
 ```
 
 **Features:**
+
 - Git pre-merge hook installation
 - Native repository protection setup
 - Hook configuration management and updates
@@ -62,10 +65,11 @@ yarn install-merge-hooks         # Installs hooks using this script
 
 ```bash
 # Used by development commands for multi-service coordination
-yarn dev                         # Uses this for orchestration
+yarn all:dev                     # Uses this for orchestration
 ```
 
 **Features:**
+
 - Multi-service development server coordination
 - Frontend and backend service management
 - Environment variable coordination
@@ -75,10 +79,11 @@ yarn dev                         # Uses this for orchestration
 
 ```bash
 # Integrated with Python quality commands
-yarn python-quality              # Includes complexity validation
+yarn be:quality                  # Includes complexity validation
 ```
 
 **Features:**
+
 - Python cyclomatic complexity analysis
 - Code quality metrics validation
 - Design guideline enforcement (CC≤15, LOC≤300)
@@ -87,16 +92,18 @@ yarn python-quality              # Includes complexity validation
 ## Development Workflow Integration
 
 ### **Tier 1: Direct Commands** (Preferred User Interface)
+
 ```bash
 # Core development commands that use these infrastructure scripts
-yarn dev                         # Uses dev-runner.cjs for orchestration
-yarn build|test|security-scan    # Cross-platform via multiplatform.cjs
-yarn merge-safety-full           # Uses merge-protection.cjs for validation
-yarn python-quality              # Includes python-cc-gate.cjs validation
-yarn install-merge-hooks         # Uses install-merge-hooks.cjs
+yarn all:dev                     # Uses dev-runner.cjs for orchestration
+yarn fe:build|fe:test|sec:all    # Cross-platform via multiplatform.cjs
+yarn repo:merge:validate         # Uses merge-protection.cjs for validation
+yarn be:quality                  # Includes python-cc-gate.cjs validation
+yarn repo:merge:hooks:install    # Uses install-merge-hooks.cjs
 ```
 
 ### **Tier 2: Slash Commands** (Workflow Automation)
+
 ```bash
 # Workflow commands that leverage infrastructure scripts
 /health-check                    # System validation using multiplatform.cjs
@@ -107,6 +114,7 @@ yarn install-merge-hooks         # Uses install-merge-hooks.cjs
 ```
 
 ### **Tier 3: Automated Hooks** (Background Integration)
+
 - **Location**: `.claude/hooks.json`
 - **Integration**: Uses multiplatform.cjs for cross-platform tool execution
 - **Quality Gates**: Includes python-cc-gate.cjs for Python validation
@@ -114,6 +122,7 @@ yarn install-merge-hooks         # Uses install-merge-hooks.cjs
 - **Trigger**: Auto-runs on Edit/Write/MultiEdit operations
 
 ### **Tier 4: Infrastructure Layer** (This Directory)
+
 - **Purpose**: Backend utilities powering higher-tier commands
 - **Maintenance**: Minimal - focused on cross-platform compatibility
 - **Integration**: Called by yarn commands and hooks system
@@ -123,12 +132,12 @@ yarn install-merge-hooks         # Uses install-merge-hooks.cjs
 
 ### **4-Tier Documentation Positioning**
 
-| Tier | Location | User Interface | Purpose |
-|------|----------|----------------|---------|
-| **Tier 1** | Direct Commands | `yarn dev`, `yarn build` | User-facing development interface |
-| **Tier 2** | Slash Commands | `/health-check`, `/merge-safety` | Workflow automation |
-| **Tier 3** | Hooks System | `.claude/hooks.json` | Background quality automation |
-| **Tier 4** | **Infrastructure** | **`scripts/` (this directory)** | **Backend utilities and platform support** |
+| Tier       | Location           | User Interface                   | Purpose                                    |
+| ---------- | ------------------ | -------------------------------- | ------------------------------------------ |
+| **Tier 1** | Direct Commands    | `yarn all:dev`, `yarn fe:build`     | User-facing development interface          |
+| **Tier 2** | Slash Commands     | `/health-check`, `/merge-safety` | Workflow automation                        |
+| **Tier 3** | Hooks System       | `.claude/hooks.json`             | Background quality automation              |
+| **Tier 4** | **Infrastructure** | **`scripts/` (this directory)**  | **Backend utilities and platform support** |
 
 ### **Cross-References**
 
@@ -140,7 +149,7 @@ yarn install-merge-hooks         # Uses install-merge-hooks.cjs
 ### **Integration Flow**
 
 ```
-User Command (yarn dev)
+User Command (yarn all:dev)
     ↓
 Infrastructure Script (dev-runner.cjs)
     ↓
@@ -168,18 +177,21 @@ scripts/
 ## Infrastructure Benefits
 
 ### **Cross-Platform Compatibility** 🌐
+
 - **Windows/Linux/WSL**: Seamless environment detection
 - **Python Virtual Environments**: Automatic activation and management
 - **Tool Availability**: Dynamic detection and fallback handling
 - **Path Translation**: Cross-platform path and command handling
 
 ### **Merge Safety Protection** 🛡️
+
 - **File Loss Prevention**: Automated file count validation
 - **Structure Integrity**: Critical directory existence checks
 - **Configuration Validation**: Essential file presence verification
 - **Native Git Integration**: Hook-based protection at repository level
 
 ### **Quality Enforcement** 🎯
+
 - **Design Guidelines**: Python complexity metrics (CC≤15, LOC≤300)
 - **Automated Validation**: Integration with quality pipeline
 - **Performance Optimization**: Efficient complexity analysis

@@ -19,7 +19,7 @@ This document specifies how to integrate the document placement validation syste
     {
       "type": "command",
       "timeout": 8,
-      "command": "echo 'Validating document placement (timeout: 8s)...'; bash tools/validate-document-placement.sh --strict || { echo '🚫 Document placement violations found. Run: yarn validate-docs:fix'; exit 1; }"
+      "command": "echo 'Validating document placement (timeout: 8s)...'; bash tools/validate-document-placement.sh --strict || { echo '🚫 Document placement violations found. Run: yarn docs:validate:fix'; exit 1; }"
     }
   ]
 }
@@ -86,16 +86,16 @@ jobs:
 **Daily Commands**:
 ```bash
 # Quick validation check
-yarn validate-docs
+yarn docs:validate
 
 # Auto-fix placement issues
-yarn validate-docs:fix
+yarn docs:validate:fix
 
 # Generate detailed report
-yarn validate-docs:report
+yarn docs:validate:report
 
 # Strict validation for CI/CD
-yarn validate-docs:strict
+yarn docs:validate:strict
 ```
 
 **Integration with Existing Commands**:
@@ -143,7 +143,7 @@ esac
     {
       "type": "command",
       "timeout": 5,
-      "command": "if [[ \"$file_path\" =~ \\.md$ ]]; then bash tools/validate-document-placement.sh --file=\"$file_path\" || echo '⚠️ Consider document placement: Run yarn validate-docs:fix'; fi"
+      "command": "if [[ \"$file_path\" =~ \\.md$ ]]; then bash tools/validate-document-placement.sh --file=\"$file_path\" || echo '⚠️ Consider document placement: Run yarn docs:validate:fix'; fi"
     }
   ]
 }

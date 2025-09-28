@@ -509,7 +509,7 @@ test_quality_gate_orchestration() {
     mock_merge_protection_success
 
     # Execute coordinated quality validation
-    yarn quality-gate
+    yarn qa:gate
     exit_code=$?
 
     assert_equals $exit_code 0 "Quality gate orchestration should succeed"

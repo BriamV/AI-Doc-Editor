@@ -33,15 +33,15 @@
 ### 3. Testing y Calidad
 ```bash
 # Ejecuta todos los tests
-yarn test
+yarn fe:test
 
 # Valida calidad del código
-yarn lint
-yarn tsc-check
-yarn python-quality
+yarn fe:lint
+yarn fe:typecheck
+yarn be:quality
 
 # Auditoría de seguridad
-yarn security-scan
+yarn sec:all
 ```
 
 ### 4. Pull Request

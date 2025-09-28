@@ -54,21 +54,21 @@ graph TB
 ### Essential Commands
 ```bash
 # Daily validation
-yarn validate-docs
+yarn docs:validate
 
 # Fix placement issues
-yarn validate-docs:fix
+yarn docs:validate:fix
 
 # Generate audit report
-yarn validate-docs:report
+yarn docs:validate:report
 
 # CI/CD strict validation
-yarn validate-docs:strict
+yarn docs:validate:strict
 ```
 
 ### Integration Points
 - **Pre-commit hooks:** Automatic validation during file operations
-- **Quality gate:** First step in `yarn quality-gate` pipeline
+- **Quality gate:** First step in `yarn qa:gate` pipeline
 - **GitHub Actions:** Automated PR and branch validation
 - **Claude Code:** Integrated into workflow commands
 
@@ -119,9 +119,9 @@ yarn validate-docs:strict
 ## ⚡ Emergency Procedures
 
 ### Critical Violation Response
-1. **Assess:** `yarn validate-docs:report`
-2. **Fix:** `yarn validate-docs:fix --verbose`
-3. **Verify:** `yarn validate-docs:strict`
+1. **Assess:** `yarn docs:validate:report`
+2. **Fix:** `yarn docs:validate:fix --verbose`
+3. **Verify:** `yarn docs:validate:strict`
 4. **Document:** Update relevant governance documentation
 
 ### Escalation Path

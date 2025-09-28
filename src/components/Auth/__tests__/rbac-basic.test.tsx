@@ -7,27 +7,27 @@ import { useRoles } from '@hooks/useRoles';
 import { RoleBasedContent, RoleIndicator } from '../index';
 
 // Mock the hooks
-jest.mock('@hooks/useRoles');
-const mockUseRoles = useRoles as jest.MockedFunction<typeof useRoles>;
+vi.mock('@hooks/useRoles');
+const mockUseRoles = useRoles as unknown as ReturnType<typeof vi.fn>;
 
 describe('RBAC Basic Tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('RoleBasedContent', () => {
     it('should render content for admin user', () => {
       mockUseRoles.mockReturnValue({
-        hasRole: jest.fn(() => true),
-        isAdmin: jest.fn(() => true),
-        isEditor: jest.fn(() => true),
-        hasPermission: jest.fn(() => true),
-        hasAnyPermission: jest.fn(() => true),
-        hasAllPermissions: jest.fn(() => true),
+        hasRole: vi.fn(() => true),
+        isAdmin: vi.fn(() => true),
+        isEditor: vi.fn(() => true),
+        hasPermission: vi.fn(() => true),
+        hasAnyPermission: vi.fn(() => true),
+        hasAllPermissions: vi.fn(() => true),
         currentRole: 'admin',
         permissions: [],
-        canAccessRoute: jest.fn(() => true),
-        canViewComponent: jest.fn(() => true),
+        canAccessRoute: vi.fn(() => true),
+        canViewComponent: vi.fn(() => true),
       });
 
       render(
@@ -41,16 +41,16 @@ describe('RBAC Basic Tests', () => {
 
     it('should not render content for non-admin user', () => {
       mockUseRoles.mockReturnValue({
-        hasRole: jest.fn(() => false),
-        isAdmin: jest.fn(() => false),
-        isEditor: jest.fn(() => true),
-        hasPermission: jest.fn(() => false),
-        hasAnyPermission: jest.fn(() => false),
-        hasAllPermissions: jest.fn(() => false),
+        hasRole: vi.fn(() => false),
+        isAdmin: vi.fn(() => false),
+        isEditor: vi.fn(() => true),
+        hasPermission: vi.fn(() => false),
+        hasAnyPermission: vi.fn(() => false),
+        hasAllPermissions: vi.fn(() => false),
         currentRole: 'editor',
         permissions: [],
-        canAccessRoute: jest.fn(() => false),
-        canViewComponent: jest.fn(() => false),
+        canAccessRoute: vi.fn(() => false),
+        canViewComponent: vi.fn(() => false),
       });
 
       render(
@@ -66,16 +66,16 @@ describe('RBAC Basic Tests', () => {
   describe('RoleIndicator', () => {
     it('should display admin role correctly', () => {
       mockUseRoles.mockReturnValue({
-        hasRole: jest.fn(() => true),
-        isAdmin: jest.fn(() => true),
-        isEditor: jest.fn(() => true),
-        hasPermission: jest.fn(() => true),
-        hasAnyPermission: jest.fn(() => true),
-        hasAllPermissions: jest.fn(() => true),
+        hasRole: vi.fn(() => true),
+        isAdmin: vi.fn(() => true),
+        isEditor: vi.fn(() => true),
+        hasPermission: vi.fn(() => true),
+        hasAnyPermission: vi.fn(() => true),
+        hasAllPermissions: vi.fn(() => true),
         currentRole: 'admin',
         permissions: [],
-        canAccessRoute: jest.fn(() => true),
-        canViewComponent: jest.fn(() => true),
+        canAccessRoute: vi.fn(() => true),
+        canViewComponent: vi.fn(() => true),
       });
 
       render(<RoleIndicator />);
@@ -86,16 +86,16 @@ describe('RBAC Basic Tests', () => {
 
     it('should display editor role correctly', () => {
       mockUseRoles.mockReturnValue({
-        hasRole: jest.fn(() => true),
-        isAdmin: jest.fn(() => false),
-        isEditor: jest.fn(() => true),
-        hasPermission: jest.fn(() => true),
-        hasAnyPermission: jest.fn(() => true),
-        hasAllPermissions: jest.fn(() => true),
+        hasRole: vi.fn(() => true),
+        isAdmin: vi.fn(() => false),
+        isEditor: vi.fn(() => true),
+        hasPermission: vi.fn(() => true),
+        hasAnyPermission: vi.fn(() => true),
+        hasAllPermissions: vi.fn(() => true),
         currentRole: 'editor',
         permissions: [],
-        canAccessRoute: jest.fn(() => true),
-        canViewComponent: jest.fn(() => true),
+        canAccessRoute: vi.fn(() => true),
+        canViewComponent: vi.fn(() => true),
       });
 
       render(<RoleIndicator />);
@@ -108,16 +108,16 @@ describe('RBAC Basic Tests', () => {
   describe('Error Handling', () => {
     it('should handle missing user gracefully', () => {
       mockUseRoles.mockReturnValue({
-        hasRole: jest.fn(() => false),
-        isAdmin: jest.fn(() => false),
-        isEditor: jest.fn(() => false),
-        hasPermission: jest.fn(() => false),
-        hasAnyPermission: jest.fn(() => false),
-        hasAllPermissions: jest.fn(() => false),
+        hasRole: vi.fn(() => false),
+        isAdmin: vi.fn(() => false),
+        isEditor: vi.fn(() => false),
+        hasPermission: vi.fn(() => false),
+        hasAnyPermission: vi.fn(() => false),
+        hasAllPermissions: vi.fn(() => false),
         currentRole: null,
         permissions: [],
-        canAccessRoute: jest.fn(() => false),
-        canViewComponent: jest.fn(() => false),
+        canAccessRoute: vi.fn(() => false),
+        canViewComponent: vi.fn(() => false),
       });
 
       render(

@@ -1,20 +1,20 @@
 # Quick Reference: Organizational Safeguards
 
-**🚀 TL;DR:** Use `yarn validate-docs:fix` to fix document placement issues automatically.
+**🚀 TL;DR:** Use `yarn docs:validate:fix` to fix document placement issues automatically.
 
 ## Essential Commands
 
 ```bash
 # 🔍 CHECK document placement
-yarn validate-docs                    # Basic validation
-yarn validate-docs:strict            # CI/CD mode (fails on violations)
+yarn docs:validate                   # Basic validation
+yarn docs:validate:strict           # CI/CD mode (fails on violations)
 
 # 🔧 FIX document placement issues
-yarn validate-docs:fix               # Auto-fix misplaced documents
-yarn validate-docs:fix --verbose     # Auto-fix with detailed output
+yarn docs:validate:fix              # Auto-fix misplaced documents
+yarn docs:validate:fix --verbose    # Auto-fix with detailed output
 
 # 📊 GENERATE placement reports
-yarn validate-docs:report            # Comprehensive analysis report
+yarn docs:validate:report           # Comprehensive analysis report
 ```
 
 ## Integration Points
@@ -22,15 +22,15 @@ yarn validate-docs:report            # Comprehensive analysis report
 ### Automatic Protection (No Action Required)
 
 ✅ **Pre-commit validation** - Runs during file modifications
-✅ **Quality gate integration** - Part of `yarn quality-gate`
+✅ **Quality gate integration** - Part of `yarn qa:gate`
 ✅ **CI/CD validation** - Automatic GitHub Actions checks
 ✅ **Claude Code hooks** - Integrated into development workflow
 
 ### Manual Validation (When Needed)
 
-⚠️ **Before major commits:** `yarn validate-docs`
-⚠️ **Before pull requests:** `yarn quality-gate` (includes validation)
-⚠️ **After reorganization:** `yarn validate-docs:report`
+⚠️ **Before major commits:** `yarn docs:validate`
+⚠️ **Before pull requests:** `yarn qa:gate` (includes validation)
+⚠️ **After reorganization:** `yarn docs:validate:report`
 
 ## Common Document Placement Rules
 
@@ -56,21 +56,21 @@ tools/README.md                        # Tool documentation (with tools)
 **Issue:** Validation timeout during file operations
 ```bash
 # Solution: Run validation separately
-yarn validate-docs
+yarn docs:validate
 # Then retry your operation
 ```
 
 **Issue:** "Document should be moved" warnings
 ```bash
 # Solution: Auto-fix placement
-yarn validate-docs:fix
+yarn docs:validate:fix
 ```
 
 **Issue:** CI/CD pipeline failing on document validation
 ```bash
 # Solution: Fix locally and push
-yarn validate-docs:strict  # Check what's failing
-yarn validate-docs:fix     # Fix the issues
+yarn docs:validate:strict  # Check what's failing
+yarn docs:validate:fix     # Fix the issues
 git add . && git commit -m "fix: correct document placement"
 ```
 
@@ -94,17 +94,17 @@ git add . && git commit -m "fix: correct document placement"
 
 **Scenario 1:** Root directory has stray documents
 ```bash
-yarn validate-docs:fix  # Moves them to correct locations
+yarn docs:validate:fix  # Moves them to correct locations
 ```
 
 **Scenario 2:** Migration documents in wrong places
 ```bash
-yarn validate-docs:fix  # Organizes into migration hierarchy
+yarn docs:validate:fix  # Organizes into migration hierarchy
 ```
 
 **Scenario 3:** Templates not in template directory
 ```bash
-yarn validate-docs:fix  # Moves to docs/templates/
+yarn docs:validate:fix  # Moves to docs/templates/
 ```
 
 ## Performance Notes
@@ -119,11 +119,11 @@ yarn validate-docs:fix  # Moves to docs/templates/
 | Situation | Command | Why |
 |-----------|---------|-----|
 | Daily development | *Automatic* | Hooks handle it |
-| Before committing | `yarn validate-docs` | Quick check |
-| Issues detected | `yarn validate-docs:fix` | Auto-correct |
-| PR preparation | `yarn quality-gate` | Full validation |
-| After reorganization | `yarn validate-docs:report` | Audit placement |
-| CI/CD debugging | `yarn validate-docs:strict` | See what's failing |
+| Before committing | `yarn docs:validate` | Quick check |
+| Issues detected | `yarn docs:validate:fix` | Auto-correct |
+| PR preparation | `yarn qa:gate` | Full validation |
+| After reorganization | `yarn docs:validate:report` | Audit placement |
+| CI/CD debugging | `yarn docs:validate:strict` | See what's failing |
 
 ## Getting Help
 
@@ -132,4 +132,4 @@ yarn validate-docs:fix  # Moves to docs/templates/
 ⚙️ **Integration Details:** `.claude/hooks.json` and `package.json`
 
 ---
-**Remember:** The system is designed to help, not hinder. When in doubt, run `yarn validate-docs:fix` and let the system organize your documents professionally.
+**Remember:** The system is designed to help, not hinder. When in doubt, run `yarn docs:validate:fix` and let the system organize your documents professionally.

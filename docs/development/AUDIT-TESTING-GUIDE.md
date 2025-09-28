@@ -118,36 +118,36 @@ python -m pytest tests/test_audit_security.py::TestAccessControl -v
 
 Run all frontend audit tests:
 ```bash
-yarn test audit
+yarn fe:test audit
 ```
 
 Run with coverage:
 ```bash
-yarn test:coverage --testPathPattern=audit
+yarn fe:test:coverage --testPathPattern=audit
 ```
 
 Run specific component tests:
 ```bash
 # Store tests
-yarn test src/store/__tests__/audit-slice.test.ts
+yarn fe:test src/store/__tests__/audit-slice.test.ts
 
 # Component tests
-yarn test src/components/AuditLogs/__tests__/
+yarn fe:test src/components/AuditLogs/__tests__/
 
 # Watch mode for development
-yarn test:watch --testPathPattern=audit
+yarn fe:test:watch --testPathPattern=audit
 ```
 
 ### 4. End-to-End Tests
 
 Run all E2E audit tests:
 ```bash
-yarn test:e2e --spec="cypress/e2e/audit-logs.cy.ts"
+yarn e2e:fe --spec="playwright/tests/audit-logs.spec.ts"
 ```
 
 Run in interactive mode:
 ```bash
-yarn test:e2e:open
+yarn e2e:fe:ui
 # Then select audit-logs.cy.ts in the Cypress UI
 ```
 
@@ -171,10 +171,10 @@ Complete test suite execution:
 cd backend && python -m pytest tests/test_audit_*.py --cov=app
 
 # Frontend tests
-yarn test audit --coverage
+yarn fe:test audit --coverage
 
 # E2E tests
-yarn test:e2e --spec="cypress/e2e/audit-logs.cy.ts"
+yarn e2e:fe --spec="playwright/tests/audit-logs.spec.ts"
 ```
 
 Parallel execution (faster):
@@ -184,7 +184,7 @@ npm-run-all --parallel test:backend:audit test:frontend:audit
 
 # Where test scripts are defined as:
 # "test:backend:audit": "cd backend && python -m pytest tests/test_audit_*.py"
-# "test:frontend:audit": "yarn test audit --watchAll=false"
+# "test:frontend:audit": "yarn fe:test audit --watchAll=false"
 ```
 
 ## Test Scenarios Covered
@@ -383,7 +383,7 @@ python -m alembic upgrade head
 ```bash
 # Increase Jest timeout
 export JEST_TIMEOUT=30000
-yarn test audit
+yarn fe:test audit
 ```
 
 **Cypress Browser Issues:**
@@ -450,7 +450,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
       - name: Run audit tests
-        run: yarn test audit --coverage --watchAll=false
+        run: yarn fe:test audit --coverage --watchAll=false
 
   e2e-tests:
     runs-on: ubuntu-latest
@@ -463,7 +463,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
       - name: Run E2E tests
-        run: yarn test:e2e --spec="cypress/e2e/audit-logs.cy.ts"
+        run: yarn e2e:fe --spec="playwright/tests/audit-logs.spec.ts"
 ```
 
 ## Coverage Requirements
@@ -486,11 +486,11 @@ cd backend && python -m pytest tests/test_audit_*.py --cov=app --cov-report=html
 open backend/htmlcov/index.html
 
 # Generate frontend coverage report
-yarn test:coverage --testPathPattern=audit
+yarn fe:test:coverage --testPathPattern=audit
 open coverage/lcov-report/index.html
 
 # Generate E2E test report
-yarn test:e2e --spec="cypress/e2e/audit-logs.cy.ts" --reporter mochawesome
+yarn e2e:fe --spec="playwright/tests/audit-logs.spec.ts" --reporter mochawesome
 open cypress/reports/mochawesome.html
 ```
 

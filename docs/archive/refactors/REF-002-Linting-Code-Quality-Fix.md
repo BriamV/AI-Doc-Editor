@@ -22,7 +22,7 @@ Se decidió realizar una refactorización exhaustiva para eliminar el 100% de lo
 2.  **Corrección Metódica:** Abordar los errores archivo por archivo, aplicando las mejores prácticas de TypeScript.
 3.  **Tipado Estricto:** Reemplazar `any` con tipos específicos (`string`, `boolean`, `unknown`) o interfaces y tipos definidos cuando fuera necesario.
 4.  **Limpieza de Código:** Eliminar todas las variables, importaciones y parámetros no utilizados.
-5.  **Validación Continua:** Ejecutar `yarn lint` periódicamente durante el proceso para medir el progreso y asegurar que no se introdujeran nuevas regresiones.
+5.  **Validación Continua:** Ejecutar `yarn fe:lint` periódicamente durante el proceso para medir el progreso y asegurar que no se introdujeran nuevas regresiones.
 
 ## 3. Alcance del Trabajo y Cambios Implementados
 

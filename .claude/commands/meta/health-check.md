@@ -24,7 +24,7 @@ Performs comprehensive health analysis of code quality, dependencies, CI/CD pipe
 ## Context (auto-collected)
 - Current branch: !`git branch --show-current`
 - Project status: !`bash tools/progress-dashboard.sh --brief`
-- Recent errors: !`yarn tsc-check 2>&1 | tail -5`
+- Recent errors: !`yarn fe:typecheck 2>&1 | tail -5`
 - System info: !`node --version && npm --version`
 - Legacy check: !`echo "⚠️ Using direct yarn commands (scripts/cli.cjs deprecated)"`
 
@@ -60,5 +60,5 @@ Parse `$ARGUMENTS` for component focus and fix mode. Perform comprehensive syste
 **Auto-fix mode:**
 When --fix flag is used:
 > Use the devops-troubleshooter sub-agent to provide automated fix recommendations with specific commands for identified health issues
-Integration: yarn lint:fix, yarn format
+Integration: yarn fe:lint:fix, yarn fe:format
 ```

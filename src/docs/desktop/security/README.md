@@ -38,6 +38,7 @@ The AI Document Editor desktop application implements a security-first approach,
 ### 1. Process Isolation
 
 #### Main Process Security
+
 ```javascript
 // Main process runs with full system privileges
 const { app, BrowserWindow } = require('electron');
@@ -55,6 +56,7 @@ const win = new BrowserWindow({
 ```
 
 #### Renderer Process Isolation
+
 - **No Node.js Integration**: Renderer runs as standard web application
 - **Context Isolation**: V8 context isolation enabled by default
 - **Sandboxing**: Renderer operates in sandboxed environment
@@ -63,6 +65,7 @@ const win = new BrowserWindow({
 ### 2. Communication Security
 
 #### HTTP-Only Communication Pattern
+
 ```javascript
 // Secure communication via HTTP instead of IPC
 const PORT = isDev ? '5173' : '51735';
@@ -70,6 +73,7 @@ win.loadURL(`http://localhost:${PORT}`);
 ```
 
 **Security Benefits:**
+
 - **No IPC Attack Surface**: Eliminates IPC-based attack vectors
 - **Standard Web Security**: Leverages proven web security model
 - **Simplified Security Audit**: Single communication channel
@@ -78,14 +82,16 @@ win.loadURL(`http://localhost:${PORT}`);
 ### 3. Asset Security
 
 #### Secure Asset Serving
+
 ```javascript
 // Production: Controlled asset serving
 const createServer = () => {
   const server = http.createServer((request, response) => {
     // Secure file path validation
-    let filePath = request.url === '/'
-      ? path.join(__dirname, '../dist/index.html')
-      : path.join(__dirname, `../dist/${request.url}`);
+    let filePath =
+      request.url === '/'
+        ? path.join(__dirname, '../dist/index.html')
+        : path.join(__dirname, `../dist/${request.url}`);
 
     // Path traversal prevention
     if (!filePath.startsWith(path.join(__dirname, '../dist'))) {
@@ -101,7 +107,7 @@ const createServer = () => {
       '.js': 'text/javascript',
       '.wasm': 'application/wasm',
       '.png': 'image/png',
-      '.json': 'application/json'
+      '.json': 'application/json',
     };
 
     fs.readFile(filePath, (error, content) => {
@@ -122,23 +128,27 @@ const createServer = () => {
 ### Default Security Settings
 
 #### Electron Security Defaults
+
 ```javascript
 // Default BrowserWindow security configuration
 const secureWindowDefaults = {
-  nodeIntegration: false,           // Disable Node.js in renderer
-  contextIsolation: true,           // Enable context isolation
-  enableRemoteModule: false,        // Disable remote module
+  nodeIntegration: false, // Disable Node.js in renderer
+  contextIsolation: true, // Enable context isolation
+  enableRemoteModule: false, // Disable remote module
   allowRunningInsecureContent: false, // Block mixed content
-  experimentalFeatures: false,      // Disable experimental web features
-  webSecurity: true,               // Enable web security
-  navigateOnDragDrop: false        // Prevent navigation on drag/drop
+  experimentalFeatures: false, // Disable experimental web features
+  webSecurity: true, // Enable web security
+  navigateOnDragDrop: false, // Prevent navigation on drag/drop
 };
 ```
 
 #### Content Security Policy (Future Enhancement)
+
 ```html
 <!-- CSP for renderer process -->
-<meta http-equiv="Content-Security-Policy" content="
+<meta
+  http-equiv="Content-Security-Policy"
+  content="
   default-src 'self';
   script-src 'self' 'unsafe-inline';
   style-src 'self' 'unsafe-inline';
@@ -148,12 +158,14 @@ const secureWindowDefaults = {
   object-src 'none';
   media-src 'none';
   child-src 'none';
-">
+"
+/>
 ```
 
 ### Network Security
 
 #### HTTPS Enforcement
+
 ```javascript
 // Development: HTTP for local development
 if (isDev) {
@@ -165,6 +177,7 @@ if (isDev) {
 ```
 
 #### Certificate Validation
+
 ```javascript
 // Certificate validation for external connections
 app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
@@ -185,6 +198,7 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
 ### Windows Security
 
 #### Code Signing Integration
+
 ```javascript
 // Windows code signing for trust and security
 // Configured in electron-builder
@@ -201,6 +215,7 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
 ```
 
 #### Windows Defender Integration
+
 - **SmartScreen Compatibility**: Code signing for SmartScreen bypass
 - **Antivirus Exclusions**: Guidance for enterprise antivirus configuration
 - **UAC Integration**: Proper privilege escalation handling
@@ -208,6 +223,7 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
 ### macOS Security
 
 #### Gatekeeper Compliance
+
 ```javascript
 // macOS security configuration
 {
@@ -223,6 +239,7 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
 ```
 
 #### Entitlements Configuration
+
 ```xml
 <!-- build/entitlements.mac.plist -->
 <?xml version="1.0" encoding="UTF-8"?>
@@ -242,6 +259,7 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
 ### Linux Security
 
 #### AppArmor/SELinux Compatibility
+
 ```bash
 # AppArmor profile for enhanced security (future enhancement)
 /usr/local/bin/ai-doc-editor {
@@ -264,6 +282,7 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
 ### 1. Input Validation and Sanitization
 
 #### File Path Validation
+
 ```javascript
 // Secure file path validation
 function validateFilePath(userPath) {
@@ -280,6 +299,7 @@ function validateFilePath(userPath) {
 ```
 
 #### URL Validation
+
 ```javascript
 // URL validation for navigation
 app.on('web-contents-created', (event, contents) => {
@@ -302,9 +322,10 @@ app.on('web-contents-created', (event, contents) => {
 ### 2. Error Handling and Information Disclosure
 
 #### Secure Error Handling
+
 ```javascript
 // Secure error handling without information disclosure
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', error => {
   // Log detailed error for debugging (development only)
   if (isDev) {
     console.error('Uncaught Exception:', error);
@@ -324,6 +345,7 @@ process.on('uncaughtException', (error) => {
 ### 3. Data Protection
 
 #### Local Data Encryption (Future Enhancement)
+
 ```javascript
 // Encrypted local storage for sensitive data
 const encryptedStorage = {
@@ -332,7 +354,7 @@ const encryptedStorage = {
     localStorage.setItem(key, encrypted);
   },
 
-  get: (key) => {
+  get: key => {
     const encrypted = localStorage.getItem(key);
     if (!encrypted) return null;
 
@@ -343,7 +365,7 @@ const encryptedStorage = {
       console.warn('Failed to decrypt stored data:', key);
       return null;
     }
-  }
+  },
 };
 ```
 
@@ -352,6 +374,7 @@ const encryptedStorage = {
 ### Security Event Logging
 
 #### Application Security Events
+
 ```javascript
 // Security event logging
 const securityLogger = {
@@ -361,7 +384,7 @@ const securityLogger = {
       event: event,
       details: details,
       version: app.getVersion(),
-      platform: process.platform
+      platform: process.platform,
     };
 
     // Log to secure audit file (future enhancement)
@@ -369,19 +392,20 @@ const securityLogger = {
       path.join(app.getPath('userData'), 'security.log'),
       JSON.stringify(logEntry) + '\n'
     );
-  }
+  },
 };
 
 // Example usage
 securityLogger.logSecurityEvent('app_start', {
   pid: process.pid,
-  nodeVersion: process.version
+  nodeVersion: process.version,
 });
 ```
 
 ### Security Metrics
 
 #### Security Health Monitoring
+
 - **Certificate Validation**: Monitor certificate validation failures
 - **Update Security**: Track auto-update security verification
 - **Process Isolation**: Monitor process isolation integrity
@@ -392,6 +416,7 @@ securityLogger.logSecurityEvent('app_start', {
 ### Security Update Process
 
 #### Dependency Security Scanning
+
 ```bash
 # Automated security scanning
 yarn audit                    # Dependency vulnerability scan
@@ -400,6 +425,7 @@ npm audit --audit-level high # High-severity vulnerability check
 ```
 
 #### Security Update Workflow
+
 1. **Vulnerability Detection**: Automated dependency scanning
 2. **Risk Assessment**: Evaluate security impact and exploitability
 3. **Update Planning**: Plan security update deployment
@@ -409,6 +435,7 @@ npm audit --audit-level high # High-severity vulnerability check
 ### Security Incident Response
 
 #### Incident Detection
+
 ```javascript
 // Security incident detection
 const securityMonitor = {
@@ -418,11 +445,12 @@ const securityMonitor = {
     // - Unauthorized file system access
     // - Unusual network activity
     // - Memory usage anomalies
-  }
+  },
 };
 ```
 
 #### Response Procedures
+
 1. **Incident Detection**: Automated anomaly detection
 2. **Analysis**: Security incident analysis and classification
 3. **Containment**: Immediate threat containment measures
@@ -434,15 +462,17 @@ const securityMonitor = {
 ### Automated Security Testing
 
 #### Security Test Suite
+
 ```bash
 # Security testing commands
-yarn test:security           # Comprehensive security test suite
-yarn test:security:xss       # XSS vulnerability testing
-yarn test:security:injection # Injection attack testing
-yarn test:security:auth      # Authentication security testing
+yarn sec:test                # Comprehensive security test suite
+yarn sec:test:xss            # XSS vulnerability testing
+yarn sec:test:injection      # Injection attack testing
+yarn sec:test:auth           # Authentication security testing
 ```
 
 #### Penetration Testing
+
 - **Static Analysis**: Code security analysis tools
 - **Dynamic Testing**: Runtime security testing
 - **Dependency Scanning**: Third-party library security assessment
@@ -451,6 +481,7 @@ yarn test:security:auth      # Authentication security testing
 ### Manual Security Review
 
 #### Security Checklist
+
 - [ ] Process isolation verification
 - [ ] Communication channel security
 - [ ] Input validation implementation
@@ -464,17 +495,20 @@ yarn test:security:auth      # Authentication security testing
 ### Planned Security Features
 
 #### Enhanced Isolation
+
 - **Sandbox Hardening**: Additional renderer process sandboxing
 - **Process Limits**: Resource and capability limits
 - **Network Isolation**: Fine-grained network access control
 
 #### Advanced Security Features
+
 - **Hardware Security**: Hardware security module integration
 - **Biometric Authentication**: Biometric user authentication
 - **Zero-Trust Architecture**: Zero-trust security model implementation
 - **Security Analytics**: Advanced security analytics and monitoring
 
 #### Compliance and Certification
+
 - **Security Certifications**: Industry security certifications
 - **Compliance Standards**: GDPR, HIPAA, SOX compliance
 - **Security Audits**: Regular third-party security audits
@@ -482,12 +516,14 @@ yarn test:security:auth      # Authentication security testing
 ## Security Documentation Maintenance
 
 ### Documentation Updates
+
 - **Security Advisories**: Regular security advisory publications
 - **Best Practices**: Updated security best practices
 - **Threat Modeling**: Continuous threat model updates
 - **Security Training**: Developer security training materials
 
 ### Community Security
+
 - **Bug Bounty Program**: Security vulnerability disclosure program
 - **Security Community**: Engagement with security community
 - **Security Contributions**: Community security contributions
@@ -498,12 +534,14 @@ yarn test:security:auth      # Authentication security testing
 ### Security Standards Compliance
 
 #### Industry Standards
+
 - **OWASP**: OWASP Application Security Verification Standard
 - **NIST**: NIST Cybersecurity Framework alignment
 - **ISO 27001**: Information security management compliance
 - **CIS Controls**: CIS Critical Security Controls implementation
 
 #### Regulatory Compliance
+
 - **GDPR**: General Data Protection Regulation compliance
 - **CCPA**: California Consumer Privacy Act compliance
 - **HIPAA**: Health Insurance Portability and Accountability Act
@@ -512,12 +550,14 @@ yarn test:security:auth      # Authentication security testing
 ## Security Support and Resources
 
 ### Internal Security Resources
+
 - **Security Team**: Dedicated security team contacts
 - **Security Documentation**: Comprehensive security documentation
 - **Security Training**: Regular security training programs
 - **Incident Response**: 24/7 security incident response
 
 ### External Security Resources
+
 - **Security Advisories**: External security advisory sources
 - **Threat Intelligence**: Threat intelligence feeds
 - **Security Research**: Security research community engagement

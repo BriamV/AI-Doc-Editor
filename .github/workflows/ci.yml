@@ -87,16 +87,16 @@ jobs:
           fi
 
       - name: Type check
-        run: yarn tsc-check
+        run: yarn fe:typecheck
 
       - name: Lint check
-        run: yarn lint
+        run: yarn fe:lint
 
       - name: Format check
-        run: yarn format:check
+        run: yarn fe:format:check
 
       - name: Run tests
-        run: yarn test:coverage
+        run: yarn fe:test:coverage
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
@@ -111,7 +111,7 @@ jobs:
       # Análisis de calidad se realiza con Semgrep en el workflow de PR
 
       - name: Build application
-        run: yarn build
+        run: yarn fe:build
 
       - name: Run yarn audit (Node.js dependencies)
         run: |
@@ -161,7 +161,7 @@ jobs:
 
           # Run Playwright E2E tests with timeout
           echo "🧪 Running E2E tests with timeout..."
-          timeout 300s yarn test:playwright || {
+          timeout 300s yarn e2e:fe || {
             echo "❌ E2E tests timed out or failed"
             exit 1
           }
@@ -233,7 +233,7 @@ jobs:
           CC_MAX_RANK: B
         run: |
           echo "🚧 Enforcing cyclomatic complexity gate (<= B)"
-          node scripts/python-cc-gate.cjs
+          yarn be:complexity
 
       - name: Python type checking (MyPy)
         run: |
@@ -306,7 +306,7 @@ jobs:
           yarn install --immutable --check-cache
 
       - name: Generate coverage report
-        run: yarn test:coverage
+        run: yarn fe:test:coverage
 
       - name: Complexity Analysis
         run: |

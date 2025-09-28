@@ -160,21 +160,21 @@ git checkout -b feature/T-XX-description
 
 # Desarrollo iterativo
 yarn dev                           # Start development server
-yarn test:e2e                     # Run E2E tests (Playwright)
-yarn lint && yarn format          # Quality checks
+yarn e2e:fe                       # Run E2E tests (Playwright)
+yarn fe:lint && yarn fe:format    # Quality checks
 ```
 
 ### 3. Validación y Quality Gates
 ```bash
 # Validación rápida (1-8 segundos)
-yarn lint                          # ESLint check
-yarn tsc-check                     # TypeScript validation
-yarn python-format                 # Python auto-format
+yarn fe:lint                       # ESLint check
+yarn fe:typecheck                  # TypeScript validation
+yarn be:format                     # Python auto-format
 
 # Validación completa (pre-PR)
-yarn quality-gate                  # Full quality pipeline
-yarn test:e2e                     # E2E tests complete
-yarn security-scan                # Security audit
+yarn qa:gate                       # Full quality pipeline
+yarn e2e:fe                        # E2E tests complete
+yarn sec:all                       # Security audit
 ```
 
 ### 4. Pull Request Creation
@@ -198,24 +198,24 @@ gh pr create --title "feat(T-XX): Description" --body "..."
 ```bash
 # Development
 yarn dev                           # Start development server
-yarn build                        # Production build
-yarn test                         # Unit tests (Jest)
-yarn test:e2e                     # E2E tests (Playwright)
+yarn fe:build                      # Production build
+yarn fe:test                       # Unit tests (Jest)
+yarn e2e:fe                        # E2E tests (Playwright)
 
 # Quality & Formatting
-yarn lint                          # ESLint check
-yarn lint:fix                     # ESLint auto-fix
-yarn format                       # Prettier formatting
-yarn tsc-check                    # TypeScript validation
+yarn fe:lint                       # ESLint check
+yarn fe:lint:fix                   # ESLint auto-fix
+yarn fe:format                     # Prettier formatting
+yarn fe:typecheck                  # TypeScript validation
 
 # Python Backend
-yarn python-format                # Black auto-format
-yarn python-lint                  # Ruff linting
-yarn python-quality               # Full Python quality gate
+yarn be:format                     # Black auto-format
+yarn be:lint                       # Ruff linting
+yarn be:quality                    # Full Python quality gate
 
 # Security & Compliance
-yarn security-scan                # Security audit (npm + semgrep)
-yarn quality-gate                 # Complete quality pipeline
+yarn sec:all                       # Security audit (npm + semgrep)
+yarn qa:gate                       # Complete quality pipeline
 
 # Environment
 yarn env-validate                 # Environment diagnostics
@@ -330,7 +330,7 @@ tools/qa-workflow.sh T-XX dev-complete
 git checkout -b feature/T-42-document-export develop
 /task-dev T-42
 # Development...
-yarn quality-gate && yarn test:e2e
+yarn qa:gate && yarn e2e:fe
 /review-complete --scope T-42
 /pr-flow
 ```
@@ -339,7 +339,7 @@ yarn quality-gate && yarn test:e2e
 ```bash
 git checkout -b fix/editor-save-button develop
 # Fix implementation...
-yarn lint:fix && yarn test
+yarn fe:lint:fix && yarn fe:test
 git commit -m "fix(editor): resolve save button state issue"
 /pr-flow
 ```
@@ -410,13 +410,13 @@ yarn env-info                     # Platform details
 ### Quality Gate Failures
 ```bash
 # Check specific issues
-yarn lint                         # ESLint errors
-yarn python-quality               # Python quality issues
-yarn security-scan               # Security problems
+yarn fe:lint                      # ESLint errors
+yarn be:quality                   # Python quality issues
+yarn sec:all                      # Security problems
 
 # Auto-fix when possible
-yarn lint:fix                     # Fix ESLint issues
-yarn python-format               # Fix Python formatting
+yarn fe:lint:fix                  # Fix ESLint issues
+yarn be:format                   # Fix Python formatting
 ```
 
 ### Workflow Issues
@@ -434,12 +434,12 @@ tools/progress-dashboard.sh       # Project status overview
 ```bash
 # ❌ OLD (DEPRECATED)
 yarn run cmd <command>            # Use yarn <command>
-yarn test:cypress                 # Use yarn test:e2e (Playwright)
+yarn test:cypress                 # Use yarn e2e:fe (Playwright)
 scripts/cli.cjs                   # Use direct yarn commands
 
 # ✅ NEW (Current)
 yarn <command>                    # Direct execution
-yarn test:e2e                     # Playwright E2E
+yarn e2e:fe                       # Playwright E2E
 /slash-commands                   # Workflow automation
 ```
 

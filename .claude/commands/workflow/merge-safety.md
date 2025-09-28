@@ -46,7 +46,7 @@ Parse `$ARGUMENTS` for source/target branches and operation flags. Auto-detect b
 1. Install git hooks for native protection (if --install-hooks specified)
 2. Execute pre-merge safety checks via `node scripts/merge-protection.cjs pre-merge-check`
 3. Run comprehensive validation via `node scripts/merge-protection.cjs validate-merge --source $SOURCE --target $TARGET`
-4. Execute quality gate validation via `yarn quality-gate`
+4. Execute quality gate validation via `yarn qa:gate`
 5. Provide detailed safety report with approval/blocking decision
 
 **Integration with existing yarn commands:**

@@ -65,9 +65,9 @@ Crear una guía de seguridad para desarrolladores que incluya:
 
 ## 📋 Validación
 Para verificar que las correcciones resuelven los problemas:
-1. Ejecutar los tests de CI: `yarn test`
-2. Ejecutar Cypress E2E tests: `yarn test:e2e`
-3. Ejecutar escaneo de seguridad: `yarn run cmd security-scan`
+1. Ejecutar los tests de CI: `yarn fe:test`
+2. Ejecutar Cypress E2E tests: `yarn e2e:fe`
+3. Ejecutar escaneo de seguridad: `yarn sec:all`
 
 ## 📚 Referencias
 

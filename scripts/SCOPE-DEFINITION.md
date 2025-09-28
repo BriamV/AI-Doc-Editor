@@ -3,7 +3,7 @@
 ## ⚠️ Status Notice
 
 **Current Status**: Essential infrastructure layer for quality automation and CI/CD
-**Preference**: Use direct yarn commands (yarn dev, yarn build, yarn test) for user interface
+**Preference**: Use direct yarn commands (yarn dev, yarn fe:build, yarn fe:test) for user interface
 **Role**: Backend multiplatform utilities for development workflow infrastructure
 
 ## Overview
@@ -24,12 +24,13 @@ Critical infrastructure layer solving cross-platform development workflow automa
 # Automatic platform detection and tool execution
 # Powers all yarn commands with Windows/Linux/WSL compatibility
 yarn dev                              # Uses multiplatform for cross-OS development
-yarn build                            # Cross-platform build execution
-yarn test                             # Platform-aware testing
-yarn quality-gate                     # Multiplatform quality validation
+yarn fe:build                         # Cross-platform build execution
+yarn fe:test                          # Platform-aware testing
+yarn qa:gate                          # Multiplatform quality validation
 ```
 
 **Features:**
+
 - Automatic Windows/Linux/WSL detection and adaptation
 - Universal command translation for cross-platform consistency
 - Environment-specific path resolution and execution contexts
@@ -45,6 +46,7 @@ yarn validate-merge-full             # Comprehensive branch comparison
 ```
 
 **Features:**
+
 - File count comparison preventing catastrophic data loss (250+ files)
 - Critical directory structure validation
 - Essential configuration file integrity checks
@@ -58,6 +60,7 @@ yarn install-merge-hooks             # Install git-level merge protection
 ```
 
 **Features:**
+
 - Native git hooks installation for merge protection
 - Automated safety validation before any merge operation
 - Integration with existing git workflow without disruption
@@ -72,6 +75,7 @@ yarn dev                             # Orchestrated development server startup
 ```
 
 **Features:**
+
 - Development server coordination and management
 - Hot-reload integration with build pipeline
 - Resource optimization for development efficiency
@@ -81,12 +85,13 @@ yarn dev                             # Orchestrated development server startup
 
 ```bash
 # Python backend quality validation and formatting
-yarn python-quality                  # Backend Python validation (format + lint + complexity)
-yarn python-format                   # Python autofix formatting (Black)
-yarn python-lint                     # Python autofix linting (Ruff)
+yarn be:quality                      # Backend Python validation (format + lint + complexity)
+yarn be:format                       # Python autofix formatting (Black)
+yarn be:lint                         # Python autofix linting (Ruff)
 ```
 
 **Features:**
+
 - Multi-technology quality gate integration (Python + TypeScript)
 - Automated code formatting and linting with autofix capabilities
 - Complexity analysis and quality metrics (CC≤15)
@@ -95,16 +100,18 @@ yarn python-lint                     # Python autofix linting (Ruff)
 ## Development Workflow Integration
 
 ### **Tier 1: Direct Commands** (Preferred User Interface)
+
 ```bash
 # Primary development commands powered by scripts infrastructure
 yarn dev                             # Uses dev-runner + multiplatform
-yarn build                           # Cross-platform via multiplatform
-yarn test                            # Uses multiplatform for cross-OS testing
-yarn quality-gate                    # Includes merge-protection validation
+yarn fe:build                        # Cross-platform via multiplatform
+yarn fe:test                         # Uses multiplatform for cross-OS testing
+yarn qa:gate                         # Includes merge-protection validation
 yarn merge-safety-full               # Uses merge-protection
 ```
 
 ### **Tier 2: Slash Commands** (Workflow Automation)
+
 ```bash
 # Workflow commands that leverage scripts infrastructure
 /merge-safety                        # Complete merge protection using merge-protection.cjs
@@ -115,6 +122,7 @@ yarn merge-safety-full               # Uses merge-protection
 ```
 
 ### **Tier 3: Automated Hooks** (Background Integration)
+
 - **Location**: .claude/hooks.json
 - **Integration**: Uses multiplatform for cross-platform execution of 40+ quality tools
 - **Quality Gates**: Includes merge-protection for automated safety validation
@@ -122,6 +130,7 @@ yarn merge-safety-full               # Uses merge-protection
 - **Trigger**: Auto-runs on Edit/Write/MultiEdit operations
 
 ### **Tier 4: Infrastructure Layer** (This Directory)
+
 - **Purpose**: Backend utilities powering higher-tier commands and automation
 - **Maintenance**: Performance-optimized - focused on multiplatform compatibility
 - **Integration**: Called by package.json scripts, yarn commands, and .claude/hooks.json
@@ -131,12 +140,12 @@ yarn merge-safety-full               # Uses merge-protection
 
 ### **4-Tier Documentation Positioning**
 
-| Tier | Location | User Interface | Purpose |
-|------|----------|----------------|---------|
-| **Tier 1** | Direct Commands | `yarn dev, yarn build, yarn test` | User-facing development interface |
-| **Tier 2** | Slash Commands | `/merge-safety, /health-check` | Workflow automation |
-| **Tier 3** | Hooks System | `.claude/hooks.json` | Background quality automation |
-| **Tier 4** | **Infrastructure** | **`scripts/`** | **Backend utilities and multiplatform infrastructure** |
+| Tier       | Location           | User Interface                    | Purpose                                                |
+| ---------- | ------------------ | --------------------------------- | ------------------------------------------------------ |
+| **Tier 1** | Direct Commands    | `yarn dev, yarn build, yarn test` | User-facing development interface                      |
+| **Tier 2** | Slash Commands     | `/merge-safety, /health-check`    | Workflow automation                                    |
+| **Tier 3** | Hooks System       | `.claude/hooks.json`              | Background quality automation                          |
+| **Tier 4** | **Infrastructure** | **`scripts/`**                    | **Backend utilities and multiplatform infrastructure** |
 
 ### **Cross-References**
 
@@ -176,18 +185,21 @@ scripts/
 ## Infrastructure Benefits
 
 ### **Cross-Platform Compatibility** 🌐
+
 - **Windows Native**: Full compatibility without WSL requirement
 - **Linux Integration**: Optimized execution in Linux environments
 - **WSL2 Support**: Seamless Windows Subsystem for Linux integration
 - **Universal Paths**: Automatic path resolution across operating systems
 
 ### **Quality Assurance Protection** 🛡️
+
 - **Merge Safety**: Prevents catastrophic data loss during git operations
 - **File Integrity**: Validates critical project structure before merges
 - **Configuration Protection**: Ensures essential files remain intact
 - **Automated Blocking**: Stops dangerous operations automatically
 
 ### **Performance Optimization** ⚡
+
 - **54% Speed Improvement**: Execution time reduced from 152s to 70s
 - **Resource Efficiency**: Optimized tool execution and resource management
 - **Parallel Processing**: Concurrent validation and quality checking
@@ -196,11 +208,13 @@ scripts/
 ## Performance Metrics
 
 ### **Execution Optimization**
+
 - 54% performance improvement (152s → 70s total pipeline execution)
 - Cross-platform execution overhead: <5% additional time
 - Quality gate integration: 40+ tools with optimized parallel execution
 
 ### **Reliability and Safety**
+
 - Merge protection success rate: 100% for configured validations
 - Cross-platform compatibility: Windows/Linux/WSL without issues
 - Quality gate accuracy: Zero false positives in protection mechanisms
@@ -210,11 +224,13 @@ scripts/
 ### **Common Issues**
 
 #### Platform Detection Problems
+
 **Problem**: Script fails to detect correct operating system or environment
 **Solution**: Verify Node.js version (18.16.0+) and check environment variables
 **Prevention**: Use `yarn env-validate` for comprehensive environment diagnostics
 
 #### Merge Protection Failures
+
 **Problem**: Merge protection blocks legitimate operations
 **Solution**: Run `yarn pre-merge-check` to identify specific validation failures
 **Validation**: Use `yarn validate-merge-full` to verify branch safety before retry
@@ -222,27 +238,32 @@ scripts/
 ### **Environment-Specific Issues**
 
 #### Windows Development
+
 - PowerShell execution policy requirements for development workflow
 - Path separator handling in multiplatform execution contexts
 
 #### Linux/WSL Environments
+
 - Permission requirements for git hook installation
 - Shell compatibility for automated script execution
 
 ## Maintenance Guidelines
 
 ### **Update Procedures**
+
 1. Test multiplatform compatibility across Windows/Linux/WSL environments
 2. Validate integration with package.json and yarn command ecosystem
 3. Verify quality gate integration maintains 40+ tool compatibility
 4. Confirm merge protection mechanisms function correctly
 
 ### **Monitoring Points**
+
 - Cross-platform execution success rates across development environments
 - Quality gate performance and integration health with .claude/hooks.json
 - Merge protection effectiveness and false positive/negative rates
 
 ### **Backup and Recovery**
+
 - Git hooks backup via install-merge-hooks.cjs automatic backup creation
 - Quality configuration backup in .claude/hooks.json.backup
 - Development environment restoration via yarn commands
@@ -250,6 +271,7 @@ scripts/
 ## Scope Boundaries
 
 ### **✅ DO: Scripts Directory Responsibilities**
+
 - Cross-platform infrastructure and execution engines
 - Git-level protection and merge safety mechanisms
 - Development workflow orchestration and automation
@@ -258,6 +280,7 @@ scripts/
 - Node.js-based (.cjs) utilities requiring cross-platform compatibility
 
 ### **❌ DON'T: Outside Scripts Scope**
+
 - Project-specific task management and navigation (→ tools/)
 - Business logic or application-specific workflows (→ src/, backend/)
 - User-facing documentation and guidance (→ docs/)
@@ -266,6 +289,7 @@ scripts/
 - Strategic architectural decisions (→ docs/architecture/)
 
 ### **Integration Points**
+
 - **WITH tools/**: Scripts provide infrastructure; tools provide project management
 - **WITH package.json**: Scripts integrate as yarn command backends
 - **WITH .claude/**: Scripts power quality automation and hook integration
@@ -274,18 +298,21 @@ scripts/
 ## Quality Standards
 
 ### **Code Quality Requirements**
+
 - Node.js/.cjs compatibility across platforms
 - Error handling for cross-platform edge cases
 - Performance optimization maintaining 54% improvement
 - Integration testing with existing development workflow
 
 ### **Documentation Standards**
+
 - Conway's Law compliance (implementation docs near code)
 - Technical infrastructure template adherence
 - Cross-reference maintenance with strategic documentation
 - Integration pattern documentation for new components
 
 ### **Performance Standards**
+
 - Maintain 54% performance improvement baseline
 - Cross-platform overhead ≤5% execution time penalty
 - Quality gate integration without workflow disruption

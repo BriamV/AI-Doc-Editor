@@ -139,10 +139,10 @@ Authorization: Bearer your_access_token
 
 ```bash
 # Unit tests
-yarn test
+yarn fe:test
 
 # E2E tests
-yarn test:e2e
+yarn e2e:fe
 
 # Type checking
 yarn type-check

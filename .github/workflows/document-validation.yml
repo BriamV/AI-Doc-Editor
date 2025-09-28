@@ -23,12 +23,12 @@ jobs:
       run: yarn install --frozen-lockfile
 
     - name: Validate document placement
-      run: yarn validate-docs:strict
+      run: yarn docs:validate:strict
 
     - name: Generate placement report
       if: failure()
       run: |
-        yarn validate-docs:report
+        yarn docs:validate:report
         echo "::error title=Document Placement Violations::Check the validation report for details"
 
     - name: Upload validation report
