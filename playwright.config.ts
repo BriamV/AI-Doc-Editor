@@ -15,6 +15,12 @@ export default defineConfig({
   globalSetup: './playwright/global-setup.ts',
   globalTeardown: './playwright/global-teardown.ts',
 
+  // Ensure test login buttons are available by setting environment
+  env: {
+    VITE_ENABLE_TESTING: 'true',
+    MODE: 'test',
+  },
+
   use: {
     baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',
@@ -23,6 +29,10 @@ export default defineConfig({
     actionTimeout: 10000,
     navigationTimeout: 15000,
     // Increase timeouts for stability
+    // Ensure test login buttons are available
+    extraHTTPHeaders: {
+      'x-test-mode': 'true',
+    },
   },
 
   // Global expect configuration
@@ -57,6 +67,19 @@ export default defineConfig({
             return baseArgs;
           })(),
         },
+        // Enable test mode for all tests
+        storageState: {
+          cookies: [],
+          origins: [
+            {
+              origin: 'http://localhost:5173',
+              localStorage: [
+                { name: 'test_mode', value: 'true' },
+                { name: 'enable_testing', value: 'true' },
+              ],
+            },
+          ],
+        },
       },
     },
 
@@ -76,7 +99,7 @@ export default defineConfig({
   webServer: process.env.CI ? undefined : {
     // In CI: Services are pre-started by workflow, don't start webServer
     // In local dev: Start full-stack development server for real E2E testing
-    command: 'yarn dev',
+    command: 'yarn all:dev',
     url: 'http://localhost:5173',
     reuseExistingServer: true, // Allow reusing existing dev server
     timeout: 180 * 1000, // Full-stack startup requires more time

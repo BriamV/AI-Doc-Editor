@@ -159,7 +159,7 @@ git checkout -b feature/T-XX-description
 /health-check                      # Validación continua del sistema
 
 # Desarrollo iterativo
-yarn dev                           # Start development server
+yarn all:dev                       # Start full-stack development server
 yarn e2e:fe                       # Run E2E tests (Playwright)
 yarn fe:lint && yarn fe:format    # Quality checks
 ```
@@ -197,7 +197,7 @@ gh pr create --title "feat(T-XX): Description" --body "..."
 ### Comandos Directos (Tier 1 - Uso Diario)
 ```bash
 # Development
-yarn dev                           # Start development server
+yarn all:dev                       # Start full-stack development server
 yarn fe:build                      # Production build
 yarn fe:test                       # Unit tests (Jest)
 yarn e2e:fe                        # E2E tests (Playwright)

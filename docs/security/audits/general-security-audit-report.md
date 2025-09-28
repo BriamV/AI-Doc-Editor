@@ -121,7 +121,7 @@ yarn qa:gate
 3. ~~Validate complete security pipeline~~
 
 ### Ongoing Security Maintenance
-1. **Dependency Updates:** Weekly `yarn audit` runs
+1. **Dependency Updates:** Weekly `yarn sec:deps:fe` runs
 2. **Security Reviews:** Pre-commit Semgrep scanning
 3. **Penetration Testing:** Quarterly security assessments
 4. **Compliance Monitoring:** Continuous WORM constraint validation

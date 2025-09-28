@@ -182,7 +182,7 @@ El proyecto utiliza comandos directos de yarn y comandos slash para desarrollo. 
 
 ```bash
 # Desarrollo
-yarn dev                          # Iniciar servidor de desarrollo
+yarn all:dev                      # Iniciar servidor de desarrollo
 yarn fe:build                     # Construir para producción
 yarn fe:test                      # Ejecutar todas las pruebas
 yarn e2e:fe                       # Pruebas E2E con Playwright

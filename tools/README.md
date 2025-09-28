@@ -136,10 +136,10 @@ bash tools/validate-document-placement.sh --strict        # CI/CD strict mode
 ### **Tier 1: Direct Commands** (Preferred User Interface)
 ```bash
 # Direct yarn commands that use these infrastructure components
-yarn dev                                # Uses tools for development workflow
-yarn build                              # Cross-platform via multiplatform.cjs
-yarn test                               # Uses tools for validation
-yarn quality-gate                       # Includes DoD validation
+yarn all:dev                            # Uses tools for full-stack development workflow
+yarn fe:build                           # Cross-platform via multiplatform.cjs
+yarn fe:test                            # Uses tools for validation
+yarn qa:gate                            # Includes DoD validation
 yarn merge-safety-full                  # Uses merge protection tools
 ```
 
@@ -172,7 +172,7 @@ yarn merge-safety-full                  # Uses merge protection tools
 
 | Tier | Location | User Interface | Purpose |
 |------|----------|----------------|---------|
-| **Tier 1** | Direct Commands | `yarn dev`, `yarn quality-gate` | User-facing development commands |
+| **Tier 1** | Direct Commands | `yarn all:dev`, `yarn qa:gate` | User-facing development commands |
 | **Tier 2** | Slash Commands | `/task-dev`, `/review-complete` | Workflow automation |
 | **Tier 3** | Hooks System | `.claude/hooks.json` | Background quality automation |
 | **Tier 4** | **Infrastructure** | **`tools/`** | **Backend utilities and task orchestration** |
@@ -187,7 +187,7 @@ yarn merge-safety-full                  # Uses merge protection tools
 ### **Integration Flow**
 
 ```
-User Command (yarn dev, /task-dev T-XX)
+User Command (yarn all:dev, /task-dev T-XX)
     ↓
 Infrastructure Script (progress-dashboard.sh, task-navigator.sh)
     ↓

@@ -15,7 +15,7 @@
 2. Clona tu fork: `git clone https://github.com/tu-usuario/AI-Doc-Editor.git`
 3. Instala dependencias: `yarn install`
 4. Configura variables de entorno: `cp .env.example .env`
-5. Inicia el servidor de desarrollo: `yarn dev`
+5. Inicia el servidor de desarrollo: `yarn all:dev`
 
 ## 📋 Proceso de Contribución
 
@@ -46,7 +46,7 @@ yarn sec:all
 
 ### 4. Pull Request
 - Asegúrate de que todos los tests pasen
-- Ejecuta la validación completa: `yarn merge-safety-full`
+- Ejecuta la validación completa: `yarn repo:merge:validate`
 - Crea el PR con descripción detallada
 - Vincula issues relacionados
 
@@ -155,7 +155,7 @@ test(components): add Chat component tests
 - Code review aprobado
 - Conflictos resueltos
 - Documentación actualizada
-- Validación de seguridad (`yarn merge-safety-full`)
+- Validación de seguridad (`yarn repo:merge:validate`)
 
 ## 💡 Tips para Contribuidores
 

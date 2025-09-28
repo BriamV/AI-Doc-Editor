@@ -71,10 +71,10 @@ The system **AUTOMATICALLY BLOCKS** merges when:
 # Step 1: MANDATORY - Run merge protection
 /merge-safety
 # OR
-yarn merge-safety-full
+yarn repo:merge:validate
 
 # Step 2: Install git hooks (one-time setup)
-yarn install-merge-hooks
+yarn repo:merge:hooks:install
 
 # Step 3: Proceed with normal merge workflow
 git merge feature/branch
@@ -84,13 +84,13 @@ git merge feature/branch
 ### Emergency Validation (if automated protection fails):
 ```bash
 # Pre-merge safety only
-yarn pre-merge-check
+yarn repo:merge:precheck
 
 # Full validation
-yarn validate-merge-full
+yarn repo:merge:validate
 
 # File count audit
-yarn branch-audit
+yarn repo:branch:audit
 ```
 
 ## 🎯 VALIDATION CRITERIA
@@ -197,16 +197,16 @@ This system provides:
 
 ```bash
 # Test Results (Current Implementation)
-$ yarn pre-merge-check
+$ yarn repo:merge:precheck
 ✅ Working Tree Clean: Working tree is clean
 ✅ No Uncommitted Changes: No uncommitted changes
 ❌ Valid Branch Context: Current branch: main
 🚫 PRE-MERGE CHECK FAILED
 
-$ yarn branch-audit
+$ yarn repo:branch:audit
 Branch main contains 643 files
 
-$ yarn install-merge-hooks
+$ yarn repo:merge:hooks:install
 🎉 Git hooks installation completed!
 🛡️ Your repository is now protected against merge disasters!
 ```

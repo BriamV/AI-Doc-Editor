@@ -21,7 +21,7 @@ Task T-43 "Implementar Escaneo de Dependencias" requires implementing Software C
 ### Current State (Updated January 2025)
 
 - **Full-stack application**: React/TypeScript frontend + Python FastAPI backend
-- **Multi-stack security pipeline**: Node.js (yarn audit) + Python (pip-audit) scanning
+- **Multi-stack security pipeline**: Node.js (yarn sec:deps:fe) + Python (pip-audit) scanning
 - **GitHub Actions CI/CD**: Enhanced quality gates with security-first approach
 - **Zero security findings**: Comprehensive dependency scanning active and passing
 - **OWASP compliance**: Complete coverage of dependency-related vulnerabilities
@@ -32,7 +32,7 @@ Task T-43 "Implementar Escaneo de Dependencias" requires implementing Software C
 
 ### 1. Tools Selection
 
-- **yarn audit**: Built-in Node.js vulnerability scanner (audit-level=high)
+- **yarn sec:deps:fe**: Frontend dependency security scanner (audit-level=high)
 - **pip-audit**: Python dependency scanner (conditional - only if pip available)
 - **License reporting**: Generate yarn dependency license inventory
 
@@ -44,7 +44,7 @@ Task T-43 "Implementar Escaneo de Dependencias" requires implementing Software C
 
 ### 3. Implementation Phases
 
-1. **Immediate (R0)**: yarn audit integration with build-blocking policy
+1. **Immediate (R0)**: yarn sec:deps:fe integration with build-blocking policy
 2. **Conditional**: pip-audit for future Python backend dependencies
 3. **Reporting**: Automated license compatibility reports
 
@@ -101,8 +101,8 @@ Task T-43 "Implementar Escaneo de Dependencias" requires implementing Software C
 ### GitHub Actions Integration
 
 ```yaml
-- name: Run yarn audit (Node.js dependencies)
-  run: yarn audit --audit-level=high || exit 1
+- name: Run yarn sec:deps:fe (Node.js dependencies)
+  run: yarn sec:deps:fe || exit 1
 
 - name: Run pip-audit (Python dependencies)
   run: pip-audit --format=json --output=pip-audit-report.json || exit 1

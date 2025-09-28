@@ -12,7 +12,7 @@
 
   ```bash
   yarn install
-  yarn dev
+  yarn all:dev
   # Verify application loads at http://localhost:5173
   ```
 
@@ -108,7 +108,7 @@
 # Clone and setup base repository
 cd /mnt/d/DELL_/Documents/GitHub/AI-Doc-Editor
 yarn install
-yarn dev
+yarn all:dev
 
 # Verify Electron build (if needed)
 yarn run electron

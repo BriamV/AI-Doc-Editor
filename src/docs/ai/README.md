@@ -91,7 +91,7 @@ Frontend AI integration implementation using React, TypeScript, and OpenAI API. 
 1. **Environment Setup**: Configure OpenAI API keys
 2. **Dependencies**: Install required packages
 3. **Configuration**: Set up model and endpoint preferences
-4. **Development Server**: Start with `yarn dev`
+4. **Development Server**: Start with `yarn all:dev`
 
 ### 🔄 Development Process
 

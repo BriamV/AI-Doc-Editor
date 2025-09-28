@@ -55,7 +55,7 @@ Guías específicas para diferentes aspectos del desarrollo:
 ### Desarrollo Diario
 ```bash
 # Comandos esenciales documentados en CONTRIBUTING.md
-yarn dev                    # Desarrollo
+yarn all:dev                # Desarrollo full-stack
 yarn fe:build               # Build
 yarn fe:test                # Testing
 yarn sec:all                # Seguridad
@@ -71,12 +71,12 @@ yarn sec:all                # Seguridad
 ### Comandos Principales
 ```bash
 # Desarrollo (documentado en CONTRIBUTING.md)
-yarn dev|fe:build|fe:test|sec:all
+yarn all:dev|fe:build|fe:test|sec:all
 
 # Calidad (40+ herramientas integradas)
 yarn fe:lint|fe:format|fe:typecheck
 yarn be:quality             # Backend Python
-yarn merge-safety-full      # Protección de merges
+yarn repo:merge:validate    # Protección de merges
 ```
 
 ### Slash Commands (Claude Code)

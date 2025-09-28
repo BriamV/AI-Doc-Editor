@@ -3,7 +3,7 @@
 ## ⚠️ Status Notice
 
 **Current Status**: Essential infrastructure layer for quality automation and CI/CD
-**Preference**: Use direct yarn commands (yarn dev, yarn fe:build, yarn fe:test) for user interface
+**Preference**: Use direct yarn commands (yarn all:dev, yarn fe:build, yarn fe:test) for user interface
 **Role**: Backend multiplatform utilities for development workflow infrastructure
 
 ## Overview
@@ -23,7 +23,7 @@ Critical infrastructure layer solving cross-platform development workflow automa
 ```bash
 # Automatic platform detection and tool execution
 # Powers all yarn commands with Windows/Linux/WSL compatibility
-yarn dev                              # Uses multiplatform for cross-OS development
+yarn all:dev                          # Uses multiplatform for cross-OS development
 yarn fe:build                         # Cross-platform build execution
 yarn fe:test                          # Platform-aware testing
 yarn qa:gate                          # Multiplatform quality validation
@@ -56,7 +56,7 @@ yarn validate-merge-full             # Comprehensive branch comparison
 
 ```bash
 # One-time installation of native git protection hooks
-yarn install-merge-hooks             # Install git-level merge protection
+yarn repo:merge:hooks:install        # Install git-level merge protection
 ```
 
 **Features:**
@@ -70,8 +70,8 @@ yarn install-merge-hooks             # Install git-level merge protection
 
 ```bash
 # Development environment management and orchestration
-# Integrated with yarn dev for seamless development experience
-yarn dev                             # Orchestrated development server startup
+# Integrated with yarn all:dev for seamless development experience
+yarn all:dev                         # Orchestrated development server startup
 ```
 
 **Features:**
@@ -103,7 +103,7 @@ yarn be:lint                         # Python autofix linting (Ruff)
 
 ```bash
 # Primary development commands powered by scripts infrastructure
-yarn dev                             # Uses dev-runner + multiplatform
+yarn all:dev                         # Uses dev-runner + multiplatform
 yarn fe:build                        # Cross-platform via multiplatform
 yarn fe:test                         # Uses multiplatform for cross-OS testing
 yarn qa:gate                         # Includes merge-protection validation
@@ -142,7 +142,7 @@ yarn merge-safety-full               # Uses merge-protection
 
 | Tier       | Location           | User Interface                    | Purpose                                                |
 | ---------- | ------------------ | --------------------------------- | ------------------------------------------------------ |
-| **Tier 1** | Direct Commands    | `yarn dev, yarn build, yarn test` | User-facing development interface                      |
+| **Tier 1** | Direct Commands    | `yarn all:dev, yarn fe:build, yarn all:test` | User-facing development interface                      |
 | **Tier 2** | Slash Commands     | `/merge-safety, /health-check`    | Workflow automation                                    |
 | **Tier 3** | Hooks System       | `.claude/hooks.json`              | Background quality automation                          |
 | **Tier 4** | **Infrastructure** | **`scripts/`**                    | **Backend utilities and multiplatform infrastructure** |
@@ -157,7 +157,7 @@ yarn merge-safety-full               # Uses merge-protection
 ### **Integration Flow**
 
 ```
-User Command (yarn dev)
+User Command (yarn all:dev)
     ↓
 Infrastructure Script (dev-runner.cjs)
     ↓

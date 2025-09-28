@@ -96,7 +96,7 @@ Todas las subtareas verificadas como completas.
 
 ## Subtareas WII
 ### id: "R0.WP1-T43-ST1"
-- description: "Integrar herramientas de escaneo de vulnerabilidades (ej. pip-audit, yarn audit) en el pipeline de CI."
+- description: "Integrar herramientas de escaneo de vulnerabilidades (ej. pip-audit, yarn sec:deps:fe) en el pipeline de CI."
 - complejidad: 4
 - entregable: "El pipeline de CI ejecuta los escaneos y reporta las vulnerabilidades encontradas."
 - status: "pendiente"

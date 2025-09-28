@@ -61,13 +61,13 @@ The application uses electron-builder with configuration embedded in package.jso
 yarn install --frozen-lockfile
 
 # Development mode (with Vite dev server)
-yarn dev              # Starts frontend dev server
+yarn all:dev          # Starts full-stack development environment
 yarn electron         # Runs Electron with dev server
 ```
 
 #### Development Workflow
 
-1. **Frontend Development**: `yarn dev` starts Vite dev server on port 5173
+1. **Frontend Development**: `yarn all:dev` starts full-stack development environment
 2. **Electron Development**: `yarn electron` connects Electron to dev server
 3. **Hot Reload**: Changes automatically reflected in Electron window
 4. **DevTools**: Automatically opened for debugging

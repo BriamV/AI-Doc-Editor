@@ -94,7 +94,7 @@ The AI-Doc-Editor project has successfully implemented a comprehensive 4-tier do
 
 #### Infrastructure Reality Check
 **Current Infrastructure** (Updated):
-- Primary Interface: Direct yarn commands (`yarn dev`, `yarn build`, `yarn test`)
+- Primary Interface: Namespaced yarn commands (`yarn all:dev`, `yarn fe:build`, `yarn all:test`)
 - Quality System: `.claude/hooks.json` (54% optimized, 10/10 tools complete)
 - Workflow Automation: 19 slash commands in `.claude/commands/`
 - Development Tools: `tools/` shell scripts (transitioning to sub-agents)
@@ -160,8 +160,8 @@ The AI-Doc-Editor project has successfully implemented a comprehensive 4-tier do
 ```bash
 # MANDATORY merge protection system operational
 /merge-safety                    # Complete merge protection (REQUIRED)
-yarn merge-safety-full           # Alternative yarn command
-yarn install-merge-hooks         # Git-level protection installed
+yarn repo:merge:validate         # Alternative yarn command
+yarn repo:merge:hooks:install    # Git-level protection installed
 ```
 
 **Protection Features Validated**:
