@@ -1,0 +1,48 @@
+# Development Dockerfile for FastAPI Backend - Security Focused Development Environment
+# Supports volume mounting and hot reload while maintaining security best practices
+
+FROM python:3.11-slim-bullseye
+
+# Security: Update system packages and install development dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    build-essential \
+    gcc \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Security: Create non-root user and group for development
+RUN groupadd --gid 1001 appgroup && \
+    useradd --uid 1001 --gid 1001 --create-home --shell /bin/bash appuser
+
+# Set working directory and create necessary directories
+WORKDIR /app
+RUN mkdir -p /app/logs /app/data && \
+    chown -R appuser:appgroup /app
+
+# Install Python dependencies as root (will be cached in layer)
+COPY requirements.txt requirements-dev.txt ./
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir -r requirements-dev.txt
+
+# Security: Switch to non-root user for development
+USER appuser
+
+# Environment variables for development
+ENV PYTHONPATH=/app \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    ENVIRONMENT=development \
+    PORT=8000
+
+# Expose port (non-privileged port)
+EXPOSE 8000
+
+# Health check using the existing /health endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Development command with reload enabled
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
