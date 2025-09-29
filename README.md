@@ -67,7 +67,7 @@ Este proyecto es un fork mejorado de [AI Text Editor](https://github.com/darryls
 2. Instala las dependencias del frontend. **Nota: Este proyecto utiliza `yarn` para asegurar la correcta resolución de dependencias.**
 
    ```bash
-   yarn install
+   yarn repo:install
    ```
 
 3. Configura las variables de entorno (copia el archivo .env.example):

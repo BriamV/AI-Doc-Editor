@@ -47,7 +47,7 @@ python -m alembic upgrade head
 ### Frontend Testing
 ```bash
 # Node.js dependencies
-yarn install
+yarn repo:install
 
 # Ensure Jest and testing libraries are available
 yarn add --dev @testing-library/react @testing-library/jest-dom
@@ -448,7 +448,7 @@ jobs:
         with:
           node-version: '18'
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn repo:install --frozen-lockfile
       - name: Run audit tests
         run: yarn fe:test audit --coverage --watchAll=false
 
@@ -461,7 +461,7 @@ jobs:
         with:
           node-version: '18'
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn repo:install --frozen-lockfile
       - name: Run E2E tests
         run: yarn e2e:fe --spec="playwright/tests/audit-logs.spec.ts"
 ```

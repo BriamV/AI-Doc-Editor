@@ -19,7 +19,7 @@ Repository: https://github.com/BriamV/AI-Doc-Editor/
 - Tools: Multi-stack quality ecosystem (40+ tools integrated)
   - **Frontend**: ESLint, Prettier, Jest, TSC
   - **Python**: Black, Ruff, Radon, MyPy, pip-audit
-  - **Security**: Semgrep, git-secrets, yarn audit
+  - **Security**: Semgrep, git-secrets, yarn sec:deps:fe
   - **Docs**: markdownlint, yamlfix, yamllint, spectral
   - **Shell**: shellcheck, shfmt
   - **Config**: taplo (TOML), prettier (JSON/XML/CSS)
@@ -29,7 +29,7 @@ Repository: https://github.com/BriamV/AI-Doc-Editor/
 
 ```bash
 # Prerequisites: Node.js 18.16.0, Python 3.11+, WSL2 (Windows)
-yarn install && yarn all:dev                  # Start development
+yarn repo:install && yarn all:dev                  # Start development
 yarn fe:build && yarn fe:test             # Build & test
 yarn sec:all                              # Security audit
 
@@ -234,7 +234,7 @@ eslint, prettier, jest, tsc              # TypeScript/JavaScript
 black, ruff, radon, mypy, pip-audit      # Python quality gates
 
 # Security & Secrets
-semgrep, git-secrets, yarn audit         # Security scanning
+semgrep, git-secrets, yarn sec:deps:fe   # Security scanning
 
 # Documentation
 markdownlint, yamlfix, yamllint, spectral # Docs quality
@@ -378,7 +378,7 @@ All enhancements MUST integrate into workflow:
 
 ```bash
 # ✅ ALWAYS run after modifying package.json or adding scripts (all: namespace)
-yarn install --frozen-lockfile          # Verify dependencies
+yarn repo:install --frozen-lockfile          # Verify dependencies
 yarn fe:build                           # Ensure frontend builds work
 yarn all:test                           # Run all test suites
 yarn qa:gate                            # Full quality pipeline (~70s)

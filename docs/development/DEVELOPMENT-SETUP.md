@@ -11,7 +11,7 @@
 - [ ] **Current Project State**: Verify base repository actually runs
 
   ```bash
-  yarn install
+  yarn repo:install
   yarn all:dev
   # Verify application loads at http://localhost:5173
   ```
@@ -107,7 +107,7 @@
 ```bash
 # Clone and setup base repository
 cd /mnt/d/DELL_/Documents/GitHub/AI-Doc-Editor
-yarn install
+yarn repo:install
 yarn all:dev
 
 # Verify Electron build (if needed)
