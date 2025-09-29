@@ -21,6 +21,7 @@ Detailed implementation guides and specifications:
 Security audit reports and assessments:
 - [HSM Security Audit - Week 3](audits/HSM-security-audit-week3.md) - Hardware Security Module audit findings
 - [General Security Audit Report](audits/general-security-audit-report.md) - Comprehensive security assessment
+- [Docker Security Audit Report](audits/docker-security-audit-report.md) - Docker infrastructure security assessment
 
 ### 📋 Compliance (`compliance/`)
 Compliance documentation and regulatory requirements:
