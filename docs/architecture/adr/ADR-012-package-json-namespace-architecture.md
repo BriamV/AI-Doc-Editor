@@ -5,6 +5,10 @@
 **Context**: Package.json modernization and command standardization
 **Decision Makers**: Development Team
 
+**Related Documentation:**
+- [GitHub Actions Workflows](../../../.github/workflows/README.md) - CI/CD infrastructure using this architecture
+- [Package.json Scripts Guidelines](../../development/PACKAGE-JSON-SCRIPTS-GUIDELINES.md) - Implementation guide
+
 ## Summary
 
 Implement a structured 8-namespace architecture for package.json scripts to replace ad-hoc command naming and improve developer experience, maintainability, and scalability.

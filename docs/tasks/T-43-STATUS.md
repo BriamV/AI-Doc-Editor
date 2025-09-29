@@ -11,7 +11,7 @@ descripcion: "Integrar herramientas de Análisis de Composición de Software (SC
 # Technical Details
 detalles_tecnicos: |
   **Herramientas:** pip-audit, yarn audit, Dependabot, Snyk (o similar).
-  **Integración:** Job en el pipeline qa-gate de GitHub Actions.
+  **Integración:** Job en el pipeline qa-gate de GitHub Actions ([workflow docs](../../.github/workflows/README.md)).
   **Política:** Definir umbrales de severidad (ej. CRITICAL, HIGH) que bloqueen el build.
 
 # Test Strategy

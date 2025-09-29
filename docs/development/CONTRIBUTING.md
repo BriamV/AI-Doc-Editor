@@ -140,10 +140,11 @@ chore(deps): upgrade React to v18.2.0
 # Clonar y setup
 git clone https://github.com/BriamV/AI-Doc-Editor.git
 cd AI-Doc-Editor
-yarn install --frozen-lockfile
+yarn repo:install                    # Namespace command (preferred)
 
 # Validar environment
-yarn env-validate
+yarn repo:env:validate               # Comprehensive diagnostics
+yarn repo:env:info                   # Platform details
 ```
 
 ### 2. Desarrollo de Tasks (Flujo Principal)
@@ -160,21 +161,27 @@ git checkout -b feature/T-XX-description
 
 # Desarrollo iterativo
 yarn all:dev                       # Start full-stack development server
-yarn e2e:fe                       # Run E2E tests (Playwright)
-yarn fe:lint && yarn fe:format    # Quality checks
+yarn e2e:fe                        # Run E2E tests (Playwright)
+yarn fe:lint && yarn fe:format     # Quality checks
+
+# Referencia: Workflows GitHub Actions
+# - ci.yml: Testing integral post-push (10-15 min)
+# - pr-validation.yml: Validación pre-merge (5-8 min)
+# Ver: .github/workflows/README.md para arquitectura completa
 ```
 
 ### 3. Validación y Quality Gates
 ```bash
-# Validación rápida (1-8 segundos)
+# Validación rápida (~5-15 segundos local)
 yarn fe:lint                       # ESLint check
 yarn fe:typecheck                  # TypeScript validation
 yarn be:format                     # Python auto-format
 
-# Validación completa (pre-PR)
+# Validación completa (pre-PR) - Local: ~70s | CI: 5-15 min
 yarn qa:gate                       # Full quality pipeline
+yarn qa:gate:fast                  # Fast validation (~30s)
 yarn e2e:fe                        # E2E tests complete
-yarn sec:all                       # Security audit
+yarn sec:all                       # Security audit (0 vulnerabilities)
 ```
 
 ### 4. Pull Request Creation
@@ -213,13 +220,15 @@ yarn be:format                     # Black auto-format
 yarn be:lint                       # Ruff linting
 yarn be:quality                    # Full Python quality gate
 
-# Security & Compliance
-yarn sec:all                       # Security audit (npm + semgrep)
-yarn qa:gate                       # Complete quality pipeline
+# Security & Compliance (0 vulnerabilities achieved)
+yarn sec:all                       # Security audit (npm + semgrep + git-secrets)
+yarn sec:deps:fe                   # Frontend dependency audit
+yarn sec:deps:be                   # Backend dependency audit
+yarn qa:gate                       # Complete quality pipeline (~70s)
 
-# Environment
-yarn env-validate                 # Environment diagnostics
-yarn env-info                     # Platform information
+# Environment (Cross-platform: Windows/Linux/WSL)
+yarn repo:env:validate            # Environment diagnostics
+yarn repo:env:info                # Platform information
 ```
 
 ### Comandos Slash (Tier 2 - Workflow Automation)
@@ -386,9 +395,11 @@ git checkout develop && git merge --no-ff hotfix/security-patch
 - **Security**: Semgrep + npm audit + git-secrets
 
 ### Performance Benchmarks
-- **Hook Execution**: 54% optimizado (152s → 70s)
-- **Validation Speed**: 1-8s para checks iterativos
-- **Quality Gate**: <2 minutos completo
+- **Local Execution**: 54% optimizado (152s → 70s local)
+- **CI/CD Pipeline**: 5-15 minutos (arquitectura zero-overlap)
+- **Validation Speed**: 5-15s para checks iterativos
+- **Quality Gate Local**: ~70s completo | ~30s fast mode
+- **Hook Performance**: Pre-tool (5-10s) | Post-tool (15-30s)
 
 ### Multi-Technology Standards
 - **Frontend**: ESLint (max-warnings=0) + Prettier + TSC
@@ -402,8 +413,8 @@ git checkout develop && git merge --no-ff hotfix/security-patch
 
 ### Environment Issues
 ```bash
-yarn env-validate                 # Comprehensive diagnostics
-yarn env-info                     # Platform details
+yarn repo:env:validate            # Comprehensive diagnostics
+yarn repo:env:info                # Platform details
 /health-check                     # System-wide validation
 ```
 
@@ -411,12 +422,14 @@ yarn env-info                     # Platform details
 ```bash
 # Check specific issues
 yarn fe:lint                      # ESLint errors
-yarn be:quality                   # Python quality issues
-yarn sec:all                      # Security problems
+yarn fe:typecheck                 # TypeScript validation errors
+yarn be:quality                   # Python quality issues (Black + Ruff + Radon)
+yarn sec:all                      # Security problems (0 vulnerabilities target)
 
 # Auto-fix when possible
-yarn fe:lint:fix                  # Fix ESLint issues
-yarn be:format                   # Fix Python formatting
+yarn fe:lint:fix                  # Fix ESLint issues automatically
+yarn be:format                    # Fix Python formatting (Black)
+yarn be:lint                      # Fix Python linting (Ruff autofix)
 ```
 
 ### Workflow Issues
@@ -486,8 +499,41 @@ docs/templates/README-VALIDATION-CHECKLIST.md
 ✅ **Conway's Law**: Implementation docs ≤2 dirs from code
 ✅ **Bilingual standards**: Spanish primary, English technical
 
+## 🚀 Workflow Architecture Integration
+
+### **Zero-Overlap CI/CD Architecture**
+Nuestra arquitectura elimina redundancias y optimiza triggers:
+
+- **ci.yml**: Testing integral post-push a `main`, `develop`, `release/**` (10-15 min)
+- **pr-validation.yml**: Validación pre-merge en PRs (5-8 min)
+- **GitFlow Completo**: feature/* → develop → release/* → main
+
+### **Command Performance Context**
+```bash
+# Local Development (optimizado 54%)
+yarn qa:gate                       # ~70s validation completa
+yarn qa:gate:fast                  # ~30s validation esencial
+yarn fe:lint:fix && yarn be:format # ~5-15s quality fixes
+
+# CI/CD Pipeline (zero-overlap)
+# - PR Validation: 5-8 min (fast feedback)
+# - Integration Testing: 10-15 min (comprehensive)
+```
+
+### **GitFlow Integration Commands**
+```bash
+# Feature Development
+/task-dev T-XX                     # Context-aware development
+/pr-flow                           # Triggers pr-validation.yml
+
+# Release Management
+/release-prep                      # Triggers comprehensive ci.yml
+/merge-safety                      # Pre-merge validation
+```
+
 Para mayor información:
 - **Project Setup**: `CLAUDE.md`
+- **Workflows**: `.github/workflows/README.md`
 - **Work Plan**: `docs/WORK-PLAN v5.md`
 - **Development Status**: `docs/DEVELOPMENT-STATUS.md`
 - **Task Management**: `tools/` directory scripts

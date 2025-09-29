@@ -1,40 +1,36 @@
-name: Document Validation
+# DEPRECATED: Document validation has been integrated into ci.yml and pr-validation.yml workflows
+# This file is kept for reference and will be removed in a future update.
+#
+# Document validation is now handled by:
+# - ci.yml: unified-quality-metrics job includes docs:validate:strict
+# - pr-validation.yml: docs-validation job provides comprehensive documentation validation
+#
+# Migration completed as part of workflow optimization to achieve frontend/backend parity
+# and eliminate redundancy in GitHub Actions pipelines.
+
+name: Document Validation (DEPRECATED)
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+  # Disabled - functionality moved to main workflows
+  workflow_dispatch:
+    inputs:
+      legacy_run:
+        description: 'Run legacy document validation (use main workflows instead)'
+        required: false
+        default: 'false'
 
 jobs:
-  validate-docs:
+  legacy-validation:
     runs-on: ubuntu-latest
+    if: github.event.inputs.legacy_run == 'true'
 
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18.16.0'
-        cache: 'yarn'
-
-    - name: Install dependencies
-      run: yarn install --frozen-lockfile
-
-    - name: Validate document placement
-      run: yarn docs:validate:strict
-
-    - name: Generate placement report
-      if: failure()
+    - name: Deprecation Notice
       run: |
-        yarn docs:validate:report
-        echo "::error title=Document Placement Violations::Check the validation report for details"
-
-    - name: Upload validation report
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: document-validation-report
-        path: docs/validation/placement-report.md
-        retention-days: 30
+        echo "⚠️ This workflow is DEPRECATED"
+        echo "📋 Document validation is now integrated into:"
+        echo "   - ci.yml (unified-quality-metrics job)"
+        echo "   - pr-validation.yml (docs-validation job)"
+        echo "🔄 Please use the main workflows instead"
+        echo "❌ This workflow will be removed in a future update"
+        exit 1

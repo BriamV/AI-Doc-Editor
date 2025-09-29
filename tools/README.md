@@ -168,6 +168,10 @@ yarn merge-safety-full                  # Uses merge protection tools
 
 ## Architecture Integration
 
+**Related Infrastructure:**
+- [GitHub Actions Workflows](../.github/workflows/README.md) - CI/CD automation using these tools
+- [CLAUDE.md Development Guide](../CLAUDE.md) - Workflow integration and command usage
+
 ### **4-Tier Documentation Positioning**
 
 | Tier | Location | User Interface | Purpose |

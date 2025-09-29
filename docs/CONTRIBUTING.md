@@ -5,7 +5,7 @@
 ## 🚀 Guía Rápida
 
 ### Requisitos Previos
-- Node.js 18+
+- Node.js 20.x+ (current LTS recommended)
 - Python 3.11+
 - Git
 - Conocimientos básicos de React y TypeScript
@@ -13,7 +13,7 @@
 ### Configuración del Entorno
 1. Fork del repositorio
 2. Clona tu fork: `git clone https://github.com/tu-usuario/AI-Doc-Editor.git`
-3. Instala dependencias: `yarn install`
+3. Instala dependencias: `yarn repo:install`
 4. Configura variables de entorno: `cp .env.example .env`
 5. Inicia el servidor de desarrollo: `yarn all:dev`
 
@@ -33,21 +33,27 @@
 ### 3. Testing y Calidad
 ```bash
 # Ejecuta todos los tests
-yarn fe:test
+yarn all:test                         # Complete test suite
+yarn fe:test                          # Frontend tests (Jest)
+yarn e2e:fe                           # E2E tests (Playwright)
 
-# Valida calidad del código
-yarn fe:lint
-yarn fe:typecheck
-yarn be:quality
+# Valida calidad del código (Local: ~5-15s cada comando)
+yarn fe:lint                          # ESLint validation
+yarn fe:typecheck                     # TypeScript validation
+yarn be:quality                       # Python quality pipeline
 
-# Auditoría de seguridad
-yarn sec:all
+# Quality Gates (Local vs CI performance)
+yarn qa:gate                          # Full pipeline (~70s local, 10-15 min CI)
+yarn qa:gate:fast                     # Fast validation (~30s local)
+yarn sec:all                          # Security audit (0 vulnerabilities)
 ```
 
 ### 4. Pull Request
 - Asegúrate de que todos los tests pasen
-- Ejecuta la validación completa: `yarn repo:merge:validate`
+- Ejecuta la validación completa: `yarn repo:merge:validate` o `/merge-safety`
 - Crea el PR con descripción detallada
+- Los [workflows de GitHub Actions](../.github/workflows/README.md) validarán automáticamente tu código
+- **Arquitectura Zero-Overlap**: ci.yml (post-push, 10-15 min) vs pr-validation.yml (pre-merge, 5-8 min)
 - Vincula issues relacionados
 
 ## 📏 Guías de Estilo
@@ -143,19 +149,30 @@ test(components): add Chat component tests
 
 ## 🔄 Workflow de Desarrollo
 
-### Branches
+### 🎆 Arquitectura Zero-Overlap CI/CD
+
+Nuestro sistema elimina redundancias con triggers mutuamente exclusivos:
+
+| Workflow | Propósito | Triggers | Tiempo Ejecución |
+|----------|----------|----------|--------------------|
+| **ci.yml** | Testing integral post-integración | Push a `main`, `develop`, `release/**` | ~10-15 min |
+| **pr-validation.yml** | Validación pre-merge rápida | PRs a `main`, `develop` | ~5-8 min |
+
+### Branches GitFlow
 - `main` - Código estable en producción
-- `develop` - Desarrollo activo
-- `feature/nombre` - Nuevas funcionalidades
+- `develop` - Desarrollo activo (integración continua)
+- `feature/T-XX-nombre` - Nuevas funcionalidades (task-based)
 - `fix/nombre` - Corrección de errores
 - `hotfix/nombre` - Correcciones urgentes
+- `release/RX` - Preparación de releases
 
 ### Merge Requirements
-- Todos los tests pasan
+- Todos los tests pasan (local + CI workflows)
 - Code review aprobado
 - Conflictos resueltos
 - Documentación actualizada
-- Validación de seguridad (`yarn repo:merge:validate`)
+- **Validación de seguridad MANDATORIA**: `yarn repo:merge:validate` o `/merge-safety`
+- CI/CD validation: pr-validation.yml (5-8 min) debe pasar
 
 ## 💡 Tips para Contribuidores
 
@@ -173,8 +190,23 @@ test(components): add Chat component tests
 
 ### Herramientas Útiles
 - [Claude Code](https://claude.ai/code) - AI assistant para desarrollo
-- Comandos slash para workflows: `/task-dev`, `/review-complete`
-- Tools de navegación: `tools/task-navigator.sh`
+- **Comandos slash para workflows**: `/task-dev T-XX`, `/review-complete`, `/pr-flow`, `/merge-safety`
+- **Tools de navegación**: `tools/task-navigator.sh T-XX`, `tools/progress-dashboard.sh`
+- **Namespace commands**: 185/185 operacionales (100% success rate)
+
+### 🚀 Performance Optimizado
+
+**Local Development** (54% faster execution):
+```bash
+yarn qa:gate                          # ~70s pipeline completo
+yarn qa:gate:fast                     # ~30s validation esencial
+yarn fe:lint:fix && yarn be:format    # ~5-15s quick fixes
+```
+
+**CI/CD Performance**:
+- **PR Validation**: 5-8 min (feedback rápido)
+- **Integration Testing**: 10-15 min (testing integral)
+- **Zero Overlap**: Sin ejecución redundante de workflows
 
 ## 🏆 Reconocimientos
 

@@ -46,7 +46,7 @@
   - [ ] Understand testing expectations per DESIGN_GUIDELINES
 
 - [ ] **Build Pipeline**: Understand current CI/CD vs target (T-01 in WORK-PLAN)
-  - [ ] Review existing GitHub Actions or CI configuration
+  - [ ] Review [GitHub Actions workflows](../../.github/workflows/README.md) configuration
   - [ ] Understand quality gates and linting requirements
   - [ ] Check Docker build process if exists
 

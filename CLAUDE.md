@@ -98,6 +98,8 @@ yarn qa:gate:dev                  # Development mode validation (~45s)
 
 ## Essential Commands
 
+**See also**: [GitHub Actions Workflows](.github/workflows/README.md) for CI/CD infrastructure details
+
 ```bash
 # Development (PREFERRED - Namespaced commands: 185/185 working)
 yarn all:dev|fe:build|fe:test|sec:all
@@ -176,6 +178,7 @@ yarn docs:api:bundle         # API documentation bundling
 - `src/docs/ai/` - **NEW** AI implementation docs (frontend patterns, integration)
 - `backend/docs/` - Backend implementation docs (API, database, security)
 - `docs/architecture/ai/` - **NEW** AI architecture docs (strategy, audit, implementation)
+- `.github/workflows/` - CI/CD automation ([detailed docs](.github/workflows/README.md))
 - `.claude/commands/` - 19 production slash commands
 - `tools/` - Task management scripts (project workflow)
 - `scripts/` - **STREAMLINED** Infrastructure automation (5 essential scripts)

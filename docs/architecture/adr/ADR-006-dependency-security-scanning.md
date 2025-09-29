@@ -22,7 +22,7 @@ Task T-43 "Implementar Escaneo de Dependencias" requires implementing Software C
 
 - **Full-stack application**: React/TypeScript frontend + Python FastAPI backend
 - **Multi-stack security pipeline**: Node.js (yarn sec:deps:fe) + Python (pip-audit) scanning
-- **GitHub Actions CI/CD**: Enhanced quality gates with security-first approach
+- **GitHub Actions CI/CD**: Enhanced quality gates with security-first approach ([workflow docs](../../../.github/workflows/README.md))
 - **Zero security findings**: Comprehensive dependency scanning active and passing
 - **OWASP compliance**: Complete coverage of dependency-related vulnerabilities
 

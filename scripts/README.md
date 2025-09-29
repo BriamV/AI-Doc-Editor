@@ -6,6 +6,10 @@
 **Preference**: Use direct yarn commands and slash commands for user-facing operations
 **Role**: Backend utilities powering cross-platform development and merge protection
 
+**Related Infrastructure:**
+- [GitHub Actions Workflows](../.github/workflows/README.md) - CI/CD infrastructure using these scripts
+- [Package.json Scripts Guidelines](../docs/development/PACKAGE-JSON-SCRIPTS-GUIDELINES.md) - Namespace commands that call these scripts
+
 ## Overview
 
 Core infrastructure scripts providing cross-platform utilities and safety systems for the AI-Doc-Editor development environment. These scripts solve critical infrastructure needs:

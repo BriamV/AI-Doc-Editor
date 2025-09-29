@@ -4,6 +4,10 @@
 **Target Audience**: Development team and contributors
 **Maintenance**: Update when adding new namespaces or script patterns
 
+**Related Documentation:**
+- [GitHub Actions Workflows](../../.github/workflows/README.md) - CI/CD infrastructure using these commands
+- [ADR-012: Namespace Architecture](../architecture/adr/ADR-012-package-json-namespace-architecture.md) - Technical decisions
+
 ## Overview
 
 This document defines the comprehensive structure, naming conventions, and architecture for maintaining the package.json scripts in the AI Document Editor project. Our modernized approach uses an 8-namespace architecture with 185+ operational commands organized for optimal developer experience.

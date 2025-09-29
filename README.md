@@ -36,6 +36,7 @@ Este proyecto es un fork mejorado de [AI Text Editor](https://github.com/darryls
 
 **Cross-References:**
 - **[Development Guide](CLAUDE.md)** - Comprehensive developer setup and workflow
+- **[CI/CD Workflows](.github/workflows/README.md)** - GitHub Actions infrastructure and automation
 - **[Architecture Documentation](docs/architecture/)** - Technical design and ADRs
 - **[Contributing Guide](docs/CONTRIBUTING.md)** - Contribution guidelines and standards
 
@@ -114,6 +115,7 @@ Este proyecto está bajo la [Licencia MIT](LICENSE).
 - **Autenticación**: OAuth 2.0 (Google/Microsoft)
 - **Testing**: Playwright E2E + Jest unit tests
 - **Quality Tools**: 40+ integrated tools (ESLint, Prettier, Black, Ruff, Semgrep, etc.)
+- **CI/CD**: GitHub Actions workflows ([architecture details](.github/workflows/README.md))
 - **Infrastructure**: Cross-platform scripts, merge protection, automated hooks
 
 ### Seguridad
