@@ -372,6 +372,15 @@ All enhancements MUST integrate into workflow:
 3. Test before documenting
 4. Remove redundancies
 
+### 📋 Package.json Script Standards
+
+**MANDATORY**: Follow structured namespace architecture when adding scripts
+
+- **Guidelines**: docs/development/PACKAGE-JSON-SCRIPTS-GUIDELINES.md
+- **Architecture**: docs/architecture/adr/ADR-012-package-json-namespace-architecture.md
+- **Pattern**: `namespace:action[:modifier][:subaction]`
+- **Validation**: Must use multiplatform wrapper for system commands
+
 ## 🔨 POST-BUILD VALIDATION Protocol
 
 **MANDATORY after package.json changes or new scripts:**

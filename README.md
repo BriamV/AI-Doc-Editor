@@ -178,6 +178,8 @@ Consulta nuestra [guía de contribución](docs/CONTRIBUTING.md) para más detall
 
 El proyecto utiliza comandos directos de yarn y comandos slash para desarrollo. Consulta la [documentación de desarrollo](CLAUDE.md) para ver todos los comandos disponibles.
 
+**Para contribuidores**: Revisa las [guías de scripts](docs/development/PACKAGE-JSON-SCRIPTS-GUIDELINES.md) antes de agregar nuevos comandos al package.json.
+
 **Comandos Esenciales:**
 
 ```bash
