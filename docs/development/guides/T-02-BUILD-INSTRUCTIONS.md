@@ -15,11 +15,11 @@
 ### Option 1: Automated Docker Build (Recommended)
 
 ```bash
-# 1. Run setup validation (auto-configura .env)
-./setup-docker-build.sh
+# 1. Verify environment setup
+yarn repo:env:validate
 
-# 2. Execute full build (5-10 minutes) - ¡Ya listo para funcionar!
-./docker-build-execute.sh
+# 2. Start Docker development environment
+yarn docker:dev
 ```
 
 **✅ No necesitas configurar OAuth ahora** - el build incluye configuración demo segura.  
@@ -261,9 +261,9 @@ newgrp docker
 
 ```bash
 # Clean and rebuild
-make clean
-make docker-clean
-./docker-build-execute.sh
+yarn repo:clean
+yarn docker:stop
+yarn docker:dev
 ```
 
 ---
