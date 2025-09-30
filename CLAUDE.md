@@ -299,18 +299,25 @@ yarn qa:gate                            # Full quality pipeline (~70s)
 
 ## CLAUDE.md Maintenance
 
-⚠️ **IMPORTANT**: `/update-claude-md` and `/audit-claude-md` are **specification-only** (not implemented)
+**Architecture**: Deterministic shell scripts (not AI slash commands)
 
 ```bash
-# Manual workflow (REQUIRED until commands implemented):
+# Validation (fast, deterministic)
+bash tools/validate-claude-md.sh        # Structure + format + references
+
+# Comprehensive audit (with quality scoring)
+bash tools/audit-claude-md.sh           # Full analysis + score report
+bash tools/audit-claude-md.sh --report  # Generate markdown report
+
+# Manual update workflow:
 # 1. Read CLAUDE.md before editing
 # 2. Make minimal, focused changes
-# 3. Run: bash tools/validate-claude-md.sh
-# 4. Check token count: wc -c CLAUDE.md | awk '{print $1/3.5 " tokens"}'
+# 3. Run validation script
+# 4. Check token count is displayed in validation
 # 5. Commit with descriptive message
 ```
 
-**Implemented validation**: `tools/validate-claude-md.sh` (structure + format only)
+**Note**: Previous `/update-claude-md` and `/audit-claude-md` slash commands moved to archive (were specification-only, not implemented)
 
 ## 📋 Documentation Standards
 
