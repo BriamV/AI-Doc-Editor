@@ -1,112 +1,186 @@
-# .claude/docs/ - Implementation Documentation
+# .claude/docs/ - Claude Code System Documentation
 
-This directory contains implementation-specific documentation for the Claude Code integration system.
+Implementation-specific documentation for the Claude Code integration system, organized by category for improved discoverability.
 
-## 📁 Directory Contents
+## 📁 Directory Structure
 
-### Migration Documentation
-- **[AI-DOCUMENTATION-MIGRATION.md](AI-DOCUMENTATION-MIGRATION.md)** - AI docs relocation notice and redirects
+```
+.claude/docs/
+├── reference/          # Files imported by CLAUDE.md (@import system)
+├── guides/             # Q&A knowledge base and how-to guides
+├── specs/              # Specification-only documents (not implemented)
+├── archive/            # Historical reports, migrations, and audits
+│   ├── reports/        # Historical optimization and implementation reports
+│   ├── migrations/     # Migration deliverables and completion summaries
+│   └── audits/         # Historical audits and coverage enhancements
+└── README.md           # This file
+```
 
-### Hooks System Documentation (4 files)
-- **[audit-current-hooks-file.md](audit-current-hooks-file.md)** - Current hooks implementation audit
-- **[hooks-migration.md](hooks-migration.md)** - Migration guide for hooks system
-- **[hooks-coverage-enhancement.md](hooks-coverage-enhancement.md)** - Coverage enhancement documentation
-- **[hooks-performance-optimization.md](hooks-performance-optimization.md)** - Performance optimization guide
+---
 
-### Q&A Knowledge Base (4 files, 165+ KB)
-- **[question-answers-about-claude.md](question-answers-about-claude.md)** - Claude Code system Q&A (62.7 KB)
-- **[questions-answers-about-hooks.md](questions-answers-about-hooks.md)** - Hooks system Q&A (38.6 KB)
-- **[questions-answers-about-settings.md](questions-answers-about-settings.md)** - Settings configuration Q&A (18.8 KB)
-- **[qustions-answers-about-csc.md](qustions-answers-about-csc.md)** - CSC system Q&A (45.2 KB)
+## 📚 Reference Documentation (4 files)
 
-## 🎯 Purpose
+**Critical**: These files are imported by CLAUDE.md using the `@import` system.
 
-This directory serves as the technical documentation hub for internal Claude Code system implementation:
+| File | Purpose | Size | Referenced In |
+|------|---------|------|---------------|
+| [commands-reference.md](reference/commands-reference.md) | Complete 185-command catalog | 120 lines | CLAUDE.md line 56 |
+| [quality-tools-reference.md](reference/quality-tools-reference.md) | 40+ tools ecosystem | 29 lines | CLAUDE.md line 146 |
+| [protected-files-policy.md](reference/protected-files-policy.md) | Files that must NEVER be modified | 26 lines | CLAUDE.md line 254 |
+| [documentation-standards.md](reference/documentation-standards.md) | Standards & templates | 37 lines | CLAUDE.md line 324 |
 
-- **Claude Code Tooling Documentation**: Technical specifications for hooks, agents, and commands
-- **Migration Documentation**: Architectural changes including AI documentation relocation
-- **Comprehensive Q&A Knowledge Base**: Troubleshooting guides for system components
-- **Performance Optimization**: System optimization strategies and results
-- **Coverage Enhancement**: Testing and validation coverage improvements
-- **Clear Separation**: Distinct boundary from application feature documentation
+**Navigation**: `reference/` contains the core reference materials that Claude Code needs for daily operation.
+
+---
+
+## 📖 Guides & Knowledge Base (4 files)
+
+**Purpose**: Q&A knowledge base and troubleshooting guides for system components.
+
+| File | Purpose | Size | Original Name |
+|------|---------|------|---------------|
+| [claude-code-system-qa.md](guides/claude-code-system-qa.md) | Claude Code system Q&A | 62.7 KB | question-answers-about-claude.md |
+| [settings-configuration-qa.md](guides/settings-configuration-qa.md) | Settings configuration Q&A | 18.8 KB | questions-answers-about-settings.md |
+| [custom-slash-commands-qa.md](guides/custom-slash-commands-qa.md) | Custom slash commands Q&A | 45.2 KB | qustions-answers-about-csc.md* |
+| [hooks-system-qa.md](guides/hooks-system-qa.md) | Hooks system Q&A | 38.6 KB | questions-answers-about-hooks.md |
+
+*Note: Fixed typo in original filename (qustions → custom-slash-commands)
+
+**Navigation**: `guides/` contains comprehensive Q&A documentation (203+ KB total).
+
+---
+
+## 📋 Specifications (1 file)
+
+**Status**: Specification-only documents describing desired functionality (not yet implemented).
+
+| File | Purpose | Status | Notes |
+|------|---------|--------|-------|
+| [claude-md-self-management-spec.md](specs/claude-md-self-management-spec.md) | CLAUDE.md self-management specification | SPEC ONLY | Replaced by deterministic shell scripts |
+
+**Navigation**: `specs/` contains specification documents for features not yet implemented.
+
+---
+
+## 📦 Archive (10 files)
+
+**Purpose**: Historical reports, migrations, and audits (read-only, point-in-time records).
+
+### Reports (5 files)
+Historical optimization and implementation reports:
+
+| File | Purpose | Date |
+|------|---------|------|
+| [claude-md-optimization-changelog.md](archive/reports/claude-md-optimization-changelog.md) | CLAUDE.md optimization history | 2025-09-30 |
+| [claude-md-upgrade-qa-report.md](archive/reports/claude-md-upgrade-qa-report.md) | Upgrade QA report | 2025-09-30 |
+| [functional-hooks-implementation.md](archive/reports/functional-hooks-implementation.md) | Hooks implementation report | Historical |
+| [hooks-performance-optimization.md](archive/reports/hooks-performance-optimization.md) | Performance optimization guide | Historical |
+| [security-hooks-integration.md](archive/reports/security-hooks-integration.md) | Security hooks summary | Historical |
+
+### Migrations (3 files)
+Migration deliverables and completion summaries:
+
+| File | Purpose | Date |
+|------|---------|------|
+| [ai-documentation-migration.md](archive/migrations/ai-documentation-migration.md) | AI docs relocation notice | Historical |
+| [hooks-migration.md](archive/migrations/hooks-migration.md) | Hooks migration guide | Historical |
+| [phase4-completion-summary.md](archive/migrations/phase4-completion-summary.md) | Phase 4 completion | Historical |
+
+### Audits (2 files)
+Historical audits and coverage enhancements:
+
+| File | Purpose | Date |
+|------|---------|------|
+| [audit-current-hooks-file.md](archive/audits/audit-current-hooks-file.md) | Hooks implementation audit | Historical |
+| [hooks-coverage-enhancement.md](archive/audits/hooks-coverage-enhancement.md) | Coverage enhancement | Historical |
+
+**Navigation**: `archive/` contains historical records that should NOT be modified (see [protected-files-policy.md](reference/protected-files-policy.md)).
+
+---
+
+## 🎯 Purpose & Scope
+
+This directory serves as the **technical documentation hub** for internal Claude Code system implementation:
+
+### What's Here
+- ✅ **Reference Documentation**: Files imported by CLAUDE.md
+- ✅ **Q&A Knowledge Base**: Comprehensive troubleshooting guides (165+ KB)
+- ✅ **Specifications**: Feature proposals and specifications
+- ✅ **Historical Archive**: Reports, migrations, and audits (point-in-time)
+
+### What's NOT Here
+- ❌ Application feature documentation → `docs/`
+- ❌ Architecture decision records → `docs/architecture/adr/`
+- ❌ User-facing documentation → `docs/`
+- ❌ Implementation code → `src/`, `backend/`
+
+---
 
 ## 🔗 Related Documentation
 
 ### Internal System Documentation
-- **[../.claude/commands/](../commands/)** - Command implementations
-- **[../.claude/agents/](../agents/)** - Agent specifications
-- **[../.claude/hooks.json](../hooks.json)** - Hooks configuration
+- **[../.claude/commands/](../commands/)** - 19 production slash commands
+- **[../.claude/hooks.json](../hooks.json)** - Hooks configuration (40+ tools)
+- **[../../tools/](../../tools/)** - Task management scripts
 
 ### User Documentation
-- **[../../docs/](../../docs/)** - User-facing project documentation
-- **[../../docs/reports/](../../docs/reports/)** - Project reports and analysis
 - **[../../CLAUDE.md](../../CLAUDE.md)** - Main Claude Code integration guide
+- **[../../docs/](../../docs/)** - User-facing project documentation
+- **[../../docs/architecture/](../../docs/architecture/)** - Architecture documentation
 
-## 🏛️ Architecture
+---
 
-```
-.claude/                    # Claude Code implementation
-├── docs/                   # Implementation documentation (THIS DIRECTORY)
-│   ├── AI-DOCUMENTATION-MIGRATION.md    # Migration notice
-│   ├── audit-current-hooks-file.md      # Hooks audit
-│   ├── hooks-*.md                       # Hooks system docs (3 files)
-│   ├── question-answers-about-*.md      # Q&A knowledge base (4 files)
-│   └── README.md                        # This file
-├── commands/               # Command system implementation
-├── agents/                # Agent specifications
-└── hooks.json             # Hooks configuration
+## 📊 Inventory Summary
 
-docs/                      # User-facing documentation
-├── architecture/ai/        # AI documentation (migrated from .claude/docs/)
-├── reports/               # Project reports and analysis
-└── ...                    # Project documentation
-```
+| Category | Files | Total Size | Purpose |
+|----------|-------|------------|---------|
+| **reference/** | 4 | ~212 lines | CLAUDE.md @imports (CRITICAL) |
+| **guides/** | 4 | 203+ KB | Q&A knowledge base |
+| **specs/** | 1 | ~743 lines | Specifications (not implemented) |
+| **archive/** | 10 | Historical | Reports/migrations/audits (read-only) |
+| **Total** | **19** | **~1 MB** | Complete system documentation |
 
-### Architectural Context
-- **AI Documentation Migration**: Successfully completed - AI docs relocated from `.claude/docs/` to `docs/architecture/ai/`
-- **Clear Boundaries**: Tooling documentation (`.claude/docs/`) vs application documentation (`docs/`)
-- **Migration Documentation**: Available for historical context and reference
-- **Conway's Law Compliance**: Implementation docs remain proximate to Claude Code system
+---
 
-## 📋 Navigation
+## 🏛️ Organization Principles
 
-### By Content Type
-| Documentation Type | Location | Purpose |
-|-------------------|----------|---------|
-| **Implementation** | `.claude/docs/` | Technical implementation details |
-| **Migration** | `.claude/docs/AI-DOCUMENTATION-MIGRATION.md` | AI docs relocation notice |
-| **Q&A Knowledge Base** | `.claude/docs/question-answers-*.md` | System troubleshooting |
-| **Commands** | `.claude/commands/` | Command system and usage |
-| **Agents** | `.claude/agents/` | Agent specifications |
-| **User Docs** | `docs/` | Project documentation |
-| **Reports** | `docs/reports/` | Analysis and reports |
+1. **Clear Categorization**: Files grouped by type (reference/guides/specs/archive)
+2. **Naming Consistency**: Kebab-case, descriptive names, fixed typos
+3. **Archive Separation**: Historical content clearly isolated
+4. **Import System Support**: `reference/` optimized for CLAUDE.md @imports
+5. **Discoverability**: Logical grouping makes files easy to find
 
-### Q&A Knowledge Base by Topic
-| Topic | File | Size | Purpose |
-|-------|------|------|---------|
-| **Claude Code System** | `question-answers-about-claude.md` | 62.7 KB | Core system Q&A |
-| **Hooks System** | `questions-answers-about-hooks.md` | 38.6 KB | Hooks configuration Q&A |
-| **CSC System** | `qustions-answers-about-csc.md` | 45.2 KB | CSC component Q&A |
-| **Settings** | `questions-answers-about-settings.md` | 18.8 KB | Configuration Q&A |
+---
 
-### Cross-References to Migrated Content
-- **AI Documentation**: Relocated to `docs/architecture/ai/` (see AI-DOCUMENTATION-MIGRATION.md)
-- **Application Features**: Located in `docs/` and subdirectories
-- **Implementation Docs**: Proximate to code in `src/docs/` and `backend/docs/`
+## 🔄 Migration History
 
-## 🔄 Maintenance
+**Date**: 2025-09-30
+**Change**: Reorganized flat structure into categorized directories
 
-This documentation is maintained as part of the Claude Code integration system. Updates should:
+**Breaking Changes**:
+- CLAUDE.md @import paths updated (5 references)
+- Old paths: `.claude/docs/commands-reference.md`
+- New paths: `.claude/docs/reference/commands-reference.md`
 
-1. **Follow Technical Infrastructure Template Standards**: Ensure compliance with established patterns
-2. **Maintain Clear Separation**: Implementation docs vs application feature documentation
-3. **Update Cross-References**: When files are moved, renamed, or migrated (see AI-DOCUMENTATION-MIGRATION.md)
-4. **Ensure Consistency**: With main CLAUDE.md integration guide and Q&A knowledge base
-5. **Validate File Inventory**: All 10 files in directory should be accurately listed and described
-6. **Reference Migration Documentation**: For historical context of architectural changes
+**Benefits**:
+- ✅ Improved discoverability (logical grouping)
+- ✅ Clear categorization (reference/guides/specs/archive)
+- ✅ Fixed naming issues (typos, inconsistencies)
+- ✅ Professional structure (industry standards)
 
-### Current Status
-- **File Count**: 10 files (100% documented)
-- **Content Coverage**: 165+ KB Q&A knowledge base + migration docs + hooks system
-- **Template Compliance**: Technical Infrastructure template standards
-- **Cross-References**: Validated links to migrated AI documentation
+---
+
+## 📝 Maintenance
+
+**Protected Content**: All files in `archive/` are read-only historical records. Do NOT modify archived content.
+
+**Reference Updates**: Files in `reference/` are imported by CLAUDE.md. Changes may affect Claude Code behavior.
+
+**Q&A Updates**: Files in `guides/` can be updated to reflect current system state.
+
+**For Questions**: See [claude-code-system-qa.md](guides/claude-code-system-qa.md) for comprehensive Q&A.
+
+---
+
+**Last Updated**: 2025-09-30
+**Organization Version**: 2.0 (Categorized Structure)
