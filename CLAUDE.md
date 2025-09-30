@@ -30,8 +30,8 @@ Repository: https://github.com/BriamV/AI-Doc-Editor/
 ```bash
 # Prerequisites: Node.js 18.16.0, Python 3.11+, WSL2 (Windows)
 yarn repo:install && yarn all:dev                  # Start development
-yarn fe:build && yarn fe:test             # Build & test
-yarn sec:all                              # Security audit
+yarn fe:build && yarn fe:test                      # Build & test
+yarn sec:all                                       # Security audit
 
 # 🎉 MODERNIZATION COMPLETE: 185/185 commands working (100% success rate)
 # 8 namespaces operational: repo:, fe:, be:, e2e:, sec:, qa:, docs:, all:
@@ -57,24 +57,19 @@ yarn sec:all                              # Security audit
 - **docs:*** - Documentation operations (validate, fix, generate)
 - **all:*** - Cross-cutting operations (build, test, quality)
 
-### Sub-Agent Architecture
+### Sub-Agent Coordination
 
 - **Custom Commands**: 19 workflow orchestrators in .claude/commands/ that analyze context
 - **Global Sub-Agents**: 40+ Claude Code specialists (security-auditor, frontend-developer, etc.)
 - **Invocation**: Commands auto-select and delegate to appropriate sub-agents
 
-## ⚡ CONSTANT VALIDATION Required
+## Essential Commands
+
+**See also**: [GitHub Actions Workflows](.github/workflows/README.md) for CI/CD infrastructure details
+
+### Daily Workflow Commands (Tier 1)
 
 ```bash
-# ALWAYS validate after branch changes, context switches, or issues
-/health-check                    # Immediate system validation
-tools/progress-dashboard.sh      # Project status verification
-yarn qa:gate                     # Multi-stack quality validation (~70s)
-yarn qa:gate:dev                  # Development mode validation (~45s)
-```
-
-```bash
-# Daily Workflow Commands (Tier 1)
 /task-dev T-XX [complete]       # Task development with context
 /review-complete [--scope]      # Multi-agent code review
 /commit-smart                   # Intelligent commits
@@ -84,84 +79,119 @@ yarn qa:gate:dev                  # Development mode validation (~45s)
 /docs-update [scope]            # Documentation maintenance
 /auto-workflow [scope]          # Context-aware suggestions
 /context-analyze [--depth]      # Project analysis
-
-# Specialized Commands (Tier 2) - Use as needed
-/security-audit /architecture /debug-analyze /pipeline-check
-/deploy-validate /adr-create /issue-generate
-
-# Advanced Commands (Tier 3) - Production/Emergency
-/release-prep /hotfix-flow /search-web /explain-codebase
-
-# Sub-Agent Invocation Pattern (Auto-handled by commands)
-> Use the [AGENT] sub-agent to [SPECIFIC-TASK]
 ```
 
-## Essential Commands
-
-**See also**: [GitHub Actions Workflows](.github/workflows/README.md) for CI/CD infrastructure details
+### Development Commands (PREFERRED - Namespaced)
 
 ```bash
-# Development (PREFERRED - Namespaced commands: 185/185 working)
-yarn all:dev|fe:build|fe:test|sec:all
+# Development & Testing - e2e: namespace
+yarn all:dev                   # Start all development servers
+yarn fe:build                  # Frontend production build
+yarn fe:test                   # Frontend unit tests (Jest)
+yarn e2e:fe                    # E2E tests (Playwright)
+yarn e2e:fe:headed             # E2E with browser visible
+yarn e2e:fe:debug              # Debug E2E tests
+yarn e2e:fe:ui                 # Interactive UI mode
+yarn e2e:report                # Show HTML test report
+yarn e2e:be                    # Backend E2E tests
+yarn e2e:integration           # Cross-directory interface testing
 
-# Testing (Playwright E2E primary) - e2e: namespace
-yarn e2e:fe                # Run E2E tests (Playwright)
-yarn e2e:fe:headed         # Run with browser visible
-yarn e2e:fe:debug          # Debug E2E tests
-yarn e2e:fe:ui             # Interactive UI mode
-yarn e2e:report            # Show HTML test report
-yarn e2e:be                # Backend E2E tests
+# Quality Assurance - qa: namespace
+yarn qa:gate                   # Full quality pipeline (~70s)
+yarn qa:gate:dev               # Development mode (~45s, skip heavy tools)
+yarn qa:gate:fast              # Fast validation (~30s, essential only)
+yarn qa:gate:monitored         # Monitored validation with timeouts
 
-# Quality (automated via hooks - 54% performance optimized) - fe:/be: namespaces
-yarn fe:lint|fe:format|fe:typecheck
-yarn be:lint|be:format|be:typecheck
+# Frontend Quality - fe: namespace
+yarn fe:lint                   # Frontend linting (ESLint)
+yarn fe:format                 # Frontend formatting (Prettier)
+yarn fe:typecheck              # TypeScript validation
 
-# Quality Gates (Multi-stack validation - qa: namespace)
-yarn qa:gate                # Full quality pipeline (~70s)
-yarn qa:gate:dev            # Development mode (~45s, skip heavy tools)
-yarn qa:gate:fast           # Fast validation (~30s, essential only)
-yarn qa:gate:monitored      # Monitored validation with timeouts
+# Backend Quality - be: namespace
+yarn be:quality                # Backend Python validation (format + lint + complexity)
+yarn be:format                 # Python autofix formatting (Black)
+yarn be:lint                   # Python autofix linting (Ruff)
+yarn be:typecheck              # Python type checking (MyPy)
+yarn be:test                   # Backend test suite
+yarn be:test:coverage          # Backend test coverage
 
-# Multi-tech validation (TypeScript + Python auto-detection) - fe:/be: namespaces
-yarn fe:typecheck           # Frontend TypeScript validation
-yarn be:quality             # Backend Python validation (format + lint + complexity)
-yarn be:format              # Python autofix formatting (Black)
-yarn be:lint                # Python autofix linting (Ruff)
-yarn be:test                # Backend test suite
-yarn be:test:coverage       # Backend test coverage
+# Security - sec: namespace
+yarn sec:all                   # Complete security pipeline: 0 vulnerabilities
+yarn sec:deps:fe               # Frontend dependency security audit
+yarn sec:deps:be               # Backend dependency security audit
+yarn sec:sast                  # Static analysis security scan
+yarn sec:secrets               # Secret scanning
 
-# Architecture & Integration (NEW)
-yarn docs:architecture           # Dual directory compliance (ADR-011)
-yarn e2e:integration             # Cross-directory interface testing
+# Documentation - docs: namespace
+yarn docs:validate             # Document placement validation
+yarn docs:validate:fix         # Auto-fix misplaced documents
+yarn docs:validate:strict      # Strict validation (CI/CD mode)
+yarn docs:validate:report      # Generate placement report
+yarn docs:api:lint             # API documentation linting
+yarn docs:api:bundle           # API documentation bundling
+yarn docs:architecture         # Dual directory compliance (ADR-011)
 
-# 🛡️ MERGE PROTECTION (MANDATORY before merges)
-yarn repo:merge:validate        # Complete merge safety validation
-yarn repo:merge:precheck        # Pre-merge safety checks
-yarn repo:merge:hooks:install   # Install git-level protection
-
-# Repository operations - repo: namespace
+# Repository Operations - repo: namespace
 yarn repo:clean                # Clean workspace (node_modules, dist, cache)
+yarn repo:install              # Install all dependencies
 yarn repo:env:validate         # Environment validation
 yarn repo:env:info             # Detailed environment information
 yarn repo:licenses             # License information
+yarn repo:merge:validate       # Complete merge safety validation
+yarn repo:merge:precheck       # Pre-merge safety checks
+yarn repo:merge:hooks:install  # Install git-level protection
+```
 
-# Environment validation & diagnostics (NEW - Unified Multiplatform)
-yarn repo:env:validate     # Comprehensive environment diagnostics
-yarn repo:env:info         # Detailed platform and tool information
+### Specialized Commands (Tier 2)
 
-# 📋 DOCUMENT ORGANIZATION - docs: namespace
-yarn docs:validate           # Document placement validation (PowerShell/WSL/Linux)
-yarn docs:validate:fix       # Auto-fix misplaced documents
-yarn docs:validate:strict    # Strict validation (CI/CD mode)
-yarn docs:validate:report    # Generate placement report
-yarn docs:api:lint           # API documentation linting
-yarn docs:api:bundle         # API documentation bundling
+```bash
+# Use as needed for specific tasks
+/security-audit                # Comprehensive security assessment
+/architecture                  # Architecture integrity check
+/debug-analyze                 # Debug analysis
+/pipeline-check                # CI/CD pipeline validation
+/deploy-validate               # Deployment validation
+/adr-create                    # Create Architecture Decision Record
+/issue-generate                # Generate GitHub issues
+```
 
-# 🎉 NAMESPACE ARCHITECTURE SUCCESS:
-# 185/185 commands operational (100% success rate)
-# 8 namespaces: repo:, fe:, be:, e2e:, sec:, qa:, docs:, all:
-# Performance: 54% faster execution (152s → 70s)
-# Legacy aliases maintained for compatibility
+### Advanced Commands (Tier 3)
+
+```bash
+# Production/Emergency use only
+/release-prep                  # Release preparation workflow
+/hotfix-flow                   # Hotfix workflow
+/search-web                    # Web search integration
+/explain-codebase              # Codebase explanation
+```
+
+### Quick Reference
+
+```bash
+# Most used commands
+/task-dev T-XX                 # Task details & development
+/context-analyze               # Project progress analysis
+/merge-safety                  # MANDATORY before merges
+/health-check                  # System validation
+tools/progress-dashboard.sh    # Visual progress dashboard
+
+# Namespace quick commands (185/185 operational)
+yarn all:build                 # Frontend + backend build
+yarn all:test                  # Complete test suite
+yarn sec:all                   # Security audit (0 vulnerabilities)
+yarn qa:gate                   # Quality pipeline (70s)
+yarn docs:validate             # Documentation quality
+yarn repo:clean                # Workspace cleanup
+```
+
+## ⚡ CONSTANT VALIDATION Required
+
+```bash
+# ALWAYS validate after branch changes, context switches, or issues
+/health-check                    # Immediate system validation
+tools/progress-dashboard.sh      # Project status verification
+yarn qa:gate                     # Multi-stack quality validation (~70s)
+yarn qa:gate:dev                 # Development mode validation (~45s)
 ```
 
 ## Project Structure
@@ -214,7 +244,7 @@ scripts/python-cc-gate.cjs           # Python quality gate automation
 ```bash
 # ✅ Validate dual directory compliance
 yarn docs:architecture           # Directory structure compliance
-/architecture                        # Architecture integrity check
+/architecture                    # Architecture integrity check
 yarn e2e:integration             # Cross-directory interface testing
 ```
 
@@ -251,7 +281,7 @@ prettier (JSON/XML/CSS/HTML)             # Universal formatting
 ```
 
 **Auto-Detection**: Windows/Linux/WSL + multi-venv support
-**Streamlined Architecture**: 6 essential scripts remain after 55% reduction (ADR-011 compliance + cross-platform wrapper)
+**Streamlined Architecture**: 5 essential scripts after 55% reduction (ADR-011 compliance)
 **Error Handling**: Standardized exit codes + structured logging
 **Integration Testing**: Cross-directory interface validation
 
@@ -278,9 +308,9 @@ prettier (JSON/XML/CSS/HTML)             # Universal formatting
 ```bash
 # Use custom slash commands for workflow automation (PREFERRED)
 /context-analyze                         # Project progress analysis
-/task-dev T-XX                          # Task development with context
-/review-complete --scope T-XX           # Validation and review
-/commit-smart                           # Mark development complete
+/task-dev T-XX                           # Task development with context
+/review-complete --scope T-XX            # Validation and review
+/commit-smart                            # Mark development complete
 
 # Legacy bash tools (still functional but use slash commands when possible)
 tools/progress-dashboard.sh              # Project progress
@@ -350,14 +380,13 @@ gh issue view <NUMBER>                                      # WRONG
 ## Security & Compliance
 
 ```bash
-# ✅ ZERO SECURITY FINDINGS ACHIEVED (January 2025) - sec: namespace
-yarn sec:all                                # Complete security pipeline: 0 vulnerabilities
-yarn sec:deps:fe                            # Frontend dependency security audit
-yarn sec:deps:be                            # Backend dependency security audit
-yarn sec:sast                               # Static analysis security scan
-yarn sec:secrets                            # Secret scanning
-/security-audit                            # Comprehensive security assessment
-/docs-update                               # Traceability matrix via commands
+# ✅ ZERO SECURITY FINDINGS ACHIEVED (January 2025)
+yarn sec:all                   # Complete security pipeline: 0 vulnerabilities
+yarn sec:deps:fe               # Frontend dependency security audit
+yarn sec:deps:be               # Backend dependency security audit
+yarn sec:sast                  # Static analysis security scan
+yarn sec:secrets               # Secret scanning
+/security-audit                # Comprehensive security assessment
 
 # 🛡️ ENTERPRISE-GRADE SECURITY ACTIVE (0 vulnerabilities across 1,782+ packages):
 # • Defense-in-depth: Multi-stack scanning (Node.js + Python)
@@ -365,17 +394,10 @@ yarn sec:secrets                            # Secret scanning
 # • Command allowlisting: Injection prevention controls
 # • Transport security: TLS 1.3+ with Perfect Forward Secrecy
 # • Audit system: WORM-compliant tamper-proof logging
-# • Namespace security: sec: commands validate all aspects
 
 # 📚 Security Documentation
 docs/architecture/adr/ADR-006-dependency-security-scanning.md  # Security architecture
 docs/security/audits/general-security-audit-report.md         # Zero findings report
-
-# ✅ MODERN PATTERNS: Use namespaced commands
-# yarn sec:sast               <- Modern security scanning
-# yarn sec:deps:fe            <- Frontend dependency security audit
-# yarn docs:api:bundle        <- Documentation generation
-# /security-audit             <- Comprehensive slash command
 ```
 
 ## Do Not Touch
@@ -407,18 +429,19 @@ docs/security/audits/general-security-audit-report.md         # Zero findings re
 
 ## 🎉 Modernization Success (100% Command Ecosystem + ADR-011 Compliance)
 
-- **Dual Directory Architecture**: tools/ (workflow) vs scripts/ (infrastructure) - ADR-011
-- `scripts/` - **MODERNIZED** - Infrastructure automation (5 essential scripts)
-  - **ELIMINATED**: cli.cjs, qa-gate.cjs, generate-traceability\*.cjs, security-scan.cjs, test-runner.cjs
+- **185/185 Commands**: 100% operational success rate
+- **8 Namespaces**: repo:, fe:, be:, e2e:, sec:, qa:, docs:, all:
+- **54% Performance**: Execution time optimized (152s → 70s)
+- **0 Vulnerabilities**: Enterprise-grade security across 1,782+ packages
+- **ADR-011 Compliance**: Dual directory architecture (tools/ vs scripts/)
+- **Cross-Platform**: Windows/Linux/WSL auto-detection
+
+**Migration Details:**
+- `scripts/` - Infrastructure automation (5 essential scripts)
+  - **ELIMINATED**: cli.cjs, qa-gate.cjs, generate-traceability*.cjs, security-scan.cjs, test-runner.cjs
   - **REMAINING**: multiplatform.cjs, merge-protection.cjs, install-merge-hooks.cjs, dev-runner.cjs, python-cc-gate.cjs
-  - Migration to namespaced yarn commands completed (185/185 working, 54% faster execution)
-- `tools/` - **SPECIALIZED** - Project workflow management (task navigation, progress tracking)
-- **Error Handling**: Standardized across both directories with structured logging
-- `legacy/cypress/` - **MIGRATED** - Cypress E2E tests replaced by Playwright
-  - `yarn test:cypress` - Legacy Cypress commands (use `yarn e2e:fe` instead)
-  - All legacy commands maintain compatibility while promoting modern namespaced alternatives
-  - Migration completed: All E2E testing now uses Playwright
-- Timeline: Final legacy/ cleanup after Playwright validation phase
+- `tools/` - Project workflow management (task navigation, progress tracking)
+- `legacy/cypress/` - Cypress E2E tests replaced by Playwright (cleanup after validation)
 
 ## Integration Policy
 
@@ -443,15 +466,91 @@ All enhancements MUST integrate into workflow:
 **MANDATORY after package.json changes or new scripts:**
 
 ```bash
-# ✅ ALWAYS run after modifying package.json or adding scripts (all: namespace)
-yarn repo:install --frozen-lockfile          # Verify dependencies
+# ✅ ALWAYS run after modifying package.json or adding scripts
+yarn repo:install --frozen-lockfile     # Verify dependencies
 yarn fe:build                           # Ensure frontend builds work
 yarn all:test                           # Run all test suites
 yarn qa:gate                            # Full quality pipeline (~70s)
-# ✅ 185/185 commands operational (100% success rate)
-# ✅ 8 namespaces: repo:, fe:, be:, e2e:, sec:, qa:, docs:, all:
-# ✅ Performance: 54% faster execution (152s → 70s)
-# ✅ Security: 0 vulnerabilities across 1,782+ packages
+```
+
+## CLAUDE.md Self-Management & Governance
+
+**Purpose**: Prevent format degradation and maintain structural integrity through systematic updates.
+
+### Update Protocol
+
+```bash
+# ✅ MANDATORY: Use systematic update workflow
+/update-claude-md "new content"         # Guided update with validation
+/audit-claude-md                        # Quality audit + consolidation
+tools/validate-claude-md.sh             # Structural validation
+
+# ❌ NEVER: Direct manual edits without validation
+```
+
+### Decision Tree for Content Classification
+
+```bash
+Command Reference?
+├─ Contains "yarn" → Essential Commands
+├─ Contains "/" (slash cmd) → Essential Commands
+├─ Contains "tools/" → Task Management Workflow
+└─ Contains "scripts/" → Integration Policy
+
+Rule/Policy?
+├─ About editing CLAUDE.md → CLAUDE.md Editing Rules
+├─ About security → Security & Compliance
+├─ About quality → Quality Assurance
+└─ About workflow → Integration Policy
+
+Structure Info?
+├─ Directory/file → Project Structure
+├─ Archive reference → Do Not Touch
+└─ Architecture → Integration Policy
+
+Context/Status?
+├─ Current branch/phase → Current Context
+└─ Task pattern → Task Management Workflow
+```
+
+### Quality Thresholds
+
+```bash
+# Maintained via automated validation:
+✓ Zero exact duplicates (was 8)
+✓ <3 near-duplicates (85%+ similarity)
+✓ All commands ≤5 lines
+✓ All lines ≤200 characters
+✓ 100% reference validity (yarn/slash/files)
+✓ All 14 required sections present
+✓ Quality score: 95+/100
+```
+
+### Rollback Conditions
+
+```bash
+# Automatic rollback if:
+❌ Structure validation fails
+❌ Duplicate introduced (>85% similarity)
+❌ Broken reference (command/file doesn't exist)
+❌ Format violation (line >200 chars)
+❌ Quality score drops below 90
+```
+
+### Maintenance Commands
+
+```bash
+# Weekly: Audit for duplicates
+/audit-claude-md --scope duplicates
+
+# Monthly: Full quality assessment
+/audit-claude-md
+
+# After major changes: Validate structure
+tools/validate-claude-md.sh --verbose
+
+# Emergency: Rollback to last good version
+git checkout HEAD~1 -- CLAUDE.md
 ```
 
 ## CLAUDE.md Editing Rules
@@ -462,7 +561,9 @@ yarn qa:gate                            # Full quality pipeline (~70s)
 # ✅ CLARO: Specific commands, not explanations
 # ✅ DIRECTO: What to do (✅) and NOT do (❌)
 # ✅ ESPECÍFICO: Use placeholders (<NUMBER>, <FILE>)
+# ✅ VALIDADO: Run tools/validate-claude-md.sh before commit
 # ❌ NO extensive documentation - keep compact
+# ❌ NO manual edits - use /update-claude-md
 ```
 
 ## 📋 Documentation Standards & Templates
@@ -529,29 +630,3 @@ yarn repo:merge:precheck         # Pre-merge safety only
 - 🏛️ ADR files presence validation
 - 🔒 Git hooks for native protection
 - 🚫 Automatic merge blocking on failures
-
-## Quick Reference
-
-- 📋 **Task details**: `/task-dev T-XX`
-- 🔍 **Codebase analysis**: `/context-analyze`
-- 🛡️ **Merge safety**: `/merge-safety`
-- 🚀 **Full command list**: `/auto-workflow`
-- 📊 **Progress**: `tools/progress-dashboard.sh`
-
-### **🎯 Namespace Quick Commands (185/185 operational)**
-
-- **🏗️ Build**: `yarn all:build` (frontend + backend)
-- **🧪 Test**: `yarn all:test` (complete test suite)
-- **🛡️ Security**: `yarn sec:all` (0 vulnerabilities)
-- **⚡ Quality**: `yarn qa:gate` (70s pipeline)
-- **📚 Docs**: `yarn docs:validate` (placement + quality)
-- **🔄 Repo**: `yarn repo:clean` (workspace cleanup)
-
-### **📊 Modernization Achievements**
-
-- **185/185 Commands**: 100% operational success rate
-- **8 Namespaces**: Complete coverage (repo:, fe:, be:, e2e:, sec:, qa:, docs:, all:)
-- **54% Performance**: Execution time optimized (152s → 70s)
-- **0 Vulnerabilities**: Enterprise-grade security across 1,782+ packages
-- **ADR-011 Compliance**: Dual directory architecture implemented
-- **Cross-Platform**: Windows/Linux/WSL auto-detection
