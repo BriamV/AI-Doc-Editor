@@ -33,7 +33,7 @@ Implementation-specific documentation for the Claude Code integration system, or
 
 ---
 
-## 📖 Guides & Knowledge Base (3 files)
+## 📖 Guides & Knowledge Base (4 files)
 
 **Purpose**: Q&A knowledge base and troubleshooting guides for system components.
 
@@ -42,10 +42,11 @@ Implementation-specific documentation for the Claude Code integration system, or
 | [claude-code-system-qa.md](guides/claude-code-system-qa.md) | Claude Code system Q&A | 62.7 KB | question-answers-about-claude.md |
 | [settings-configuration-qa.md](guides/settings-configuration-qa.md) | Settings configuration Q&A | 18.8 KB | questions-answers-about-settings.md |
 | [custom-slash-commands-qa.md](guides/custom-slash-commands-qa.md) | Custom slash commands Q&A | 45.2 KB | qustions-answers-about-csc.md* |
+| [hooks-system-qa.md](guides/hooks-system-qa.md) | Hooks system Q&A | 38.6 KB | questions-answers-about-hooks.md |
 
 *Note: Fixed typo in original filename (qustions → custom-slash-commands)
 
-**Navigation**: `guides/` contains comprehensive Q&A documentation (165+ KB total).
+**Navigation**: `guides/` contains comprehensive Q&A documentation (203+ KB total).
 
 ---
 
@@ -61,7 +62,7 @@ Implementation-specific documentation for the Claude Code integration system, or
 
 ---
 
-## 📦 Archive (11 files)
+## 📦 Archive (10 files)
 
 **Purpose**: Historical reports, migrations, and audits (read-only, point-in-time records).
 
@@ -85,14 +86,13 @@ Migration deliverables and completion summaries:
 | [hooks-migration.md](archive/migrations/hooks-migration.md) | Hooks migration guide | Historical |
 | [phase4-completion-summary.md](archive/migrations/phase4-completion-summary.md) | Phase 4 completion | Historical |
 
-### Audits (3 files)
+### Audits (2 files)
 Historical audits and coverage enhancements:
 
 | File | Purpose | Date |
 |------|---------|------|
 | [audit-current-hooks-file.md](archive/audits/audit-current-hooks-file.md) | Hooks implementation audit | Historical |
 | [hooks-coverage-enhancement.md](archive/audits/hooks-coverage-enhancement.md) | Coverage enhancement | Historical |
-| [questions-answers-about-hooks.md](archive/audits/questions-answers-about-hooks.md) | Hooks Q&A (archived) | 38.6 KB |
 
 **Navigation**: `archive/` contains historical records that should NOT be modified (see [protected-files-policy.md](reference/protected-files-policy.md)).
 
@@ -135,9 +135,9 @@ This directory serves as the **technical documentation hub** for internal Claude
 | Category | Files | Total Size | Purpose |
 |----------|-------|------------|---------|
 | **reference/** | 4 | ~212 lines | CLAUDE.md @imports (CRITICAL) |
-| **guides/** | 3 | 165+ KB | Q&A knowledge base |
+| **guides/** | 4 | 203+ KB | Q&A knowledge base |
 | **specs/** | 1 | ~743 lines | Specifications (not implemented) |
-| **archive/** | 11 | Historical | Reports/migrations/audits (read-only) |
+| **archive/** | 10 | Historical | Reports/migrations/audits (read-only) |
 | **Total** | **19** | **~1 MB** | Complete system documentation |
 
 ---
