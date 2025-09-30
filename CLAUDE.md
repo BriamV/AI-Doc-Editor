@@ -10,20 +10,13 @@ Repository: https://github.com/BriamV/AI-Doc-Editor/
 
 ## Tech Stack
 
-- Frontend: React 18 + TypeScript + Vite + TailwindCSS
-- Backend: Python FastAPI + SQLAlchemy + Alembic
-- AI: OpenAI Chat Completions (GPT-4o, GPT-4, GPT-3.5-turbo) + Frontend Streaming
-- Desktop: Electron + auto-updater
-- State: Zustand + IndexedDB encryption
-- Testing: Playwright E2E + Jest unit tests
-- Tools: Multi-stack quality ecosystem (40+ tools integrated)
-  - **Frontend**: ESLint, Prettier, Jest, TSC
-  - **Python**: Black, Ruff, Radon, MyPy, pip-audit
-  - **Security**: Semgrep, git-secrets, yarn sec:deps:fe
-  - **Docs**: markdownlint, yamlfix, yamllint, spectral
-  - **Shell**: shellcheck, shfmt
-  - **Config**: taplo (TOML), prettier (JSON/XML/CSS)
-  - **Infrastructure**: Docker, GitHub Actions, Claude Code hooks
+- **Frontend**: React 18 + TypeScript + Vite + TailwindCSS
+- **Backend**: Python FastAPI + SQLAlchemy + Alembic
+- **AI**: OpenAI GPT-4o/GPT-4/GPT-3.5 + streaming
+- **Desktop**: Electron + auto-updater
+- **State**: Zustand + IndexedDB encryption
+- **Testing**: Playwright E2E + Jest unit tests
+- **Tools**: 40+ multi-stack quality ecosystem (see @.claude/docs/quality-tools-reference.md)
 
 ## Development Setup
 
@@ -136,45 +129,22 @@ yarn qa:gate:dev                 # Development mode validation (~45s)
 
 ## 🏗️ Dual Directory Architecture (ADR-011)
 
-**GOVERNANCE: Strict separation between workflow tools and infrastructure scripts**
-
-### **tools/ - Project Workflow Management**
+**Strict separation**: tools/ (project workflows) vs scripts/ (infrastructure automation)
 
 ```bash
-# ✅ Project-specific workflows, task management, progress tracking
-tools/task-navigator.sh T-XX         # Task development workflows
-tools/progress-dashboard.sh          # Project status dashboards
-tools/extract-subtasks.sh T-XX       # Development planning
-tools/validate-dod.sh T-XX           # Definition of Done validation
-tools/qa-workflow.sh T-XX            # Quality assurance workflows
+# tools/ - Task management, progress tracking, QA workflows
+tools/task-navigator.sh T-XX     # Task development workflows
+tools/progress-dashboard.sh      # Project status dashboards
+
+# scripts/ - CI/CD, platform detection, git hooks (5 essential scripts)
+scripts/multiplatform.cjs        # Cross-platform environment
+scripts/merge-protection.cjs     # Merge safety automation
+
+# Validation
+yarn docs:architecture           # ADR-011 compliance check
 ```
 
-### **scripts/ - Infrastructure Automation**
-
-```bash
-# ✅ Build tools, CI/CD automation, development environment setup
-scripts/multiplatform.cjs            # Platform detection & environment
-scripts/merge-protection.cjs         # Git merge safety automation
-scripts/install-merge-hooks.cjs      # Git hooks installation
-scripts/dev-runner.cjs               # Development server automation
-scripts/python-cc-gate.cjs           # Python quality gate automation
-```
-
-### **Integration Validation**
-
-```bash
-# ✅ Validate dual directory compliance
-yarn docs:architecture           # Directory structure compliance
-/architecture                    # Architecture integrity check
-yarn e2e:integration             # Cross-directory interface testing
-```
-
-**Scopes & Interface Contracts:**
-
-- **tools/**: Project domain, task context, workflow orchestration
-- **scripts/**: Infrastructure domain, build automation, environment setup
-- **Error Handling**: Standardized exit codes, structured logging
-- **Integration**: Clear APIs between workflow and infrastructure layers
+**See**: docs/architecture/adr/ADR-011-*.md for complete architecture details
 
 ## 🔧 Quality Tools Ecosystem
 
@@ -243,49 +213,26 @@ tools/qa-workflow.sh T-XX dev-complete   # Mark development complete
 
 ## Current Context
 
-- **Branch**: develop
-- **Phase**: R0.WP3 (Seguridad y Auditoría)
+**Current Status**: @docs/project-management/status/PROJECT-STATUS.md
+
 - **Language**: Spanish docs, English code
 - **Pattern**: T-XX task identification
-- **Status**: docs/project-management/status/R0-RELEASE-STATUS.md
+- **Branch**: develop
 
 ## Sub-Agent Architecture
 
-**MANDATORY**: Prioritize sub-agents for complex analysis tasks
+**MANDATORY**: Prioritize sub-agents for complex tasks (code analysis, security audits, architecture review, multi-file investigation, testing, debugging)
 
-### Agent Selection Policy
-
-✅ **Use sub-agents for** (delegate immediately):
-- Code analysis → technical-researcher
-- Security audits → security-auditor
-- Architecture review → backend-architect, frontend-developer
-- Multi-file investigation → general-purpose
-- Test automation → test-automator
-- Refactoring/debugging → debugger
-
-❌ **Main thread only for**:
-- Sub-agent coordination
-- Brief confirmations (< 3 lines)
-- Single command execution
-- User interaction prompts
-
-### Available Agents
-
-- **Global Sub-Agents**: 40+ Claude Code specialists (security-auditor, backend-architect, frontend-developer, test-automator, debugger, technical-researcher, code-reviewer, general-purpose)
-- **Local Project Agent**: workflow-architect (specialized for this project's workflow orchestration)
-- **Custom Commands**: Auto-select appropriate sub-agents via .claude/commands/ (19 workflow orchestrators)
-
-### Invocation Pattern
+**Available**: 40+ global specialists (security-auditor, backend-architect, frontend-developer, technical-researcher, code-reviewer, etc.) + workflow-architect (local)
 
 ```bash
-# Automatic delegation via slash commands (PREFERRED)
-/security-audit          # → security-auditor sub-agent
-/architecture            # → backend-architect sub-agent
-/review-complete         # → code-reviewer sub-agent
-
-# Manual invocation pattern (when needed)
-> Use the [technical-researcher] sub-agent to analyze hooks implementation
+# Automatic delegation (PREFERRED)
+/security-audit          # → security-auditor
+/architecture            # → backend-architect
+/review-complete         # → code-reviewer
 ```
+
+**Main thread only for**: Sub-agent coordination, brief confirmations, single commands, user prompts
 
 ## GitHub Issues Management
 
@@ -335,21 +282,11 @@ yarn sec:all                         # Complete security pipeline
 - Temporary file patterns
 - Detailed rationale for protection policy
 
-## 🎉 Modernization Success (100% Command Ecosystem + ADR-011 Compliance)
+## 🎉 System Status
 
-- **185/185 Commands**: 100% operational success rate
-- **8 Namespaces**: repo:, fe:, be:, e2e:, sec:, qa:, docs:, all:
-- **54% Performance**: Execution time optimized (152s → 70s)
-- **0 Vulnerabilities**: Enterprise-grade security across 1,782+ packages
-- **ADR-011 Compliance**: Dual directory architecture (tools/ vs scripts/)
-- **Cross-Platform**: Windows/Linux/WSL auto-detection
-
-**Migration Details:**
-- `scripts/` - Infrastructure automation (5 essential scripts)
-  - **ELIMINATED**: cli.cjs, qa-gate.cjs, generate-traceability*.cjs, security-scan.cjs, test-runner.cjs
-  - **REMAINING**: multiplatform.cjs, merge-protection.cjs, install-merge-hooks.cjs, dev-runner.cjs, python-cc-gate.cjs
-- `tools/` - Project workflow management (task navigation, progress tracking)
-- `legacy/cypress/` - Cypress E2E tests replaced by Playwright (cleanup after validation)
+- **185/185 Commands**: 100% operational, 8 namespaces (repo:, fe:, be:, e2e:, sec:, qa:, docs:, all:)
+- **Performance**: 54% optimized (152s → 70s), cross-platform (Windows/Linux/WSL)
+- **Security**: 0 vulnerabilities (1,782+ packages), ADR-011 compliant architecture
 
 ## Integration Policy
 
