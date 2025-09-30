@@ -1,5 +1,17 @@
 # /audit-claude-md
 
+⚠️ **CRITICAL WARNING: SPECIFICATION ONLY - NOT IMPLEMENTED**
+
+This command is currently a **specification document** describing desired functionality. The described automation **does not exist yet**.
+
+**Current Status**: Only `tools/validate-claude-md.sh` is partially functional
+
+**Implementation Status**: 15% (basic validation only, no quality scoring or duplicate detection)
+
+**Risk**: Relying on this command may result in undetected CLAUDE.md degradation
+
+---
+
 Comprehensive CLAUDE.md quality audit with detailed analysis and consolidation recommendations.
 
 ## Usage

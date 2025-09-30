@@ -248,6 +248,36 @@ generate_report() {
   blank_lines=$(grep -c '^$' "$CLAUDE_MD" || true)
   content_lines=$((total_lines - blank_lines))
 
+  # Token counting (estimate: chars / 3.5)
+  local char_count
+  local token_estimate
+  char_count=$(wc -c < "$CLAUDE_MD" 2>/dev/null || echo "0")
+  token_estimate=$(awk "BEGIN {printf \"%.0f\", $char_count / 3.5}")
+
+  # Token budget status
+  local token_status="${GREEN}✅ GOOD${NC}"
+  local token_message="Well under 5,000 token target"
+
+  if [[ $token_estimate -gt 5000 ]]; then
+    token_status="${RED}❌ EXCEEDED${NC}"
+    token_message="CRITICAL: Over 5,000 token community target"
+  elif [[ $token_estimate -gt 4750 ]]; then
+    token_status="${YELLOW}⚠️ WARNING${NC}"
+    token_message="Approaching 5,000 token limit (5% buffer needed)"
+  elif [[ $token_estimate -gt 4500 ]]; then
+    token_status="${YELLOW}⚠️ CAUTION${NC}"
+    token_message="Within buffer zone (10% from limit)"
+  fi
+
+  # Duplicate detection (exact lines only - basic check)
+  local duplicate_count
+  duplicate_count=$(sort "$CLAUDE_MD" | uniq -d | wc -l)
+  local duplicate_status="${GREEN}✅ NONE${NC}"
+
+  if [[ $duplicate_count -gt 0 ]]; then
+    duplicate_status="${RED}❌ FOUND ($duplicate_count)${NC}"
+  fi
+
   echo ""
   echo "═══════════════════════════════════════════════════════════"
   echo "  CLAUDE.MD VALIDATION REPORT"
@@ -257,6 +287,22 @@ generate_report() {
   echo "Total Lines: $total_lines"
   echo "Content Lines: $content_lines"
   echo "Blank Lines: $blank_lines"
+  echo ""
+  echo "─────────────────────────────────────────"
+  echo "TOKEN BUDGET ANALYSIS"
+  echo "─────────────────────────────────────────"
+  echo "Characters: $char_count"
+  echo -e "Estimated Tokens: $token_estimate"
+  echo -e "Status: $token_status"
+  echo "$token_message"
+  echo "Target: <5,000 tokens (community recommendation)"
+  echo "Safe Zone: <4,500 tokens (10% buffer)"
+  echo ""
+  echo "─────────────────────────────────────────"
+  echo "DUPLICATE DETECTION (EXACT LINES)"
+  echo "─────────────────────────────────────────"
+  echo -e "Status: $duplicate_status"
+  echo "Note: Near-duplicate detection (85%+ similarity) not yet implemented"
   echo ""
 
   if [[ $EXIT_CODE -eq 0 ]]; then

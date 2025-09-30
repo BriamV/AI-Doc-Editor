@@ -1,5 +1,17 @@
 # /update-claude-md
 
+⚠️ **CRITICAL WARNING: SPECIFICATION ONLY - NOT IMPLEMENTED**
+
+This command is currently a **specification document** describing desired functionality. The described automation **does not exist yet**.
+
+**Current Status**: Manual workflow required (see end of this document)
+
+**Implementation Status**: 0% (specification only)
+
+**Risk**: Using this command may create false confidence in automated validation
+
+---
+
 Systematically update CLAUDE.md with new instructions while maintaining structural integrity.
 
 ## Usage
