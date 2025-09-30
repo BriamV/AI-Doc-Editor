@@ -8,8 +8,8 @@ import { createAuditSlice } from '../audit-slice';
 import { mockAuditLogs } from '../__mocks__/store';
 
 // Mock fetch globally
-global.fetch = jest.fn();
-const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>;
+global.fetch = vi.fn();
+const mockFetch = global.fetch as ReturnType<typeof vi.fn>;
 
 // Mock audit API responses
 const mockApiResponse = {
@@ -18,15 +18,15 @@ const mockApiResponse = {
 };
 
 describe('Audit Slice Store', () => {
-  let mockSet: jest.Mock;
-  let mockGet: jest.Mock;
+  let mockSet: ReturnType<typeof vi.fn>;
+  let mockGet: ReturnType<typeof vi.fn>;
   let auditSlice: ReturnType<typeof createAuditSlice>;
 
   beforeEach(() => {
     mockFetch.mockClear();
 
     // Create a proper Response mock that satisfies the interface
-    const mockResponse = {
+    const mockResponse: Partial<Response> = {
       ok: true,
       status: 200,
       statusText: 'OK',
@@ -36,18 +36,19 @@ describe('Audit Slice Store', () => {
       headers: new Headers({ 'content-type': 'application/json' }),
       body: null,
       bodyUsed: false,
-      clone: jest.fn(),
-      arrayBuffer: jest.fn(),
-      blob: jest.fn(),
-      formData: jest.fn(),
-      text: jest.fn(),
-      json: jest.fn().mockResolvedValue(mockApiResponse),
-    } as Response;
+      clone: vi.fn(),
+      arrayBuffer: vi.fn(),
+      blob: vi.fn(),
+      formData: vi.fn(),
+      text: vi.fn(),
+      json: vi.fn().mockResolvedValue(mockApiResponse),
+      bytes: vi.fn(),
+    };
 
     mockFetch.mockResolvedValue(mockResponse);
 
     // Clear all mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Create mock Zustand set/get functions
     let state = {
@@ -71,10 +72,10 @@ describe('Audit Slice Store', () => {
       autoRefresh: false,
       refreshInterval: 30,
       // Mock function to avoid undefined errors in action handlers
-      fetchAuditLogs: jest.fn().mockResolvedValue(undefined),
+      fetchAuditLogs: vi.fn().mockResolvedValue(undefined),
     };
 
-    mockSet = jest.fn(update => {
+    mockSet = vi.fn(update => {
       if (typeof update === 'function') {
         state = { ...state, ...update(state) };
       } else {
@@ -82,7 +83,7 @@ describe('Audit Slice Store', () => {
       }
     });
 
-    mockGet = jest.fn(() => state);
+    mockGet = vi.fn(() => state);
 
     // Create the audit slice with mocked functions
     auditSlice = createAuditSlice(mockSet, mockGet);

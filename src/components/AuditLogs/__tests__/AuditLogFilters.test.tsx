@@ -11,8 +11,8 @@ import useStore from '../../../store/store';
 // Mock utilities available if needed in future tests
 
 // Mock the store
-jest.mock('../../../store/store');
-const mockUseStore = useStore as jest.MockedFunction<typeof useStore>;
+vi.mock('../../../store/store');
+const mockUseStore = useStore as unknown as ReturnType<typeof vi.fn>;
 
 const defaultMockState = {
   filters: {},
@@ -21,34 +21,34 @@ const defaultMockState = {
     { id: 'user-1', email: 'test@example.com', name: 'Test User' },
     { id: 'user-2', email: 'admin@example.com', name: 'Admin User' },
   ],
-  setFilters: jest.fn(),
-  clearFilters: jest.fn(),
-  fetchActionTypes: jest.fn(),
-  fetchUsers: jest.fn(),
+  setFilters: vi.fn(),
+  clearFilters: vi.fn(),
+  fetchActionTypes: vi.fn(),
+  fetchUsers: vi.fn(),
 };
 
 describe('AuditLogFilters Component', () => {
   let mockStore: typeof defaultMockState & {
-    setFilters: jest.Mock;
-    clearFilters: jest.Mock;
-    fetchActionTypes: jest.Mock;
-    fetchUsers: jest.Mock;
+    setFilters: ReturnType<typeof vi.fn>;
+    clearFilters: ReturnType<typeof vi.fn>;
+    fetchActionTypes: ReturnType<typeof vi.fn>;
+    fetchUsers: ReturnType<typeof vi.fn>;
   };
   const user = userEvent.setup();
 
   beforeEach(() => {
     mockStore = {
       ...defaultMockState,
-      setFilters: jest.fn(),
-      clearFilters: jest.fn(),
-      fetchActionTypes: jest.fn(),
-      fetchUsers: jest.fn(),
+      setFilters: vi.fn(),
+      clearFilters: vi.fn(),
+      fetchActionTypes: vi.fn(),
+      fetchUsers: vi.fn(),
     };
     mockUseStore.mockReturnValue(mockStore);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders filter component with basic controls', () => {
@@ -199,10 +199,10 @@ describe('AuditLogFilters Component', () => {
       filters: {},
       actionTypes: [],
       users: [],
-      setFilters: jest.fn(),
-      clearFilters: jest.fn(),
-      fetchActionTypes: jest.fn(),
-      fetchUsers: jest.fn(),
+      setFilters: vi.fn(),
+      clearFilters: vi.fn(),
+      fetchActionTypes: vi.fn(),
+      fetchUsers: vi.fn(),
     });
 
     expect(() => render(<AuditLogFilters />)).not.toThrow();
@@ -213,10 +213,10 @@ describe('AuditLogFilters Component', () => {
       filters: {},
       actionTypes: [], // Use empty arrays instead of null to avoid length errors
       users: [],
-      setFilters: jest.fn(),
-      clearFilters: jest.fn(),
-      fetchActionTypes: jest.fn(),
-      fetchUsers: jest.fn(),
+      setFilters: vi.fn(),
+      clearFilters: vi.fn(),
+      fetchActionTypes: vi.fn(),
+      fetchUsers: vi.fn(),
     });
 
     expect(() => render(<AuditLogFilters />)).not.toThrow();

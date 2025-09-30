@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { setupTestEnvironment } from '../test-setup';
 
 test.describe('Application Smoke Test', () => {
   test('should load the home page without errors', async ({ page }) => {
+    // Set up test environment
+    await setupTestEnvironment(page);
+
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
@@ -31,6 +35,9 @@ test.describe('Application Smoke Test', () => {
   });
 
   test('should have basic navigation working', async ({ page }) => {
+    // Set up test environment
+    await setupTestEnvironment(page);
+
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
@@ -47,6 +54,9 @@ test.describe('Application Smoke Test', () => {
   });
 
   test('should handle invalid routes gracefully', async ({ page }) => {
+    // Set up test environment
+    await setupTestEnvironment(page);
+
     await page.goto('/non-existent-page');
     await page.waitForLoadState('networkidle');
 

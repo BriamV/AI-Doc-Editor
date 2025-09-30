@@ -49,5 +49,5 @@ When --health-check flag is used:
 > Use the cloud-architect sub-agent to validate infrastructure health for the target environment
 
 **Frontend validation integration:**
-Run frontend validation (yarn tsc-check) as part of deployment readiness check.
+Run frontend validation (yarn fe:typecheck) as part of deployment readiness check.
 ```

@@ -7,6 +7,7 @@ and performance measurement utilities.
 """
 
 import pytest
+import pytest_asyncio
 import asyncio
 import os
 import sys
@@ -28,9 +29,7 @@ from app.models.key_management import Base as KeyManagementBase
 from app.models.audit import Base as AuditBase
 from app.security.encryption.aes_gcm_engine import AESGCMEngine
 from app.security.encryption.key_derivation import Argon2KeyDerivation
-from app.security.encryption.memory_utils import SecureMemoryManager
 from app.security.key_management.key_manager import KeyManager
-from app.security.key_management.hsm_integration import HSMManager
 from app.security.key_management.monitoring import KeyManagementMonitor
 from app.security.transport.security_middleware import TLSSecurityMiddleware
 from app.routers.key_management import router as key_management_router
@@ -52,7 +51,7 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 async def test_engine():
     """Create test database engine."""
     engine = create_async_engine(
@@ -65,7 +64,7 @@ async def test_engine():
     await engine.dispose()
 
 
-@pytest.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session")
 async def setup_test_database(test_engine):
     """Setup test database with all required tables."""
     async with test_engine.begin() as conn:
@@ -81,7 +80,7 @@ async def setup_test_database(test_engine):
         await conn.run_sync(AuditBase.metadata.drop_all)
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def db_session(test_engine, setup_test_database) -> AsyncGenerator[AsyncSession, None]:
     """Provide a clean database session for each test."""
     async_session = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
@@ -97,48 +96,42 @@ async def db_session(test_engine, setup_test_database) -> AsyncGenerator[AsyncSe
             await transaction.rollback()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def aes_gcm_engine():
     """Provide AES-GCM encryption engine for testing."""
-    memory_manager = SecureMemoryManager()
-    key_derivation = Argon2KeyDerivation()
-
-    engine = AESGCMEngine(memory_manager=memory_manager, key_derivation=key_derivation)
+    engine = AESGCMEngine()
 
     yield engine
 
-    # Cleanup
-    await engine.cleanup()
 
-
-@pytest.fixture
+@pytest_asyncio.fixture
 async def mock_hsm_manager():
     """Provide mock HSM manager for testing."""
-    mock_hsm = AsyncMock(spec=HSMManager)
+    mock_hsm = AsyncMock()
 
-    # Mock HSM configuration - not used directly in fixture
-
-    # Mock HSM operations
-    mock_hsm.connect.return_value = True
-    mock_hsm.disconnect.return_value = True
-    mock_hsm.generate_key.return_value = secrets.token_bytes(32)
-    mock_hsm.encrypt.return_value = b"encrypted_data"
-    mock_hsm.decrypt.return_value = b"decrypted_data"
-    mock_hsm.is_available.return_value = True
-    mock_hsm.get_health_status.return_value = {
-        "status": "healthy",
-        "timestamp": datetime.utcnow(),
-        "provider": "AWS_CLOUDHSM",
-        "cluster_id": "test-cluster",
-    }
+    mock_hsm.connect = AsyncMock(return_value=True)
+    mock_hsm.disconnect = AsyncMock(return_value=True)
+    mock_hsm.generate_key = AsyncMock(return_value=secrets.token_bytes(32))
+    mock_hsm.encrypt = AsyncMock(return_value=b"encrypted_data")
+    mock_hsm.decrypt = AsyncMock(return_value=b"decrypted_data")
+    mock_hsm.is_available = AsyncMock(return_value=True)
+    mock_hsm.get_health_status = AsyncMock(
+        return_value={
+            "status": "healthy",
+            "timestamp": datetime.utcnow(),
+            "provider": "AWS_CLOUDHSM",
+            "cluster_id": "test-cluster",
+        }
+    )
 
     yield mock_hsm
 
 
-@pytest.fixture
-async def key_manager(db_session, aes_gcm_engine, mock_hsm_manager):
+@pytest_asyncio.fixture
+async def key_manager(db_session, aes_gcm_engine, mock_hsm_manager, test_engine):
     """Provide KeyManager instance for testing."""
-    monitor = KeyManagementMonitor()
+    session_factory = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
+    monitor = KeyManagementMonitor(session_factory=lambda: session_factory())
 
     key_manager = KeyManager(
         db_session=db_session,
@@ -148,9 +141,6 @@ async def key_manager(db_session, aes_gcm_engine, mock_hsm_manager):
     )
 
     yield key_manager
-
-    # Cleanup
-    await key_manager.cleanup()
 
 
 @pytest.fixture
@@ -272,7 +262,7 @@ def test_key_data():
     return TestKeyData()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def test_encryption_key():
     """Provide test encryption key for testing."""
     # Generate a test key using Argon2 derivation
@@ -302,7 +292,7 @@ def mock_audit_logger():
     return logger
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def integration_test_context(
     db_session,
     aes_gcm_engine,

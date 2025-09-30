@@ -11,6 +11,8 @@ model: claude-3-5-sonnet-20241022
 
 Pre-push pipeline validation and health check using sub-agent delegation. Analyzes workflow status and automatically invokes specialized troubleshooting agents.
 
+**Related Documentation:** [GitHub Actions Workflows](../../.github/workflows/README.md)
+
 ## Usage
 
 ```bash

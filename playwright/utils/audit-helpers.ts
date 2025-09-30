@@ -3,6 +3,7 @@
  * Replaces Cypress custom commands with Playwright equivalents
  */
 import { Page, expect } from '@playwright/test';
+import { setupTestEnvironment } from '../test-setup';
 import auditFixture from '../../legacy/cypress/fixtures/audit-test-data.json' assert { type: 'json' };
 
 const fixtureLogs = [
@@ -61,6 +62,9 @@ export class AuditTestHelpers {
   constructor(private page: Page, private useRealBackend: boolean = false) {}
 
   async setupBackendIntegration(): Promise<void> {
+    // Set up test environment first
+    await setupTestEnvironment(this.page);
+
     if (this.useRealBackend) {
       // Configure for real backend integration
       await this.setupRealBackendIntegration();

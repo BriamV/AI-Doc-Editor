@@ -1,0 +1,64 @@
+{
+  "documentPlacementRules": {
+    "migrationArtifacts": {
+      "patterns": ["*MIGRATION*", "*TESTING*REPORT*", "*SUCCESS*REPORT*", "*DASHBOARD*", "*COMPATIBILITY*", "*VALIDATION*REPORT*", "*SUMMARY*DELIVERABLE*"],
+      "targetLocation": "docs/project-management/migrations/",
+      "subdirectories": {
+        "testing": ["*TESTING*", "*TEST*"],
+        "reports": ["*REPORT*", "*SUMMARY*", "*DASHBOARD*"]
+      }
+    },
+    "templates": {
+      "patterns": ["*TEMPLATE*", "*GUIDELINE*"],
+      "targetLocation": "docs/templates/"
+    },
+    "strategicDocs": {
+      "patterns": ["*ARCHITECTURE*", "*DECISION*", "*ADR*"],
+      "targetLocation": "docs/architecture/",
+      "subdirectories": {
+        "adr": ["*ADR*"]
+      }
+    },
+    "implementationDocs": {
+      "frontend": {
+        "patterns": ["*COMPONENT*", "*HOOK*", "*FRONTEND*"],
+        "targetLocation": "src/docs/",
+        "codeProximity": true
+      },
+      "backend": {
+        "patterns": ["*API*", "*DATABASE*", "*BACKEND*"],
+        "targetLocation": "backend/docs/",
+        "codeProximity": true
+      }
+    },
+    "toolDocs": {
+      "patterns": ["*TOOL*", "*SCRIPT*", "*UTILITY*"],
+      "targetLocation": "tools/",
+      "requiresReadme": true
+    }
+  },
+  "validationSettings": {
+    "strictMode": false,
+    "autoFix": false,
+    "generateReports": true,
+    "conwaysLawCompliance": true,
+    "requireTierCompliance": true,
+    "excludePatterns": [
+      "node_modules/**",
+      ".git/**",
+      "dist/**",
+      "build/**",
+      "coverage/**"
+    ]
+  },
+  "packageJsonIntegration": {
+    "commands": {
+      "validate-docs": "bash tools/validate-document-placement.sh",
+      "validate-docs:fix": "bash tools/validate-document-placement.sh --fix",
+      "validate-docs:report": "bash tools/validate-document-placement.sh --report",
+      "validate-docs:strict": "bash tools/validate-document-placement.sh --strict"
+    },
+    "qualityGateIntegration": true,
+    "preCommitHook": true
+  }
+}

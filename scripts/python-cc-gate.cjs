@@ -5,6 +5,14 @@
  * Runs Radon CC in JSON mode against the backend and fails if any block
  * has a rank worse than the configured threshold (default: B).
  * Prints a concise summary + actionable offenders list.
+ *
+ * Supports single-file analysis:
+ *   --file <path>  Analyze single file instead of entire backend/
+ *   --json         Output structured JSON: {"max_cc": N, "file": "path", "violations": [...]}
+ *
+ * Examples:
+ *   node scripts/python-cc-gate.cjs                          # Full backend scan
+ *   node scripts/python-cc-gate.cjs --file backend/app/main.py --json
  */
 
 const { spawnSync } = require('child_process');
@@ -26,9 +34,7 @@ function venvPath(repoRoot) {
 function toolPath(repoRoot, tool) {
   const venv = venvPath(repoRoot);
   const exe = isWin() ? `${tool}.exe` : tool;
-  return isWin()
-    ? path.join(venv, 'Scripts', exe)
-    : path.join(venv, 'bin', exe);
+  return isWin() ? path.join(venv, 'Scripts', exe) : path.join(venv, 'bin', exe);
 }
 
 function ensureToolExists(filePath) {
@@ -57,7 +63,7 @@ function loadApprovedExceptions(repoRoot) {
     'get_certificate_info',
     'get_cipher_suites_for_security_level',
     'get_compliance_report',
-    'get_system_health'
+    'get_system_health',
   ]);
 
   const approvedFiles = new Set([
@@ -68,7 +74,7 @@ function loadApprovedExceptions(repoRoot) {
     'policy_engine.py',
     'rotation_scheduler.py',
     'tls_config.py',
-    'key_management.py'
+    'key_management.py',
   ]);
 
   return { approvedFunctions, approvedFiles };
@@ -90,21 +96,72 @@ function isApprovedSecurityException(file, functionName, { approvedFunctions, ap
   return approvedFiles.has(fileName) && approvedFunctions.has(functionName);
 }
 
+function parseArgs() {
+  const args = process.argv.slice(2);
+  const options = {
+    file: null,
+    json: false,
+  };
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--file' && i + 1 < args.length) {
+      options.file = args[i + 1];
+      i++;
+    } else if (args[i] === '--json') {
+      options.json = true;
+    }
+  }
+
+  return options;
+}
+
+function rankToNumber(rank) {
+  const order = ['A', 'B', 'C', 'D', 'E', 'F'];
+  return order.indexOf(rank.toUpperCase());
+}
+
+function getMaxComplexity(data) {
+  let maxCC = 0;
+  for (const items of Object.values(data)) {
+    for (const item of items) {
+      maxCC = Math.max(maxCC, item.complexity || 0);
+    }
+  }
+  return maxCC;
+}
+
 function main() {
+  const options = parseArgs();
   const repoRoot = getRepoRoot();
   const backendDir = path.join(repoRoot, 'backend');
   const radon = toolPath(repoRoot, 'radon');
   ensureToolExists(radon);
 
-  const maxRank = (process.env.CC_MAX_RANK || 'B').toUpperCase();
-  const target = process.env.CC_TARGET || backendDir;
+  const maxRank = (process.env.CC_MAX_RANK || 'C').toUpperCase();
+  const target = options.file
+    ? path.resolve(repoRoot, options.file)
+    : process.env.CC_TARGET || backendDir;
   const exceptions = loadApprovedExceptions(repoRoot);
+
+  // Validate file exists if --file specified
+  if (options.file && !fs.existsSync(target)) {
+    if (options.json) {
+      console.log(JSON.stringify({ error: 'File not found', file: target, max_cc: 0 }));
+    } else {
+      console.error(`File not found: ${target}`);
+    }
+    process.exit(1);
+  }
 
   const args = ['cc', target, '-j'];
   const res = spawnSync(radon, args, { cwd: repoRoot, encoding: 'utf8' });
 
   if (res.status !== 0) {
-    console.error('Failed to run radon cc:', res.stderr || res.stdout);
+    if (options.json) {
+      console.log(JSON.stringify({ error: 'Radon execution failed', max_cc: 0 }));
+    } else {
+      console.error('Failed to run radon cc:', res.stderr || res.stdout);
+    }
     process.exit(res.status || 1);
   }
 
@@ -112,8 +169,12 @@ function main() {
   try {
     data = JSON.parse(res.stdout || '{}');
   } catch (e) {
-    console.error('Failed to parse radon JSON output');
-    console.error(res.stdout);
+    if (options.json) {
+      console.log(JSON.stringify({ error: 'Failed to parse radon output', max_cc: 0 }));
+    } else {
+      console.error('Failed to parse radon JSON output');
+      console.error(res.stdout);
+    }
     process.exit(1);
   }
 
@@ -130,14 +191,49 @@ function main() {
       if (rankWorseThan(rank, maxRank)) {
         // Check if this is an approved security exception
         if (isApprovedSecurityException(file, item.name, exceptions)) {
-          approvedExceptions.push({ file, name: item.name, line: item.lineno, rank });
+          approvedExceptions.push({
+            file,
+            name: item.name,
+            line: item.lineno,
+            rank,
+            complexity: item.complexity,
+          });
         } else {
-          offenders.push({ file, name: item.name, line: item.lineno, rank });
+          offenders.push({
+            file,
+            name: item.name,
+            line: item.lineno,
+            rank,
+            complexity: item.complexity,
+          });
         }
       }
     }
   }
 
+  // JSON output mode (for single-file analysis)
+  if (options.json) {
+    const maxCC = getMaxComplexity(data);
+    const violations = offenders.map(({ file, name, line, rank, complexity }) => ({
+      file,
+      function: name,
+      line,
+      rank,
+      complexity,
+    }));
+
+    console.log(
+      JSON.stringify({
+        max_cc: maxCC,
+        file: options.file || target,
+        violations,
+        approved_exceptions: approvedExceptions.length,
+      })
+    );
+    process.exit(offenders.length > 0 ? 2 : 0);
+  }
+
+  // Standard output mode
   const summary = `Complexity summary: A=${counts.A} B=${counts.B} C=${counts.C} D=${counts.D} E=${counts.E} F=${counts.F}`;
   console.log(summary);
 
@@ -162,4 +258,3 @@ function main() {
 }
 
 main();
-

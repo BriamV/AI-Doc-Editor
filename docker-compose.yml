@@ -2,7 +2,7 @@
 # Task T-01.5: Docker-compose setup
 
 services:
-  # Development service
+  # Development service (default profile - no profile required)
   app-dev:
     build:
       context: .
@@ -16,12 +16,19 @@ services:
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
+      - VITE_API_URL=http://api:8000
     stdin_open: true
     tty: true
     networks:
       - ai-doc-editor
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # Production service
+  # Production service (requires --profile production)
   app-prod:
     build:
       context: .
@@ -31,17 +38,23 @@ services:
       - '3000:3000'
     environment:
       - NODE_ENV=production
+      - VITE_API_URL=http://api:8000
     restart: unless-stopped
     networks:
       - ai-doc-editor
     profiles:
       - production
+    depends_on:
+      api:
+        condition: service_healthy
+        required: false
 
-  # T-02: FastAPI backend for OAuth + JWT
-  api:
-    image: python:3.12-alpine
-    container_name: ai-doc-editor-api
-    working_dir: /app
+  # FastAPI backend for OAuth + JWT - Development Mode (requires --profile backend)
+  api-dev:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: ai-doc-editor-api-dev
     volumes:
       - ./backend:/app
     ports:
@@ -49,19 +62,57 @@ services:
     environment:
       - PYTHONPATH=/app
       - ENVIRONMENT=development
+      - CHROMA_HOST=vectordb
+      - CHROMA_PORT=8000
     env_file:
       - .env
-    command: |
-      sh -c "
-        pip install -r requirements.txt && 
-        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-      "
     networks:
       - ai-doc-editor
     profiles:
       - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      vectordb:
+        condition: service_healthy
+        required: false
 
-  # Future: Vector database (Chroma)
+  # FastAPI backend for OAuth + JWT - Production Mode (requires --profile production)
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ai-doc-editor-api
+    ports:
+      - '8000:8000'
+    environment:
+      - PYTHONPATH=/app
+      - ENVIRONMENT=production
+      - CHROMA_HOST=vectordb
+      - CHROMA_PORT=8000
+    env_file:
+      - .env
+    networks:
+      - ai-doc-editor
+    profiles:
+      - production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      vectordb:
+        condition: service_healthy
+        required: false
+    restart: unless-stopped
+
+  # Vector database (Chroma) for RAG capabilities (requires --profile backend)
   vectordb:
     image: chromadb/chroma:latest
     container_name: ai-doc-editor-chroma
@@ -70,12 +121,20 @@ services:
     environment:
       - CHROMA_SERVER_HOST=0.0.0.0
       - CHROMA_SERVER_HTTP_PORT=8000
+      - CHROMA_LOG_LEVEL=INFO
     volumes:
       - chroma_data:/chroma/chroma
     networks:
       - ai-doc-editor
     profiles:
       - backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
 
 networks:
   ai-doc-editor:
@@ -85,7 +144,16 @@ networks:
 volumes:
   chroma_data:
     name: ai-doc-editor-chroma-data
-# Usage:
-# Development: docker-compose up app-dev
-# Production:  docker-compose --profile production up app-prod
-# Full stack:  docker-compose --profile backend up
+# Usage Examples:
+# Development (frontend only): docker-compose up app-dev
+# Production (frontend only):  docker-compose --profile production up app-prod
+# Backend services (dev):      docker-compose --profile backend up api-dev vectordb
+# Backend services (prod):     docker-compose --profile production up api vectordb
+# Full stack development:      docker-compose --profile backend up app-dev api-dev vectordb
+# Full stack production:       docker-compose --profile backend --profile production up
+#
+# Quick Commands (use package.json docker:* namespace):
+# yarn docker:dev              # Development frontend
+# yarn docker:prod             # Production frontend
+# yarn docker:backend          # Backend services only (development mode)
+# yarn docker:fullstack        # Complete application stack

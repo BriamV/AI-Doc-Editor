@@ -3,9 +3,7 @@ const concurrently = require('concurrently');
 const { spawnSync } = require('child_process');
 
 const isWin = process.platform === 'win32';
-const pythonPath = isWin
-  ? '.\\backend\\.venv\\Scripts\\python.exe'
-  : 'backend/.venv/bin/python';
+const pythonPath = isWin ? '.\\backend\\.venv\\Scripts\\python.exe' : 'backend/.venv/bin/python';
 
 const backendCmd = `${pythonPath} -m uvicorn app.main:app --reload --app-dir backend`;
 
@@ -26,6 +24,4 @@ const { result } = concurrently(
   }
 );
 
-result
-  .then(() => process.exit(0))
-  .catch(() => process.exit(1));
+result.then(() => process.exit(0)).catch(() => process.exit(1));

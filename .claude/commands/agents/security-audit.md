@@ -36,5 +36,5 @@ Parse `$ARGUMENTS` for security scope and quick flag. Auto-detect scope from rec
 - npm audit --audit-level moderate
 - npx semgrep --config=auto . --severity=ERROR
 - tools/validate-auth.sh (if available)
-- yarn security-scan
+- yarn sec:all
 ```
