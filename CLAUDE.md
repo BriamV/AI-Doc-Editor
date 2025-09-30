@@ -265,6 +265,9 @@ prettier (JSON/XML/CSS/HTML)             # Universal formatting
   - Shell: shellcheck + shfmt
   - Config: taplo (TOML) + prettier (JSON/XML/CSS)
 - **Design Metrics**: Complexity (CC≤15) + LOC (≤300) validation
+  - **Green Zone** (optimal): CC ≤ 10, LOC ≤ 212
+  - **Yellow Zone** (acceptable): CC 11-15, LOC 213-300
+  - **Red Zone** (blocks commit): CC > 15, LOC > 300
 - **Security Gates**: Semgrep + git-secrets + dependency audits
 - **Performance**: 54% optimized (152s → 70s total timeout)
 - **Multi-OS**: Windows/Linux/WSL auto-detection

@@ -137,7 +137,7 @@ function main() {
   const radon = toolPath(repoRoot, 'radon');
   ensureToolExists(radon);
 
-  const maxRank = (process.env.CC_MAX_RANK || 'B').toUpperCase();
+  const maxRank = (process.env.CC_MAX_RANK || 'C').toUpperCase();
   const target = options.file
     ? path.resolve(repoRoot, options.file)
     : process.env.CC_TARGET || backendDir;
