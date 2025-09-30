@@ -116,3 +116,5 @@ cypress/videos/
 command-fix-report.json
 comprehensive-validation-report.md
 final-fixes-report.json
+.claude/hooks.json.backup-*
+.claude/session-context.json
