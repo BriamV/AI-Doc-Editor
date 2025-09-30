@@ -65,129 +65,50 @@ yarn sec:all                                       # Security audit
 
 ## Essential Commands
 
-**See also**: [GitHub Actions Workflows](.github/workflows/README.md) for CI/CD infrastructure details
+**Complete 185-Command Reference**: @.claude/docs/commands-reference.md
 
-### Daily Workflow Commands (Tier 1)
+**Daily Workflow (Most Used)**:
 
 ```bash
 /task-dev T-XX [complete]       # Task development with context
+/merge-safety                   # MANDATORY merge protection
+/health-check                   # System diagnostics
 /review-complete [--scope]      # Multi-agent code review
 /commit-smart                   # Intelligent commits
-/pr-flow [--draft]              # Pull request automation
-/merge-safety [--source --target] # MANDATORY merge protection
-/health-check                   # System diagnostics
-/docs-update [scope]            # Documentation maintenance
-/auto-workflow [scope]          # Context-aware suggestions
-/context-analyze [--depth]      # Project analysis
 ```
 
-### Development Commands (PREFERRED - Namespaced)
+**Quick Access by Category**:
 
 ```bash
-# Development & Testing - e2e: namespace
+# Development & Testing
 yarn all:dev                   # Start all development servers
 yarn fe:build                  # Frontend production build
 yarn fe:test                   # Frontend unit tests (Jest)
 yarn e2e:fe                    # E2E tests (Playwright)
-yarn e2e:fe:headed             # E2E with browser visible
-yarn e2e:fe:debug              # Debug E2E tests
-yarn e2e:fe:ui                 # Interactive UI mode
-yarn e2e:report                # Show HTML test report
-yarn e2e:be                    # Backend E2E tests
-yarn e2e:integration           # Cross-directory interface testing
 
-# Quality Assurance - qa: namespace
+# Quality & Security
 yarn qa:gate                   # Full quality pipeline (~70s)
-yarn qa:gate:dev               # Development mode (~45s, skip heavy tools)
-yarn qa:gate:fast              # Fast validation (~30s, essential only)
-yarn qa:gate:monitored         # Monitored validation with timeouts
+yarn qa:gate:dev               # Development mode (~45s)
+yarn sec:all                   # Complete security pipeline
 
-# Frontend Quality - fe: namespace
-yarn fe:lint                   # Frontend linting (ESLint)
-yarn fe:format                 # Frontend formatting (Prettier)
-yarn fe:typecheck              # TypeScript validation
-
-# Backend Quality - be: namespace
-yarn be:quality                # Backend Python validation (format + lint + complexity)
-yarn be:format                 # Python autofix formatting (Black)
-yarn be:lint                   # Python autofix linting (Ruff)
-yarn be:typecheck              # Python type checking (MyPy)
-yarn be:test                   # Backend test suite
-yarn be:test:coverage          # Backend test coverage
-
-# Security - sec: namespace
-yarn sec:all                   # Complete security pipeline: 0 vulnerabilities
-yarn sec:deps:fe               # Frontend dependency security audit
-yarn sec:deps:be               # Backend dependency security audit
-yarn sec:sast                  # Static analysis security scan
-yarn sec:secrets               # Secret scanning
-
-# Documentation - docs: namespace
-yarn docs:validate             # Document placement validation
-yarn docs:validate:fix         # Auto-fix misplaced documents
-yarn docs:validate:strict      # Strict validation (CI/CD mode)
-yarn docs:validate:report      # Generate placement report
-yarn docs:api:lint             # API documentation linting
-yarn docs:api:bundle           # API documentation bundling
-yarn docs:architecture         # Dual directory compliance (ADR-011)
-
-# Repository Operations - repo: namespace
-yarn repo:clean                # Clean workspace (node_modules, dist, cache)
-yarn repo:install              # Install all dependencies
-yarn repo:env:validate         # Environment validation
-yarn repo:env:info             # Detailed environment information
-yarn repo:licenses             # License information
-yarn repo:merge:validate       # Complete merge safety validation
-yarn repo:merge:precheck       # Pre-merge safety checks
-yarn repo:merge:hooks:install  # Install git-level protection
+# Repository Operations
+yarn repo:clean                # Clean workspace
+yarn repo:install              # Install dependencies
+yarn repo:merge:validate       # Merge safety validation
 ```
 
-### Specialized Commands (Tier 2)
-
-```bash
-# Use as needed for specific tasks
-/security-audit                # Comprehensive security assessment
-/architecture                  # Architecture integrity check
-/debug-analyze                 # Debug analysis
-/pipeline-check                # CI/CD pipeline validation
-/deploy-validate               # Deployment validation
-/adr-create                    # Create Architecture Decision Record
-/issue-generate                # Generate GitHub issues
-```
-
-### Advanced Commands (Tier 3)
-
-```bash
-# Production/Emergency use only
-/release-prep                  # Release preparation workflow
-/hotfix-flow                   # Hotfix workflow
-/search-web                    # Web search integration
-/explain-codebase              # Codebase explanation
-```
-
-### Quick Reference
-
-```bash
-# Most used commands
-/task-dev T-XX                 # Task details & development
-/context-analyze               # Project progress analysis
-/merge-safety                  # MANDATORY before merges
-/health-check                  # System validation
-tools/progress-dashboard.sh    # Visual progress dashboard
-
-# Namespace quick commands (185/185 operational)
-yarn all:build                 # Frontend + backend build
-yarn all:test                  # Complete test suite
-yarn sec:all                   # Security audit (0 vulnerabilities)
-yarn qa:gate                   # Quality pipeline (70s)
-yarn docs:validate             # Documentation quality
-yarn repo:clean                # Workspace cleanup
-```
+**See imported commands-reference.md for**:
+- Complete 8-namespace breakdown (repo:, fe:, be:, e2e:, sec:, qa:, docs:, all:)
+- Tier 1/2/3 slash commands organization
+- Specialized workflow commands
+- CLAUDE.md management commands
+- Performance timings and usage patterns
 
 ## ⚡ CONSTANT VALIDATION Required
 
 ```bash
 # ALWAYS validate after branch changes, context switches, or issues
+# See also: MERGE PROTECTION SYSTEM section (end of file)
 /health-check                    # Immediate system validation
 tools/progress-dashboard.sh      # Project status verification
 yarn qa:gate                     # Multi-stack quality validation (~70s)
@@ -204,14 +125,14 @@ yarn qa:gate:dev                 # Development mode validation (~45s)
   - `backend/scripts/` - Database utilities, security validation
   - `backend/reports/` - Generated analysis reports
 - `docs/` - Spanish documentation (primary)
-- `src/docs/` - **NEW** Frontend implementation docs (React, Zustand, hooks)
-- `src/docs/ai/` - **NEW** AI implementation docs (frontend patterns, integration)
+- `src/docs/` - Frontend implementation docs (React, Zustand, hooks)
+- `src/docs/ai/` - AI implementation docs (frontend patterns, integration)
 - `backend/docs/` - Backend implementation docs (API, database, security)
-- `docs/architecture/ai/` - **NEW** AI architecture docs (strategy, audit, implementation)
+- `docs/architecture/ai/` - AI architecture docs (strategy, audit, implementation)
 - `.github/workflows/` - CI/CD automation ([detailed docs](.github/workflows/README.md))
 - `.claude/commands/` - 19 production slash commands
 - `tools/` - Task management scripts (project workflow)
-- `scripts/` - **STREAMLINED** Infrastructure automation (5 essential scripts)
+- `scripts/` - Infrastructure automation (5 essential scripts)
 
 ## 🏗️ Dual Directory Architecture (ADR-011)
 
@@ -255,9 +176,11 @@ yarn e2e:integration             # Cross-directory interface testing
 - **Error Handling**: Standardized exit codes, structured logging
 - **Integration**: Clear APIs between workflow and infrastructure layers
 
-## 🔧 Quality Tools Ecosystem (40+ Tools)
+## 🔧 Quality Tools Ecosystem
 
-**Hooks-Integrated Multi-Stack Pipeline:**
+**Complete 40+ Tools Reference**: @.claude/docs/quality-tools-reference.md
+
+**Key Tools Integration:**
 
 ```bash
 # Frontend Quality
@@ -271,19 +194,17 @@ semgrep, git-secrets, yarn sec:deps:fe   # Security scanning
 
 # Documentation
 markdownlint, yamlfix, yamllint, spectral # Docs quality
-# Template validation (README consistency + placement guidelines)
 
 # Configuration & Shell
 taplo, shellcheck, shfmt                 # Config + shell scripts
-
-# Multi-Format Support
-prettier (JSON/XML/CSS/HTML)             # Universal formatting
 ```
 
-**Auto-Detection**: Windows/Linux/WSL + multi-venv support
-**Streamlined Architecture**: 5 essential scripts after 55% reduction (ADR-011 compliance)
-**Error Handling**: Standardized exit codes + structured logging
-**Integration Testing**: Cross-directory interface validation
+**See imported quality-tools-reference.md for**:
+- Complete hooks-integrated pipeline details
+- Auto-detection (Windows/Linux/WSL + multi-venv)
+- Streamlined architecture (5 essential scripts, ADR-011 compliance)
+- Error handling (standardized exit codes + structured logging)
+- Integration testing (cross-directory interface validation)
 
 ## Quality Assurance
 
@@ -379,53 +300,40 @@ gh issue view <NUMBER>                                      # WRONG
 
 ## Security & Compliance
 
+**Complete Security Commands**: See Essential Commands → @.claude/docs/commands-reference.md
+
+### Security Status (Sept 2025)
+
 ```bash
-# ✅ ZERO SECURITY FINDINGS ACHIEVED (January 2025)
-yarn sec:all                   # Complete security pipeline: 0 vulnerabilities
-yarn sec:deps:fe               # Frontend dependency security audit
-yarn sec:deps:be               # Backend dependency security audit
-yarn sec:sast                  # Static analysis security scan
-yarn sec:secrets               # Secret scanning
-/security-audit                # Comprehensive security assessment
+# ✅ ZERO SECURITY FINDINGS: 0 vulnerabilities (1,782+ packages)
+yarn sec:all                         # Complete security pipeline
+/security-audit                      # Comprehensive assessment
 
-# 🛡️ ENTERPRISE-GRADE SECURITY ACTIVE (0 vulnerabilities across 1,782+ packages):
-# • Defense-in-depth: Multi-stack scanning (Node.js + Python)
-# • OWASP Top 10: Complete compliance implemented
-# • Command allowlisting: Injection prevention controls
-# • Transport security: TLS 1.3+ with Perfect Forward Secrecy
-# • Audit system: WORM-compliant tamper-proof logging
-
-# 📚 Security Documentation
-docs/architecture/adr/ADR-006-dependency-security-scanning.md  # Security architecture
-docs/security/audits/general-security-audit-report.md         # Zero findings report
+# 🛡️ ENTERPRISE-GRADE: 0 vulnerabilities (1,782+ packages)
+# • Multi-stack (Node/Python), OWASP Top 10, TLS 1.3+, WORM audit
+# • Defense-in-depth + injection prevention + perfect forward secrecy
 ```
+
+**Documentation**:
+- Security architecture: docs/architecture/adr/ADR-006-dependency-security-scanning.md
+- Zero findings report: docs/security/audits/general-security-audit-report.md
 
 ## Do Not Touch
 
-**NEVER modify files in these categories:**
+**Complete Protected Files Policy**: @.claude/docs/protected-files-policy.md
 
-### Archive Directories (Historical Reference Only)
-- `**/archive/` - Archived documentation (historical snapshots, DO NOT UPDATE)
-- `.claude/commands/archive/` - Archived historical commands
-- `docs/architecture/archive/` - Archived architecture docs (e.g., DESIGN_GUIDELINES-v1)
-- `docs/reports/archive/` - Archived reports
-- `legacy/` - Migrated Cypress files (see legacy/MIGRATION-README.md)
-
-### Audit Reports & Deliverables (Point-in-Time Snapshots)
-- Files matching `*audit*.md`, `*-audit-*.md` - Audit reports from specific dates
-- Files matching `*-report.md`, `*REPORT*.md` - Formal reports and deliverables
-- Files matching `*SUMMARY*.md`, `*-SUMMARY.md` - Completion summaries
-- Examples:
-  - `.claude/docs/audit-current-hooks-file.md` (now in archive/)
-  - `docs/security/audits/general-security-audit-report.md`
-  - `docs/reports/archive/phase-*-completion-report.md`
+**NEVER modify**:
+- `**/archive/` directories (historical snapshots)
+- Files matching `*audit*.md`, `*-report.md`, `*SUMMARY*.md` (point-in-time records)
+- Temporary files (test-*.js, *.backup-*, session-context.json)
 
 **Rationale**: Archives and audit reports are historical records. When updating documentation, create NEW versions or update CURRENT files, never modify archived/audit files.
 
-### Temporary Files
-- `test-*.js` - Temporary debugging files
-- `.claude/hooks.json.backup-*` - Backup configurations (gitignored)
-- `.claude/session-context.json` - Runtime session data (gitignored)
+**See imported protected-files-policy.md for**:
+- Complete archive directory listing
+- Audit report patterns and examples
+- Temporary file patterns
+- Detailed rationale for protection policy
 
 ## 🎉 Modernization Success (100% Command Ecosystem + ADR-011 Compliance)
 
@@ -473,90 +381,36 @@ yarn all:test                           # Run all test suites
 yarn qa:gate                            # Full quality pipeline (~70s)
 ```
 
-## CLAUDE.md Self-Management & Governance
+## CLAUDE.md Self-Management
 
-**Purpose**: Prevent format degradation and maintain structural integrity through systematic updates.
+**Complete Management System**: @.claude/docs/self-management-guide.md
 
-### Update Protocol
+### Update Protocol (MANDATORY)
 
 ```bash
 # ✅ MANDATORY: Use systematic update workflow
-/update-claude-md "new content"         # Guided update with validation
-/audit-claude-md                        # Quality audit + consolidation
-tools/validate-claude-md.sh             # Structural validation
+/update-claude-md "<content>"    # Guided update with validation
+/audit-claude-md                 # Quality audit + consolidation
+tools/validate-claude-md.sh      # Structural validation
 
 # ❌ NEVER: Direct manual edits without validation
 ```
 
-### Decision Tree for Content Classification
+**Quality Thresholds**: Zero duplicates, <3 near-duplicates, ≤200 chars/line, 95+ score
 
-```bash
-Command Reference?
-├─ Contains "yarn" → Essential Commands
-├─ Contains "/" (slash cmd) → Essential Commands
-├─ Contains "tools/" → Task Management Workflow
-└─ Contains "scripts/" → Integration Policy
-
-Rule/Policy?
-├─ About editing CLAUDE.md → CLAUDE.md Editing Rules
-├─ About security → Security & Compliance
-├─ About quality → Quality Assurance
-└─ About workflow → Integration Policy
-
-Structure Info?
-├─ Directory/file → Project Structure
-├─ Archive reference → Do Not Touch
-└─ Architecture → Integration Policy
-
-Context/Status?
-├─ Current branch/phase → Current Context
-└─ Task pattern → Task Management Workflow
-```
-
-### Quality Thresholds
-
-```bash
-# Maintained via automated validation:
-✓ Zero exact duplicates (was 8)
-✓ <3 near-duplicates (85%+ similarity)
-✓ All commands ≤5 lines
-✓ All lines ≤200 characters
-✓ 100% reference validity (yarn/slash/files)
-✓ All 14 required sections present
-✓ Quality score: 95+/100
-```
-
-### Rollback Conditions
-
-```bash
-# Automatic rollback if:
-❌ Structure validation fails
-❌ Duplicate introduced (>85% similarity)
-❌ Broken reference (command/file doesn't exist)
-❌ Format violation (line >200 chars)
-❌ Quality score drops below 90
-```
-
-### Maintenance Commands
-
-```bash
-# Weekly: Audit for duplicates
-/audit-claude-md --scope duplicates
-
-# Monthly: Full quality assessment
-/audit-claude-md
-
-# After major changes: Validate structure
-tools/validate-claude-md.sh --verbose
-
-# Emergency: Rollback to last good version
-git checkout HEAD~1 -- CLAUDE.md
-```
+**See imported self-management-guide.md for**:
+- Complete update protocol and decision trees
+- Quality threshold details and metrics
+- Rollback conditions and emergency procedures
+- Maintenance schedule (weekly/monthly/after-changes)
+- Content classification flowchart
 
 ## CLAUDE.md Editing Rules
 
 ```bash
 # ✅ MANDATORY: Follow existing structure and style
+# ✅ MANDATORY: Use /update-claude-md for systematic updates
+# ✅ MANDATORY: Run /audit-claude-md monthly
 # ✅ CONCISO: Max 3-5 lines per concept
 # ✅ CLARO: Specific commands, not explanations
 # ✅ DIRECTO: What to do (✅) and NOT do (❌)
@@ -564,44 +418,30 @@ git checkout HEAD~1 -- CLAUDE.md
 # ✅ VALIDADO: Run tools/validate-claude-md.sh before commit
 # ❌ NO extensive documentation - keep compact
 # ❌ NO manual edits - use /update-claude-md
+# ❌ NO duplicate commands - consolidate via /audit-claude-md
 ```
 
-## 📋 Documentation Standards & Templates
+## 📋 Documentation Standards
 
-### **Template Usage (REQUIRED for README creation)**
+**Complete Standards & Templates**: @.claude/docs/documentation-standards.md
 
-```bash
-# 1. Evaluate content type and placement
-docs/templates/DOCUMENTATION-PLACEMENT-GUIDELINES.md
+### Quick Template Selection
 
-# 2. Select appropriate template from 6 categories:
-# - User-Facing Application (main project entry)
-# - Technical Infrastructure (tools/scripts)
-# - Documentation Hub (navigation/organization)
-# - Implementation Guide (code-proximate docs)
-# - Architecture Reference (ADRs/formal decisions)
-# - Claude Code Integration (commands/automation)
-
-# 3. Validate compliance before committing
-docs/templates/README-VALIDATION-CHECKLIST.md
-```
-
-### **Quality Requirements**
-
-✅ **MANDATORY**: Template compliance for all new READMEs
-✅ **MANDATORY**: Conway's Law compliance (implementation docs ≤2 dirs from code)
-✅ **MANDATORY**: 4-tier navigation table (user-facing docs)
-✅ **MANDATORY**: Bilingual standards (Spanish user-facing, English technical)
-✅ **VALIDATION**: 95%+ working cross-references, 90%+ template adherence
-
-### **Quick Template Selection**
-
-- **Main project README**: User-Facing Application template
-- **Tools/scripts dirs**: Technical Infrastructure template
+- **Main README**: User-Facing Application template
+- **Tools/scripts**: Technical Infrastructure template
 - **docs/ navigation**: Documentation Hub template
 - **src/docs/ or backend/docs/**: Implementation Guide template
 - **ADR collections**: Architecture Reference template
 - **.claude/ directories**: Claude Code Integration template
+
+**Quality Requirements**: Template compliance, Conway's Law (≤2 dirs), bilingual standards
+
+**See imported documentation-standards.md for**:
+- Complete template usage guidelines
+- 6-category template selection flowchart
+- Placement guidelines (DOCUMENTATION-PLACEMENT-GUIDELINES.md)
+- Validation checklists (README-VALIDATION-CHECKLIST.md)
+- Quality requirements (95%+ cross-references, 90%+ template adherence)
 
 ## 🛡️ MERGE PROTECTION SYSTEM
 
