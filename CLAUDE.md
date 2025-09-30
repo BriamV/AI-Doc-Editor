@@ -53,7 +53,7 @@ yarn sec:all                         # Security audit
 
 ## Essential Commands
 
-**Complete 185-Command Reference**: @.claude/docs/commands-reference.md
+**Complete 185-Command Reference**: @.claude/docs/reference/commands-reference.md
 
 **Daily Workflow (Most Used)**:
 
@@ -143,7 +143,7 @@ yarn docs:architecture           # ADR-011 compliance check
 
 ## 🔧 Quality Tools Ecosystem
 
-**Complete 40+ Tools Reference**: @.claude/docs/quality-tools-reference.md
+**Complete 40+ Tools Reference**: @.claude/docs/reference/quality-tools-reference.md
 
 **Key Tools Integration:**
 
@@ -251,7 +251,7 @@ yarn sec:all                   # Complete security pipeline
 
 ## Do Not Touch
 
-**Complete Protected Files Policy**: @.claude/docs/protected-files-policy.md
+**Complete Protected Files Policy**: @.claude/docs/reference/protected-files-policy.md
 
 **NEVER modify**:
 - `**/archive/` directories (historical snapshots)
@@ -321,7 +321,7 @@ bash tools/audit-claude-md.sh --report  # Generate markdown report
 
 ## 📋 Documentation Standards
 
-**Complete Standards & Templates**: @.claude/docs/documentation-standards.md
+**Complete Standards & Templates**: @.claude/docs/reference/documentation-standards.md
 
 ### Quick Template Selection
 
