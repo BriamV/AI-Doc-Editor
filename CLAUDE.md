@@ -300,9 +300,41 @@ tools/qa-workflow.sh T-XX dev-complete   # Mark development complete
 
 ## Sub-Agent Architecture
 
-- **40+ Global Sub-Agents**: Built-in Claude Code specialists (security-auditor, backend-architect, etc.)
-- **Local Project Agent**: workflow-architect - Specialized for this project's workflow orchestration
-- **Custom Commands**: Auto-select appropriate sub-agents (global + local) based on project context
+**MANDATORY**: Prioritize sub-agents for complex analysis tasks
+
+### Agent Selection Policy
+
+✅ **Use sub-agents for** (delegate immediately):
+- Code analysis → technical-researcher
+- Security audits → security-auditor
+- Architecture review → backend-architect, frontend-developer
+- Multi-file investigation → general-purpose
+- Test automation → test-automator
+- Refactoring/debugging → debugger
+
+❌ **Main thread only for**:
+- Sub-agent coordination
+- Brief confirmations (< 3 lines)
+- Single command execution
+- User interaction prompts
+
+### Available Agents
+
+- **Global Sub-Agents**: 40+ Claude Code specialists (security-auditor, backend-architect, frontend-developer, test-automator, debugger, technical-researcher, code-reviewer, general-purpose)
+- **Local Project Agent**: workflow-architect (specialized for this project's workflow orchestration)
+- **Custom Commands**: Auto-select appropriate sub-agents via .claude/commands/ (19 workflow orchestrators)
+
+### Invocation Pattern
+
+```bash
+# Automatic delegation via slash commands (PREFERRED)
+/security-audit          # → security-auditor sub-agent
+/architecture            # → backend-architect sub-agent
+/review-complete         # → code-reviewer sub-agent
+
+# Manual invocation pattern (when needed)
+> Use the [technical-researcher] sub-agent to analyze hooks implementation
+```
 
 ## GitHub Issues Management
 
