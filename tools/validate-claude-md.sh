@@ -33,7 +33,7 @@ REQUIRED_SECTIONS=(
   "## Security & Compliance"
   "## Do Not Touch"
   "## Integration Policy"
-  "## CLAUDE.md Editing Rules"
+  "## CLAUDE.md Maintenance"
 )
 
 # Parse arguments

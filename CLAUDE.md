@@ -22,24 +22,19 @@ Repository: https://github.com/BriamV/AI-Doc-Editor/
 
 ```bash
 # Prerequisites: Node.js 18.16.0, Python 3.11+, WSL2 (Windows)
-yarn repo:install && yarn all:dev                  # Start development
-yarn fe:build && yarn fe:test                      # Build & test
-yarn sec:all                                       # Security audit
-
-# 🎉 MODERNIZATION COMPLETE: 185/185 commands working (100% success rate)
-# 8 namespaces operational: repo:, fe:, be:, e2e:, sec:, qa:, docs:, all:
-# Performance: 54% faster execution (152s → 70s)
-# Security: 0 vulnerabilities achieved
+yarn repo:install && yarn all:dev    # Start development
+yarn fe:build && yarn fe:test        # Build & test
+yarn sec:all                         # Security audit
 ```
 
 ## 🚨 MANDATORY: Sub-Agent First Workflow
 
 1. **FIRST**: Use CUSTOM slash commands (.claude/commands/) for complex tasks
-2. **SECOND**: Use namespaced yarn commands (185/185 working at 100%)
+2. **SECOND**: Use namespaced yarn commands
 3. **LAST**: Direct CLI only if above unavailable
 4. **NEVER**: Use eliminated scripts (cli.cjs, qa-gate.cjs, etc. - removed)
 
-### **8 Namespace Architecture (100% Operational)**
+### **8 Namespace Architecture**
 
 - **repo:*** - Repository operations (clean, reset, status)
 - **fe:*** - Frontend operations (build, test, lint, format)
@@ -190,9 +185,7 @@ taplo, shellcheck, shfmt                 # Config + shell scripts
   - **Yellow Zone** (acceptable): CC 11-15, LOC 213-300
   - **Red Zone** (blocks commit): CC > 15, LOC > 300
 - **Security Gates**: Semgrep + git-secrets + dependency audits
-- **Performance**: 54% optimized (152s → 70s total timeout)
 - **Multi-OS**: Windows/Linux/WSL auto-detection
-- **Compliance**: OAuth 2.0, TLS 1.3+, AES-256, GDPR
 
 ## Task Management Workflow
 
@@ -247,23 +240,14 @@ gh issue view <NUMBER>                                      # WRONG
 
 ## Security & Compliance
 
-**Complete Security Commands**: See Essential Commands → @.claude/docs/commands-reference.md
-
-### Security Status (Sept 2025)
-
 ```bash
-# ✅ ZERO SECURITY FINDINGS: 0 vulnerabilities (1,782+ packages)
-yarn sec:all                         # Complete security pipeline
-/security-audit                      # Comprehensive assessment
-
-# 🛡️ ENTERPRISE-GRADE: 0 vulnerabilities (1,782+ packages)
-# • Multi-stack (Node/Python), OWASP Top 10, TLS 1.3+, WORM audit
-# • Defense-in-depth + injection prevention + perfect forward secrecy
+yarn sec:all                   # Complete security pipeline
+/security-audit                # Comprehensive assessment
 ```
 
-**Documentation**:
-- Security architecture: docs/architecture/adr/ADR-006-dependency-security-scanning.md
-- Zero findings report: docs/security/audits/general-security-audit-report.md
+**Documentation**: docs/architecture/adr/ADR-006-dependency-security-scanning.md
+
+**Compliance**: OAuth 2.0, TLS 1.3+, AES-256, GDPR, OWASP Top 10
 
 ## Do Not Touch
 
@@ -282,11 +266,6 @@ yarn sec:all                         # Complete security pipeline
 - Temporary file patterns
 - Detailed rationale for protection policy
 
-## 🎉 System Status
-
-- **185/185 Commands**: 100% operational, 8 namespaces (repo:, fe:, be:, e2e:, sec:, qa:, docs:, all:)
-- **Performance**: 54% optimized (152s → 70s), cross-platform (Windows/Linux/WSL)
-- **Security**: 0 vulnerabilities (1,782+ packages), ADR-011 compliant architecture
 
 ## Integration Policy
 
@@ -318,44 +297,11 @@ yarn all:test                           # Run all test suites
 yarn qa:gate                            # Full quality pipeline (~70s)
 ```
 
-## CLAUDE.md Self-Management
-
-**Complete Management System**: @.claude/docs/self-management-guide.md
-
-### Update Protocol (MANDATORY)
+## CLAUDE.md Maintenance
 
 ```bash
-# ✅ MANDATORY: Use systematic update workflow
-/update-claude-md "<content>"    # Guided update with validation
-/audit-claude-md                 # Quality audit + consolidation
-tools/validate-claude-md.sh      # Structural validation
-
-# ❌ NEVER: Direct manual edits without validation
-```
-
-**Quality Thresholds**: Zero duplicates, <3 near-duplicates, ≤200 chars/line, 95+ score
-
-**See imported self-management-guide.md for**:
-- Complete update protocol and decision trees
-- Quality threshold details and metrics
-- Rollback conditions and emergency procedures
-- Maintenance schedule (weekly/monthly/after-changes)
-- Content classification flowchart
-
-## CLAUDE.md Editing Rules
-
-```bash
-# ✅ MANDATORY: Follow existing structure and style
-# ✅ MANDATORY: Use /update-claude-md for systematic updates
-# ✅ MANDATORY: Run /audit-claude-md monthly
-# ✅ CONCISO: Max 3-5 lines per concept
-# ✅ CLARO: Specific commands, not explanations
-# ✅ DIRECTO: What to do (✅) and NOT do (❌)
-# ✅ ESPECÍFICO: Use placeholders (<NUMBER>, <FILE>)
-# ✅ VALIDADO: Run tools/validate-claude-md.sh before commit
-# ❌ NO extensive documentation - keep compact
-# ❌ NO manual edits - use /update-claude-md
-# ❌ NO duplicate commands - consolidate via /audit-claude-md
+/update-claude-md "<content>"    # Update with validation
+/audit-claude-md                 # Quality audit
 ```
 
 ## 📋 Documentation Standards
