@@ -7,6 +7,7 @@
 **Role**: Backend utilities powering cross-platform development and merge protection
 
 **Related Infrastructure:**
+
 - [GitHub Actions Workflows](../.github/workflows/README.md) - CI/CD infrastructure using these scripts
 - [Package.json Scripts Guidelines](../docs/development/PACKAGE-JSON-SCRIPTS-GUIDELINES.md) - Namespace commands that call these scripts
 
@@ -138,7 +139,7 @@ yarn repo:merge:hooks:install    # Uses install-merge-hooks.cjs
 
 | Tier       | Location           | User Interface                   | Purpose                                    |
 | ---------- | ------------------ | -------------------------------- | ------------------------------------------ |
-| **Tier 1** | Direct Commands    | `yarn all:dev`, `yarn fe:build`     | User-facing development interface          |
+| **Tier 1** | Direct Commands    | `yarn all:dev`, `yarn fe:build`  | User-facing development interface          |
 | **Tier 2** | Slash Commands     | `/health-check`, `/merge-safety` | Workflow automation                        |
 | **Tier 3** | Hooks System       | `.claude/hooks.json`             | Background quality automation              |
 | **Tier 4** | **Infrastructure** | **`scripts/` (this directory)**  | **Backend utilities and platform support** |
