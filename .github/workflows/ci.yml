@@ -89,10 +89,9 @@ jobs:
           GIT_TERMINAL_PROMPT: "0"
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
-          echo "📦 Installing dependencies with modern namespaced command..."
-
-          # Use modernized repo:install command for standardized dependency management
-          yarn repo:install
+          echo "📦 Installing dependencies..."
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          yarn install --immutable
 
       - name: Type check
         run: yarn fe:typecheck
@@ -219,7 +218,7 @@ jobs:
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          yarn repo:install
+          yarn install --immutable
 
       - name: Setup Python environment
         run: |
@@ -314,7 +313,7 @@ jobs:
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          yarn repo:install
+          yarn install --immutable
           yarn be:bootstrap
 
       - name: Unified coverage reports

@@ -55,7 +55,8 @@ jobs:
           GIT_TERMINAL_PROMPT: "0"
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
-          yarn repo:install
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          yarn install --immutable
 
       - name: Frontend type checking
         run: |
@@ -115,7 +116,8 @@ jobs:
           GIT_TERMINAL_PROMPT: "0"
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
-          yarn repo:install
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          yarn install --immutable
           yarn be:bootstrap
 
       - name: Backend formatting validation
@@ -179,7 +181,12 @@ jobs:
           corepack prepare yarn@4.5.1 --activate
 
       - name: Install dependencies
-        run: yarn repo:install
+        env:
+          GIT_TERMINAL_PROMPT: "0"
+          npm_config_registry: "https://registry.npmjs.org/"
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          yarn install --immutable
 
       - name: Document placement validation
         run: |
@@ -233,7 +240,8 @@ jobs:
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
           echo "📦 Installing dependencies for comprehensive security scan..."
-          yarn repo:install
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          yarn install --immutable
           yarn be:bootstrap
 
       - name: Comprehensive security audit
