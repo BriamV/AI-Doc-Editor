@@ -4,11 +4,9 @@ T-04-ST1: REST API for file uploads with validation
 """
 
 from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, Request, status
-from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 
-from app.core.config import settings
 from app.db.session import get_db
 from app.services.upload_service import UploadService
 from app.services.auth import AuthService
@@ -17,7 +15,6 @@ from app.models.upload_schemas import (
     UploadValidationResponse,
     DocumentResponse,
     DocumentListResponse,
-    DocumentQueryFilters,
 )
 from fastapi.security import HTTPBearer, HTTPAuthCredential
 
@@ -34,7 +31,7 @@ def get_current_user(credentials: HTTPAuthCredential = Depends(security)):
     try:
         user_data = auth_service.verify_token(credentials.credentials)
         return user_data
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",

@@ -5,7 +5,7 @@ T-04-ST1: Validates file types, sizes, and content
 
 import magic
 from typing import Dict, Tuple, Optional
-from fastapi import UploadFile, HTTPException
+from fastapi import UploadFile
 import os
 
 

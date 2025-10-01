@@ -5,13 +5,12 @@ T-04-ST1: Business logic for document upload operations
 
 import os
 import uuid
-import shutil
 from typing import Optional, Tuple
 from datetime import datetime
 from pathlib import Path
 from fastapi import UploadFile, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
+from sqlalchemy import select
 
 from app.models.document import Document, DocumentStatus
 from app.services.file_validator import FileValidator
@@ -98,7 +97,7 @@ class UploadService:
             try:
                 if os.path.exists(full_path):
                     os.remove(full_path)
-            except:
+            except Exception:
                 pass
             raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
 
@@ -222,7 +221,7 @@ class UploadService:
                 full_path = os.path.join(self.storage_base_path, storage_path)
                 if os.path.exists(full_path):
                     os.remove(full_path)
-            except:
+            except Exception:
                 pass
 
             await self.audit_service.log_event(
@@ -350,7 +349,7 @@ class UploadService:
                 full_path = os.path.join(self.storage_base_path, document.storage_path)
                 if os.path.exists(full_path):
                     os.remove(full_path)
-            except Exception as e:
+            except Exception:
                 # Log but don't fail on file deletion error
                 pass
 

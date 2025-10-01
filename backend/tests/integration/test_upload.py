@@ -5,13 +5,12 @@ T-04-ST1: Test valid and invalid uploads
 
 import pytest
 import io
-import os
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.main import app
-from app.models.document import Document, Base as DocumentBase
+from app.models.document import Base as DocumentBase
 from app.db.session import get_db
 
 
