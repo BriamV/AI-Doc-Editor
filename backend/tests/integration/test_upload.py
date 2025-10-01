@@ -8,7 +8,9 @@ Will be fixed in T-04-ST2 when implementing extraction module.
 
 import pytest
 
-pytestmark = pytest.mark.skip(reason="Async test client issues in Python 3.13 - will fix in T-04-ST2")
+pytestmark = pytest.mark.skip(
+    reason="Async test client issues in Python 3.13 - will fix in T-04-ST2"
+)
 import io
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
