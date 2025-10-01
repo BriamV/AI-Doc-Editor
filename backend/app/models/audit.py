@@ -28,6 +28,7 @@ class AuditActionType(str, Enum):
     DOCUMENT_DELETE = "document_delete"
     DOCUMENT_VIEW = "document_view"
     DOCUMENT_EXPORT = "document_export"
+    DOCUMENT_UPLOAD = "document_upload"  # T-04: File upload event
 
     # Configuration changes
     CONFIG_UPDATE = "config_update"

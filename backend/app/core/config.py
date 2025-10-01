@@ -168,6 +168,17 @@ class Settings(BaseSettings):
     SECURITY_LOG_ENABLED: bool = True
     PERFORMANCE_MONITORING: bool = True
 
+    # File upload settings (T-04)
+    UPLOAD_STORAGE_PATH: str = "./uploads"
+    UPLOAD_MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10MB in bytes
+    UPLOAD_ALLOWED_EXTENSIONS: List[str] = ["pdf", "docx", "md"]
+    UPLOAD_ALLOWED_MIME_TYPES: List[str] = [
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "text/markdown",
+        "text/plain"
+    ]
+
     # Security logging configuration
     SECURITY_LOG_FILE: str = "security.log"
     AUDIT_LOG_FILE: str = "audit.log"
