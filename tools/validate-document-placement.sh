@@ -687,7 +687,14 @@ run_validation() {
     return 2
   elif [[ $VIOLATION_COUNT -gt 0 ]]; then
     if [[ "$STRICT_MODE" == "true" ]]; then
-      error "Violations found in strict mode."
+      error "STRICT MODE: Validation failed due to violations"
+      warn ""
+      warn "Misplaced files ($VIOLATION_COUNT):"
+      for file in "${!VIOLATIONS[@]}"; do
+        local violation="${VIOLATIONS[$file]}"
+        local description="${violation#*:}"
+        warn "  - $file (suggest: ${description#* should be in })"
+      done
       return 1
     else
       warn "Placement violations found. Run with --fix to auto-correct."
