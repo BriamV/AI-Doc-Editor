@@ -6,19 +6,20 @@ NOTE: Tests temporarily skipped due to async test client issues in Python 3.13.
 Will be fixed in T-04-ST2 when implementing extraction module.
 """
 
-import pytest
-
-pytestmark = pytest.mark.skip(
-    reason="Async test client issues in Python 3.13 - will fix in T-04-ST2"
-)
 import io
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
+from app.db.session import get_db
 from app.main import app
 from app.models.document import Base as DocumentBase
-from app.db.session import get_db
+
+pytestmark = pytest.mark.skip(
+    reason="Async test client issues in Python 3.13 - will fix in T-04-ST2"
+)
 
 
 # Test database URL (in-memory SQLite)

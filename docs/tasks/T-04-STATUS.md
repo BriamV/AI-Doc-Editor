@@ -49,12 +49,12 @@ wii_subtasks:
     description: "Implementar endpoint REST /upload con validación de archivos (MIME type, tamaño) y metadatos."
     complejidad: 4
     entregable: "Colección Postman que prueba subidas válidas (200 OK) e inválidas (400 Bad Request)."
-    status: "pendiente"
+    status: "completado"
   - id: "R1.WP1-T04-ST2"
     description: "Desarrollar el módulo de extracción de texto para PDF, DOCX y MD, incluyendo el chunking de texto."
     complejidad: 5
     entregable: "Tests unitarios que procesan ficheros de ejemplo y devuelven el texto extraído y chunked correctamente."
-    status: "pendiente"
+    status: "completado"
   - id: "R1.WP1-T04-ST3"
     description: "Integrar cliente OpenAI para generar embeddings (text-embedding-3-small)."
     complejidad: 2
