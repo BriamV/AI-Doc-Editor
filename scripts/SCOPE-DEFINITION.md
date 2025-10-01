@@ -140,12 +140,12 @@ yarn merge-safety-full               # Uses merge-protection
 
 ### **4-Tier Documentation Positioning**
 
-| Tier       | Location           | User Interface                    | Purpose                                                |
-| ---------- | ------------------ | --------------------------------- | ------------------------------------------------------ |
+| Tier       | Location           | User Interface                               | Purpose                                                |
+| ---------- | ------------------ | -------------------------------------------- | ------------------------------------------------------ |
 | **Tier 1** | Direct Commands    | `yarn all:dev, yarn fe:build, yarn all:test` | User-facing development interface                      |
-| **Tier 2** | Slash Commands     | `/merge-safety, /health-check`    | Workflow automation                                    |
-| **Tier 3** | Hooks System       | `.claude/hooks.json`              | Background quality automation                          |
-| **Tier 4** | **Infrastructure** | **`scripts/`**                    | **Backend utilities and multiplatform infrastructure** |
+| **Tier 2** | Slash Commands     | `/merge-safety, /health-check`               | Workflow automation                                    |
+| **Tier 3** | Hooks System       | `.claude/hooks.json`                         | Background quality automation                          |
+| **Tier 4** | **Infrastructure** | **`scripts/`**                               | **Backend utilities and multiplatform infrastructure** |
 
 ### **Cross-References**
 

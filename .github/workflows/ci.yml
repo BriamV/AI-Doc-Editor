@@ -38,17 +38,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Enable Corepack (Yarn 4)
-        run: |
-          corepack enable
-          corepack prepare yarn@4.5.1 --activate
-
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'yarn'
-          cache-dependency-path: 'yarn.lock'
+
+      - name: Enable Corepack (Yarn 4)
+        run: |
+          corepack enable
+          corepack prepare yarn@4.5.1 --activate
 
       - name: Checkout with full history for diff
         uses: actions/checkout@v4
@@ -91,10 +89,9 @@ jobs:
           GIT_TERMINAL_PROMPT: "0"
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
-          echo "📦 Installing dependencies with modern namespaced command..."
-
-          # Use modernized repo:install command for standardized dependency management
-          yarn repo:install
+          echo "📦 Installing dependencies..."
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          yarn install --immutable
 
       - name: Type check
         run: yarn fe:typecheck
@@ -200,17 +197,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Enable Corepack (Yarn 4)
-        run: |
-          corepack enable
-          corepack prepare yarn@4.5.1 --activate
-
       - name: Setup Node.js (for namespaced commands)
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'yarn'
-          cache-dependency-path: 'yarn.lock'
+
+      - name: Enable Corepack (Yarn 4)
+        run: |
+          corepack enable
+          corepack prepare yarn@4.5.1 --activate
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -223,7 +218,7 @@ jobs:
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          yarn repo:install
+          yarn install --immutable
 
       - name: Setup Python environment
         run: |
@@ -297,16 +292,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Enable Corepack (Yarn 4)
-        run: |
-          corepack enable
-          corepack prepare yarn@4.5.1 --activate
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: 'yarn'
+
+      - name: Enable Corepack (Yarn 4)
+        run: |
+          corepack enable
+          corepack prepare yarn@4.5.1 --activate
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -319,7 +313,7 @@ jobs:
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          yarn repo:install
+          yarn install --immutable
           yarn be:bootstrap
 
       - name: Unified coverage reports
