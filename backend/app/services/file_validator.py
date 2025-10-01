@@ -3,7 +3,7 @@ File validation service for upload endpoint
 T-04-ST1: Validates file types, sizes, and content
 """
 
-import magic
+import filetype
 from typing import Dict, Tuple, Optional
 from fastapi import UploadFile
 import os
@@ -37,7 +37,6 @@ class FileValidator:
             max_file_size: Maximum allowed file size in bytes (defaults to 10MB)
         """
         self.max_file_size = max_file_size or self.DEFAULT_MAX_FILE_SIZE
-        self.magic_detector = magic.Magic(mime=True)
 
     def validate_file_extension(self, filename: str) -> Tuple[bool, str]:
         """
@@ -83,7 +82,7 @@ class FileValidator:
 
     def detect_mime_type(self, file_content: bytes) -> str:
         """
-        Detect MIME type from file content
+        Detect MIME type from file content using filetype library
 
         Args:
             file_content: First few bytes of the file
@@ -92,8 +91,10 @@ class FileValidator:
             Detected MIME type
         """
         try:
-            mime_type = self.magic_detector.from_buffer(file_content)
-            return mime_type
+            kind = filetype.guess(file_content)
+            if kind is None:
+                return "application/octet-stream"
+            return kind.mime
         except Exception:
             return "application/octet-stream"
 

@@ -9,34 +9,15 @@ from typing import Optional
 
 from app.db.session import get_db
 from app.services.upload_service import UploadService
-from app.services.auth import AuthService
+from app.services.auth import get_current_user, User
 from app.models.upload_schemas import (
     UploadSuccessResponse,
     UploadValidationResponse,
     DocumentResponse,
     DocumentListResponse,
 )
-from fastapi.security import HTTPBearer, HTTPAuthCredential
 
 router = APIRouter()
-security = HTTPBearer()
-auth_service = AuthService()
-
-
-def get_current_user(credentials: HTTPAuthCredential = Depends(security)):
-    """
-    Dependency to extract current user from JWT token
-    Reuses existing OAuth authentication from T-02
-    """
-    try:
-        user_data = auth_service.verify_token(credentials.credentials)
-        return user_data
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
 
 
 @router.post(
@@ -72,7 +53,7 @@ async def upload_document(
     title: Optional[str] = Form(None, description="Optional document title"),
     description: Optional[str] = Form(None, description="Optional document description"),
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Upload a document with validation and metadata
@@ -94,8 +75,8 @@ async def upload_document(
     - Logs all operations to audit system
     """
     # Extract user information from token
-    user_id = current_user.get("user_id") or current_user.get("email")
-    user_email = current_user.get("email")
+    user_id = current_user.id
+    user_email = current_user.email
 
     # Extract client IP for audit
     client_ip = request.client.host if request.client else None
@@ -157,7 +138,7 @@ async def list_documents(
     page: int = 1,
     page_size: int = 20,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     List documents with optional filters
@@ -171,7 +152,7 @@ async def list_documents(
     **Response:**
     - List of documents with pagination metadata
     """
-    user_id = current_user.get("user_id") or current_user.get("email")
+    user_id = current_user.id
 
     # Calculate offset
     offset = (page - 1) * page_size
@@ -230,7 +211,7 @@ async def list_documents(
 async def get_document(
     document_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Get document by ID
@@ -242,7 +223,7 @@ async def get_document(
     - 200: Document details
     - 404: Document not found
     """
-    user_id = current_user.get("user_id") or current_user.get("email")
+    user_id = current_user.id
 
     upload_service = UploadService()
 
@@ -289,7 +270,7 @@ async def delete_document(
     document_id: str,
     hard_delete: bool = False,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Delete document
@@ -304,7 +285,7 @@ async def delete_document(
     - 204: Document deleted successfully
     - 404: Document not found
     """
-    user_id = current_user.get("user_id") or current_user.get("email")
+    user_id = current_user.id
 
     upload_service = UploadService()
 

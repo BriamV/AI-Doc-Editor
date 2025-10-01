@@ -43,8 +43,7 @@ pytz==2024.1                # Timezone handling for rotation scheduling
 aiohttp==3.12.14            # HTTP client for HSM integration
 
 # T-04: File Upload & RAG Pipeline
-python-magic==0.4.27        # MIME type detection from file content
-python-magic-bin==0.4.14    # Windows binary for python-magic (platform-specific)
+filetype==1.2.0             # MIME type detection (lightweight, no binary dependencies)
 
 # CORS
 # NOTE: fastapi-cors is unmaintained. Consider migrating to FastAPI's built-in CORSMiddleware.
