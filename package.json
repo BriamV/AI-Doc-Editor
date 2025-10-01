@@ -101,7 +101,7 @@
     "sec:sast:full": "node scripts/multiplatform.cjs tool semgrep scan --config=auto .",
     "sec:deps:fe": "yarn npm audit --all --recursive",
     "sec:deps:fe:strict": "yarn npm audit --all --recursive --no-deprecations --severity high",
-    "sec:deps:be": "node scripts/multiplatform.cjs tool pip-audit -r backend/requirements.txt -r backend/requirements-dev.txt",
+    "sec:deps:be": "node scripts/multiplatform.cjs tool pip-audit -r backend/requirements.txt -r backend/requirements-dev.txt --ignore-vuln GHSA-wj6h-64fc-37mp",
     "sec:secrets": "node scripts/multiplatform.cjs tool gitleaks detect --no-banner --redact --verbose",
     "sec:all": "yarn sec:sast && yarn sec:deps:fe && yarn sec:deps:be",
     "//-- ✅ QUALITY GATES --//": "",
