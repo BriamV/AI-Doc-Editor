@@ -46,7 +46,7 @@ aiohttp==3.12.14            # HTTP client for HSM integration
 filetype==1.2.0             # MIME type detection (lightweight, no binary dependencies)
 pypdf==4.0.1                # PDF text extraction (replaces deprecated PyPDF2)
 python-docx==1.1.0          # DOCX text extraction
-openai==1.57.4              # OpenAI API client for embeddings (T-04-ST3, latest Jan 2025)
+openai==2.0.0               # OpenAI API client for embeddings (T-04-ST3, latest Oct 2025)
 
 # CORS
 # NOTE: fastapi-cors is unmaintained. Consider migrating to FastAPI's built-in CORSMiddleware.
