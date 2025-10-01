@@ -176,7 +176,7 @@ class Settings(BaseSettings):
         "application/pdf",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "text/markdown",
-        "text/plain"
+        "text/plain",
     ]
 
     # Security logging configuration

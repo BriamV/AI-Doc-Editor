@@ -11,6 +11,7 @@ from enum import Enum
 
 class DocumentTypeEnum(str, Enum):
     """Supported document types"""
+
     PDF = "pdf"
     DOCX = "docx"
     MARKDOWN = "md"
@@ -18,6 +19,7 @@ class DocumentTypeEnum(str, Enum):
 
 class DocumentStatusEnum(str, Enum):
     """Document processing status"""
+
     UPLOADED = "uploaded"
     PROCESSING = "processing"
     INDEXED = "indexed"
@@ -29,6 +31,7 @@ class UploadMetadataRequest(BaseModel):
     Optional metadata that can be provided during upload
     Sent as form fields alongside the file
     """
+
     title: Optional[str] = Field(None, max_length=500, description="Document title")
     description: Optional[str] = Field(None, max_length=2000, description="Document description")
 
@@ -45,6 +48,7 @@ class UploadMetadataRequest(BaseModel):
 
 class UploadValidationResponse(BaseModel):
     """Response model for validation errors"""
+
     success: bool = False
     error: str = Field(..., description="Error message")
     details: Optional[dict] = Field(None, description="Additional error details")
@@ -54,6 +58,7 @@ class DocumentResponse(BaseModel):
     """
     Response model for successfully uploaded document
     """
+
     id: str = Field(..., description="Unique document identifier")
     original_filename: str = Field(..., description="Original filename")
     file_type: str = Field(..., description="File type (pdf, docx, md)")
@@ -80,7 +85,7 @@ class DocumentResponse(BaseModel):
                 "status": "uploaded",
                 "user_id": "user-123",
                 "user_email": "user@example.com",
-                "uploaded_at": "2025-10-01T12:00:00Z"
+                "uploaded_at": "2025-10-01T12:00:00Z",
             }
         }
 
@@ -89,6 +94,7 @@ class UploadSuccessResponse(BaseModel):
     """
     Success response wrapper for upload operations
     """
+
     success: bool = True
     message: str = "File uploaded successfully"
     document: DocumentResponse
@@ -106,8 +112,8 @@ class UploadSuccessResponse(BaseModel):
                     "file_size_bytes": 1048576,
                     "title": "My Document",
                     "status": "uploaded",
-                    "uploaded_at": "2025-10-01T12:00:00Z"
-                }
+                    "uploaded_at": "2025-10-01T12:00:00Z",
+                },
             }
         }
 
@@ -116,6 +122,7 @@ class DocumentListResponse(BaseModel):
     """
     Response model for listing documents
     """
+
     total: int = Field(..., description="Total number of documents")
     documents: list[DocumentResponse] = Field(..., description="List of documents")
     page: int = Field(1, description="Current page number")
@@ -126,6 +133,7 @@ class DocumentQueryFilters(BaseModel):
     """
     Filters for querying documents
     """
+
     user_id: Optional[str] = None
     file_type: Optional[DocumentTypeEnum] = None
     status: Optional[DocumentStatusEnum] = None

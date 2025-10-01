@@ -27,9 +27,7 @@ class UploadService:
     """
 
     def __init__(
-        self,
-        storage_base_path: Optional[str] = None,
-        max_file_size: Optional[int] = None
+        self, storage_base_path: Optional[str] = None, max_file_size: Optional[int] = None
     ):
         """
         Initialize upload service
@@ -102,10 +100,7 @@ class UploadService:
                     os.remove(full_path)
             except:
                 pass
-            raise HTTPException(
-                status_code=500,
-                detail=f"Failed to save file: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
 
     async def upload_document(
         self,
@@ -115,7 +110,7 @@ class UploadService:
         user_email: Optional[str] = None,
         title: Optional[str] = None,
         description: Optional[str] = None,
-        ip_address: Optional[str] = None
+        ip_address: Optional[str] = None,
     ) -> Document:
         """
         Handle complete document upload process
@@ -148,7 +143,7 @@ class UploadService:
                 resource_type="document",
                 ip_address=ip_address,
                 status="failure",
-                details={"error": error_msg, "metadata": metadata}
+                details={"error": error_msg, "metadata": metadata},
             )
 
             raise HTTPException(status_code=400, detail=error_msg)
@@ -160,7 +155,7 @@ class UploadService:
         storage_path = self._generate_storage_path(
             user_id=user_id or "anonymous",
             file_id=document_id,
-            extension=metadata["file_extension"]
+            extension=metadata["file_extension"],
         )
 
         # 4. Save file to disk
@@ -175,7 +170,7 @@ class UploadService:
                 resource_type="document",
                 ip_address=ip_address,
                 status="error",
-                details={"error": str(e), "metadata": metadata}
+                details={"error": str(e), "metadata": metadata},
             )
             raise
 
@@ -192,7 +187,7 @@ class UploadService:
             status=DocumentStatus.UPLOADED.value,
             user_id=user_id,
             user_email=user_email,
-            uploaded_at=datetime.utcnow()
+            uploaded_at=datetime.utcnow(),
         )
 
         try:
@@ -213,8 +208,8 @@ class UploadService:
                 details={
                     "filename": metadata["original_filename"],
                     "file_type": document.file_type,
-                    "file_size_bytes": metadata["file_size_bytes"]
-                }
+                    "file_size_bytes": metadata["file_size_bytes"],
+                },
             )
 
             return document
@@ -238,19 +233,15 @@ class UploadService:
                 resource_type="document",
                 ip_address=ip_address,
                 status="error",
-                details={"error": str(e), "metadata": metadata}
+                details={"error": str(e), "metadata": metadata},
             )
 
             raise HTTPException(
-                status_code=500,
-                detail=f"Failed to create document record: {str(e)}"
+                status_code=500, detail=f"Failed to create document record: {str(e)}"
             )
 
     async def get_document_by_id(
-        self,
-        document_id: str,
-        session: AsyncSession,
-        user_id: Optional[str] = None
+        self, document_id: str, session: AsyncSession, user_id: Optional[str] = None
     ) -> Optional[Document]:
         """
         Retrieve document by ID
@@ -279,7 +270,7 @@ class UploadService:
         file_type: Optional[str] = None,
         status: Optional[str] = None,
         limit: int = 20,
-        offset: int = 0
+        offset: int = 0,
     ) -> Tuple[list[Document], int]:
         """
         List documents with optional filters
@@ -334,7 +325,7 @@ class UploadService:
         document_id: str,
         session: AsyncSession,
         user_id: Optional[str] = None,
-        hard_delete: bool = False
+        hard_delete: bool = False,
     ) -> bool:
         """
         Delete document (soft delete by default)
@@ -378,7 +369,7 @@ class UploadService:
             user_id=user_id,
             resource_type="document",
             resource_id=document_id,
-            status="success"
+            status="success",
         )
 
         return True

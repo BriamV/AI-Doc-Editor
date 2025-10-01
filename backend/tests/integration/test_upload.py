@@ -20,9 +20,7 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 # Create test engine and session
 test_engine = create_async_engine(TEST_DATABASE_URL, echo=False)
-TestAsyncSessionLocal = sessionmaker(
-    test_engine, expire_on_commit=False, class_=AsyncSession
-)
+TestAsyncSessionLocal = sessionmaker(test_engine, expire_on_commit=False, class_=AsyncSession)
 
 
 async def override_get_db():
@@ -71,26 +69,16 @@ class TestUploadEndpoint:
     def test_upload_valid_pdf(self, setup_database, auth_headers):
         """Test uploading a valid PDF file"""
         # Create mock PDF content
-        pdf_content = b"%PDF-1.4\n%\xE2\xE3\xCF\xD3\n" + b"A" * 1024  # Mock PDF header + content
+        pdf_content = b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n" + b"A" * 1024  # Mock PDF header + content
 
         # Create file-like object
-        files = {
-            "file": ("test_document.pdf", io.BytesIO(pdf_content), "application/pdf")
-        }
+        files = {"file": ("test_document.pdf", io.BytesIO(pdf_content), "application/pdf")}
 
         # Optional form data
-        data = {
-            "title": "Test PDF Document",
-            "description": "Integration test upload"
-        }
+        data = {"title": "Test PDF Document", "description": "Integration test upload"}
 
         # Make request
-        response = client.post(
-            "/api/upload",
-            files=files,
-            data=data,
-            headers=auth_headers
-        )
+        response = client.post("/api/upload", files=files, data=data, headers=auth_headers)
 
         # Assertions
         assert response.status_code == 201
@@ -107,18 +95,11 @@ class TestUploadEndpoint:
         # Create markdown content
         md_content = b"# Test Document\n\nThis is a test markdown file."
 
-        files = {
-            "file": ("test.md", io.BytesIO(md_content), "text/markdown")
-        }
+        files = {"file": ("test.md", io.BytesIO(md_content), "text/markdown")}
 
         data = {"title": "Test Markdown"}
 
-        response = client.post(
-            "/api/upload",
-            files=files,
-            data=data,
-            headers=auth_headers
-        )
+        response = client.post("/api/upload", files=files, data=data, headers=auth_headers)
 
         assert response.status_code == 201
         json_data = response.json()
@@ -128,15 +109,9 @@ class TestUploadEndpoint:
     def test_upload_invalid_file_extension(self, setup_database, auth_headers):
         """Test uploading file with invalid extension (should return 400)"""
         # Create file with unsupported extension
-        files = {
-            "file": ("test.exe", io.BytesIO(b"fake executable"), "application/octet-stream")
-        }
+        files = {"file": ("test.exe", io.BytesIO(b"fake executable"), "application/octet-stream")}
 
-        response = client.post(
-            "/api/upload",
-            files=files,
-            headers=auth_headers
-        )
+        response = client.post("/api/upload", files=files, headers=auth_headers)
 
         # Should return 400 Bad Request
         assert response.status_code == 400
@@ -147,15 +122,9 @@ class TestUploadEndpoint:
         # Create file larger than 10MB limit
         large_content = b"A" * (11 * 1024 * 1024)  # 11MB
 
-        files = {
-            "file": ("large_file.pdf", io.BytesIO(large_content), "application/pdf")
-        }
+        files = {"file": ("large_file.pdf", io.BytesIO(large_content), "application/pdf")}
 
-        response = client.post(
-            "/api/upload",
-            files=files,
-            headers=auth_headers
-        )
+        response = client.post("/api/upload", files=files, headers=auth_headers)
 
         # Should return 400 Bad Request
         assert response.status_code == 400
@@ -163,15 +132,9 @@ class TestUploadEndpoint:
 
     def test_upload_empty_file(self, setup_database, auth_headers):
         """Test uploading empty file (should return 400)"""
-        files = {
-            "file": ("empty.pdf", io.BytesIO(b""), "application/pdf")
-        }
+        files = {"file": ("empty.pdf", io.BytesIO(b""), "application/pdf")}
 
-        response = client.post(
-            "/api/upload",
-            files=files,
-            headers=auth_headers
-        )
+        response = client.post("/api/upload", files=files, headers=auth_headers)
 
         # Should return 400 Bad Request
         assert response.status_code == 400
@@ -179,15 +142,10 @@ class TestUploadEndpoint:
 
     def test_upload_without_authentication(self, setup_database):
         """Test uploading without authentication token (should return 401)"""
-        files = {
-            "file": ("test.pdf", io.BytesIO(b"%PDF-1.4\ntest"), "application/pdf")
-        }
+        files = {"file": ("test.pdf", io.BytesIO(b"%PDF-1.4\ntest"), "application/pdf")}
 
         # No auth headers
-        response = client.post(
-            "/api/upload",
-            files=files
-        )
+        response = client.post("/api/upload", files=files)
 
         # Should return 401 Unauthorized
         assert response.status_code == 401
@@ -198,24 +156,21 @@ class TestUploadEndpoint:
         pdf_content = b"%PDF-1.4\n" + b"A" * 1024
 
         files = {
-            "file": ("fake_docx.docx", io.BytesIO(pdf_content), "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            "file": (
+                "fake_docx.docx",
+                io.BytesIO(pdf_content),
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            )
         }
 
-        response = client.post(
-            "/api/upload",
-            files=files,
-            headers=auth_headers
-        )
+        response = client.post("/api/upload", files=files, headers=auth_headers)
 
         # Should return 400 Bad Request due to MIME type mismatch
         assert response.status_code == 400
 
     def test_list_documents(self, setup_database, auth_headers):
         """Test listing uploaded documents"""
-        response = client.get(
-            "/api/documents",
-            headers=auth_headers
-        )
+        response = client.get("/api/documents", headers=auth_headers)
 
         assert response.status_code == 200
         json_data = response.json()
@@ -226,8 +181,7 @@ class TestUploadEndpoint:
     def test_list_documents_with_filters(self, setup_database, auth_headers):
         """Test listing documents with filters"""
         response = client.get(
-            "/api/documents?file_type=pdf&status=uploaded&page=1&page_size=10",
-            headers=auth_headers
+            "/api/documents?file_type=pdf&status=uploaded&page=1&page_size=10", headers=auth_headers
         )
 
         assert response.status_code == 200
@@ -243,23 +197,14 @@ class TestDocumentRetrieval:
     def test_get_document_by_id(self, setup_database, auth_headers):
         """Test retrieving a specific document by ID"""
         # First upload a document
-        files = {
-            "file": ("test.pdf", io.BytesIO(b"%PDF-1.4\ntest"), "application/pdf")
-        }
-        upload_response = client.post(
-            "/api/upload",
-            files=files,
-            headers=auth_headers
-        )
+        files = {"file": ("test.pdf", io.BytesIO(b"%PDF-1.4\ntest"), "application/pdf")}
+        upload_response = client.post("/api/upload", files=files, headers=auth_headers)
 
         assert upload_response.status_code == 201
         document_id = upload_response.json()["document"]["id"]
 
         # Now retrieve it
-        response = client.get(
-            f"/api/documents/{document_id}",
-            headers=auth_headers
-        )
+        response = client.get(f"/api/documents/{document_id}", headers=auth_headers)
 
         assert response.status_code == 200
         json_data = response.json()
@@ -269,10 +214,7 @@ class TestDocumentRetrieval:
         """Test retrieving a document that doesn't exist"""
         fake_id = "00000000-0000-0000-0000-000000000000"
 
-        response = client.get(
-            f"/api/documents/{fake_id}",
-            headers=auth_headers
-        )
+        response = client.get(f"/api/documents/{fake_id}", headers=auth_headers)
 
         assert response.status_code == 404
 
@@ -283,43 +225,27 @@ class TestDocumentDeletion:
     def test_delete_document_soft(self, setup_database, auth_headers):
         """Test soft deleting a document"""
         # Upload a document first
-        files = {
-            "file": ("to_delete.pdf", io.BytesIO(b"%PDF-1.4\ntest"), "application/pdf")
-        }
-        upload_response = client.post(
-            "/api/upload",
-            files=files,
-            headers=auth_headers
-        )
+        files = {"file": ("to_delete.pdf", io.BytesIO(b"%PDF-1.4\ntest"), "application/pdf")}
+        upload_response = client.post("/api/upload", files=files, headers=auth_headers)
 
         document_id = upload_response.json()["document"]["id"]
 
         # Delete it (soft delete by default)
-        response = client.delete(
-            f"/api/documents/{document_id}",
-            headers=auth_headers
-        )
+        response = client.delete(f"/api/documents/{document_id}", headers=auth_headers)
 
         assert response.status_code == 204
 
     def test_delete_document_hard(self, setup_database, auth_headers):
         """Test hard deleting a document"""
         # Upload a document first
-        files = {
-            "file": ("to_hard_delete.pdf", io.BytesIO(b"%PDF-1.4\ntest"), "application/pdf")
-        }
-        upload_response = client.post(
-            "/api/upload",
-            files=files,
-            headers=auth_headers
-        )
+        files = {"file": ("to_hard_delete.pdf", io.BytesIO(b"%PDF-1.4\ntest"), "application/pdf")}
+        upload_response = client.post("/api/upload", files=files, headers=auth_headers)
 
         document_id = upload_response.json()["document"]["id"]
 
         # Hard delete
         response = client.delete(
-            f"/api/documents/{document_id}?hard_delete=true",
-            headers=auth_headers
+            f"/api/documents/{document_id}?hard_delete=true", headers=auth_headers
         )
 
         assert response.status_code == 204
@@ -328,10 +254,7 @@ class TestDocumentDeletion:
         """Test deleting a document that doesn't exist"""
         fake_id = "00000000-0000-0000-0000-000000000000"
 
-        response = client.delete(
-            f"/api/documents/{fake_id}",
-            headers=auth_headers
-        )
+        response = client.delete(f"/api/documents/{fake_id}", headers=auth_headers)
 
         assert response.status_code == 404
 

@@ -14,6 +14,7 @@ Base = declarative_base()
 
 class DocumentType(str, Enum):
     """Enumeration of supported document types"""
+
     PDF = "pdf"
     DOCX = "docx"
     MARKDOWN = "md"
@@ -21,6 +22,7 @@ class DocumentType(str, Enum):
 
 class DocumentStatus(str, Enum):
     """Document processing status"""
+
     UPLOADED = "uploaded"
     PROCESSING = "processing"
     INDEXED = "indexed"
@@ -52,12 +54,7 @@ class Document(Base):
     description = Column(Text, nullable=True)  # Optional description
 
     # Processing status
-    status = Column(
-        String(20),
-        nullable=False,
-        default=DocumentStatus.UPLOADED.value,
-        index=True
-    )
+    status = Column(String(20), nullable=False, default=DocumentStatus.UPLOADED.value, index=True)
     processing_error = Column(Text, nullable=True)  # Error message if processing failed
 
     # RAG integration
@@ -112,6 +109,8 @@ class Document(Base):
             "user_email": self.user_email,
             "uploaded_at": self.uploaded_at.isoformat() if self.uploaded_at else None,
             "processed_at": self.processed_at.isoformat() if self.processed_at else None,
-            "last_accessed_at": self.last_accessed_at.isoformat() if self.last_accessed_at else None,
+            "last_accessed_at": (
+                self.last_accessed_at.isoformat() if self.last_accessed_at else None
+            ),
             "deleted_at": self.deleted_at.isoformat() if self.deleted_at else None,
         }

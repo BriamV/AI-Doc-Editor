@@ -17,7 +17,7 @@ from app.models.upload_schemas import (
     UploadValidationResponse,
     DocumentResponse,
     DocumentListResponse,
-    DocumentQueryFilters
+    DocumentQueryFilters,
 )
 from fastapi.security import HTTPBearer, HTTPAuthCredential
 
@@ -47,23 +47,11 @@ def get_current_user(credentials: HTTPAuthCredential = Depends(security)):
     response_model=UploadSuccessResponse,
     status_code=status.HTTP_201_CREATED,
     responses={
-        201: {
-            "description": "File uploaded successfully",
-            "model": UploadSuccessResponse
-        },
-        400: {
-            "description": "Invalid file or validation error",
-            "model": UploadValidationResponse
-        },
-        401: {
-            "description": "Authentication required"
-        },
-        413: {
-            "description": "File too large"
-        },
-        500: {
-            "description": "Internal server error"
-        }
+        201: {"description": "File uploaded successfully", "model": UploadSuccessResponse},
+        400: {"description": "Invalid file or validation error", "model": UploadValidationResponse},
+        401: {"description": "Authentication required"},
+        413: {"description": "File too large"},
+        500: {"description": "Internal server error"},
     },
     summary="Upload a document",
     description="""
@@ -79,7 +67,7 @@ def get_current_user(credentials: HTTPAuthCredential = Depends(security)):
     **Authentication:** Requires valid JWT token from OAuth login.
 
     **Audit:** All upload operations are logged in the audit system.
-    """
+    """,
 )
 async def upload_document(
     request: Request,
@@ -87,7 +75,7 @@ async def upload_document(
     title: Optional[str] = Form(None, description="Optional document title"),
     description: Optional[str] = Form(None, description="Optional document description"),
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Upload a document with validation and metadata
@@ -127,7 +115,7 @@ async def upload_document(
             user_email=user_email,
             title=title,
             description=description,
-            ip_address=client_ip
+            ip_address=client_ip,
         )
 
         # Convert to response model
@@ -142,13 +130,11 @@ async def upload_document(
             status=document.status,
             user_id=document.user_id,
             user_email=document.user_email,
-            uploaded_at=document.uploaded_at
+            uploaded_at=document.uploaded_at,
         )
 
         return UploadSuccessResponse(
-            success=True,
-            message="File uploaded successfully",
-            document=document_response
+            success=True, message="File uploaded successfully", document=document_response
         )
 
     except HTTPException:
@@ -158,7 +144,7 @@ async def upload_document(
         # Log unexpected errors
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to upload document: {str(e)}"
+            detail=f"Failed to upload document: {str(e)}",
         )
 
 
@@ -166,7 +152,7 @@ async def upload_document(
     "/documents",
     response_model=DocumentListResponse,
     summary="List uploaded documents",
-    description="Retrieve a list of documents uploaded by the authenticated user"
+    description="Retrieve a list of documents uploaded by the authenticated user",
 )
 async def list_documents(
     file_type: Optional[str] = None,
@@ -174,7 +160,7 @@ async def list_documents(
     page: int = 1,
     page_size: int = 20,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user),
 ):
     """
     List documents with optional filters
@@ -206,7 +192,7 @@ async def list_documents(
             file_type=file_type,
             status=status,
             limit=page_size,
-            offset=offset
+            offset=offset,
         )
 
         # Convert to response models
@@ -222,22 +208,19 @@ async def list_documents(
                 status=doc.status,
                 user_id=doc.user_id,
                 user_email=doc.user_email,
-                uploaded_at=doc.uploaded_at
+                uploaded_at=doc.uploaded_at,
             )
             for doc in documents
         ]
 
         return DocumentListResponse(
-            total=total,
-            documents=document_responses,
-            page=page,
-            page_size=page_size
+            total=total, documents=document_responses, page=page, page_size=page_size
         )
 
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve documents: {str(e)}"
+            detail=f"Failed to retrieve documents: {str(e)}",
         )
 
 
@@ -245,12 +228,12 @@ async def list_documents(
     "/documents/{document_id}",
     response_model=DocumentResponse,
     summary="Get document details",
-    description="Retrieve details of a specific document by ID"
+    description="Retrieve details of a specific document by ID",
 )
 async def get_document(
     document_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Get document by ID
@@ -270,14 +253,11 @@ async def get_document(
         document = await upload_service.get_document_by_id(
             document_id=document_id,
             session=db,
-            user_id=user_id  # Access control: users can only access their own documents
+            user_id=user_id,  # Access control: users can only access their own documents
         )
 
         if not document:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Document not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
         return DocumentResponse(
             id=document.id,
@@ -290,7 +270,7 @@ async def get_document(
             status=document.status,
             user_id=document.user_id,
             user_email=document.user_email,
-            uploaded_at=document.uploaded_at
+            uploaded_at=document.uploaded_at,
         )
 
     except HTTPException:
@@ -298,7 +278,7 @@ async def get_document(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve document: {str(e)}"
+            detail=f"Failed to retrieve document: {str(e)}",
         )
 
 
@@ -306,13 +286,13 @@ async def get_document(
     "/documents/{document_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a document",
-    description="Delete a document (soft delete by default)"
+    description="Delete a document (soft delete by default)",
 )
 async def delete_document(
     document_id: str,
     hard_delete: bool = False,
     db: AsyncSession = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Delete document
@@ -333,17 +313,11 @@ async def delete_document(
 
     try:
         deleted = await upload_service.delete_document(
-            document_id=document_id,
-            session=db,
-            user_id=user_id,
-            hard_delete=hard_delete
+            document_id=document_id, session=db, user_id=user_id, hard_delete=hard_delete
         )
 
         if not deleted:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Document not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
         return None  # 204 No Content
 
@@ -352,5 +326,5 @@ async def delete_document(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to delete document: {str(e)}"
+            detail=f"Failed to delete document: {str(e)}",
         )
