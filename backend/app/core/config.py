@@ -179,6 +179,11 @@ class Settings(BaseSettings):
         "text/plain",
     ]
 
+    # OpenAI embeddings settings (T-04-ST3)
+    OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
+    OPENAI_EMBEDDING_DIMENSIONS: int = 1536  # Default for text-embedding-3-small
+    OPENAI_MAX_BATCH_SIZE: int = 100  # Maximum texts per API call
+
     # Security logging configuration
     SECURITY_LOG_FILE: str = "security.log"
     AUDIT_LOG_FILE: str = "audit.log"

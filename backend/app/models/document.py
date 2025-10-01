@@ -25,6 +25,7 @@ class DocumentStatus(str, Enum):
 
     UPLOADED = "uploaded"
     PROCESSING = "processing"
+    EMBEDDING_GENERATED = "embedding_generated"  # T-04-ST3: Embeddings created
     INDEXED = "indexed"
     FAILED = "failed"
 
@@ -60,6 +61,7 @@ class Document(Base):
     # RAG integration
     chunk_count = Column(Integer, nullable=True)  # Number of text chunks generated
     embedding_model = Column(String(100), nullable=True)  # OpenAI model used for embeddings
+    embedding_dimensions = Column(Integer, nullable=True)  # Dimensions of embedding vectors (T-04-ST3)
     vector_store_id = Column(String(100), nullable=True)  # ChromaDB collection ID
 
     # User context (from OAuth authentication)
@@ -105,6 +107,7 @@ class Document(Base):
             "processing_error": self.processing_error,
             "chunk_count": self.chunk_count,
             "embedding_model": self.embedding_model,
+            "embedding_dimensions": self.embedding_dimensions,
             "user_id": self.user_id,
             "user_email": self.user_email,
             "uploaded_at": self.uploaded_at.isoformat() if self.uploaded_at else None,

@@ -59,7 +59,7 @@ wii_subtasks:
     description: "Integrar cliente OpenAI para generar embeddings (text-embedding-3-small)."
     complejidad: 2
     entregable: "Test de integración que invoca al cliente OpenAI y verifica que se reciben los vectores."
-    status: "pendiente"
+    status: "completado"
   - id: "R1.WP1-T04-ST4"
     description: "Implementar lógica de upsert en ChromaDB para indexar y actualizar vectores y metadatos."
     complejidad: 3
