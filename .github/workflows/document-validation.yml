@@ -1,0 +1,36 @@
+# DEPRECATED: Document validation has been integrated into ci.yml and pr-validation.yml workflows
+# This file is kept for reference and will be removed in a future update.
+#
+# Document validation is now handled by:
+# - ci.yml: unified-quality-metrics job includes docs:validate:strict
+# - pr-validation.yml: docs-validation job provides comprehensive documentation validation
+#
+# Migration completed as part of workflow optimization to achieve frontend/backend parity
+# and eliminate redundancy in GitHub Actions pipelines.
+
+name: Document Validation (DEPRECATED)
+
+on:
+  # Disabled - functionality moved to main workflows
+  workflow_dispatch:
+    inputs:
+      legacy_run:
+        description: 'Run legacy document validation (use main workflows instead)'
+        required: false
+        default: 'false'
+
+jobs:
+  legacy-validation:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.legacy_run == 'true'
+
+    steps:
+    - name: Deprecation Notice
+      run: |
+        echo "⚠️ This workflow is DEPRECATED"
+        echo "📋 Document validation is now integrated into:"
+        echo "   - ci.yml (unified-quality-metrics job)"
+        echo "   - pr-validation.yml (docs-validation job)"
+        echo "🔄 Please use the main workflows instead"
+        echo "❌ This workflow will be removed in a future update"
+        exit 1

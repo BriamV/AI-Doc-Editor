@@ -25,8 +25,28 @@ servers:
     description: Production server
   - url: https://staging-api.aidoceditor.app
     description: Staging server
+  - url: http://localhost:8000
+    description: Local development server
 
 paths:
+  /:
+    get:
+      summary: Root endpoint
+      description: |
+        Root API endpoint that provides basic service information and health status.
+        Returns service metadata and environment-specific information.
+      operationId: getRoot
+      tags:
+        - Health
+      security: []
+      responses:
+        '200':
+          description: Service information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RootResponse'
+
   /healthz:
     get:
       summary: Health check endpoint
@@ -57,7 +77,74 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
 
-  /auth/login:
+  /api/health:
+    get:
+      summary: Comprehensive health check
+      description: |
+        Comprehensive health check endpoint with external dependencies.
+        Returns normalized HealthStatus payload with OpenAI API status and storage checks.
+        **Status**: ✅ IMPLEMENTED (T-23)
+      operationId: getComprehensiveHealth
+      tags:
+        - Health
+      security: []
+      responses:
+        '200':
+          description: Comprehensive health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComprehensiveHealthResponse'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComprehensiveHealthResponse'
+
+  /api/security/status:
+    get:
+      summary: Security configuration status
+      description: |
+        Security configuration status endpoint for monitoring security features.
+        Returns information about enabled security features.
+      operationId: getSecurityStatus
+      tags:
+        - Security
+      security: []
+      responses:
+        '200':
+          description: Security status information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityStatusResponse'
+
+  /api/security/tls:
+    get:
+      summary: TLS security status
+      description: |
+        TLS security configuration and status endpoint.
+        Returns TLS configuration details and security compliance information.
+      operationId: getTLSStatus
+      tags:
+        - Security
+      security: []
+      responses:
+        '200':
+          description: TLS security status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TLSStatusResponse'
+        '500':
+          description: TLS status retrieval failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
     post:
       summary: OAuth 2.0 authentication initiation
       description: |
@@ -68,12 +155,14 @@ paths:
       tags:
         - Authentication
       security: [] # Login endpoint is public
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LoginRequest'
+      parameters:
+        - name: provider
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [google, microsoft]
+          description: OAuth provider
       responses:
         '200':
           description: OAuth URL generated successfully
@@ -88,8 +177,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /auth/callback:
-    post:
+  /api/auth/callback:
+    get:
       summary: OAuth 2.0 callback handler
       description: |
         Handle OAuth callback and exchange authorization code for JWT tokens.
@@ -124,7 +213,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /auth/refresh:
+  /api/auth/refresh:
     post:
       summary: Refresh JWT token
       description: |
@@ -154,7 +243,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /auth/me:
+  /api/auth/me:
     get:
       summary: Get current user profile
       description: |
@@ -179,7 +268,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /config:
+  /api/config:
     get:
       summary: Get system configuration
       description: |
@@ -233,8 +322,709 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/user/credentials:
+    post:
+      summary: Store user credentials
+      description: |
+        Store encrypted OpenAI API key for the current user.
+        **Status**: ✅ IMPLEMENTED (T-41)
+      operationId: storeUserCredentials
+      tags:
+        - Credentials
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCredentials'
+      responses:
+        '200':
+          description: Credentials stored successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCredentialsResponse'
+        '400':
+          description: Invalid API key format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: Get user credentials status
+      description: |
+        Get user's API key status without returning the actual key.
+        **Status**: ✅ IMPLEMENTED (T-41)
+      operationId: getUserCredentialsStatus
+      tags:
+        - Credentials
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Credentials status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCredentialsResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete user credentials
+      description: |
+        Delete user's stored API key.
+        **Status**: ✅ IMPLEMENTED (T-41)
+      operationId: deleteUserCredentials
+      tags:
+        - Credentials
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Credentials deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API key deleted successfully
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No API key found for user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/audit/logs:
+    get:
+      summary: Retrieve audit logs
+      description: |
+        Retrieve audit logs with filtering and pagination (Admin only).
+        Supports comprehensive filtering by user, action type, date range, and other criteria.
+        **Status**: ✅ IMPLEMENTED (T-13)
+      operationId: getAuditLogs
+      tags:
+        - Audit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: user_id
+          in: query
+          schema:
+            type: string
+          description: Filter by user ID
+        - name: user_email
+          in: query
+          schema:
+            type: string
+          description: Filter by user email
+        - name: action_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/AuditActionType'
+          description: Filter by action type
+        - name: resource_type
+          in: query
+          schema:
+            type: string
+          description: Filter by resource type
+        - name: resource_id
+          in: query
+          schema:
+            type: string
+          description: Filter by resource ID
+        - name: ip_address
+          in: query
+          schema:
+            type: string
+          description: Filter by IP address
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [success, failure, error]
+          description: Filter by status
+        - name: date_from
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Filter from date (ISO format)
+        - name: date_to
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Filter to date (ISO format)
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 50
+          description: Items per page
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+            enum: [timestamp, action_type, user_email, status]
+            default: timestamp
+          description: Sort field
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Sort order
+      responses:
+        '200':
+          description: Audit logs retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogListResponse'
+        '400':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/audit/stats:
+    get:
+      summary: Get audit log statistics
+      description: |
+        Get audit log statistics and metrics (Admin only).
+        Provides overview statistics including event counts, top actions, top users, and security event summaries.
+        **Status**: ✅ IMPLEMENTED (T-13)
+      operationId: getAuditStats
+      tags:
+        - Audit
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Audit statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogStatsResponse'
+        '403':
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/audit/actions:
+    get:
+      summary: Get audit action types
+      description: |
+        Get list of all available audit action types (Admin only).
+        Returns all possible action types that can be used for filtering.
+        **Status**: ✅ IMPLEMENTED (T-13)
+      operationId: getAuditActionTypes
+      tags:
+        - Audit
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Action types retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '403':
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/audit/verify/{log_id}:
+    get:
+      summary: Verify log integrity
+      description: |
+        Verify the integrity of a specific audit log entry (Admin only).
+        Recalculates the hash of the audit log entry and compares it with the stored hash to detect any tampering.
+        **Status**: ✅ IMPLEMENTED (T-13)
+      operationId: verifyLogIntegrity
+      tags:
+        - Audit
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: log_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Audit log entry ID
+      responses:
+        '200':
+          description: Log integrity verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogIntegrityResponse'
+        '403':
+          description: Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
+    RootResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Service name
+          example: AI-Doc-Editor API
+        version:
+          type: string
+          description: API version
+          example: 0.1.0
+        status:
+          type: string
+          description: Service status
+          example: running
+        environment:
+          type: string
+          description: Environment name
+          example: development
+        security_enabled:
+          type: boolean
+          description: Security features status
+          example: true
+        docs:
+          type: string
+          description: Documentation URL or status
+          example: /docs
+      required:
+        - message
+        - version
+        - status
+        - environment
+        - security_enabled
+
+    ComprehensiveHealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded]
+          description: Overall health status
+        timestamp:
+          type: string
+          format: date-time
+          description: Health check timestamp
+        version:
+          type: string
+          description: API version
+        deps:
+          type: object
+          properties:
+            openai:
+              $ref: '#/components/schemas/OpenAIDependencyStatus'
+            browser:
+              $ref: '#/components/schemas/BrowserDependencyStatus'
+            storage:
+              $ref: '#/components/schemas/StorageDependencyStatus'
+          additionalProperties:
+            $ref: '#/components/schemas/GenericDependencyStatus'
+      required:
+        - status
+        - timestamp
+        - version
+        - deps
+
+    OpenAIDependencyStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [available, error, timeout, not_configured]
+        response_time_ms:
+          type: number
+          description: Response time in milliseconds
+        models_available:
+          type: integer
+          description: Number of available models
+        api_version:
+          type: string
+          description: API version
+        error:
+          type: string
+          description: Error message if status is error
+      required:
+        - status
+
+    BrowserDependencyStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [not_applicable]
+        note:
+          type: string
+          description: Browser dependency note
+      required:
+        - status
+
+    StorageDependencyStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [available, error]
+        type:
+          type: string
+          description: Storage type
+        writable:
+          type: boolean
+          description: Storage writable status
+        error:
+          type: string
+          description: Error message if status is error
+      required:
+        - status
+
+    GenericDependencyStatus:
+      type: object
+      properties:
+        status:
+          type: string
+        response_time_ms:
+          type: number
+          description: Response time in milliseconds
+        error:
+          type: string
+          description: Error message if applicable
+      required:
+        - status
+      additionalProperties: true
+
+    SecurityStatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: secure
+        environment:
+          type: string
+          example: development
+        rate_limiting:
+          type: boolean
+          description: Rate limiting enabled status
+        security_headers:
+          type: boolean
+          description: Security headers enabled status
+        audit_enabled:
+          type: boolean
+          description: Audit system enabled status
+        cors_restricted:
+          type: boolean
+          description: CORS restriction status
+        https_required:
+          type: boolean
+          description: HTTPS requirement status
+        debug_mode:
+          type: boolean
+          description: Debug mode status
+      required:
+        - status
+        - environment
+
+    TLSStatusResponse:
+      type: object
+      properties:
+        tls_enabled:
+          type: boolean
+          description: TLS enabled status
+        environment:
+          type: string
+          description: Environment name
+        tls_configuration:
+          type: object
+          description: TLS configuration details
+          additionalProperties: true
+        tls_1_3_available:
+          type: boolean
+          description: TLS 1.3 availability
+        enhanced_components_available:
+          type: boolean
+          description: Enhanced TLS components availability
+        cipher_suite_analysis:
+          type: object
+          description: Cipher suite analysis
+          additionalProperties: true
+        compliance_report:
+          type: object
+          description: Compliance report
+          additionalProperties: true
+        timestamp:
+          type: number
+          description: Status timestamp
+        error:
+          type: string
+          description: Error message if applicable
+      required:
+        - tls_enabled
+        - environment
+
+    UserCredentials:
+      type: object
+      properties:
+        openai_api_key:
+          type: string
+          description: OpenAI API key (must start with 'sk-')
+          pattern: '^sk-[A-Za-z0-9]{20,}$'
+          example: sk-1234567890abcdef1234567890abcdef
+      required:
+        - openai_api_key
+
+    UserCredentialsResponse:
+      type: object
+      properties:
+        has_api_key:
+          type: boolean
+          description: Whether user has an API key stored
+        key_preview:
+          type: string
+          description: Preview of the API key (e.g., 'sk-****...1234')
+          example: sk-****...1234
+      required:
+        - has_api_key
+
+    AuditActionType:
+      type: string
+      enum:
+        - USER_LOGIN
+        - USER_LOGOUT
+        - USER_REGISTRATION
+        - PASSWORD_CHANGE
+        - API_KEY_UPDATE
+        - DOCUMENT_CREATE
+        - DOCUMENT_UPDATE
+        - DOCUMENT_DELETE
+        - DOCUMENT_SHARE
+        - SYSTEM_CONFIG_CHANGE
+        - ADMIN_ACTION
+        - SECURITY_EVENT
+        - DATA_EXPORT
+        - DATA_IMPORT
+      description: Type of action performed
+
+    AuditLogEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique audit log entry ID
+        timestamp:
+          type: string
+          format: date-time
+          description: When the action occurred
+        action_type:
+          $ref: '#/components/schemas/AuditActionType'
+        description:
+          type: string
+          description: Human-readable description of the action
+        user_id:
+          type: string
+          description: ID of the user who performed the action
+        user_email:
+          type: string
+          format: email
+          description: Email of the user who performed the action
+        user_role:
+          type: string
+          enum: [editor, admin]
+          description: Role of the user who performed the action
+        resource_type:
+          type: string
+          description: Type of resource affected
+        resource_id:
+          type: string
+          description: ID of the resource affected
+        ip_address:
+          type: string
+          description: IP address of the client
+        user_agent:
+          type: string
+          description: User agent string
+        status:
+          type: string
+          enum: [success, failure, error]
+          description: Status of the action
+        details:
+          type: object
+          description: Additional action details
+          additionalProperties: true
+        integrity_hash:
+          type: string
+          description: Hash for integrity verification
+      required:
+        - id
+        - timestamp
+        - action_type
+        - description
+        - status
+
+    AuditLogListResponse:
+      type: object
+      properties:
+        logs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLogEntry'
+        total:
+          type: integer
+          description: Total number of logs matching criteria
+        page:
+          type: integer
+          description: Current page number
+        page_size:
+          type: integer
+          description: Number of items per page
+        total_pages:
+          type: integer
+          description: Total number of pages
+      required:
+        - logs
+        - total
+        - page
+        - page_size
+        - total_pages
+
+    AuditLogStatsResponse:
+      type: object
+      properties:
+        total_logs:
+          type: integer
+          description: Total number of audit logs
+        logs_by_action:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count of logs by action type
+        logs_by_user:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count of logs by user
+        logs_by_status:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count of logs by status
+        logs_by_date:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Count of logs by date
+        recent_actions:
+          type: integer
+          description: Number of recent actions
+        failed_logins:
+          type: integer
+          description: Number of failed login attempts
+        security_events:
+          type: integer
+          description: Number of security events
+      required:
+        - total_logs
+        - logs_by_action
+        - logs_by_user
+        - logs_by_status
+        - logs_by_date
+        - recent_actions
+
+    LogIntegrityResponse:
+      type: object
+      properties:
+        log_id:
+          type: string
+          description: ID of the verified log entry
+        integrity_valid:
+          type: boolean
+          description: Whether the log integrity is valid
+        verified_at:
+          type: string
+          description: Verification timestamp or system info
+        verified_by:
+          type: string
+          description: Email of the admin who verified
+      required:
+        - log_id
+        - integrity_valid
+        - verified_by
+
     HealthResponse:
       type: object
       properties:
@@ -472,6 +1262,12 @@ tags:
     description: User authentication and session management
   - name: Configuration
     description: System configuration management
+  - name: Security
+    description: Security status and monitoring endpoints
+  - name: Credentials
+    description: User credential management (API keys)
+  - name: Audit
+    description: Audit log access and integrity verification (Admin only)
 # Future endpoints (planned for R1-R6)
 # /upload - File ingesta RAG (T-04)
 # /plan - Planner service (T-05)

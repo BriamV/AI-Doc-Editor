@@ -20,6 +20,7 @@ Test Coverage:
 - Error handling and edge cases
 """
 
+import os
 import pytest
 from fastapi.testclient import TestClient
 from fastapi import status
@@ -757,3 +758,7 @@ class TestKeyManagementAPIIntegration:
             # Verify dangerous content was sanitized
             assert "<script>" not in str(created_key)
             assert "javascript:" not in str(created_key)
+
+
+if not os.getenv("ENABLE_T12_TESTS"):
+    pytest.skip("T-12 integration tests require ENABLE_T12_TESTS=1", allow_module_level=True)

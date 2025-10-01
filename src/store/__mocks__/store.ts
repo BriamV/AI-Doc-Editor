@@ -1,6 +1,6 @@
 /**
  * Mock store for testing
- * Provides jest-compatible Zustand store mocking
+ * Provides Vitest-compatible Zustand store mocking
  */
 
 import {
@@ -94,30 +94,30 @@ const mockStoreState = {
   },
 
   // Actions
-  fetchAuditLogs: jest.fn().mockResolvedValue(undefined),
-  setFilters: jest.fn(),
-  clearFilters: jest.fn(),
-  setSortConfig: jest.fn(),
-  goToPage: jest.fn(),
-  changePageSize: jest.fn(),
-  toggleRowExpansion: jest.fn(),
-  toggleLogSelection: jest.fn(),
-  selectAllLogs: jest.fn(),
-  clearSelection: jest.fn(),
-  fetchActionTypes: jest.fn().mockResolvedValue(undefined),
-  fetchUsers: jest.fn().mockResolvedValue(undefined),
-  fetchAuditStats: jest.fn().mockResolvedValue(undefined),
-  exportLogs: jest.fn().mockResolvedValue(undefined),
+  fetchAuditLogs: vi.fn().mockResolvedValue(undefined),
+  setFilters: vi.fn(),
+  clearFilters: vi.fn(),
+  setSortConfig: vi.fn(),
+  goToPage: vi.fn(),
+  changePageSize: vi.fn(),
+  toggleRowExpansion: vi.fn(),
+  toggleLogSelection: vi.fn(),
+  selectAllLogs: vi.fn(),
+  clearSelection: vi.fn(),
+  fetchActionTypes: vi.fn().mockResolvedValue(undefined),
+  fetchUsers: vi.fn().mockResolvedValue(undefined),
+  fetchAuditStats: vi.fn().mockResolvedValue(undefined),
+  exportLogs: vi.fn().mockResolvedValue(undefined),
 };
 
 // Create store mock that can be updated by tests
 const createStoreMock = (initialState = {}) => {
   const state = { ...mockStoreState, ...initialState };
 
-  return jest.fn(() => state);
+  return vi.fn(() => state);
 };
 
-// Default export for jest.mock
+// Default export for vi.mock
 const useStore = createStoreMock();
 
 export default useStore;

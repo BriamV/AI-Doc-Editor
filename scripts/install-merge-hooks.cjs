@@ -27,7 +27,7 @@ class GitHooksInstaller {
       success: '\x1b[32m',
       warn: '\x1b[33m',
       error: '\x1b[31m',
-      reset: '\x1b[0m'
+      reset: '\x1b[0m',
     };
     console.log(`${colors[level]}${message}${colors.reset}`);
   }
@@ -177,7 +177,6 @@ fi
       this.log('info', '  • post-merge: Validates merge integrity after completion');
       this.log('success', '');
       this.log('success', '🛡️  Your repository is now protected against merge disasters!');
-
     } catch (error) {
       this.log('error', `💥 Hook installation failed: ${error.message}`);
       process.exit(1);

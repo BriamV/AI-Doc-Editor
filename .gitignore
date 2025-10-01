@@ -64,7 +64,7 @@ __pycache__/
 # Environment variables
 .vscode
 tasks.json
-tasks/
+/tasks/
 package-lock.json
 .eslintcache
 app.db
@@ -105,3 +105,16 @@ cypress/videos/
 
 # Playwright MCP artifacts
 .playwright-mcp/
+
+# Python testing frameworks
+.hypothesis/
+
+# Temporary development reports
+*-report.json
+*-validation-report.md
+*-fixes-report.json
+command-fix-report.json
+comprehensive-validation-report.md
+final-fixes-report.json
+.claude/hooks.json.backup-*
+.claude/session-context.json

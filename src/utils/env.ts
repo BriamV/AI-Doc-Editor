@@ -12,7 +12,7 @@ export const getEnvVar = (key: string): string | undefined => {
   // Check if running in test environment first (Jest)
   if (
     typeof process !== 'undefined' &&
-    (typeof jest !== 'undefined' || process.env.NODE_ENV === 'test')
+    ((typeof globalThis !== 'undefined' && 'vi' in globalThis) || process.env.NODE_ENV === 'test')
   ) {
     // In test environment, use process.env which is set up in jest.setup.ts
     // eslint-disable-next-line security/detect-object-injection

@@ -1,0 +1,26 @@
+# Data Integrity Checksums - Sub Tareas v2.md Migration Archive
+# Generated: 2025-09-25
+# Purpose: Validation of complete data preservation during archival
+
+# Original Source File
+33849943bc9229253a194c0e71e85b3b  docs/project-management/Sub Tareas v2.md
+5dc3689b944166ea930e495275f4265ff9c37b5793c768286c115f06696d58ff  docs/project-management/Sub Tareas v2.md
+
+# Archived Legacy File
+33849943bc9229253a194c0e71e85b3b  docs/project-management/archive/Sub-Tareas-v2-LEGACY.md
+5dc3689b944166ea930e495275f4265ff9c37b5793c768286c115f06696d58ff  docs/project-management/archive/Sub-Tareas-v2-LEGACY.md
+
+# Verification: Source and archived checksums match ✅ INTEGRITY CONFIRMED
+
+# Distributed Task Files Checksums
+# Note: These represent the distributed equivalent of the original 161KB data
+# Generated via: for file in docs/tasks/T-*-STATUS.md; do sha256sum "$file"; done
+
+# Individual task file checksums will be appended here during validation
+# Total distributed files: 47 (T-01-STATUS.md through T-47-STATUS.md)
+# Expected aggregate preservation: 100% of original content in new format
+
+# Validation Commands:
+# Verify original vs archive: diff <(md5sum "docs/project-management/Sub Tareas v2.md") <(md5sum "docs/project-management/archive/Sub-Tareas-v2-LEGACY.md")
+# Count distributed files: find docs/tasks/ -name "T-*-STATUS.md" | wc -l  # Should return 47
+# Verify all files exist: for i in {01..47}; do [ -f "docs/tasks/T-$i-STATUS.md" ] && echo "✅ T-$i" || echo "❌ T-$i missing"; done

@@ -13,6 +13,10 @@ cypress/fixtures/
 **/*.spec.js
 **/*.spec.ts
 
+# Integration test files (may contain intentional security test cases)
+tests/integration/
+**/integration/**/
+
 # Node modules and dependencies
 node_modules/
 .yarn/

@@ -51,8 +51,7 @@ class MultiPlatformValidator {
     if (this.isWin) return false;
     try {
       const release = fs.readFileSync('/proc/version', 'utf8');
-      return release.toLowerCase().includes('microsoft') ||
-             release.toLowerCase().includes('wsl');
+      return release.toLowerCase().includes('microsoft') || release.toLowerCase().includes('wsl');
     } catch {
       return false;
     }
@@ -128,9 +127,7 @@ class MultiPlatformValidator {
     this.log('debug', 'Searching for system Python interpreter...');
 
     // Try common Python commands first
-    const candidates = this.isWin
-      ? ['py', 'python', 'python3']
-      : ['python3', 'python'];
+    const candidates = this.isWin ? ['py', 'python', 'python3'] : ['python3', 'python'];
 
     for (const cmd of candidates) {
       this.log('debug', `Testing Python command: ${cmd}`);
@@ -151,9 +148,27 @@ class MultiPlatformValidator {
           'C:\\Python312\\python.exe',
           'C:\\Python313\\python.exe',
           'D:\\Programs\\Python\\Python313\\python.exe',
-          path.join(process.env.LOCALAPPDATA || '', 'Programs', 'Python', 'Python311', 'python.exe'),
-          path.join(process.env.LOCALAPPDATA || '', 'Programs', 'Python', 'Python312', 'python.exe'),
-          path.join(process.env.LOCALAPPDATA || '', 'Programs', 'Python', 'Python313', 'python.exe'),
+          path.join(
+            process.env.LOCALAPPDATA || '',
+            'Programs',
+            'Python',
+            'Python311',
+            'python.exe'
+          ),
+          path.join(
+            process.env.LOCALAPPDATA || '',
+            'Programs',
+            'Python',
+            'Python312',
+            'python.exe'
+          ),
+          path.join(
+            process.env.LOCALAPPDATA || '',
+            'Programs',
+            'Python',
+            'Python313',
+            'python.exe'
+          ),
           path.join(process.env.APPDATA || '', 'Python', 'Python311', 'python.exe'),
           'C:\\msys64\\mingw64\\bin\\python.exe',
         ]
@@ -165,7 +180,7 @@ class MultiPlatformValidator {
           '/opt/python/bin/python3',
           '/opt/homebrew/bin/python3', // macOS Homebrew
           '/usr/local/opt/python/bin/python3', // macOS Homebrew old location
-          ...(this.isWSL ? ['/mnt/c/Python/python.exe', '/mnt/c/Python3/python.exe'] : [])
+          ...(this.isWSL ? ['/mnt/c/Python/python.exe', '/mnt/c/Python3/python.exe'] : []),
         ];
 
     for (const pythonPath of fallbackPaths) {
@@ -183,7 +198,7 @@ class MultiPlatformValidator {
 
     throw new Error(
       'No suitable Python interpreter found. Please ensure Python 3.8+ is installed and accessible.\n' +
-      'Visit: https://python.org/downloads/ for installation instructions.'
+        'Visit: https://python.org/downloads/ for installation instructions.'
     );
   }
 
@@ -192,8 +207,11 @@ class MultiPlatformValidator {
    */
   validatePythonVersion(pythonCmd) {
     try {
-      const result = spawnSync(pythonCmd, ['-c', 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'],
-        { stdio: 'pipe', encoding: 'utf8' });
+      const result = spawnSync(
+        pythonCmd,
+        ['-c', 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")'],
+        { stdio: 'pipe', encoding: 'utf8' }
+      );
 
       if (result.status !== 0) {
         throw new Error('Failed to get Python version');
@@ -221,7 +239,7 @@ class MultiPlatformValidator {
       stdio: 'inherit',
       cwd: this.repoRoot,
       env: { ...process.env, PYTHONPATH: this.backendDir },
-      ...options
+      ...options,
     };
 
     this.log('debug', `Executing: ${cmd} ${args.join(' ')}`);
@@ -253,25 +271,25 @@ class MultiPlatformValidator {
         arch: process.arch,
         isWSL: this.isWSL,
         nodeVersion: process.version,
-        workingDir: this.repoRoot
+        workingDir: this.repoRoot,
       },
       directories: {},
       python: {},
       virtualenv: {},
       tools: {},
-      issues: []
+      issues: [],
     };
 
     try {
       // Directory validation
       diagnostics.directories.backend = {
         exists: this.fileExists(this.backendDir),
-        path: this.backendDir
+        path: this.backendDir,
       };
 
       diagnostics.directories.venv = {
         exists: this.fileExists(this.venvDir),
-        path: this.venvDir
+        path: this.venvDir,
       };
 
       // Python validation
@@ -281,12 +299,12 @@ class MultiPlatformValidator {
         diagnostics.python = {
           found: true,
           path: systemPython,
-          version: pythonVersion
+          version: pythonVersion,
         };
       } catch (error) {
         diagnostics.python = {
           found: false,
-          error: error.message
+          error: error.message,
         };
         diagnostics.issues.push(`Python: ${error.message}`);
       }
@@ -320,14 +338,16 @@ class MultiPlatformValidator {
         const exists = this.fileExists(toolPath);
         diagnostics.tools[tool] = {
           path: toolPath,
-          available: exists
+          available: exists,
         };
 
         if (!exists && diagnostics.virtualenv.functional) {
           // Try as Python module
           try {
-            const result = spawnSync(venvPython, ['-c', `import ${tool}`],
-              { stdio: 'pipe', timeout: 5000 });
+            const result = spawnSync(venvPython, ['-c', `import ${tool}`], {
+              stdio: 'pipe',
+              timeout: 5000,
+            });
             diagnostics.tools[tool].moduleAvailable = result.status === 0;
           } catch {
             diagnostics.tools[tool].moduleAvailable = false;
@@ -336,23 +356,18 @@ class MultiPlatformValidator {
       }
 
       // Requirements files validation
-      const reqFiles = [
-        'requirements.txt',
-        'requirements-dev.txt',
-        'requirements-optional.txt'
-      ];
+      const reqFiles = ['requirements.txt', 'requirements-dev.txt', 'requirements-optional.txt'];
 
       diagnostics.requirements = {};
       for (const reqFile of reqFiles) {
         const reqPath = path.join(this.backendDir, reqFile);
         diagnostics.requirements[reqFile] = {
           exists: this.fileExists(reqPath),
-          path: reqPath
+          path: reqPath,
         };
       }
 
       return diagnostics;
-
     } catch (error) {
       diagnostics.issues.push(`Environment validation failed: ${error.message}`);
       return diagnostics;
@@ -467,20 +482,27 @@ class MultiPlatformValidator {
       serverArgs = [
         'app.main:app',
         '--reload',
-        '--app-dir', 'backend',
-        '--host', '127.0.0.1',
-        '--port', '8000'
+        '--app-dir',
+        'backend',
+        '--host',
+        '127.0.0.1',
+        '--port',
+        '8000',
       ];
     } else {
       this.log('info', 'Using python -m uvicorn');
       serverCommand = venvPython;
       serverArgs = [
-        '-m', 'uvicorn',
+        '-m',
+        'uvicorn',
         'app.main:app',
         '--reload',
-        '--app-dir', 'backend',
-        '--host', '127.0.0.1',
-        '--port', '8000'
+        '--app-dir',
+        'backend',
+        '--host',
+        '127.0.0.1',
+        '--port',
+        '8000',
       ];
     }
 
@@ -494,7 +516,7 @@ class MultiPlatformValidator {
     const child = spawn(serverCommand, serverArgs, {
       stdio: 'inherit',
       cwd: this.repoRoot,
-      env: { ...process.env, PYTHONPATH: this.backendDir }
+      env: { ...process.env, PYTHONPATH: this.backendDir },
     });
 
     // Enhanced process management
@@ -507,13 +529,13 @@ class MultiPlatformValidator {
       process.exit(code ?? 0);
     });
 
-    child.on('error', (error) => {
+    child.on('error', error => {
       this.log('error', `Failed to start development server: ${error.message}`);
       process.exit(1);
     });
 
     // Handle process termination gracefully
-    const gracefulShutdown = (signal) => {
+    const gracefulShutdown = signal => {
       this.log('info', `\nReceived ${signal}, shutting down development server...`);
       child.kill('SIGTERM');
 
@@ -571,7 +593,7 @@ class MultiPlatformValidator {
    * Main command router
    */
   async execute() {
-    const [,, command, ...args] = process.argv;
+    const [, , command, ...args] = process.argv;
 
     if (!command) {
       console.error('Usage: node scripts/multiplatform.cjs <command> [args...]');
@@ -654,7 +676,7 @@ class MultiPlatformValidator {
 // Execute if called directly
 if (require.main === module) {
   const validator = new MultiPlatformValidator();
-  validator.execute().catch((error) => {
+  validator.execute().catch(error => {
     console.error('Unhandled error:', error.message);
     process.exit(1);
   });

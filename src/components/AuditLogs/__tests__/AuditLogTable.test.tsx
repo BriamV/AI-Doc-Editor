@@ -12,8 +12,8 @@ import useStore from '../../../store/store';
 import { mockAuditLogs } from '../../../store/__mocks__/store';
 
 // Mock the store
-jest.mock('../../../store/store');
-const mockUseStore = useStore as jest.MockedFunction<typeof useStore>;
+vi.mock('../../../store/store');
+const mockUseStore = useStore as unknown as ReturnType<typeof vi.fn>;
 
 // Using mock audit log data from store mock
 
@@ -24,20 +24,20 @@ const defaultMockState = {
   },
   expandedRows: new Set<string>(),
   selectedLogs: new Set<string>(),
-  setSortConfig: jest.fn(),
-  toggleRowExpansion: jest.fn(),
-  toggleLogSelection: jest.fn(),
-  selectAllLogs: jest.fn(),
-  clearSelection: jest.fn(),
+  setSortConfig: vi.fn(),
+  toggleRowExpansion: vi.fn(),
+  toggleLogSelection: vi.fn(),
+  selectAllLogs: vi.fn(),
+  clearSelection: vi.fn(),
 };
 
 describe('AuditLogTable Component', () => {
   let mockStore: typeof defaultMockState & {
-    setSortConfig: jest.Mock;
-    toggleRowExpansion: jest.Mock;
-    toggleLogSelection: jest.Mock;
-    selectAllLogs: jest.Mock;
-    clearSelection: jest.Mock;
+    setSortConfig: ReturnType<typeof vi.fn>;
+    toggleRowExpansion: ReturnType<typeof vi.fn>;
+    toggleLogSelection: ReturnType<typeof vi.fn>;
+    selectAllLogs: ReturnType<typeof vi.fn>;
+    clearSelection: ReturnType<typeof vi.fn>;
   };
   const user = userEvent.setup();
 
@@ -49,17 +49,17 @@ describe('AuditLogTable Component', () => {
   beforeEach(() => {
     mockStore = {
       ...defaultMockState,
-      setSortConfig: jest.fn(),
-      toggleRowExpansion: jest.fn(),
-      toggleLogSelection: jest.fn(),
-      selectAllLogs: jest.fn(),
-      clearSelection: jest.fn(),
+      setSortConfig: vi.fn(),
+      toggleRowExpansion: vi.fn(),
+      toggleLogSelection: vi.fn(),
+      selectAllLogs: vi.fn(),
+      clearSelection: vi.fn(),
     };
     mockUseStore.mockReturnValue(mockStore);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('renders table with audit log data', () => {

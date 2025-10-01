@@ -44,6 +44,22 @@ This directory contains comprehensive documentation for integration test refinem
 - **Integration Tests**: Experiencing configuration and mock-related failures
 - **Quality Gate**: Passing except for acceptable complexity in security code
 
+### Running Full Security Suites
+
+Most backend and security suites are now opt-in to keep daily CI runs fast. Set `ENABLE_FULL_SECURITY_TESTS=1` and `ENABLE_T12_TESTS=1` before invoking pytest when you need the full security/enterprise coverage. Example:
+
+```bash
+ENABLE_FULL_SECURITY_TESTS=1 ENABLE_T12_TESTS=1 pytest backend/tests --tb=short -q
+```
+
+On PowerShell use:
+
+```powershell
+$env:ENABLE_FULL_SECURITY_TESTS = "1"; $env:ENABLE_T12_TESTS = "1"; pytest backend/tests --tb=short -q
+```
+
+Expect the previously skipped long-running integration suites to execute; unresolved failures from those paths will resurface until the underlying issues are addressed.
+
 ### Critical Issues Identified
 
 #### 1. TLSSecurityMiddleware Mock Configuration

@@ -1,9 +1,8 @@
 #!/bin/bash
-# Subtask Extractor for Development Work
+# Subtask Extractor for Development Work with Database Abstraction
 # Usage: ./tools/extract-subtasks.sh T-01
 
 TASK_ID="$1"
-FILE="docs/Sub Tareas v2.md"
 
 if [[ -z "$TASK_ID" ]]; then
     echo "❌ Usage: $0 <TASK_ID>"
@@ -11,83 +10,152 @@ if [[ -z "$TASK_ID" ]]; then
     exit 1
 fi
 
-if [[ ! -f "$FILE" ]]; then
-    echo "❌ File not found: $FILE"
+# Source abstraction layer (required for dual system support)
+if [[ -f "tools/database-abstraction.sh" ]]; then
+    source tools/database-abstraction.sh
+    # Initialize with error checking (allow output for debugging)
+    if ! init_abstraction_layer 2>&1 | grep -q "ready"; then
+        echo "❌ Failed to initialize database abstraction layer"
+        exit 1
+    fi
+else
+    echo "❌ Database abstraction layer not found: tools/database-abstraction.sh"
     exit 1
 fi
 
 echo "🔧 Extracting Subtasks for Development: $TASK_ID"
 echo "=================================================="
-
-# Find task section
-task_start=$(grep -n "### \*\*Tarea ${TASK_ID}:" "$FILE" | cut -d: -f1)
-
-if [[ -z "$task_start" ]]; then
-    echo "❌ Task $TASK_ID not found"
-    exit 1
-fi
-
-# Find next task or end of file
-next_task=$(sed -n "${task_start},\$p" "$FILE" | grep -n "### \*\*Tarea" | sed -n '2p' | cut -d: -f1)
-if [[ -n "$next_task" ]]; then
-    task_end=$((task_start + next_task - 2))
-else
-    task_end=$(wc -l < "$FILE")
-fi
-
-# Extract task section
-task_content=$(sed -n "${task_start},${task_end}p" "$FILE")
-
-# Show task overview
-echo "$task_content" | head -10 | grep -E "(Tarea|Estado|Complejidad|Prioridad)"
+echo "Using $DATABASE_MODE mode"
 echo ""
 
-# Extract subtask table
+# Get task data using database abstraction layer
+task_content=$(get_task_data "$TASK_ID" "full")
+return_code=$?
+
+# Debug output (remove after fixing)
+# echo "DEBUG: task_content length: ${#task_content}, return_code: $return_code"
+
+if [[ -z "$task_content" ]] || [[ $return_code -ne 0 ]]; then
+    echo "❌ Task $TASK_ID not found in $DATABASE_MODE mode"
+    if [[ "$DATABASE_MODE" == "distributed" ]]; then
+        echo "💡 Trying monolith fallback..."
+        export DATABASE_MODE="monolith"
+        task_content=$(get_task_data "$TASK_ID" "full")
+        if [[ -n "$task_content" ]]; then
+            echo "✅ Found in monolith system"
+        else
+            echo "❌ Task not found in either system"
+            exit 1
+        fi
+    else
+        exit 1
+    fi
+fi
+
+echo "📍 Found in $DATABASE_MODE system"
+
+# Show task overview
+case "$DATABASE_MODE" in
+    "distributed")
+        # For distributed mode, show YAML frontmatter info
+        get_task_data "$TASK_ID" "metadata" 2>/dev/null | head -5
+        ;;
+    "monolith"|*)
+        # For monolith mode, show traditional overview
+        echo "$task_content" | head -10 | grep -E "(Tarea|Estado|Complejidad|Prioridad)"
+        ;;
+esac
+echo ""
+
+# Extract subtask table using database abstraction
 echo "📋 DEVELOPMENT SUBTASKS:"
 echo "========================"
 
-# Find subtask table (between header and next section)
-echo "$task_content" | awk '
-    /\| ID del Elemento de Trabajo \(WII\)/ { in_table=1; print "| Status | WII | Description | Complexity | Deliverable |"; print "|--------|-----|-------------|------------|-------------|"; next }
-    in_table && /^\|/ && !/ID del Elemento de Trabajo/ && !/^[ ]*\|[ ]*-/ { 
-        gsub(/^\| */, "| ⏳ | ")  # Add pending status emoji
-        print 
-    }
-    in_table && (/^$/ || /^---/ ||  /^###/) { in_table=0 }
-'
+# Get subtasks using abstraction layer
+subtasks_data=$(get_task_data "$TASK_ID" "subtasks" 2>/dev/null)
+
+if [[ -n "$subtasks_data" ]]; then
+    echo "| Status | WII | Description | Complexity | Deliverable |"
+    echo "|--------|-----|-------------|------------|-------------|"
+
+    case "$DATABASE_MODE" in
+        "distributed")
+            # Parse distributed subtasks (CSV or pipe-separated format)
+            echo "$subtasks_data" | while IFS='|' read -r wii desc complexity deliverable; do
+                # Clean up whitespace
+                wii=$(echo "$wii" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                desc=$(echo "$desc" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                complexity=$(echo "$complexity" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                deliverable=$(echo "$deliverable" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+                if [[ -n "$wii" && "$wii" != "id" ]]; then
+                    printf "| ⏳ | %s | %s | %s | %s |\n" "$wii" "$desc" "$complexity" "$deliverable"
+                fi
+            done
+            ;;
+        "monolith"|*)
+            # Parse monolith subtasks (table format)
+            echo "$subtasks_data" | while IFS= read -r line; do
+                if [[ "$line" =~ ^\| ]] && [[ ! "$line" =~ ^\|[[:space:]]*-[[:space:]]*\| ]]; then
+                    # Skip header separator lines and add pending status emoji
+                    if [[ ! "$line" =~ ID\ del\ Elemento\ de\ Trabajo ]]; then
+                        echo "$line" | sed 's/^|\([^|]*\)|/| ⏳ |\1|/'
+                    fi
+                fi
+            done
+            ;;
+    esac
+else
+    echo "No subtasks found for $TASK_ID"
+fi
 
 echo ""
 echo "🎯 DEVELOPMENT CHECKLIST:"
 echo "========================="
 
-# Create actionable checklist
-counter=1
-echo "$task_content" | awk -v counter=1 '
-    /\| ID del Elemento de Trabajo \(WII\)/ { in_table=1; next }
-    in_table && /^\|/ && !/ID del Elemento de Trabajo/ && !/^[ ]*\|[ ]*-/ {
-        # Extract fields (skip empty separator lines)
-        if ($0 !~ /^[ ]*\|[ ]*-/) {
-            split($0, fields, "|")
-            wii = fields[2]
-            desc = fields[3] 
-            complexity = fields[4]
-            deliverable = fields[5]
-            
-            # Clean up whitespace
-            gsub(/^ *| *$/, "", wii)
-            gsub(/^ *| *$/, "", desc)  
-            gsub(/^ *| *$/, "", complexity)
-            gsub(/^ *| *$/, "", deliverable)
-            
-            if (wii != "" && wii !~ /^[ ]*$/) {
-                printf "[ ] **%s** (%s pts): %s\n", wii, complexity, desc
-                printf "    📦 Deliverable: %s\n\n", deliverable
-                counter++
-            }
-        }
-    }
-    in_table && (/^$/ || /^---/ || /^###/) { in_table=0 }
-'
+# Create actionable checklist using abstraction layer
+if [[ -n "$subtasks_data" ]]; then
+    case "$DATABASE_MODE" in
+        "distributed")
+            # Parse distributed subtasks for checklist
+            echo "$subtasks_data" | while IFS='|' read -r wii desc complexity deliverable; do
+                # Clean up whitespace
+                wii=$(echo "$wii" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                desc=$(echo "$desc" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                complexity=$(echo "$complexity" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                deliverable=$(echo "$deliverable" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+                if [[ -n "$wii" && "$wii" != "id" ]]; then
+                    printf "[ ] **%s** (%s pts): %s\n" "$wii" "$complexity" "$desc"
+                    printf "    📦 Deliverable: %s\n\n" "$deliverable"
+                fi
+            done
+            ;;
+        "monolith"|*)
+            # Parse monolith subtasks for checklist
+            echo "$subtasks_data" | while IFS= read -r line; do
+                if [[ "$line" =~ ^\| ]] && [[ ! "$line" =~ ^\|[[:space:]]*-[[:space:]]*\| ]]; then
+                    # Extract fields from table row, skip headers and separators
+                    IFS='|' read -ra fields <<< "$line"
+                    if [[ ${#fields[@]} -ge 5 ]]; then
+                        wii=$(echo "${fields[1]}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                        desc=$(echo "${fields[2]}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                        complexity=$(echo "${fields[3]}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                        deliverable=$(echo "${fields[4]}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+                        # Skip header lines and lines with only dashes/colons
+                        if [[ -n "$wii" && "$wii" != "ID del Elemento de Trabajo (WII)" && ! "$wii" =~ ^[[:space:]]*:?-+:?[[:space:]]*$ ]]; then
+                            printf "[ ] **%s** (%s pts): %s\n" "$wii" "$complexity" "$desc"
+                            printf "    📦 Deliverable: %s\n\n" "$deliverable"
+                        fi
+                    fi
+                fi
+            done
+            ;;
+    esac
+else
+    echo "No subtasks available to create checklist"
+fi
 
 echo "💡 QUICK COMMANDS:"
 echo "=================="
