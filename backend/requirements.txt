@@ -2,7 +2,7 @@
 # Updated to resolve security vulnerabilities found by pip-audit
 
 # Core FastAPI
-fastapi==0.115.6  # Updated to resolve starlette vulnerabilities
+fastapi==0.117.1  # Updated to resolve starlette vulnerabilities (includes starlette 0.47.2)
 uvicorn[standard]==0.30.3
 python-multipart==0.0.18
 
