@@ -14,6 +14,7 @@ export interface AuthSlice {
   accessToken?: string;
   refreshToken?: string;
   user?: User;
+  testMode: boolean; // Dual-mode: track if using test authentication
   setApiKey: (apiKey: string) => void;
   setApiEndpoint: (apiEndpoint: string) => void;
   setFirstVisit: (firstVisit: boolean) => void;
@@ -36,6 +37,7 @@ export const createAuthSlice: StoreSlice<AuthSlice> = set => ({
   accessToken: undefined,
   refreshToken: undefined,
   user: undefined,
+  testMode: false,
   setApiKey: (apiKey: string) => {
     set((prev: AuthSlice) => ({
       ...prev,
@@ -80,15 +82,23 @@ export const createAuthSlice: StoreSlice<AuthSlice> = set => ({
       ...prev,
       user,
       isAuthenticated: true,
+      testMode: user.test_mode || false, // Track test mode from user object
     }));
   },
   logout: () => {
+    // Clear localStorage when logging out
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('test_mode');
+
     set((prev: AuthSlice) => ({
       ...prev,
       accessToken: undefined,
       refreshToken: undefined,
       user: undefined,
       isAuthenticated: false,
+      testMode: false,
     }));
   },
 });

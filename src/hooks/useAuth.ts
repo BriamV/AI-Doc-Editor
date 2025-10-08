@@ -165,6 +165,8 @@ export const useAuth = () => {
     handleCallback,
     refreshAccessToken,
     getCurrentUser,
+    setTokens, // Dual-mode: expose for test authentication
+    setUser, // Dual-mode: expose for test authentication
 
     // Utilities
     hasRole,
