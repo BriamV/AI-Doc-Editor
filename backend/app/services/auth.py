@@ -31,13 +31,19 @@ class AuthService:
     def __init__(self):
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-    def create_access_token(self, data: Dict[str, Any]) -> str:
+    def create_access_token(self, data: Dict[str, Any], expires_minutes: int = None) -> str:
         """
         Create JWT access token
         T-02-ST2: JWT generation with roles
+
+        Args:
+            data: Token payload data
+            expires_minutes: Optional custom expiration time in minutes.
+                           If None, uses settings.ACCESS_TOKEN_EXPIRE_MINUTES
         """
         to_encode = data.copy()
-        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expiry_minutes = expires_minutes or settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        expire = datetime.utcnow() + timedelta(minutes=expiry_minutes)
         to_encode.update({"exp": expire, "type": "access"})
 
         encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
