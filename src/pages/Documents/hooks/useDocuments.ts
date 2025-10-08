@@ -19,6 +19,16 @@ interface UseDocumentsState {
   };
 }
 
+const buildApiParams = (
+  currentPage: number,
+  pageSize: number,
+  filters: { fileType?: string; status?: string }
+): DocumentListParams => ({
+  limit: pageSize,
+  offset: (currentPage - 1) * pageSize,
+  ...filters,
+});
+
 export const useDocuments = (token: string | null) => {
   const [state, setState] = useState<UseDocumentsState>({
     documents: [],
@@ -39,12 +49,7 @@ export const useDocuments = (token: string | null) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const params: DocumentListParams = {
-        limit: state.pageSize,
-        offset: (state.currentPage - 1) * state.pageSize,
-        ...state.filters,
-      };
-
+      const params = buildApiParams(state.currentPage, state.pageSize, state.filters);
       const response = await documentsAPI.listDocuments(token, params);
 
       setState(prev => ({
@@ -62,36 +67,23 @@ export const useDocuments = (token: string | null) => {
     }
   }, [token, state.currentPage, state.pageSize, state.filters]);
 
-  const setPage = useCallback((page: number) => {
-    setState(prev => ({ ...prev, currentPage: page }));
-  }, []);
-
-  const setPageSize = useCallback((size: number) => {
-    setState(prev => ({ ...prev, pageSize: size, currentPage: 1 }));
-  }, []);
-
-  const setFilters = useCallback((filters: { fileType?: string; status?: string }) => {
-    setState(prev => ({ ...prev, filters, currentPage: 1 }));
-  }, []);
-
-  const clearError = useCallback(() => {
-    setState(prev => ({ ...prev, error: null }));
-  }, []);
-
-  const refresh = useCallback(() => {
-    fetchDocuments();
-  }, [fetchDocuments]);
-
   useEffect(() => {
     fetchDocuments();
   }, [fetchDocuments]);
 
   return {
     ...state,
-    setPage,
-    setPageSize,
-    setFilters,
-    clearError,
-    refresh,
+    setPage: useCallback((page: number) => setState(prev => ({ ...prev, currentPage: page })), []),
+    setPageSize: useCallback(
+      (size: number) => setState(prev => ({ ...prev, pageSize: size, currentPage: 1 })),
+      []
+    ),
+    setFilters: useCallback(
+      (filters: { fileType?: string; status?: string }) =>
+        setState(prev => ({ ...prev, filters, currentPage: 1 })),
+      []
+    ),
+    clearError: useCallback(() => setState(prev => ({ ...prev, error: null })), []),
+    refresh: fetchDocuments,
   };
 };

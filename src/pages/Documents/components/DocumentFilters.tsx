@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import FilterSelect from './FilterSelect';
 
 interface DocumentFiltersProps {
   fileType?: string;
@@ -12,6 +13,20 @@ interface DocumentFiltersProps {
   onStatusChange: (status: string) => void;
   onClearFilters: () => void;
 }
+
+const fileTypeOptions = [
+  { value: '', label: 'All' },
+  { value: 'pdf', label: 'PDF' },
+  { value: 'docx', label: 'DOCX' },
+  { value: 'md', label: 'Markdown' },
+];
+
+const statusOptions = [
+  { value: '', label: 'All' },
+  { value: 'processing', label: 'Processing' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'failed', label: 'Failed' },
+];
 
 const DocumentFilters: React.FC<DocumentFiltersProps> = ({
   fileType,
@@ -27,43 +42,22 @@ const DocumentFilters: React.FC<DocumentFiltersProps> = ({
       <div className="flex flex-wrap items-center gap-4">
         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Filters:</h3>
 
-        {/* File Type Filter */}
-        <div className="flex items-center space-x-2">
-          <label htmlFor="file-type-filter" className="text-sm text-gray-600 dark:text-gray-400">
-            File Type:
-          </label>
-          <select
-            id="file-type-filter"
-            value={fileType || ''}
-            onChange={e => onFileTypeChange(e.target.value)}
-            className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-          >
-            <option value="">All</option>
-            <option value="pdf">PDF</option>
-            <option value="docx">DOCX</option>
-            <option value="md">Markdown</option>
-          </select>
-        </div>
+        <FilterSelect
+          id="file-type-filter"
+          label="File Type"
+          value={fileType}
+          onChange={onFileTypeChange}
+          options={fileTypeOptions}
+        />
 
-        {/* Status Filter */}
-        <div className="flex items-center space-x-2">
-          <label htmlFor="status-filter" className="text-sm text-gray-600 dark:text-gray-400">
-            Status:
-          </label>
-          <select
-            id="status-filter"
-            value={status || ''}
-            onChange={e => onStatusChange(e.target.value)}
-            className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-          >
-            <option value="">All</option>
-            <option value="processing">Processing</option>
-            <option value="completed">Completed</option>
-            <option value="failed">Failed</option>
-          </select>
-        </div>
+        <FilterSelect
+          id="status-filter"
+          label="Status"
+          value={status}
+          onChange={onStatusChange}
+          options={statusOptions}
+        />
 
-        {/* Clear Filters Button */}
         {hasActiveFilters && (
           <button
             onClick={onClearFilters}
