@@ -11,6 +11,7 @@ from typing import Optional
 
 from app.core.config import settings
 from app.services.auth import AuthService
+from app.services.user_service import UserService
 
 router = APIRouter()
 security = HTTPBearer()
@@ -115,12 +116,18 @@ async def oauth_callback(code: str, state: Optional[str] = None, provider: str =
             user_info = user_response.json()
 
         # Create or update user in database
-        # TODO: Implement database operations
+        # Issue #27: User persistence with role management
+        user_service = UserService()
+        user = user_service.get_or_create_user(
+            email=user_info.get("email"), name=user_info.get("name"), provider=provider
+        )
+
+        # Prepare user data for JWT token
         user_data = {
-            "email": user_info.get("email"),
-            "name": user_info.get("name"),
-            "provider": provider,
-            "role": "editor",  # Default role
+            "email": user["email"],
+            "name": user["name"],
+            "provider": user["provider"],
+            "role": user["role"],  # Role from database (editor or admin)
         }
 
         # Generate JWT tokens
