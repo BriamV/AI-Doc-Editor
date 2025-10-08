@@ -87,6 +87,10 @@ backend/.coverage
 coverage/
 nyc_output/
 
+# ChromaDB vector database (generated data)
+backend/chroma_db/
+htmlcov/
+
 # Temporary Claude session files
 .cc-session-start
 .cc-metrics-fail.json
