@@ -126,7 +126,10 @@
 ### Post-R1 Emergent Work: Quality Enhancements
 | Task | Class | Priority | Impact | Timeline |
 |------|-------|----------|--------|----------|
+| **T-49: Document Library UI** | B | High | Completes T-04 criterion #3 | 2-3 days post-T-04 merge |
 | **T-48: Docling Integration** | B | High | +42% RAG quality | 2-3 days post-R1 |
+
+**T-49 Details**: Implement Document Library UI to display uploaded documents with metadata, completing WORK-PLAN v5 T-04 acceptance criterion #3 "Metadatos correctos visibles en la UI post-carga". Enables user validation of RAG ingestion and provides visual feedback for processing status.
 
 **T-48 Details**: Integrate Docling advanced document extraction to improve RAG pipeline quality from 50-60% to 85-95% for ISO standards, technical handbooks, and academic papers. Key improvement: 97.9% table extraction accuracy vs 40% with pypdf baseline.
 
@@ -192,10 +195,12 @@
 - **Completed Release**: [status/R0-RELEASE-STATUS.md](status/R0-RELEASE-STATUS.md)
 - **Work Packages**: [progress/R0-WP1-progress.md](progress/R0-WP1-progress.md)
 - **Emergent Work**: [emergent/DOCUMENTATION-IMPROVEMENTS.md](emergent/DOCUMENTATION-IMPROVEMENTS.md)
+- **Post-T-04 Emergent**: [emergent/DOCUMENT-LIBRARY-UI.md](emergent/DOCUMENT-LIBRARY-UI.md)
 - **Post-R1 Emergent**: [emergent/DOCLING-INTEGRATION.md](emergent/DOCLING-INTEGRATION.md)
 
 ### Active Tasks
-- **T-04: RAG Pipeline**: [tasks/T-04-STATUS.md](../../tasks/T-04-STATUS.md) - 61% complete
+- **T-04: RAG Pipeline**: [tasks/T-04-STATUS.md](../../tasks/T-04-STATUS.md) - 100% complete (pending T-49 for criterion #3)
+- **T-49: Document Library UI**: [tasks/T-49-STATUS.md](../../tasks/T-49-STATUS.md) - Planned post-T-04
 - **T-48: Docling Integration**: [tasks/T-48-STATUS.md](../../tasks/T-48-STATUS.md) - Planned post-R1
 
 ### Dependencies
