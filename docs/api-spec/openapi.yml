@@ -1268,8 +1268,264 @@ tags:
     description: User credential management (API keys)
   - name: Audit
     description: Audit log access and integrity verification (Admin only)
+  - name: RAG Pipeline
+    description: Document upload, embedding generation, and semantic search (T-04)
+
+  # T-04: RAG Pipeline - File Upload & Ingestion
+  /api/upload:
+    post:
+      summary: Upload document for RAG indexing
+      description: |
+        Upload a document (PDF, DOCX, or Markdown) to the RAG pipeline for processing.
+        The system will:
+        1. Validate file type and size
+        2. Extract text content
+        3. Split into chunks (1000 chars, 200 overlap)
+        4. Generate embeddings (OpenAI text-embedding-3-small)
+        5. Store vectors in ChromaDB for semantic search
+
+        **Supported Formats**: PDF, DOCX, Markdown
+        **Max File Size**: 10MB
+        **Performance**: ~2-3s for typical 5-page PDF
+      operationId: uploadDocument
+      tags:
+        - RAG Pipeline
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Document file to upload (PDF, DOCX, or MD)
+                document_name:
+                  type: string
+                  description: Optional custom name for the document (defaults to filename)
+                  example: "Q3 Financial Report"
+                metadata:
+                  type: object
+                  additionalProperties: true
+                  description: Optional custom metadata (e.g., category, tags)
+                  example:
+                    category: "finance"
+                    department: "accounting"
+                    year: 2025
+      responses:
+        '200':
+          description: Document uploaded and indexed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - message
+                  - document_id
+                  - chunks_processed
+                  - embeddings_generated
+                properties:
+                  message:
+                    type: string
+                    example: "Document uploaded and indexed successfully"
+                  document_id:
+                    type: string
+                    format: uuid
+                    description: Unique identifier for the uploaded document
+                    example: "550e8400-e29b-41d4-a716-446655440000"
+                  document_name:
+                    type: string
+                    description: Name of the uploaded document
+                    example: "Q3_Financial_Report.pdf"
+                  file_type:
+                    type: string
+                    enum: [pdf, docx, md]
+                    description: Detected file type
+                    example: "pdf"
+                  file_size_bytes:
+                    type: integer
+                    description: File size in bytes
+                    example: 256000
+                  chunks_processed:
+                    type: integer
+                    description: Number of text chunks created
+                    example: 8
+                  embeddings_generated:
+                    type: integer
+                    description: Number of embeddings generated (should equal chunks_processed)
+                    example: 8
+                  processing_time_ms:
+                    type: number
+                    format: float
+                    description: Total processing time in milliseconds
+                    example: 2340.5
+                  created_at:
+                    type: string
+                    format: date-time
+                    description: Timestamp when document was indexed
+                    example: "2025-10-01T12:34:56.789Z"
+        '400':
+          description: Invalid request (unsupported file type, file too large, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unsupported_type:
+                  summary: Unsupported file type
+                  value:
+                    error: "Unsupported file type"
+                    detail: "File type .txt is not supported. Allowed types: pdf, docx, md"
+                file_too_large:
+                  summary: File exceeds size limit
+                  value:
+                    error: "File too large"
+                    detail: "File size 12MB exceeds maximum allowed size of 10MB"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          description: Server error during processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                extraction_error:
+                  summary: Text extraction failed
+                  value:
+                    error: "Text extraction failed"
+                    detail: "Unable to extract text from PDF: corrupted file"
+                embedding_error:
+                  summary: OpenAI API error
+                  value:
+                    error: "Embedding generation failed"
+                    detail: "OpenAI API rate limit exceeded"
+
+  /api/search:
+    post:
+      summary: Semantic search across indexed documents
+      description: |
+        Perform semantic search using natural language queries.
+        The system will:
+        1. Generate query embedding (OpenAI)
+        2. Search ChromaDB for similar chunks (cosine similarity)
+        3. Return top-k most relevant chunks with metadata
+
+        **Performance**: p95 latency <500ms @ 10 concurrent users
+      operationId: searchDocuments
+      tags:
+        - RAG Pipeline
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+              properties:
+                query:
+                  type: string
+                  description: Natural language search query
+                  example: "What are the security requirements for OAuth authentication?"
+                top_k:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+                  default: 5
+                  description: Maximum number of results to return
+                  example: 10
+                filter_metadata:
+                  type: object
+                  additionalProperties: true
+                  description: Optional metadata filters
+                  example:
+                    file_type: "pdf"
+                    category: "security"
+      responses:
+        '200':
+          description: Search results returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - results
+                  - took_ms
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - chunk_text
+                        - metadata
+                        - similarity
+                      properties:
+                        id:
+                          type: string
+                          description: Unique chunk identifier
+                          example: "550e8400-e29b-41d4-a716-446655440000_chunk_3"
+                        chunk_text:
+                          type: string
+                          description: Relevant text chunk
+                          example: "OAuth 2.0 requires HTTPS for all authorization endpoints..."
+                        metadata:
+                          type: object
+                          description: Chunk metadata
+                          properties:
+                            document_id:
+                              type: string
+                            document_name:
+                              type: string
+                            file_type:
+                              type: string
+                            chunk_index:
+                              type: integer
+                            created_at:
+                              type: string
+                              format: date-time
+                        similarity:
+                          type: number
+                          format: float
+                          minimum: 0
+                          maximum: 1
+                          description: Cosine similarity score (1 = perfect match)
+                          example: 0.89
+                        distance:
+                          type: number
+                          format: float
+                          description: Cosine distance (lower = more similar)
+                          example: 0.11
+                  took_ms:
+                    type: number
+                    format: float
+                    description: Server-side processing time in milliseconds
+                    example: 285.3
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          description: Server error during search
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 # Future endpoints (planned for R1-R6)
-# /upload - File ingesta RAG (T-04)
 # /plan - Planner service (T-05)
 # /draft_section - WebSocket streaming (T-06)
 # /rewrite - Action palette commands (T-08)

@@ -1,7 +1,7 @@
 ---
 task_id: "T-04"
 titulo: "File Ingesta RAG + Perf"
-estado: "Pendiente"
+estado: "Completado"
 dependencias: "T-12, T-41"
 prioridad: "Crítica"
 release_target: "Release 1"
@@ -137,27 +137,27 @@ Todas las subtareas verificadas como completas.
 - description: "Desarrollar el módulo de extracción de texto para PDF, DOCX y MD, incluyendo el chunking de texto."
 - complejidad: 5
 - entregable: "Tests unitarios que procesan ficheros de ejemplo y devuelven el texto extraído y chunked correctamente."
-- status: "pendiente"
+- status: "completado"
 ### id: "R1.WP1-T04-ST3"
 - description: "Integrar cliente OpenAI para generar embeddings (text-embedding-3-small)."
 - complejidad: 2
 - entregable: "Test de integración que invoca al cliente OpenAI y verifica que se reciben los vectores."
-- status: "pendiente"
+- status: "completado"
 ### id: "R1.WP1-T04-ST4"
 - description: "Implementar lógica de upsert en ChromaDB para indexar y actualizar vectores y metadatos."
 - complejidad: 3
 - entregable: "Test de integración que sube un documento, genera embeddings y verifica que los vectores existen en ChromaDB."
-- status: "pendiente"
+- status: "completado"
 ### id: "R1.WP1-T04-ST5"
 - description: "Crear script de benchmark (JMeter/Locust) para medir rendimiento de ingesta (PERF-003)."
 - complejidad: 2
 - entregable: "Reporte de JMeter/Locust que muestra las métricas de rendimiento de ingesta."
-- status: "pendiente"
+- status: "completado"
 ### id: "R1.WP1-T04-ST6"
 - description: "Crear script de benchmark para medir latencia de búsqueda vectorial (PERF-004)."
 - complejidad: 2
 - entregable: "Reporte de JMeter/Locust que muestra las métricas de latencia de búsqueda."
-- status: "pendiente"
+- status: "completado"
 
 ---
 *Generado automáticamente desde docs/project-management/Sub Tareas v2.md*

@@ -184,6 +184,10 @@ class Settings(BaseSettings):
     OPENAI_EMBEDDING_DIMENSIONS: int = 1536  # Default for text-embedding-3-small
     OPENAI_MAX_BATCH_SIZE: int = 100  # Maximum texts per API call
 
+    # ChromaDB Configuration (T-04-ST4)
+    CHROMA_PERSIST_DIRECTORY: str = "backend/chroma_db"
+    CHROMA_COLLECTION_NAME: str = "documents"
+
     # Security logging configuration
     SECURITY_LOG_FILE: str = "security.log"
     AUDIT_LOG_FILE: str = "audit.log"

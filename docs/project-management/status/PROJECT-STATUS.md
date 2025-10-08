@@ -82,6 +82,19 @@
 
 ## In Progress Work
 
+### R1 Active Development: T-04 RAG Pipeline
+- **Progress**: [██████░░░░] 61% (11/18 points complete)
+- **Status**: ST1-ST3 complete, ST4-ST6 pending
+- **Current Branch**: feature/T-04-file-ingesta-rag
+- **Completed Subtasks**:
+  - ✅ **ST1**: Upload endpoint with file validation (4 points)
+  - ✅ **ST2**: Text extraction (pypdf/python-docx) + chunking (5 points)
+  - ✅ **ST3**: OpenAI embeddings integration (2 points)
+- **Pending Subtasks**:
+  - 🟡 **ST4**: ChromaDB vector storage integration (3 points)
+  - 🟡 **ST5**: Ingestion performance benchmarks (2 points)
+  - 🟡 **ST6**: Search latency benchmarks (2 points)
+
 ### Pre-R1 Planning Phase
 - **Progress**: [███░░░░░░░] 30%
 - **Tasks**:
@@ -109,6 +122,13 @@
   - Database integration & persistence layer
   - User & document management APIs
   - Frontend → Backend API migration
+
+### Post-R1 Emergent Work: Quality Enhancements
+| Task | Class | Priority | Impact | Timeline |
+|------|-------|----------|--------|----------|
+| **T-48: Docling Integration** | B | High | +42% RAG quality | 2-3 days post-R1 |
+
+**T-48 Details**: Integrate Docling advanced document extraction to improve RAG pipeline quality from 50-60% to 85-95% for ISO standards, technical handbooks, and academic papers. Key improvement: 97.9% table extraction accuracy vs 40% with pypdf baseline.
 
 ### Release 2: AI Integration & Intelligence
 - **Start Date**: 2025-11-05 (Estimated)
@@ -172,6 +192,11 @@
 - **Completed Release**: [status/R0-RELEASE-STATUS.md](status/R0-RELEASE-STATUS.md)
 - **Work Packages**: [progress/R0-WP1-progress.md](progress/R0-WP1-progress.md)
 - **Emergent Work**: [emergent/DOCUMENTATION-IMPROVEMENTS.md](emergent/DOCUMENTATION-IMPROVEMENTS.md)
+- **Post-R1 Emergent**: [emergent/DOCLING-INTEGRATION.md](emergent/DOCLING-INTEGRATION.md)
+
+### Active Tasks
+- **T-04: RAG Pipeline**: [tasks/T-04-STATUS.md](../../tasks/T-04-STATUS.md) - 61% complete
+- **T-48: Docling Integration**: [tasks/T-48-STATUS.md](../../tasks/T-48-STATUS.md) - Planned post-R1
 
 ### Dependencies
 - **GitHub Repository**: [AI-Doc-Editor](https://github.com/BriamV/AI-Doc-Editor)
@@ -181,10 +206,10 @@
 ## Next Actions
 
 ### Immediate Priorities (This Week)
-1. **Finalize R1 backend architecture** - Architecture design sessions
-2. **Technology stack confirmation** - Python/FastAPI validation
-3. **Database design kickoff** - Schema planning and migration strategy
-4. **R1 work package breakdown** - Detailed task planning
+1. **Complete T-04 RAG Pipeline** - ST4-ST6 (ChromaDB, benchmarks)
+2. **Finalize R1 backend architecture** - Architecture design sessions
+3. **Technology stack confirmation** - Python/FastAPI validation
+4. **Database design kickoff** - Schema planning and migration strategy
 
 ### Strategic Priorities (Next 2 Weeks)
 1. **R1 detailed planning** - Complete work breakdown structure
@@ -196,6 +221,8 @@
 
 | Date | Author | Changes | Impact |
 |------|--------|---------|--------|
+| 2025-10-01 | Tech Lead | T-48 emergent work documented (Docling integration) | Post-R1 quality enhancement |
+| 2025-10-01 | Tech Lead | T-04 progress update (ST1-ST3 complete, 61%) | R1 active development |
 | 2025-10-01 | Tech Lead | R0 merged to main via PR #23 (GitFlow complete) | Release deployment |
 | 2025-09-30 | Tech Lead | CLAUDE.md optimization & .claude/docs reorganization | AI tooling infrastructure |
 | 2025-09-24 | Tech Lead | Initial distributed status system creation | Major architecture |

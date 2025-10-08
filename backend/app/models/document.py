@@ -61,7 +61,9 @@ class Document(Base):
     # RAG integration
     chunk_count = Column(Integer, nullable=True)  # Number of text chunks generated
     embedding_model = Column(String(100), nullable=True)  # OpenAI model used for embeddings
-    embedding_dimensions = Column(Integer, nullable=True)  # Dimensions of embedding vectors (T-04-ST3)
+    embedding_dimensions = Column(
+        Integer, nullable=True
+    )  # Dimensions of embedding vectors (T-04-ST3)
     vector_store_id = Column(String(100), nullable=True)  # ChromaDB collection ID
 
     # User context (from OAuth authentication)

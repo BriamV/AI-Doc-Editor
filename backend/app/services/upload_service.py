@@ -10,7 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from fastapi import UploadFile, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from app.models.document import Document, DocumentStatus
 from app.services.file_validator import FileValidator
@@ -307,8 +307,9 @@ class UploadService:
         if status:
             count_query = count_query.where(Document.status == status)
 
-        count_result = await session.execute(count_query)
-        total = len(count_result.all())
+        count_subquery = count_query.subquery()
+        total = await session.scalar(select(func.count()).select_from(count_subquery))
+        total = total or 0
 
         # Apply pagination
         query = query.limit(limit).offset(offset)

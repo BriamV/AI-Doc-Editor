@@ -45,6 +45,7 @@
     "be:test:monitor": "node scripts/python-timeout-monitor.cjs test",
     "be:test:optimize": "node scripts/python-timeout-monitor.cjs optimize",
     "be:performance:report": "node scripts/python-timeout-monitor.cjs report",
+    "be:performance:ingest": "node scripts/multiplatform.cjs tool locust -f backend/performance/locust_ingest_benchmark.py --headless --users 3 --spawn-rate 1 --run-time 1m --stop-timeout 30",
     "be:install": "node scripts/multiplatform.cjs python -m pip install -r backend/requirements.txt -r backend/requirements-dev.txt",
     "be:bootstrap": "node scripts/multiplatform.cjs bootstrap",
     "be:dev": "node scripts/multiplatform.cjs dev",

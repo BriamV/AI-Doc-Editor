@@ -13,7 +13,7 @@ import os
 import time
 
 from app.core.config import settings
-from app.routers import auth, health, config, credentials, audit, upload
+from app.routers import auth, health, config, credentials, audit, upload, vector_search
 from app.middleware.audit_middleware import AuditMiddleware
 from app.services.audit import AuditService
 from app.security.rate_limiter import RateLimitMiddleware, SecurityHeadersMiddleware
@@ -132,6 +132,7 @@ app.include_router(config.router, prefix="/api", tags=["config"])
 app.include_router(credentials.router, prefix="/api", tags=["credentials"])
 app.include_router(audit.router, prefix="/api", tags=["audit"])
 app.include_router(upload.router, prefix="/api", tags=["upload"])
+app.include_router(vector_search.router, prefix="/api", tags=["vector-search"])
 
 
 # Global exception handler for security
