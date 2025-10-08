@@ -6,6 +6,7 @@ import DocumentMenu from '@components/Menu/DocumentMenu';
 import AIMenu from '@components/Menu/AIMenu/AIMenu';
 import Settings from './pages/Settings';
 import AuditLogs from './pages/AuditLogs';
+import Documents from './pages/Documents';
 import AuthLogin from '@components/Auth/AuthLogin';
 import AuthCallback from '@components/Auth/AuthCallback';
 import { useAuth } from '@hooks/useAuth';
@@ -211,6 +212,14 @@ const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <AuditLogs />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: '/documents',
+    element: (
+      <RequireAuth>
+        <Documents />
       </RequireAuth>
     ),
   },
