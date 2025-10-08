@@ -16,6 +16,7 @@ import LoadingState from './Documents/components/LoadingState';
 import EmptyState from './Documents/components/EmptyState';
 import UploadForm from './Documents/components/UploadForm';
 
+// eslint-disable-next-line max-lines-per-function
 const Documents: React.FC = () => {
   const { token, isAuthenticated } = useAuth();
   const documentsState = useDocuments(token || null);

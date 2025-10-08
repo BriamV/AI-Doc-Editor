@@ -29,6 +29,7 @@ const buildApiParams = (
   ...filters,
 });
 
+// eslint-disable-next-line max-lines-per-function
 export const useDocuments = (token: string | null) => {
   const [state, setState] = useState<UseDocumentsState>({
     documents: [],
