@@ -6,7 +6,6 @@ Tests GET /api/documents and GET /api/documents/{id} endpoints.
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
 from datetime import datetime
 from uuid import uuid4
 
@@ -39,7 +38,7 @@ def mock_auth(monkeypatch):
         email="test@example.com",
         google_id="test_google_id",
         is_active=True,
-        role="editor"
+        role="editor",
     )
 
     async def mock_get_current_user():
@@ -54,9 +53,12 @@ def test_list_documents_empty(mock_auth, monkeypatch):
 
     def mock_get_db():
         from unittest.mock import MagicMock
+
         db = MagicMock()
         db.query.return_value.filter.return_value.count.return_value = 0
-        db.query.return_value.filter.return_value.order_by.return_value.offset.return_value.limit.return_value.all.return_value = []
+        db.query.return_value.filter.return_value.order_by.return_value.offset.return_value.limit.return_value.all.return_value = (
+            []
+        )
         return db
 
     app.dependency_overrides[get_db] = mock_get_db
@@ -87,14 +89,17 @@ def test_list_documents_with_data(mock_auth, monkeypatch):
         user_email=mock_auth.email,
         uploaded_at=datetime.utcnow(),
         processed_at=datetime.utcnow(),
-        deleted_at=None
+        deleted_at=None,
     )
 
     def mock_get_db():
         from unittest.mock import MagicMock
+
         db = MagicMock()
         db.query.return_value.filter.return_value.count.return_value = 1
-        db.query.return_value.filter.return_value.order_by.return_value.offset.return_value.limit.return_value.all.return_value = [mock_doc]
+        db.query.return_value.filter.return_value.order_by.return_value.offset.return_value.limit.return_value.all.return_value = [
+            mock_doc
+        ]
         return db
 
     app.dependency_overrides[get_db] = mock_get_db
@@ -114,9 +119,12 @@ def test_list_documents_with_filters(mock_auth, monkeypatch):
 
     def mock_get_db():
         from unittest.mock import MagicMock
+
         db = MagicMock()
         db.query.return_value.filter.return_value.filter.return_value.count.return_value = 0
-        db.query.return_value.filter.return_value.filter.return_value.order_by.return_value.offset.return_value.limit.return_value.all.return_value = []
+        db.query.return_value.filter.return_value.filter.return_value.order_by.return_value.offset.return_value.limit.return_value.all.return_value = (
+            []
+        )
         return db
 
     app.dependency_overrides[get_db] = mock_get_db
@@ -133,9 +141,12 @@ def test_list_documents_pagination(mock_auth, monkeypatch):
 
     def mock_get_db():
         from unittest.mock import MagicMock
+
         db = MagicMock()
         db.query.return_value.filter.return_value.count.return_value = 50
-        db.query.return_value.filter.return_value.order_by.return_value.offset.return_value.limit.return_value.all.return_value = []
+        db.query.return_value.filter.return_value.order_by.return_value.offset.return_value.limit.return_value.all.return_value = (
+            []
+        )
         return db
 
     app.dependency_overrides[get_db] = mock_get_db
@@ -164,11 +175,12 @@ def test_get_document_by_id(mock_auth, monkeypatch):
         user_id=mock_auth.id,
         user_email=mock_auth.email,
         uploaded_at=datetime.utcnow(),
-        deleted_at=None
+        deleted_at=None,
     )
 
     def mock_get_db():
         from unittest.mock import MagicMock
+
         db = MagicMock()
         db.query.return_value.filter.return_value.first.return_value = mock_doc
         return db
@@ -188,6 +200,7 @@ def test_get_document_not_found(mock_auth, monkeypatch):
 
     def mock_get_db():
         from unittest.mock import MagicMock
+
         db = MagicMock()
         db.query.return_value.filter.return_value.first.return_value = None
         return db
@@ -217,11 +230,12 @@ def test_get_document_wrong_owner(mock_auth, monkeypatch):
         user_id=wrong_user_id,  # Different owner
         user_email="other@example.com",
         uploaded_at=datetime.utcnow(),
-        deleted_at=None
+        deleted_at=None,
     )
 
     def mock_get_db():
         from unittest.mock import MagicMock
+
         db = MagicMock()
         db.query.return_value.filter.return_value.first.return_value = mock_doc
         return db
@@ -239,6 +253,7 @@ def test_invalid_document_id_format(mock_auth, monkeypatch):
 
     def mock_get_db():
         from unittest.mock import MagicMock
+
         return MagicMock()
 
     app.dependency_overrides[get_db] = mock_get_db
