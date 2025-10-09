@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@hooks/useAuth';
+import TestModeBanner from '@components/Auth/TestModeBanner';
 
 /** Settings admin page */
 const Settings = () => {
@@ -10,10 +11,13 @@ const Settings = () => {
   }
 
   return (
-    <div className="p-4 text-white">
-      <h1 className="text-xl mb-4">Admin Settings</h1>
-      <p>Configuration options will appear here.</p>
-    </div>
+    <>
+      <TestModeBanner />
+      <div className="p-4 text-white">
+        <h1 className="text-xl mb-4">Admin Settings</h1>
+        <p>Configuration options will appear here.</p>
+      </div>
+    </>
   );
 };
 
