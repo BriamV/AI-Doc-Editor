@@ -85,16 +85,28 @@ class AuthService:
         Verify and decode JWT token
         T-02-ST2: Token validation
         """
+        import logging
+
         try:
+            # Debug logging
+            logging.info(f"[verify_token] Token length: {len(token)}")
+            logging.info(f"[verify_token] Token prefix: {token[:20]}..." if len(token) > 20 else f"[verify_token] Token: {token}")
+            logging.info(f"[verify_token] SECRET_KEY length: {len(settings.SECRET_KEY)}")
+            logging.info(f"[verify_token] ALGORITHM: {settings.ALGORITHM}")
+
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
 
             email: str = payload.get("sub")
             if email is None:
+                logging.error("[verify_token] Token missing 'sub' field")
                 raise JWTError("Invalid token")
 
+            logging.info(f"[verify_token] Successfully decoded token for: {email}")
+            logging.info(f"[verify_token] Token fields: {list(payload.keys())}")
             return payload
 
-        except JWTError:
+        except JWTError as e:
+            logging.error(f"[verify_token] JWTError: {type(e).__name__} - {str(e)}")
             raise ValueError("Invalid token")
 
     def refresh_tokens(self, refresh_token: str) -> Dict[str, str]:
