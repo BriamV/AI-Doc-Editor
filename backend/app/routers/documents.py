@@ -32,8 +32,23 @@ def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(secu
         auth_service = AuthService()
         user_data = auth_service.verify_token(credentials.credentials)
         # Support both 'user_id' (OAuth) and 'id' (Test Mode) for compatibility
-        return user_data.get("user_id") or user_data.get("id")
-    except Exception:
+        user_id = user_data.get("user_id") or user_data.get("id")
+
+        if not user_id:
+            # Debug: log what fields are in the token
+            import logging
+            logging.error(f"Token missing user_id/id. Token fields: {list(user_data.keys())}")
+            raise HTTPException(
+                status_code=401,
+                detail=f"Token missing user identifier. Available fields: {list(user_data.keys())}"
+            )
+
+        return user_id
+    except HTTPException:
+        raise
+    except Exception as e:
+        import logging
+        logging.error(f"Token validation error: {str(e)}")
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
 
