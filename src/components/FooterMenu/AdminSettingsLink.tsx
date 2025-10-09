@@ -1,4 +1,4 @@
-import { Security, UserMultiple, Settings, DocumentMultiple_01 } from '@carbon/icons-react';
+import { Security, UserMultiple, Settings } from '@carbon/icons-react';
 import { useRoles } from '@hooks/useRoles';
 import { RoleBasedMenuItem } from '@components/Auth/RoleBasedMenu';
 
@@ -11,15 +11,6 @@ const AdminSettingsLink = () => {
   return (
     <div className="space-y-1 border-t border-gray-600 pt-2 mt-2">
       <div className="text-xs font-semibold text-gray-400 px-2 mb-1">ADMIN TOOLS</div>
-
-      <RoleBasedMenuItem
-        to="/documents"
-        icon={<DocumentMultiple_01 className="w-4 h-4" />}
-        requiredRoles={['admin']}
-        className="text-white text-sm"
-      >
-        Document Library
-      </RoleBasedMenuItem>
 
       <RoleBasedMenuItem
         to="/admin/audit-logs"
