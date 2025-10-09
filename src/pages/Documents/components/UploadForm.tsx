@@ -82,14 +82,6 @@ const UploadForm: React.FC<UploadFormProps> = ({ onUploadSuccess, onUploadError 
           {isUploading ? 'Uploading...' : 'Upload'}
         </button>
       </div>
-
-      {/* TODO Notice */}
-      <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded">
-        <p className="text-sm text-yellow-800 dark:text-yellow-200">
-          <strong>Note:</strong> Upload functionality requires backend endpoint POST /api/upload
-          (T-04 ST1). Currently showing UI preview only.
-        </p>
-      </div>
     </div>
   );
 };

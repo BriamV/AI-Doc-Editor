@@ -4,6 +4,8 @@
  */
 
 import { useState, useCallback, useRef } from 'react';
+import { useAuth } from '@hooks/useAuth';
+import { getEnvVar } from '@utils/env';
 
 const ALLOWED_FILE_TYPES = [
   'application/pdf',
@@ -31,29 +33,88 @@ const validateFile = (file: File): string | null => {
   return null;
 };
 
-const simulateUpload = (
-  setProgress: (fn: (prev: number) => number) => void,
-  setUploading: (val: boolean) => void,
-  setError: (msg: string) => void,
-  onError?: (msg: string) => void
-) => {
-  const interval = setInterval(() => {
-    setProgress(prev => {
-      if (prev >= 100) {
-        clearInterval(interval);
-        return 100;
-      }
-      return prev + 10;
-    });
+interface UploadResponse {
+  document_id: string;
+  filename: string;
+  file_type: string;
+  file_size: number;
+  status: string;
+  created_at: string;
+}
+
+/**
+ * Maps backend error status codes to user-friendly messages
+ */
+const getErrorMessage = (status: number, defaultMessage: string): string => {
+  switch (status) {
+    case 400:
+      return 'Invalid file type. Please upload PDF, DOCX, or MD files.';
+    case 401:
+    case 403:
+      return 'Session expired. Please login again.';
+    case 413:
+      return 'File is too large. Maximum size is 10MB.';
+    case 500:
+      return 'Upload failed. Please try again.';
+    default:
+      return defaultMessage;
+  }
+};
+
+/**
+ * Upload file to backend API
+ */
+const uploadToBackend = async (
+  file: File,
+  token: string,
+  onProgress: (progress: number) => void
+): Promise<UploadResponse> => {
+  const API_BASE_URL = getEnvVar('VITE_API_BASE_URL');
+  if (!API_BASE_URL) {
+    throw new Error('API base URL not configured');
+  }
+
+  // Prepare FormData
+  const formData = new FormData();
+  formData.append('file', file);
+
+  // Start progress simulation for better UX
+  const progressInterval = setInterval(() => {
+    onProgress(90); // Cap at 90% until response
   }, 200);
 
-  setTimeout(() => {
-    clearInterval(interval);
-    setUploading(false);
-    setProgress(() => 100);
-    setError('Upload endpoint not implemented yet. Backend POST /api/upload is pending.');
-    onError?.('Upload endpoint not implemented');
-  }, 2000);
+  try {
+    // Upload to backend
+    const response = await fetch(`${API_BASE_URL}/upload`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    clearInterval(progressInterval);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { detail: errorText };
+      }
+
+      const errorMsg = getErrorMessage(
+        response.status,
+        errorData.detail || 'Upload failed. Please try again.'
+      );
+      throw new Error(errorMsg);
+    }
+
+    return await response.json();
+  } finally {
+    clearInterval(progressInterval);
+  }
 };
 
 // eslint-disable-next-line max-lines-per-function
@@ -64,11 +125,7 @@ export const useFileUpload = ({ onUploadSuccess, onUploadError }: UseFileUploadP
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Log props to avoid TypeScript unused warning (backend integration pending)
-  if (onUploadSuccess || onUploadError) {
-    console.debug('Upload callbacks ready for backend integration');
-  }
+  const { token } = useAuth();
 
   const handleFileSelect = useCallback((file: File) => {
     const validationError = validateFile(file);
@@ -125,12 +182,45 @@ export const useFileUpload = ({ onUploadSuccess, onUploadError }: UseFileUploadP
   const handleUpload = async () => {
     if (!selectedFile) return;
 
+    // Check authentication
+    if (!token) {
+      const errorMsg = 'Please login to upload files.';
+      setError(errorMsg);
+      onUploadError?.(errorMsg);
+      return;
+    }
+
     setIsUploading(true);
     setUploadProgress(0);
     setError(null);
 
-    // TODO: Implement actual upload to POST /api/upload endpoint
-    simulateUpload(setUploadProgress, setIsUploading, setError, onUploadError);
+    try {
+      // Upload file with progress updates
+      const data = await uploadToBackend(selectedFile, token, progress => {
+        setUploadProgress(prev => Math.max(prev, progress));
+      });
+
+      setUploadProgress(100);
+
+      // Success callback
+      onUploadSuccess?.(data.document_id);
+
+      // Clear state after successful upload
+      setTimeout(() => {
+        setSelectedFile(null);
+        setUploadProgress(0);
+        setIsUploading(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }, 1000);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Upload failed. Please try again.';
+      setError(errorMsg);
+      onUploadError?.(errorMsg);
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
   };
 
   const handleBrowseClick = () => {
