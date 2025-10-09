@@ -25,12 +25,14 @@ def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(secu
     Extract user ID from JWT token.
 
     Returns user_id from token payload.
+    Supports both 'user_id' and 'id' for backward compatibility.
     Raises HTTPException 401 if token is invalid.
     """
     try:
         auth_service = AuthService()
         user_data = auth_service.verify_token(credentials.credentials)
-        return user_data["user_id"]
+        # Support both 'user_id' (OAuth) and 'id' (Test Mode) for compatibility
+        return user_data.get("user_id") or user_data.get("id")
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
