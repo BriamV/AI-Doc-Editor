@@ -30,7 +30,7 @@ router = APIRouter(prefix="/test", tags=["test-auth"])
 class TestLoginRequest(BaseModel):
     """Test login request - only requires email."""
 
-    email: EmailStr
+    email: str  # Note: Cannot use EmailStr because @test.local is reserved domain
 
 
 class TestUserResponse(BaseModel):

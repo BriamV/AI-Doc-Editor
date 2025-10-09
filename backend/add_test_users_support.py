@@ -6,13 +6,16 @@ Part of dual-mode authentication architecture.
 import sqlite3
 from pathlib import Path
 
-# Use database in project root (where FastAPI expects it)
-db_path = Path("../app.db")
+# Use database in backend/ directory (where FastAPI actually uses it)
+db_path = Path("app.db")
 
 if not db_path.exists():
-    print("[ERROR] Database not found at ../app.db")
+    print("[ERROR] Database not found at app.db")
     print("Run this script from backend/ directory")
+    print(f"Looked in: {db_path.absolute()}")
     exit(1)
+
+print(f"Using database: {db_path.absolute()}")
 
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
