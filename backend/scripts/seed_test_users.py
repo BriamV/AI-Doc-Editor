@@ -21,8 +21,8 @@ from datetime import datetime
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-# Use database in project root
-DB_PATH = Path(__file__).parent.parent.parent / "app.db"
+# Use database in backend/ directory (where FastAPI uses it)
+DB_PATH = Path(__file__).parent.parent / "app.db"
 
 # Test users configuration
 TEST_USERS = [
