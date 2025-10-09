@@ -90,12 +90,14 @@ const LoginButton = ({
 // Backend fallback component
 const BackendFallback = () => (
   <div className="auth-fallback p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-    <h3 className="text-lg font-semibold text-yellow-800 mb-2">T-02 Backend Unavailable</h3>
+    <h3 className="text-lg font-semibold text-yellow-800 mb-2">Backend Connection Failed</h3>
     <p className="text-yellow-700 mb-3">
-      OAuth + JWT backend is not running. Using existing Google OAuth.
+      Cannot connect to authentication backend. Please check that the backend is running on{' '}
+      <code className="bg-yellow-100 px-1 rounded">http://localhost:8000</code>
     </p>
     <p className="text-sm text-yellow-600">
-      To enable full T-02 features, start backend: <code>make docker-backend</code>
+      Start backend: <code className="bg-yellow-100 px-1 rounded">yarn be:dev</code> or check
+      network configuration
     </p>
   </div>
 );

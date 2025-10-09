@@ -60,7 +60,7 @@ El archivo `.env` creado incluye:
 ```env
 ENVIRONMENT=development
 VITE_ENABLE_TESTING=true
-VITE_API_BASE_URL=http://localhost:8000
+VITE_API_BASE_URL=http://localhost:8000/api
 ```
 
 Esto habilita:
