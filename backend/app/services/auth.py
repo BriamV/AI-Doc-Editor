@@ -68,6 +68,7 @@ class AuthService:
         """
         token_data = {
             "sub": user_data["email"],
+            "user_id": user_data.get("id", user_data.get("user_id", "")),  # Support both id and user_id keys
             "email": user_data["email"],
             "name": user_data["name"],
             "role": user_data["role"],

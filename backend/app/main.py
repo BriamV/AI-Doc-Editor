@@ -13,7 +13,7 @@ import os
 import time
 
 from app.core.config import settings
-from app.routers import auth, health, config, credentials, audit, documents, auth_test
+from app.routers import auth, health, config, credentials, audit, documents, auth_test, upload
 from app.middleware.audit_middleware import AuditMiddleware
 from app.services.audit import AuditService
 from app.security.rate_limiter import RateLimitMiddleware, SecurityHeadersMiddleware
@@ -133,6 +133,7 @@ app.include_router(config.router, prefix="/api", tags=["config"])
 app.include_router(credentials.router, prefix="/api", tags=["credentials"])
 app.include_router(audit.router, prefix="/api", tags=["audit"])
 app.include_router(documents.router, tags=["documents"])  # T-49: Document listing
+app.include_router(upload.router, tags=["upload"])  # T-04 ST1: Document upload
 
 
 # Global exception handler for security

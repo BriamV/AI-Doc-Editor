@@ -124,6 +124,7 @@ async def oauth_callback(code: str, state: Optional[str] = None, provider: str =
 
         # Prepare user data for JWT token
         user_data = {
+            "id": user["id"],  # Include user_id for document operations
             "email": user["email"],
             "name": user["name"],
             "provider": user["provider"],
