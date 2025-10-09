@@ -14,7 +14,9 @@ export const useAuth = () => {
   const [backendAvailable, setBackendAvailable] = useState(false);
 
   const checkBackend = useCallback(async () => {
+    console.log('🏥 Checking backend health...');
     const available = await authAPI.healthCheck();
+    console.log('🏥 Backend available:', available);
     setBackendAvailable(available);
   }, []);
 

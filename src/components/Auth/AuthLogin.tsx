@@ -164,6 +164,14 @@ const AuthLogin: React.FC<AuthLoginProps> = ({ onSuccess, onError }) => {
   // Check if we're in development mode
   const isDevelopment = getEnvVar('DEV') || getEnvVar('VITE_ENABLE_TESTING') === 'true';
 
+  // DEBUG: Log environment variables and conditions
+  console.log('🔍 AuthLogin Debug:');
+  console.log('  VITE_ENABLE_TESTING:', getEnvVar('VITE_ENABLE_TESTING'));
+  console.log('  DEV:', getEnvVar('DEV'));
+  console.log('  isDevelopment:', isDevelopment);
+  console.log('  backendAvailable:', backendAvailable);
+  console.log('  Toggle should show:', isDevelopment && backendAvailable);
+
   const handleLogin = async (provider: 'google' | 'microsoft') => {
     try {
       await login(provider);

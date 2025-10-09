@@ -16,30 +16,35 @@ export const getEnvVar = (key: string): string | undefined => {
   ) {
     // In test environment, use process.env which is set up in jest.setup.ts
     // eslint-disable-next-line security/detect-object-injection
-    return process.env[key];
+    const value = process.env[key];
+    console.log(`[getEnvVar TEST] ${key} = ${value}`);
+    return value;
   }
 
-  // Check if running in browser context and try to access import.meta dynamically
+  // In Vite/Browser: use import.meta.env directly (Vite requires static access)
+  // This works because Vite performs static analysis and replaces these at build time
   if (typeof window !== 'undefined') {
     try {
-      // Use dynamic access to avoid Jest parsing issues with import.meta
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const importMeta = (globalThis as any).import?.meta || (window as any).import?.meta;
-      if (importMeta && importMeta.env) {
-        // eslint-disable-next-line security/detect-object-injection
-        return importMeta.env[key];
-      }
-    } catch {
-      // If import.meta is not available, fall through to process.env
+      // Direct access to import.meta.env (required for Vite's static analysis)
+      // eslint-disable-next-line security/detect-object-injection
+      const value = import.meta.env[key];
+      console.log(`[getEnvVar VITE] ${key} = ${value}`);
+      return value as string | undefined;
+    } catch (e) {
+      // If import.meta is not available (shouldn't happen in Vite)
+      console.log(`[getEnvVar VITE] Failed to access import.meta.env for ${key}:`, e);
     }
   }
 
   // Fallback to process.env if available (Node.js context)
   if (typeof process !== 'undefined' && process.env) {
     // eslint-disable-next-line security/detect-object-injection
-    return process.env[key];
+    const value = process.env[key];
+    console.log(`[getEnvVar FALLBACK] ${key} = ${value}`);
+    return value;
   }
 
   // Ultimate fallback - return undefined if no environment access
+  console.log(`[getEnvVar UNDEFINED] ${key} = undefined (no env access)`);
   return undefined;
 };
