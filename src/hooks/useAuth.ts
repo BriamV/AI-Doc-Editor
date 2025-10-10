@@ -1,10 +1,12 @@
 /**
  * Authentication hook
  * T-02: OAuth 2.0 + JWT integration
+ * Updated: Includes API key migration from localStorage to backend
  */
 import { useCallback, useEffect, useState } from 'react';
 import useStore from '@store/store';
 import { authAPI } from '@api/auth-api';
+import { migrateApiKeyToBackend } from '@utils/api-key-migration';
 
 export const useAuth = () => {
   const { isAuthenticated, accessToken, refreshToken, user, setTokens, setUser, logout } =
@@ -101,6 +103,11 @@ export const useAuth = () => {
         // Store tokens and user data
         setTokens(tokenData.access_token, tokenData.refresh_token);
         setUser(tokenData.user);
+
+        // Migrate API key from localStorage to backend (non-blocking)
+        migrateApiKeyToBackend(tokenData.access_token).catch(error => {
+          console.warn('API key migration failed (non-critical):', error);
+        });
 
         return tokenData;
       } catch (error) {

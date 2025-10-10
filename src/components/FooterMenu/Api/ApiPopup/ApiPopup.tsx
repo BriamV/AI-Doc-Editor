@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import useStore from '@store/store';
 import { useTranslation, Trans } from 'react-i18next';
+import { useAuth } from '@hooks/useAuth';
+import { credentialsAPI } from '@api/credentials-api';
 
 import PopupModal from '@components/PopupModal';
 import { Close } from '@carbon/icons-react';
 
 const ApiPopup = () => {
   const { t } = useTranslation(['main', 'api']);
+  const { token, isAuthenticated } = useAuth();
 
   const apiKey = useStore(state => state.apiKey);
   const setApiKey = useStore(state => state.setApiKey);
@@ -16,6 +19,7 @@ const ApiPopup = () => {
   const [_apiKey, _setApiKey] = useState<string>(apiKey || '');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(!apiKey && firstVisit);
   const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     _setApiKey(e.target.value);
@@ -30,10 +34,31 @@ const ApiPopup = () => {
     setError('');
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (_apiKey.length === 0) {
       setError(t('noApiKeyWarning', { ns: 'api' }) as string);
+      return;
+    }
+
+    // If authenticated, save to backend
+    if (isAuthenticated && token) {
+      setLoading(true);
+      setError('');
+
+      try {
+        await credentialsAPI.saveApiKey(token, _apiKey);
+        // Keep in store for backward compatibility
+        setApiKey(_apiKey);
+        setIsModalOpen(false);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to save API key. Please try again.';
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
     } else {
+      // Fallback: save to localStorage via store (legacy behavior)
       setError('');
       setApiKey(_apiKey);
       setIsModalOpen(false);
@@ -60,9 +85,10 @@ const ApiPopup = () => {
           </div>
           <input
             type="text"
-            className="text-gray-800 dark:text-white p-3 text-sm border-none bg-gray-200 dark:bg-gray-600 rounded-md m-0 w-full mr-0 h-8 focus:outline-none"
+            className="text-gray-800 dark:text-white p-3 text-sm border-none bg-gray-200 dark:bg-gray-600 rounded-md m-0 w-full mr-0 h-8 focus:outline-none disabled:opacity-50"
             value={_apiKey}
             onChange={handleApiKeyChange}
+            disabled={loading}
           />
         </div>
 

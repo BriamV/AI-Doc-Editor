@@ -1,7 +1,7 @@
 import useStore from '@store/store';
 import { useTranslation } from 'react-i18next';
 import { MessageInterface, ConfigInterface } from '@type/document';
-import { getChatCompletion } from '@api/api';
+import { getChatCompletionWrapper } from '@api/chat-wrapper';
 import { updateTotalTokenUsed } from '@utils/messageUtils';
 import { _defaultChatConfig } from '@constants/chat';
 import { officialAPIEndpoint } from '@constants/auth';
@@ -10,36 +10,51 @@ interface TitleGenerationResult {
   generateAndSetTitle: (config: ConfigInterface) => Promise<void>;
 }
 
+interface ChatCompletionResponse {
+  choices: Array<{
+    message: {
+      content: string;
+    };
+  }>;
+}
+
 /**
  * Custom hook for auto-title generation logic
  * Reduces complexity by centralizing title generation operations
+ * Updated to use backend proxy when authenticated
  */
 const useTitleGeneration = (): TitleGenerationResult => {
   const { t, i18n } = useTranslation('api');
   const apiEndpoint = useStore(state => state.apiEndpoint);
   const apiKey = useStore(state => state.apiKey);
+  const isAuthenticated = useStore(state => state.isAuthenticated);
   const currentChatIndex = useStore(state => state.currentChatIndex);
   const setChats = useStore(state => state.setChats);
 
   const generateTitle = async (message: MessageInterface[]): Promise<string> => {
-    let data;
+    let data: ChatCompletionResponse;
 
-    if (!apiKey || apiKey.length === 0) {
+    // Skip validation if authenticated (backend handles it)
+    if (!isAuthenticated && (!apiKey || apiKey.length === 0)) {
       if (apiEndpoint === officialAPIEndpoint) {
         throw new Error(t('noApiKeyWarning') as string);
       }
-      data = await getChatCompletion({
+    }
+
+    // Use wrapper that handles backend proxy routing
+    if (!apiKey || apiKey.length === 0) {
+      data = (await getChatCompletionWrapper({
         endpoint: useStore.getState().apiEndpoint,
         messages: message,
         config: _defaultChatConfig,
-      });
+      })) as ChatCompletionResponse;
     } else {
-      data = await getChatCompletion({
+      data = (await getChatCompletionWrapper({
         endpoint: useStore.getState().apiEndpoint,
         messages: message,
         config: _defaultChatConfig,
         apiKey,
-      });
+      })) as ChatCompletionResponse;
     }
 
     return data.choices[0].message.content;

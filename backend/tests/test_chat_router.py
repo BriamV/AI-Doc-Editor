@@ -4,10 +4,10 @@ GitHub Issue #29: Backend chat proxy endpoint
 """
 
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, patch
 from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
-from openai import AuthenticationError, RateLimitError, APIConnectionError, APIError
+from openai import AuthenticationError, RateLimitError
 
 from app.main import app
 from app.routers.chat import get_openai_client
@@ -37,10 +37,11 @@ class TestChatRouter:
         user_api_key = "sk-user-test-key"
         mock_get_user_key.return_value = user_api_key
 
-        client_instance = get_openai_client(user_id)
+        result = get_openai_client(user_id)
 
         mock_get_user_key.assert_called_once_with(user_id)
         mock_openai.assert_called_once_with(api_key=user_api_key)
+        assert result is not None
 
     @patch("app.routers.chat.get_user_openai_key")
     @patch("app.routers.chat.settings")
@@ -58,9 +59,10 @@ class TestChatRouter:
         )
         mock_settings.OPENAI_API_KEY = global_api_key
 
-        client_instance = get_openai_client(user_id)
+        result = get_openai_client(user_id)
 
         mock_openai.assert_called_once_with(api_key=global_api_key)
+        assert result is not None
 
     @patch("app.routers.chat.get_user_openai_key")
     @patch("app.routers.chat.settings")
