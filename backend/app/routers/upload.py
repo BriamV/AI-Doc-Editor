@@ -17,6 +17,7 @@ from app.db.session import get_db
 from app.services.auth import AuthService
 from app.services.document_service import DocumentService
 from app.services.rag_processing_service import RAGProcessingService
+from app.routers.credentials import get_user_openai_key
 
 logger = logging.getLogger(__name__)
 
@@ -34,15 +35,36 @@ async def process_document_in_background(
         document_id: Document UUID
         file_path: Full path to uploaded file
         user_id: User UUID
-        api_key: Optional OpenAI API key
+        api_key: Optional OpenAI API key (user-specific or None for global)
     """
     from app.db.session import get_async_session
 
     logger.info(f"[Background] Starting RAG processing for document: {document_id}")
 
     try:
-        # Create RAG processing service
+        # Create RAG processing service with user API key (or global fallback)
         rag_service = RAGProcessingService(api_key=api_key)
+
+        # Check if embedding service is available (has valid API key)
+        if not rag_service.embedding_service.is_available():
+            error_msg = (
+                "No OpenAI API key available. "
+                "Please configure your API key in user settings or contact administrator."
+            )
+            logger.error(f"[Background] {error_msg} (document: {document_id})")
+
+            # Update document status to failed with clear error message
+            async for db in get_async_session():
+                document_service = DocumentService()
+                await document_service.update_document_status(
+                    db=db,
+                    document_id=document_id,
+                    status="failed",
+                    metadata={"error": error_msg, "reason": "missing_api_key"},
+                )
+                break
+
+            return  # Exit gracefully without crashing
 
         # Get database session
         async for db in get_async_session():
@@ -63,8 +85,35 @@ async def process_document_in_background(
 
             break  # Exit after processing
 
+    except ValueError as e:
+        # Handle validation errors (empty text, invalid input, etc.)
+        error_msg = f"Validation error: {str(e)}"
+        logger.error(f"[Background] {error_msg} (document: {document_id})")
+
+        async for db in get_async_session():
+            document_service = DocumentService()
+            await document_service.update_document_status(
+                db=db,
+                document_id=document_id,
+                status="failed",
+                metadata={"error": error_msg, "reason": "validation_error"},
+            )
+            break
+
     except Exception as e:
-        logger.error(f"[Background] RAG processing failed for {document_id}: {str(e)}")
+        # Handle unexpected errors
+        error_msg = f"Processing error: {str(e)}"
+        logger.error(f"[Background] RAG processing failed for {document_id}: {error_msg}")
+
+        async for db in get_async_session():
+            document_service = DocumentService()
+            await document_service.update_document_status(
+                db=db,
+                document_id=document_id,
+                status="failed",
+                metadata={"error": error_msg, "reason": "processing_error"},
+            )
+            break
 
 
 def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
@@ -172,6 +221,23 @@ async def upload_document(
 
         logger.info(f"Upload successful: {document_metadata['document_id']} by user {user_id}")
 
+        # Retrieve user's OpenAI API key (prioritize user key, fallback to global)
+        user_api_key = None
+        try:
+            user_api_key = get_user_openai_key(user_id)
+            logger.info(
+                f"Using user-specific API key for document {document_metadata['document_id']}"
+            )
+        except HTTPException as e:
+            # User hasn't configured their own API key - will use global key
+            if e.status_code == status.HTTP_402_PAYMENT_REQUIRED:
+                logger.info(
+                    f"No user API key found for {user_id}, will use global key if available"
+                )
+            else:
+                # Re-raise unexpected HTTP exceptions
+                raise
+
         # Schedule RAG processing in background
         # Get full file path from relative path
         upload_dir = document_service.upload_dir
@@ -192,6 +258,7 @@ async def upload_document(
                 document_id=document_metadata["document_id"],
                 file_path=file_path,
                 user_id=user_id,
+                api_key=user_api_key,
             )
 
         return document_metadata

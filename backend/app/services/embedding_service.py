@@ -33,7 +33,10 @@ class EmbeddingService:
 
         Args:
             api_key: OpenAI API key (optional, uses settings if not provided)
+                    Priority: 1. User-specific key (passed in)
+                             2. Global settings key (fallback)
         """
+        self.user_api_key = api_key  # Store user key separately for logging
         self.api_key = api_key or self._get_api_key()
         self.client = OpenAI(api_key=self.api_key) if self.api_key else None
         self.model = "text-embedding-3-small"  # 1536 dimensions, cost-effective
@@ -41,13 +44,29 @@ class EmbeddingService:
         self.max_retries = 3
         self.retry_delay = 1.0  # Initial delay in seconds
 
+        # Log which API key source is being used (without logging the actual key)
+        if self.api_key:
+            if self.user_api_key:
+                logger.info("EmbeddingService initialized with user-specific API key")
+            else:
+                logger.info("EmbeddingService initialized with global API key")
+        else:
+            logger.warning("EmbeddingService initialized without API key")
+
     def _get_api_key(self) -> str:
-        """Get OpenAI API key from settings or environment."""
-        # Try to get from user-specific API keys first (T-41)
-        # For now, use global setting
+        """
+        Get OpenAI API key from global settings.
+
+        Returns:
+            Global API key from settings, or None if not configured
+
+        Note:
+            This is the fallback when no user-specific key is provided.
+            Priority is: user key (in __init__) > global key (this method)
+        """
         api_key = getattr(settings, "OPENAI_API_KEY", None)
         if not api_key:
-            logger.warning("OpenAI API key not configured")
+            logger.warning("Global OpenAI API key not configured in settings")
         return api_key
 
     def is_available(self) -> bool:
