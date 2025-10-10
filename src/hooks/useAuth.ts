@@ -37,33 +37,38 @@ export const useAuth = () => {
     }
   }, [refreshToken, logout, setTokens]);
 
-  const setupTokenRefresh = useCallback(() => {
-    // Set up automatic token refresh before expiry
-    // JWT tokens typically expire in 30 minutes, refresh at 25 minutes
-    const refreshInterval = 25 * 60 * 1000; // 25 minutes
-
-    const interval = setInterval(() => {
-      if (isAuthenticated && refreshToken) {
-        refreshAccessToken();
-      } else {
-        clearInterval(interval);
-      }
-    }, refreshInterval);
-
-    return () => clearInterval(interval);
-  }, [isAuthenticated, refreshToken, refreshAccessToken]);
-
   // Check backend availability on mount
   useEffect(() => {
     checkBackend();
   }, [checkBackend]);
 
-  // Auto-refresh tokens
+  // Auto-refresh tokens - Stable interval that only depends on auth state
   useEffect(() => {
-    if (accessToken && refreshToken) {
-      setupTokenRefresh();
+    if (!isAuthenticated || !refreshToken) {
+      return;
     }
-  }, [accessToken, refreshToken, setupTokenRefresh]);
+
+    // Set up automatic token refresh before expiry
+    // JWT tokens expire in 30 minutes, refresh at 25 minutes
+    const refreshInterval = 25 * 60 * 1000; // 25 minutes
+
+    console.log('🔄 Setting up auto-refresh interval (25 minutes)');
+
+    const interval = setInterval(async () => {
+      console.log('⏰ Auto-refresh triggered');
+      try {
+        await refreshAccessToken();
+        console.log('✅ Auto-refresh successful');
+      } catch (error) {
+        console.error('❌ Auto-refresh failed:', error);
+      }
+    }, refreshInterval);
+
+    return () => {
+      console.log('🛑 Clearing auto-refresh interval');
+      clearInterval(interval);
+    };
+  }, [isAuthenticated, refreshToken, refreshAccessToken]);
 
   const login = useCallback(
     async (provider: 'google' | 'microsoft') => {

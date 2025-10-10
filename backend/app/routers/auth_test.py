@@ -131,7 +131,7 @@ async def test_login(request: TestLoginRequest):
     # Generate JWT tokens with test_mode claim and extended expiry
     user_data = {
         "sub": user["email"],  # JWT standard subject field (required)
-        "id": user["id"],  # Include user_id for document operations
+        "user_id": user["id"],  # Include user_id for document operations
         "email": user["email"],
         "name": user["name"],
         "provider": user["provider"],

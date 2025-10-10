@@ -149,12 +149,18 @@ async def oauth_callback(code: str, state: Optional[str] = None, provider: str =
 
 
 @router.post("/refresh")
-async def refresh_token(refresh_token: str):
+async def refresh_token(request_body: dict):
     """
     Refresh JWT access token
     T-02-ST2: JWT refresh implementation
+
+    Accepts JSON body: {"refresh_token": "..."}
     """
     try:
+        refresh_token = request_body.get("refresh_token")
+        if not refresh_token:
+            raise HTTPException(status_code=400, detail="refresh_token is required")
+
         auth_service = AuthService()
         new_tokens = auth_service.refresh_tokens(refresh_token)
 
@@ -166,8 +172,10 @@ async def refresh_token(refresh_token: str):
             }
         )
 
-    except Exception:
+    except ValueError:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Token refresh failed: {str(e)}")
 
 
 @router.get("/me")

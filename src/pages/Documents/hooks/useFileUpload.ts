@@ -67,7 +67,8 @@ const getErrorMessage = (status: number, defaultMessage: string): string => {
 const uploadToBackend = async (
   file: File,
   token: string,
-  onProgress: (progress: number) => void
+  onProgress: (progress: number) => void,
+  retryWithNewToken?: (newToken: string) => Promise<UploadResponse>
 ): Promise<UploadResponse> => {
   const API_BASE_URL = getEnvVar('VITE_API_BASE_URL');
   if (!API_BASE_URL) {
@@ -104,6 +105,11 @@ const uploadToBackend = async (
         errorData = { detail: errorText };
       }
 
+      // Handle 401 with automatic retry if callback provided
+      if (response.status === 401 && retryWithNewToken) {
+        throw { status: 401, needsRetry: true };
+      }
+
       const errorMsg = getErrorMessage(
         response.status,
         errorData.detail || 'Upload failed. Please try again.'
@@ -125,7 +131,7 @@ export const useFileUpload = ({ onUploadSuccess, onUploadError }: UseFileUploadP
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { token } = useAuth();
+  const { token, refreshAccessToken } = useAuth();
 
   const handleFileSelect = useCallback((file: File) => {
     const validationError = validateFile(file);
@@ -214,7 +220,54 @@ export const useFileUpload = ({ onUploadSuccess, onUploadError }: UseFileUploadP
           fileInputRef.current.value = '';
         }
       }, 1000);
-    } catch (err) {
+    } catch (err: any) {
+      // Handle 401 with automatic token refresh and retry
+      if (err?.status === 401 && err?.needsRetry) {
+        console.log('🔄 Token expired, attempting refresh...');
+        const newToken = await refreshAccessToken();
+
+        if (newToken) {
+          console.log('✅ Token refreshed, retrying upload...');
+          try {
+            // Retry upload with new token
+            const data = await uploadToBackend(selectedFile, newToken, progress => {
+              setUploadProgress(prev => Math.max(prev, progress));
+            });
+
+            setUploadProgress(100);
+            onUploadSuccess?.(data.document_id);
+
+            // Clear state after successful upload
+            setTimeout(() => {
+              setSelectedFile(null);
+              setUploadProgress(0);
+              setIsUploading(false);
+              if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+              }
+            }, 1000);
+            return; // Exit successfully
+          } catch (retryErr) {
+            const errorMsg =
+              retryErr instanceof Error ? retryErr.message : 'Upload failed after retry.';
+            setError(errorMsg);
+            onUploadError?.(errorMsg);
+            setIsUploading(false);
+            setUploadProgress(0);
+            return;
+          }
+        } else {
+          // Token refresh failed - require login
+          const errorMsg = 'Session expired. Please login again.';
+          setError(errorMsg);
+          onUploadError?.(errorMsg);
+          setIsUploading(false);
+          setUploadProgress(0);
+          return;
+        }
+      }
+
+      // Other errors
       const errorMsg = err instanceof Error ? err.message : 'Upload failed. Please try again.';
       setError(errorMsg);
       onUploadError?.(errorMsg);
