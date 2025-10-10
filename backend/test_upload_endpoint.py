@@ -6,7 +6,6 @@ Usage:
     python test_upload_endpoint.py
 """
 
-import asyncio
 import sys
 from pathlib import Path
 

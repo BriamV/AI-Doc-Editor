@@ -132,7 +132,7 @@ def test_vector_store():
 
         # Cleanup
         service.delete_collection(collection_name)
-        print(f"[OK] Cleaned up test collection")
+        print("[OK] Cleaned up test collection")
 
         return True
 
@@ -156,7 +156,7 @@ def test_rag_service_readiness():
     # Get stats
     try:
         stats = service.get_processing_stats()
-        print(f"\nProcessing Stats:")
+        print("\nProcessing Stats:")
         print(f"  Collections: {stats['collections']}")
         print(f"  Embedding Model: {stats['embedding_model']}")
         print(f"  Embedding Dimensions: {stats['embedding_dimensions']}")

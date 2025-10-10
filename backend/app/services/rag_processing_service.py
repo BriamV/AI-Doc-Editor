@@ -11,9 +11,8 @@ Orchestrates the complete RAG pipeline:
 """
 
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any
 from pathlib import Path
-import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.text_extraction_service import TextExtractionService
@@ -101,9 +100,7 @@ class RAGProcessingService:
             if not extracted_text or len(extracted_text.strip()) < 10:
                 raise ValueError("Extracted text is empty or too short")
 
-            logger.info(
-                f"[{document_id}] Extracted {len(extracted_text)} characters from document"
-            )
+            logger.info(f"[{document_id}] Extracted {len(extracted_text)} characters from document")
 
             # Stage 2: Chunk text
             logger.info(f"[{document_id}] Stage 2: Chunking text...")

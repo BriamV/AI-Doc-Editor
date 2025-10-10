@@ -20,7 +20,6 @@ from sqlalchemy import select
 from fastapi import UploadFile, HTTPException
 
 from app.models.document import Document, DocumentStatus
-from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -424,9 +423,7 @@ class DocumentService:
             doc_uuid = uuid.UUID(document_id)
 
             result = await db.execute(
-                select(Document).where(
-                    Document.id == doc_uuid, Document.deleted_at.is_(None)
-                )
+                select(Document).where(Document.id == doc_uuid, Document.deleted_at.is_(None))
             )
             document = result.scalar_one_or_none()
 

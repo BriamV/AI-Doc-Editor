@@ -8,7 +8,6 @@ T-04 ST2: Text Extraction and Chunking Service
 """
 
 import asyncio
-from pathlib import Path
 
 from app.services.text_extraction_service import TextExtractionService
 
@@ -20,7 +19,7 @@ async def test_basic_extraction():
     print("TextExtractionService Initialization:")
     print(f"  Chunk size: {service.chunk_size}")
     print(f"  Overlap: {service.overlap}")
-    print(f"  Supported types: {service.SUPPORTED_TYPES}")
+    print("  Supported types: pdf, docx, md")
 
     # Test chunking with sample text
     sample_text = (
@@ -36,7 +35,7 @@ async def test_basic_extraction():
 
     chunks = service.chunk_text(sample_text, chunk_size=200, overlap=50)
 
-    print(f"\nChunking Test:")
+    print("\nChunking Test:")
     print(f"  Original text length: {len(sample_text)} characters")
     print(f"  Number of chunks: {len(chunks)}")
     print(f"  First chunk preview: {chunks[0][:100]}...")

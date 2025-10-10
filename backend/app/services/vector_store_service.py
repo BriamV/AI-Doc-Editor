@@ -7,7 +7,7 @@ Handles collection management, document indexing, and similarity search.
 """
 
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from pathlib import Path
 import chromadb
 
@@ -122,9 +122,7 @@ class VectorStoreService:
 
         try:
             # Add documents to collection
-            collection.add(
-                documents=texts, embeddings=embeddings, metadatas=metadatas, ids=ids
-            )
+            collection.add(documents=texts, embeddings=embeddings, metadatas=metadatas, ids=ids)
 
             logger.info(f"Added {len(texts)} documents to collection: {collection_name}")
 

@@ -159,9 +159,7 @@ class EmbeddingService:
                 if attempt < self.max_retries - 1:
                     time.sleep(wait_time)
                 else:
-                    raise APIError(
-                        f"Connection failed after {self.max_retries} retries"
-                    ) from e
+                    raise APIError(f"Connection failed after {self.max_retries} retries") from e
 
             except APIError as e:
                 logger.error(f"OpenAI API error: {str(e)}")

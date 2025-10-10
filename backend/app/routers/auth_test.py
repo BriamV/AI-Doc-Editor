@@ -17,7 +17,7 @@ Endpoints:
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from pathlib import Path
 
 from app.core.config import settings

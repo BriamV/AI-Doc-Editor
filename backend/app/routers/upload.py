@@ -12,7 +12,6 @@ from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status,
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
-from pathlib import Path
 
 from app.db.session import get_db
 from app.services.auth import AuthService
