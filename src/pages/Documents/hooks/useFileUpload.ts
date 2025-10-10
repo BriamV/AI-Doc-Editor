@@ -3,7 +3,7 @@
  * T-49-ST2: File upload logic and state management
  */
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useAuth } from '@hooks/useAuth';
 import { getEnvVar } from '@utils/env';
 
@@ -123,7 +123,192 @@ const uploadToBackend = async (
   }
 };
 
-// eslint-disable-next-line max-lines-per-function
+/**
+ * Create drag event handlers for file upload
+ */
+const createDragHandlers = (
+  setIsDragging: (value: boolean) => void,
+  onFileSelect: (file: File) => void
+) => ({
+  handleDragEnter: (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  },
+  handleDragLeave: (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  },
+  handleDragOver: (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  },
+  handleDrop: (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      onFileSelect(files[0]);
+    }
+  },
+});
+
+/**
+ * Create file management handlers (select, clear, browse, file input)
+ */
+const createFileHandlers = (
+  setError: (value: string | null) => void,
+  setSelectedFile: (value: File | null) => void,
+  setUploadProgress: (value: number) => void,
+  fileInputRef: React.RefObject<HTMLInputElement>
+) => {
+  const handleFileSelect = (file: File) => {
+    const validationError = validateFile(file);
+    if (validationError) {
+      setError(validationError);
+      setSelectedFile(null);
+      return;
+    }
+    setError(null);
+    setSelectedFile(file);
+  };
+
+  return {
+    handleFileSelect,
+    handleFileInputChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (files && files.length > 0) handleFileSelect(files[0]);
+    },
+    handleBrowseClick: () => fileInputRef.current?.click(),
+    handleClearFile: () => {
+      setSelectedFile(null);
+      setError(null);
+      setUploadProgress(0);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    },
+  };
+};
+
+interface UploadCallbacksOptions {
+  setUploadProgress: (value: number) => void;
+  setSelectedFile: (value: File | null) => void;
+  setIsUploading: (value: boolean) => void;
+  setError: (value: string | null) => void;
+  fileInputRef: React.RefObject<HTMLInputElement>;
+  onUploadSuccess?: (documentId: string) => void;
+  onUploadError?: (error: string) => void;
+}
+
+/**
+ * Create upload callback handlers (success and error)
+ */
+const createUploadCallbacks = (options: UploadCallbacksOptions) => ({
+  handleSuccess: (documentId: string) => {
+    options.setUploadProgress(100);
+    options.onUploadSuccess?.(documentId);
+    setTimeout(() => {
+      options.setSelectedFile(null);
+      options.setUploadProgress(0);
+      options.setIsUploading(false);
+      if (options.fileInputRef.current) options.fileInputRef.current.value = '';
+    }, 1000);
+  },
+  handleError: (errorMsg: string) => {
+    options.setError(errorMsg);
+    options.onUploadError?.(errorMsg);
+  },
+});
+
+/**
+ * Type guard for 401 retry error
+ */
+const is401RetryError = (error: unknown): error is { status: number; needsRetry: boolean } =>
+  typeof error === 'object' &&
+  error !== null &&
+  'status' in error &&
+  'needsRetry' in error &&
+  (error as { status: number }).status === 401;
+
+interface UploadHandlerOptions {
+  file: File | null;
+  token: string | null;
+  setIsUploading: (value: boolean) => void;
+  setUploadProgress: (value: number | ((prev: number) => number)) => void;
+  setError: (value: string | null) => void;
+  refreshAccessToken: () => Promise<string | null>;
+  onSuccess: (documentId: string) => void;
+  onError: (errorMsg: string) => void;
+}
+
+/**
+ * Upload file with automatic token refresh retry on 401
+ */
+const uploadWithRetry = async (
+  file: File,
+  token: string,
+  refreshAccessToken: () => Promise<string | null>,
+  setProgress: (value: number | ((prev: number) => number)) => void
+): Promise<UploadResponse> => {
+  try {
+    return await uploadToBackend(file, token, progress => {
+      setProgress(prev => Math.max(prev, progress));
+    });
+  } catch (err: unknown) {
+    if (!is401RetryError(err)) throw err;
+
+    console.log('🔄 Token expired, attempting refresh...');
+    const newToken = await refreshAccessToken();
+    if (!newToken) throw new Error('Session expired. Please login again.');
+
+    console.log('✅ Token refreshed, retrying upload...');
+    return await uploadToBackend(file, newToken, progress => {
+      setProgress(prev => Math.max(prev, progress));
+    });
+  }
+};
+
+/**
+ * Create upload handler with retry logic
+ */
+const createUploadHandler = (options: UploadHandlerOptions) => {
+  return async () => {
+    const {
+      file,
+      token,
+      setIsUploading,
+      setUploadProgress,
+      setError,
+      refreshAccessToken,
+      onSuccess,
+      onError,
+    } = options;
+
+    if (!file || !token) {
+      const errorMsg = !token ? 'Please login to upload files.' : 'No file selected.';
+      setError(errorMsg);
+      onError(errorMsg);
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress(0);
+    setError(null);
+
+    try {
+      const data = await uploadWithRetry(file, token, refreshAccessToken, setUploadProgress);
+      onSuccess(data.document_id);
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Upload failed. Please try again.';
+      setError(errorMsg);
+      onError(errorMsg);
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
+  };
+};
+
 export const useFileUpload = ({ onUploadSuccess, onUploadError }: UseFileUploadProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -133,161 +318,33 @@ export const useFileUpload = ({ onUploadSuccess, onUploadError }: UseFileUploadP
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { token, refreshAccessToken } = useAuth();
 
-  const handleFileSelect = useCallback((file: File) => {
-    const validationError = validateFile(file);
-    if (validationError) {
-      setError(validationError);
-      setSelectedFile(null);
-      return;
-    }
-    setError(null);
-    setSelectedFile(file);
-  }, []);
-
-  const handleDragEnter = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  }, []);
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragging(false);
-
-      const files = Array.from(e.dataTransfer.files);
-      if (files.length > 0) {
-        handleFileSelect(files[0]);
-      }
-    },
-    [handleFileSelect]
+  const fileHandlers = createFileHandlers(
+    setError,
+    setSelectedFile,
+    setUploadProgress,
+    fileInputRef
   );
+  const uploadCallbacks = createUploadCallbacks({
+    setUploadProgress,
+    setSelectedFile,
+    setIsUploading,
+    setError,
+    fileInputRef,
+    onUploadSuccess,
+    onUploadError,
+  });
+  const dragHandlers = createDragHandlers(setIsDragging, fileHandlers.handleFileSelect);
 
-  const handleFileInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      if (files && files.length > 0) {
-        handleFileSelect(files[0]);
-      }
-    },
-    [handleFileSelect]
-  );
-
-  const handleUpload = async () => {
-    if (!selectedFile) return;
-
-    // Check authentication
-    if (!token) {
-      const errorMsg = 'Please login to upload files.';
-      setError(errorMsg);
-      onUploadError?.(errorMsg);
-      return;
-    }
-
-    setIsUploading(true);
-    setUploadProgress(0);
-    setError(null);
-
-    try {
-      // Upload file with progress updates
-      const data = await uploadToBackend(selectedFile, token, progress => {
-        setUploadProgress(prev => Math.max(prev, progress));
-      });
-
-      setUploadProgress(100);
-
-      // Success callback
-      onUploadSuccess?.(data.document_id);
-
-      // Clear state after successful upload
-      setTimeout(() => {
-        setSelectedFile(null);
-        setUploadProgress(0);
-        setIsUploading(false);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-      }, 1000);
-    } catch (err: any) {
-      // Handle 401 with automatic token refresh and retry
-      if (err?.status === 401 && err?.needsRetry) {
-        console.log('🔄 Token expired, attempting refresh...');
-        const newToken = await refreshAccessToken();
-
-        if (newToken) {
-          console.log('✅ Token refreshed, retrying upload...');
-          try {
-            // Retry upload with new token
-            const data = await uploadToBackend(selectedFile, newToken, progress => {
-              setUploadProgress(prev => Math.max(prev, progress));
-            });
-
-            setUploadProgress(100);
-            onUploadSuccess?.(data.document_id);
-
-            // Clear state after successful upload
-            setTimeout(() => {
-              setSelectedFile(null);
-              setUploadProgress(0);
-              setIsUploading(false);
-              if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-              }
-            }, 1000);
-            return; // Exit successfully
-          } catch (retryErr) {
-            const errorMsg =
-              retryErr instanceof Error ? retryErr.message : 'Upload failed after retry.';
-            setError(errorMsg);
-            onUploadError?.(errorMsg);
-            setIsUploading(false);
-            setUploadProgress(0);
-            return;
-          }
-        } else {
-          // Token refresh failed - require login
-          const errorMsg = 'Session expired. Please login again.';
-          setError(errorMsg);
-          onUploadError?.(errorMsg);
-          setIsUploading(false);
-          setUploadProgress(0);
-          return;
-        }
-      }
-
-      // Other errors
-      const errorMsg = err instanceof Error ? err.message : 'Upload failed. Please try again.';
-      setError(errorMsg);
-      onUploadError?.(errorMsg);
-      setIsUploading(false);
-      setUploadProgress(0);
-    }
-  };
-
-  const handleBrowseClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleClearFile = () => {
-    setSelectedFile(null);
-    setError(null);
-    setUploadProgress(0);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
+  const handleUpload = createUploadHandler({
+    file: selectedFile,
+    token: token ?? null,
+    setIsUploading,
+    setUploadProgress,
+    setError,
+    refreshAccessToken,
+    onSuccess: uploadCallbacks.handleSuccess,
+    onError: uploadCallbacks.handleError,
+  });
 
   return {
     isDragging,
@@ -296,13 +353,10 @@ export const useFileUpload = ({ onUploadSuccess, onUploadError }: UseFileUploadP
     uploadProgress,
     error,
     fileInputRef,
-    handleDragEnter,
-    handleDragLeave,
-    handleDragOver,
-    handleDrop,
-    handleFileInputChange,
+    ...dragHandlers,
+    handleFileInputChange: fileHandlers.handleFileInputChange,
     handleUpload,
-    handleBrowseClick,
-    handleClearFile,
+    handleBrowseClick: fileHandlers.handleBrowseClick,
+    handleClearFile: fileHandlers.handleClearFile,
   };
 };
