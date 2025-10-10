@@ -5,7 +5,7 @@
 import React from 'react';
 // Note: No redirects here; show inline access denied message
 import { useAuth } from '@hooks/useAuth';
-import TestModeBanner from '@components/Auth/TestModeBanner';
+import UserBanner from '@components/Auth/UserBanner';
 import AuditLogStats from '@components/AuditLogs/AuditLogStats';
 import AuditLogFilters from '@components/AuditLogs/AuditLogFilters';
 import AuditLogTable from '@components/AuditLogs/AuditLogTable';
@@ -51,7 +51,7 @@ const AuditLogsContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <TestModeBanner />
+      <UserBanner />
       {/* Header */}
       <PageHeader
         lastRefresh={auditState.lastRefresh}

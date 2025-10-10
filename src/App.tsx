@@ -9,7 +9,7 @@ import AuditLogs from './pages/AuditLogs';
 import Documents from './pages/Documents';
 import AuthLogin from '@components/Auth/AuthLogin';
 import AuthCallback from '@components/Auth/AuthCallback';
-import TestModeBanner from '@components/Auth/TestModeBanner';
+import UserBanner from '@components/Auth/UserBanner';
 import { useAuth } from '@hooks/useAuth';
 
 import useInitialiseNewDocument from '@hooks/useInitialiseNewDocument';
@@ -169,7 +169,7 @@ function RequireAuth({ children }: { children: JSX.Element }) {
 const Home: React.FC = () => {
   return (
     <>
-      <TestModeBanner />
+      <UserBanner />
       <DocumentMenu />
       <Document />
       <AIMenu />

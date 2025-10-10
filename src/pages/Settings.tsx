@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@hooks/useAuth';
-import TestModeBanner from '@components/Auth/TestModeBanner';
+import UserBanner from '@components/Auth/UserBanner';
 
 /** Settings admin page */
 const Settings = () => {
@@ -12,7 +12,7 @@ const Settings = () => {
 
   return (
     <>
-      <TestModeBanner />
+      <UserBanner />
       <div className="p-4 text-white">
         <h1 className="text-xl mb-4">Admin Settings</h1>
         <p>Configuration options will appear here.</p>

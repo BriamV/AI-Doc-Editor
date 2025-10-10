@@ -7,7 +7,7 @@
 import React from 'react';
 import { useAuth } from '@hooks/useAuth';
 import { useDocuments } from './Documents/hooks/useDocuments';
-import TestModeBanner from '@components/Auth/TestModeBanner';
+import UserBanner from '@components/Auth/UserBanner';
 import PageHeader from './Documents/components/PageHeader';
 import ErrorBanner from './Documents/components/ErrorBanner';
 import DocumentFilters from './Documents/components/DocumentFilters';
@@ -69,7 +69,7 @@ const Documents: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <TestModeBanner />
+      <UserBanner />
       <PageHeader isLoading={documentsState.isLoading} onRefresh={documentsState.refresh} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
