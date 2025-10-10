@@ -8,19 +8,64 @@ T-04 ST1: Upload Endpoint for Document RAG Processing
 """
 
 from typing import Dict, Any
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status, BackgroundTasks
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
+from pathlib import Path
 
 from app.db.session import get_db
 from app.services.auth import AuthService
 from app.services.document_service import DocumentService
+from app.services.rag_processing_service import RAGProcessingService
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["upload"])
 security = HTTPBearer()
+
+
+async def process_document_in_background(
+    document_id: str, file_path: str, user_id: str, api_key: str = None
+):
+    """
+    Background task to process document through RAG pipeline.
+
+    Args:
+        document_id: Document UUID
+        file_path: Full path to uploaded file
+        user_id: User UUID
+        api_key: Optional OpenAI API key
+    """
+    from app.db.session import get_async_session
+
+    logger.info(f"[Background] Starting RAG processing for document: {document_id}")
+
+    try:
+        # Create RAG processing service
+        rag_service = RAGProcessingService(api_key=api_key)
+
+        # Get database session
+        async for db in get_async_session():
+            # Process document through RAG pipeline
+            result = await rag_service.process_document(
+                db=db,
+                document_id=document_id,
+                file_path=file_path,
+                user_id=user_id,
+                collection_name="documents",
+            )
+
+            logger.info(
+                f"[Background] RAG processing completed for {document_id}: "
+                f"{result['chunks_created']} chunks, "
+                f"{result['embeddings_generated']} embeddings"
+            )
+
+            break  # Exit after processing
+
+    except Exception as e:
+        logger.error(f"[Background] RAG processing failed for {document_id}: {str(e)}")
 
 
 def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
@@ -71,6 +116,7 @@ def get_current_user_email(
 
 @router.post("/upload")
 async def upload_document(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(..., description="Document file to upload (.pdf, .docx, .md)"),
     db: AsyncSession = Depends(get_db),
     user_id: str = Depends(get_current_user_id),
@@ -126,6 +172,28 @@ async def upload_document(
         )
 
         logger.info(f"Upload successful: {document_metadata['document_id']} by user {user_id}")
+
+        # Schedule RAG processing in background
+        # Get full file path from relative path
+        upload_dir = document_service.upload_dir
+        file_path = str(upload_dir / file.filename.split("/")[-1])
+
+        # Find the actual file path from the uploads directory
+        # The file is stored in user_id[:8]/timestamp_uniqueid_filename.ext
+        user_subdirs = list(upload_dir.glob(f"{user_id[:8]}/*"))
+        if user_subdirs:
+            # Get the most recently modified file
+            latest_file = max(user_subdirs, key=lambda p: p.stat().st_mtime)
+            file_path = str(latest_file)
+
+            logger.info(f"Scheduling RAG processing for: {file_path}")
+
+            background_tasks.add_task(
+                process_document_in_background,
+                document_id=document_metadata["document_id"],
+                file_path=file_path,
+                user_id=user_id,
+            )
 
         return document_metadata
 

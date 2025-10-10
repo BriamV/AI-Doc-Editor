@@ -397,3 +397,79 @@ class DocumentService:
         logger.info(f"Soft deleted document {document_id} for user {user_id}")
 
         return True
+
+    async def update_document_status(
+        self,
+        db: AsyncSession,
+        document_id: str,
+        status: str,
+        metadata: Dict[str, Any] = None,
+    ) -> Document:
+        """
+        Update document processing status.
+
+        Args:
+            db: Database session
+            document_id: UUID of document
+            status: New status ('processing', 'processed', 'failed')
+            metadata: Optional metadata to store (e.g., chunk count, error info)
+
+        Returns:
+            Updated Document model instance
+
+        Raises:
+            HTTPException: If document not found or update fails
+        """
+        try:
+            doc_uuid = uuid.UUID(document_id)
+
+            result = await db.execute(
+                select(Document).where(
+                    Document.id == doc_uuid, Document.deleted_at.is_(None)
+                )
+            )
+            document = result.scalar_one_or_none()
+
+            if not document:
+                raise HTTPException(status_code=404, detail="Document not found")
+
+            # Map string status to enum
+            status_map = {
+                "processing": DocumentStatus.PROCESSING,
+                "processed": DocumentStatus.PROCESSED,
+                "failed": DocumentStatus.FAILED,
+            }
+
+            if status not in status_map:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid status. Must be one of: {', '.join(status_map.keys())}",
+                )
+
+            # Update status
+            document.status = status_map[status]
+            document.processed_at = datetime.utcnow() if status == "processed" else None
+
+            # Update metadata if provided
+            if metadata:
+                # Store as JSON in a metadata field (you might need to add this column)
+                # For now, we'll log it
+                logger.info(f"Document {document_id} metadata: {metadata}")
+
+            await db.commit()
+            await db.refresh(document)
+
+            logger.info(f"Updated document {document_id} status to {status}")
+
+            return document
+
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid document ID format")
+        except HTTPException:
+            raise
+        except Exception as e:
+            await db.rollback()
+            logger.error(f"Failed to update document status: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail="Failed to update document status. Please try again."
+            )
