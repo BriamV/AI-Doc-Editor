@@ -68,7 +68,9 @@ class AuthService:
         """
         token_data = {
             "sub": user_data["email"],
-            "user_id": user_data.get("id", user_data.get("user_id", "")),  # Support both id and user_id keys
+            "user_id": user_data.get(
+                "id", user_data.get("user_id", "")
+            ),  # Support both id and user_id keys
             "email": user_data["email"],
             "name": user_data["name"],
             "role": user_data["role"],
@@ -90,7 +92,11 @@ class AuthService:
         try:
             # Debug logging
             logging.info(f"[verify_token] Token length: {len(token)}")
-            logging.info(f"[verify_token] Token prefix: {token[:20]}..." if len(token) > 20 else f"[verify_token] Token: {token}")
+            logging.info(
+                f"[verify_token] Token prefix: {token[:20]}..."
+                if len(token) > 20
+                else f"[verify_token] Token: {token}"
+            )
             logging.info(f"[verify_token] SECRET_KEY length: {len(settings.SECRET_KEY)}")
             logging.info(f"[verify_token] ALGORITHM: {settings.ALGORITHM}")
 

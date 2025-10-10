@@ -193,9 +193,7 @@ class DocumentService:
             # Return relative path from uploads directory
             relative_path = str(file_path.relative_to(self.upload_dir))
 
-            logger.info(
-                f"Saved file for user {user_id}: {unique_filename} ({file_size} bytes)"
-            )
+            logger.info(f"Saved file for user {user_id}: {unique_filename} ({file_size} bytes)")
 
             return relative_path
 
@@ -299,9 +297,7 @@ class DocumentService:
             await file.seek(0)
 
             # Create database record
-            document = await self.create_document_record(
-                db, file, file_path, user_id, user_email
-            )
+            document = await self.create_document_record(db, file, file_path, user_id, user_email)
 
             # Return document metadata
             return {
@@ -374,9 +370,7 @@ class DocumentService:
                 detail="Failed to retrieve document. Please try again.",
             )
 
-    async def delete_document(
-        self, db: AsyncSession, document_id: str, user_id: str
-    ) -> bool:
+    async def delete_document(self, db: AsyncSession, document_id: str, user_id: str) -> bool:
         """
         Soft delete document (sets deleted_at timestamp).
 

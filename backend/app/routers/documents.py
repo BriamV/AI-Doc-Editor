@@ -7,7 +7,8 @@ Provides endpoints for listing and managing user documents in the RAG knowledge 
 from typing import Optional
 from fastapi import APIRouter, Depends, Query, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
 from uuid import UUID
 
 from app.db.session import get_db
@@ -37,10 +38,11 @@ def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(secu
         if not user_id:
             # Debug: log what fields are in the token
             import logging
+
             logging.error(f"Token missing user_id/id. Token fields: {list(user_data.keys())}")
             raise HTTPException(
                 status_code=401,
-                detail=f"Token missing user identifier. Available fields: {list(user_data.keys())}"
+                detail=f"Token missing user identifier. Available fields: {list(user_data.keys())}",
             )
 
         return user_id
@@ -48,6 +50,7 @@ def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(secu
         raise
     except Exception as e:
         import logging
+
         logging.error(f"Token validation error: {str(e)}")
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
@@ -60,7 +63,7 @@ async def list_documents(
     ),
     limit: int = Query(20, ge=1, le=100, description="Number of items per page"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     user_id: str = Depends(get_current_user_id),
 ) -> DocumentListResponse:
     """
@@ -86,25 +89,29 @@ async def list_documents(
         raise HTTPException(status_code=401, detail="Invalid user ID in token")
 
     # Build query for user's documents (exclude soft-deleted)
-    query = db.query(Document).filter(Document.user_id == user_uuid, Document.deleted_at.is_(None))
+    stmt = select(Document).filter(Document.user_id == user_uuid, Document.deleted_at.is_(None))
 
     # Apply filters
     if file_type:
-        query = query.filter(Document.file_type == file_type.lower())
+        stmt = stmt.filter(Document.file_type == file_type.lower())
 
     if status:
         try:
             status_enum = DocumentStatus(status.lower())
-            query = query.filter(Document.status == status_enum)
+            stmt = stmt.filter(Document.status == status_enum)
         except ValueError:
             # Invalid status, ignore filter
             pass
 
     # Get total count before pagination
-    total = query.count()
+    count_stmt = select(func.count()).select_from(stmt.subquery())
+    total_result = await db.execute(count_stmt)
+    total = total_result.scalar()
 
     # Apply pagination and order by upload date (newest first)
-    documents = query.order_by(Document.uploaded_at.desc()).offset(offset).limit(limit).all()
+    stmt = stmt.order_by(Document.uploaded_at.desc()).offset(offset).limit(limit)
+    result = await db.execute(stmt)
+    documents = result.scalars().all()
 
     # Convert to response models
     document_responses = [DocumentResponse.from_orm(doc) for doc in documents]
@@ -117,7 +124,7 @@ async def list_documents(
 @router.get("/documents/{document_id}", response_model=DocumentResponse)
 async def get_document(
     document_id: str,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     user_id: str = Depends(get_current_user_id),
 ) -> DocumentResponse:
     """
@@ -149,14 +156,12 @@ async def get_document(
         raise HTTPException(status_code=400, detail="Invalid document ID format")
 
     # Query document
-    document = (
-        db.query(Document)
-        .filter(
-            Document.id == doc_uuid,
-            Document.deleted_at.is_(None),
-        )
-        .first()
+    stmt = select(Document).filter(
+        Document.id == doc_uuid,
+        Document.deleted_at.is_(None),
     )
+    result = await db.execute(stmt)
+    document = result.scalar_one_or_none()
 
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")

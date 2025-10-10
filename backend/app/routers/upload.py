@@ -112,9 +112,7 @@ async def upload_document(
     """
     try:
         # Log upload attempt
-        logger.info(
-            f"Upload attempt by user {user_id}: {file.filename} ({file.content_type})"
-        )
+        logger.info(f"Upload attempt by user {user_id}: {file.filename} ({file.content_type})")
 
         # Create document service
         document_service = DocumentService()
@@ -127,9 +125,7 @@ async def upload_document(
             user_email=user_email,
         )
 
-        logger.info(
-            f"Upload successful: {document_metadata['document_id']} by user {user_id}"
-        )
+        logger.info(f"Upload successful: {document_metadata['document_id']} by user {user_id}")
 
         return document_metadata
 

@@ -6,11 +6,17 @@ T-02: OAuth 2.0 + JWT settings
 import re
 import secrets
 import logging
+from pathlib import Path
 from typing import Optional, Dict, Any, List
 from pydantic_settings import BaseSettings
 from pydantic import Field, validator
 from cryptography.fernet import Fernet
 from urllib.parse import urlparse
+
+
+# Get the backend directory path (portable across environments)
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+DB_PATH = BASE_DIR / "app.db"
 
 
 class Settings(BaseSettings):
@@ -24,8 +30,8 @@ class Settings(BaseSettings):
     SECURE_HEADERS: bool = True
     ALLOWED_HOSTS: list = ["localhost", "127.0.0.1", "0.0.0.0"]
 
-    # Database
-    DATABASE_URL: str = "sqlite+aiosqlite:///./app.db"
+    # Database - Using portable path resolution
+    DATABASE_URL: str = f"sqlite+aiosqlite:///{DB_PATH}"
 
     # JWT settings - Enhanced security
     SECRET_KEY: str = Field(

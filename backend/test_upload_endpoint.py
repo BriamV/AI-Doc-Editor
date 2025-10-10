@@ -48,8 +48,7 @@ def test_upload_without_auth():
     test_file = create_test_file("test.pdf", "PDF test content")
 
     response = client.post(
-        "/api/upload",
-        files={"file": ("test.pdf", test_file, "application/pdf")}
+        "/api/upload", files={"file": ("test.pdf", test_file, "application/pdf")}
     )
 
     print(f"   Status: {response.status_code}")
@@ -70,7 +69,7 @@ def test_upload_with_invalid_token():
     response = client.post(
         "/api/upload",
         files={"file": ("test.pdf", test_file, "application/pdf")},
-        headers={"Authorization": "Bearer invalid-token"}
+        headers={"Authorization": "Bearer invalid-token"},
     )
 
     print(f"   Status: {response.status_code}")
@@ -86,10 +85,7 @@ def test_upload_with_test_user():
     client = TestClient(app)
 
     # Login with test user
-    login_response = client.post(
-        "/api/auth/test/login",
-        json={"email": "admin@test.local"}
-    )
+    login_response = client.post("/api/auth/test/login", json={"email": "admin@test.local"})
 
     if login_response.status_code != 200:
         print(f"   [WARN] Test user login failed: {login_response.json()}")
@@ -105,7 +101,7 @@ def test_upload_with_test_user():
     response = client.post(
         "/api/upload",
         files={"file": ("test-document.pdf", test_file, "application/pdf")},
-        headers={"Authorization": f"Bearer {token}"}
+        headers={"Authorization": f"Bearer {token}"},
     )
 
     print(f"   Status: {response.status_code}")
@@ -128,10 +124,7 @@ def test_upload_invalid_file_type():
     client = TestClient(app)
 
     # Login with test user
-    login_response = client.post(
-        "/api/auth/test/login",
-        json={"email": "admin@test.local"}
-    )
+    login_response = client.post("/api/auth/test/login", json={"email": "admin@test.local"})
 
     if login_response.status_code != 200:
         print("   [WARN] Skipped (test user not available)")
@@ -145,7 +138,7 @@ def test_upload_invalid_file_type():
     response = client.post(
         "/api/upload",
         files={"file": ("test.txt", test_file, "text/plain")},
-        headers={"Authorization": f"Bearer {token}"}
+        headers={"Authorization": f"Bearer {token}"},
     )
 
     print(f"   Status: {response.status_code}")
@@ -161,10 +154,7 @@ def test_upload_supported_file_types():
     client = TestClient(app)
 
     # Login with test user
-    login_response = client.post(
-        "/api/auth/test/login",
-        json={"email": "admin@test.local"}
-    )
+    login_response = client.post("/api/auth/test/login", json={"email": "admin@test.local"})
 
     if login_response.status_code != 200:
         print("   [WARN] Skipped (test user not available)")
@@ -175,7 +165,11 @@ def test_upload_supported_file_types():
     # Test each supported file type
     test_files = [
         ("test.pdf", "application/pdf", "PDF content"),
-        ("test.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "DOCX content"),
+        (
+            "test.docx",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "DOCX content",
+        ),
         ("test.md", "text/markdown", "# Markdown content"),
     ]
 
@@ -184,7 +178,7 @@ def test_upload_supported_file_types():
         response = client.post(
             "/api/upload",
             files={"file": (filename, test_file, mime_type)},
-            headers={"Authorization": f"Bearer {token}"}
+            headers={"Authorization": f"Bearer {token}"},
         )
 
         if response.status_code == 200:
@@ -217,6 +211,7 @@ def main():
     except Exception as e:
         print(f"\n[ERROR] Unexpected error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
