@@ -122,8 +122,8 @@ const ApiPopup = () => {
         <div className="min-w-fit text-gray-900 dark:text-gray-300 text-sm mt-4">
           <p>
             Your API key is encrypted and securely stored on our backend server using AES-256
-            encryption. It is never transmitted in plain text and is only used to process your
-            requests to OpenAI.
+            encryption. All requests to OpenAI are proxied through our backend to ensure security
+            and proper key management.
           </p>
         </div>
 

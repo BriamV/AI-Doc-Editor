@@ -247,107 +247,92 @@ enum AuditActionType {
 - Rate limited: 100 requests per minute per admin user
 - IP address logging mandatory for all audit access
 
-## 2. Frontend ↔ OpenAI API Contract
+## 2. Frontend → Backend Chat Proxy Contract
 
-### 2.1 Chat Completion Contract
+### Overview
 
-#### Non-Streaming Request
-**Endpoint**: `https://api.openai.com/v1/chat/completions`
+All OpenAI API calls are proxied through the backend to ensure secure key management and proper authentication.
 
-**Request Contract**:
+### Chat Completions Proxy
+
 ```typescript
-interface ChatCompletionRequest {
-  model: string;            // e.g., 'gpt-4', 'gpt-3.5-turbo'
-  messages: ChatMessage[];
-  max_tokens?: number;      // Default: 2048, Max: 4096 for gpt-3.5
-  temperature?: number;     // Range: 0.0-2.0, Default: 1.0
-  top_p?: number;          // Range: 0.0-1.0, Default: 1.0
-  n?: number;              // Number of responses, Default: 1
-  stop?: string | string[]; // Stop sequences
-  presence_penalty?: number; // Range: -2.0-2.0, Default: 0
-  frequency_penalty?: number; // Range: -2.0-2.0, Default: 0
-  user?: string;           // User identifier for abuse monitoring
-}
-
-interface ChatMessage {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-  name?: string;           // Optional name for user/assistant
-}
-```
-
-**Response Contract**:
-```typescript
-interface ChatCompletionResponse {
-  id: string;
-  object: 'chat.completion';
-  created: number;         // Unix timestamp
-  model: string;
-  choices: ChatChoice[];
-  usage: TokenUsage;
-}
-
-interface ChatChoice {
-  index: number;
-  message: ChatMessage;
-  finish_reason: 'stop' | 'length' | 'content_filter' | null;
-}
-
-interface TokenUsage {
-  prompt_tokens: number;
-  completion_tokens: number;
-  total_tokens: number;
-}
-```
-
-#### Streaming Request
-**Request Contract**: Same as non-streaming with `stream: true`
-
-**Response Contract**: Server-Sent Events
-```typescript
-interface StreamChunk {
-  id: string;
-  object: 'chat.completion.chunk';
-  created: number;
-  model: string;
-  choices: StreamChoice[];
-}
-
-interface StreamChoice {
-  index: number;
-  delta: {
-    role?: 'assistant';
-    content?: string;
-  };
-  finish_reason?: 'stop' | 'length' | 'content_filter' | null;
-}
-
-// Stream termination signal
-type StreamEnd = '[DONE]';
-```
-
-**Error Contract**:
-```typescript
-interface OpenAIError {
-  error: {
-    message: string;
-    type: 'invalid_request_error' | 'authentication_error' | 'permission_error' | 'rate_limit_error' | 'server_error';
-    param?: string;
-    code?: string;
+interface ChatProxyContract {
+  POST: {
+    "/api/chat/completions": {
+      request: {
+        headers: {
+          Authorization: string; // Bearer {JWT}
+          "Content-Type": "application/json";
+        };
+        body: {
+          messages: Array<{
+            role: "system" | "user" | "assistant";
+            content: string;
+          }>;
+          model?: string; // Default: "gpt-4o-mini"
+          temperature?: number; // 0-2, default: 0.7
+          max_tokens?: number;
+          stream?: boolean; // Default: false
+        };
+      };
+      response: {
+        200: OpenAIChatResponse | StreamingResponse;
+        401: UnauthorizedError;
+        402: {
+          error: "no_api_key";
+          message: string;
+        };
+        500: InternalServerError;
+      };
+      security: {
+        authentication: "JWT Bearer token";
+        api_key_source: "user_credentials OR global_fallback";
+        encryption: "AES-256 (Fernet)";
+      };
+      sla: {
+        response_time: "< 30000ms"; // OpenAI call timeout
+        availability: "99.9%";
+      };
+    };
   };
 }
 ```
 
-### 2.2 Azure OpenAI Contract
+### API Key Resolution Flow
 
-**Endpoint Pattern**: `https://{resource}.openai.azure.com/openai/deployments/{deployment}/chat/completions?api-version={version}`
+```typescript
+/**
+ * Backend resolves API key in this order:
+ * 1. User's stored API key (from credentials table, encrypted)
+ * 2. Global OPENAI_API_KEY from environment
+ * 3. Error 402 if neither available
+ */
+```
 
-**Request Modifications**:
-- Replace `Authorization: Bearer {token}` with `api-key: {token}`
-- Model name transformation: `gpt-3.5-turbo` → `gpt-35-turbo`
-- API version: `2023-03-15-preview`
+### Error Handling
 
-**Response Contract**: Identical to OpenAI API
+```typescript
+interface ChatProxyErrors {
+  401: "Invalid or expired JWT token";
+  402: "No API key configured (user or global)";
+  429: "OpenAI rate limit exceeded";
+  500: "OpenAI API error or server error";
+}
+```
+
+### Streaming Support
+
+The proxy supports Server-Sent Events (SSE) for streaming responses:
+```typescript
+Content-Type: text/event-stream
+Transfer-Encoding: chunked
+
+data: {"choices":[{"delta":{"content":"Hello"}}]}
+
+data: {"choices":[{"delta":{"content":" world"}}]}
+
+data: [DONE]
+```
 
 ## 3. Desktop ↔ Frontend Contract
 

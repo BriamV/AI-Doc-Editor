@@ -5,6 +5,8 @@
 **Created**: 2025-10-08
 **Authors**: Backend Architect
 
+**IMPORTANT CLARIFICATION**: This document describes **dual authentication providers** (OAuth vs Test), NOT API key storage modes. As of Issue #29 (completed 2025-10-11), API key management uses **single-mode backend-only storage** with no localStorage fallback. This authentication architecture is independent of API key management.
+
 ## Executive Summary
 
 This document provides a comprehensive architecture for implementing dual-mode authentication in AI-Doc-Editor, enabling both production OAuth 2.0 and test authentication modes without compromising security or developer experience.
