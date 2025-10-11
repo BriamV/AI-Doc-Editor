@@ -179,11 +179,18 @@ const ApiMenu = ({
               here.
             </a>
           </p>
-          <p>
-            Enter your API key above to enable OpenAI API access. This API key is exclusively for
-            accessing the OpenAI API and does not service any other purposes. The storage of this
-            key happens within your browser, with no transmissions to our servers or third-parties.
-          </p>
+          {isAuthenticated ? (
+            <p>
+              Your API key is encrypted and securely stored on our backend server using AES-256
+              encryption. It is never transmitted in plain text and is only used to process your
+              requests to OpenAI. You can update or delete your key at any time.
+            </p>
+          ) : (
+            <p>
+              Your API key will be stored locally in your browser. For enhanced security, please log
+              in to have your key encrypted and stored securely on our backend server.
+            </p>
+          )}
         </div>
       </div>
     </PopupModal>

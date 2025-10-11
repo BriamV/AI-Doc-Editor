@@ -122,7 +122,18 @@ const ApiPopup = () => {
         </div>
 
         <div className="min-w-fit text-gray-900 dark:text-gray-300 text-sm mt-4">
-          {t('securityMessage', { ns: 'api' })}
+          {isAuthenticated ? (
+            <p>
+              Your API key will be encrypted and securely stored on our backend server using AES-256
+              encryption. It is never transmitted in plain text and is only used to process your
+              requests to OpenAI.
+            </p>
+          ) : (
+            <p>
+              Your API key will be stored locally in your browser. For enhanced security, please log
+              in to have your key encrypted and stored securely on our backend server.
+            </p>
+          )}
         </div>
 
         {error.length > 0 && (
