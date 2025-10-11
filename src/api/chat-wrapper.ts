@@ -1,11 +1,10 @@
 /**
  * Chat API Wrapper
- * Dual-mode: Uses backend proxy when authenticated, falls back to direct OpenAI calls
- * This provides backward compatibility while enabling secure backend storage
+ * Authentication-only mode: Always routes through backend proxy
+ * Requires user authentication - no localStorage fallback
  */
 
 import { ConfigInterface, MessageInterface } from '@type/document';
-import { getChatCompletion, getChatCompletionStream } from '@api/api';
 import { chatAPI } from '@api/chat-api';
 import useStore from '@store/store';
 
@@ -18,61 +17,60 @@ interface ChatCompletionParams {
 }
 
 /**
- * Check if user is authenticated and has backend available
+ * Get authentication token from store
  */
-const shouldUseBackend = (): { useBackend: boolean; token?: string } => {
+const getAuthToken = (): string => {
   const state = useStore.getState();
   const isAuthenticated = state.isAuthenticated;
   const token = state.accessToken;
 
-  return {
-    useBackend: isAuthenticated && !!token,
-    token: token,
-  };
+  if (!isAuthenticated || !token) {
+    throw new Error('Authentication required. Please log in to use chat features.');
+  }
+
+  return token;
 };
 
 /**
  * Get chat completion (non-streaming)
- * Routes through backend if authenticated, otherwise uses direct API call
+ * Always uses backend proxy - authentication required
  */
 export const getChatCompletionWrapper = async (params: ChatCompletionParams): Promise<unknown> => {
-  const { useBackend, token } = shouldUseBackend();
+  const token = getAuthToken();
 
-  if (useBackend && token) {
-    // Use backend proxy
-    try {
-      return await chatAPI.sendChatCompletion(token, params.messages, params.config);
-    } catch (error) {
-      console.warn('Backend proxy failed, falling back to direct API call:', error);
-      // Fallback to direct API call
-      return await getChatCompletion(params);
+  try {
+    return await chatAPI.sendChatCompletion(token, params.messages, params.config);
+  } catch (error) {
+    // Check for authentication errors
+    if (
+      error instanceof Error &&
+      (error.message.includes('401') || error.message.includes('402'))
+    ) {
+      throw new Error('Your session has expired. Please log in again.');
     }
+    throw error;
   }
-
-  // Use direct API call (legacy mode)
-  return await getChatCompletion(params);
 };
 
 /**
  * Get chat completion stream (streaming)
- * Routes through backend if authenticated, otherwise uses direct API call
+ * Always uses backend proxy - authentication required
  */
 export const getChatCompletionStreamWrapper = async (
   params: ChatCompletionParams
 ): Promise<ReadableStream | null> => {
-  const { useBackend, token } = shouldUseBackend();
+  const token = getAuthToken();
 
-  if (useBackend && token) {
-    // Use backend proxy
-    try {
-      return await chatAPI.sendChatCompletionStream(token, params.messages, params.config);
-    } catch (error) {
-      console.warn('Backend proxy failed, falling back to direct API call:', error);
-      // Fallback to direct API call
-      return await getChatCompletionStream(params);
+  try {
+    return await chatAPI.sendChatCompletionStream(token, params.messages, params.config);
+  } catch (error) {
+    // Check for authentication errors
+    if (
+      error instanceof Error &&
+      (error.message.includes('401') || error.message.includes('402'))
+    ) {
+      throw new Error('Your session has expired. Please log in again.');
     }
+    throw error;
   }
-
-  // Use direct API call (legacy mode)
-  return await getChatCompletionStream(params);
 };

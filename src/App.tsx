@@ -159,8 +159,7 @@ function RequireAuth({ children }: { children: JSX.Element }) {
   const hasValidTestToken = isValidTestToken(authToken);
 
   if (!isAuthenticated && !hasValidTestToken) {
-    const target = location.pathname === '/' ? '/login' : '/';
-    return <Navigate to={target} state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return children;

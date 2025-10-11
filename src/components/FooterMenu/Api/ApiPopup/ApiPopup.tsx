@@ -40,28 +40,26 @@ const ApiPopup = () => {
       return;
     }
 
-    // If authenticated, save to backend
-    if (isAuthenticated && token) {
-      setLoading(true);
-      setError('');
+    // Require authentication - no localStorage fallback
+    if (!isAuthenticated || !token) {
+      setError('Authentication required. Please log in to configure your API key.');
+      return;
+    }
 
-      try {
-        await credentialsAPI.saveApiKey(token, _apiKey);
-        // Keep in store for backward compatibility
-        setApiKey(_apiKey);
-        setIsModalOpen(false);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to save API key. Please try again.';
-        setError(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      // Fallback: save to localStorage via store (legacy behavior)
-      setError('');
+    setLoading(true);
+    setError('');
+
+    try {
+      await credentialsAPI.saveApiKey(token, _apiKey);
+      // Keep in store for backward compatibility
       setApiKey(_apiKey);
       setIsModalOpen(false);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to save API key. Please try again.';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -122,18 +120,11 @@ const ApiPopup = () => {
         </div>
 
         <div className="min-w-fit text-gray-900 dark:text-gray-300 text-sm mt-4">
-          {isAuthenticated ? (
-            <p>
-              Your API key will be encrypted and securely stored on our backend server using AES-256
-              encryption. It is never transmitted in plain text and is only used to process your
-              requests to OpenAI.
-            </p>
-          ) : (
-            <p>
-              Your API key will be stored locally in your browser. For enhanced security, please log
-              in to have your key encrypted and stored securely on our backend server.
-            </p>
-          )}
+          <p>
+            Your API key is encrypted and securely stored on our backend server using AES-256
+            encryption. It is never transmitted in plain text and is only used to process your
+            requests to OpenAI.
+          </p>
         </div>
 
         {error.length > 0 && (

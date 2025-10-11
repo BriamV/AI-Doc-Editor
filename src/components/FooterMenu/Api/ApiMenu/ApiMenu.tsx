@@ -56,31 +56,34 @@ const ApiMenu = ({
   }, [fetchApiKeyStatus]);
 
   const handleSave = async () => {
-    // If authenticated, save to backend
-    if (isAuthenticated && token && _apiKey) {
-      setLoading(true);
-      setError('');
+    // Require authentication - no localStorage fallback
+    if (!isAuthenticated || !token) {
+      setError('Authentication required. Please log in to configure your API key.');
+      return;
+    }
 
-      try {
-        await credentialsAPI.saveApiKey(token, _apiKey);
-        // Keep in store for backward compatibility
-        setApiKey(_apiKey);
-        setApiEndpoint(_apiEndpoint);
-        setIsModalOpen(false);
-        // Refresh status
-        await fetchApiKeyStatus();
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to save API key. Please try again.';
-        setError(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      // Fallback: save to localStorage via store (legacy behavior)
+    if (!_apiKey) {
+      setError('API key is required.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      await credentialsAPI.saveApiKey(token, _apiKey);
+      // Keep in store for backward compatibility
       setApiKey(_apiKey);
       setApiEndpoint(_apiEndpoint);
       setIsModalOpen(false);
+      // Refresh status
+      await fetchApiKeyStatus();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to save API key. Please try again.';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -179,18 +182,11 @@ const ApiMenu = ({
               here.
             </a>
           </p>
-          {isAuthenticated ? (
-            <p>
-              Your API key is encrypted and securely stored on our backend server using AES-256
-              encryption. It is never transmitted in plain text and is only used to process your
-              requests to OpenAI. You can update or delete your key at any time.
-            </p>
-          ) : (
-            <p>
-              Your API key will be stored locally in your browser. For enhanced security, please log
-              in to have your key encrypted and stored securely on our backend server.
-            </p>
-          )}
+          <p>
+            Your API key is encrypted and securely stored on our backend server using AES-256
+            encryption. It is never transmitted in plain text and is only used to process your
+            requests to OpenAI. You can update or delete your key at any time.
+          </p>
         </div>
       </div>
     </PopupModal>
