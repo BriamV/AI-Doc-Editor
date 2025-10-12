@@ -37,6 +37,7 @@ email-validator==2.2.0
 # Development & Testing
 pytest==8.3.2
 pytest-asyncio==0.23.8
+locust==2.32.4              # Load testing framework for performance benchmarks (T-04 PERF-003, PERF-004)
 
 # Week 4 Additional Dependencies
 pytz==2024.1                # Timezone handling for rotation scheduling
