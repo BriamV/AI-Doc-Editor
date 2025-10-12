@@ -22,31 +22,28 @@ cp .env.example .env
 # - TEST_AUTH_TOKEN=tu-jwt-aqui
 ```
 
-### Paso 2: Obtener JWT token
+### Paso 2: Obtener JWT token (AUTOMÁTICO) ⚡
 
-**Opción A - Desde el navegador:**
-1. Abrir frontend: `http://localhost:5173`
-2. Login con OAuth
-3. Abrir DevTools (F12) → Application → Local Storage
-4. Copiar el valor de `auth_token`
-
-**Opción B - Desde la API:**
+**Opción A - Automático (Recomendado):**
 ```bash
-# Login y obtener token
-curl -X POST http://localhost:8000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"tu@email.com","password":"tu-password"}'
-```
+# Genera automáticamente un token de prueba
+python backend/tests/performance/get_test_token.py
 
-### Paso 3: Configurar token para tests
-
-```bash
-# Windows PowerShell
-$env:TEST_AUTH_TOKEN="tu-jwt-token-aqui"
+# O exporta directamente a variable de entorno (PowerShell)
+$env:TEST_AUTH_TOKEN = $(python backend/tests/performance/get_test_token.py --quiet)
 
 # Linux/Mac
-export TEST_AUTH_TOKEN="tu-jwt-token-aqui"
+export TEST_AUTH_TOKEN=$(python backend/tests/performance/get_test_token.py --quiet)
 ```
+
+**Opción B - Manual (OAuth):**
+1. Abrir frontend: `http://localhost:5173`
+2. Login con Google/Microsoft OAuth
+3. DevTools (F12) → Application → Local Storage
+4. Copiar valor de `auth_token`
+5. Configurar: `$env:TEST_AUTH_TOKEN="tu-token"`
+
+**Nota**: Con tu Google OAuth configurado en `.env`, puedes usar ambas opciones.
 
 ## 🚀 Ejecutar Benchmarks
 
