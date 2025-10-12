@@ -57,7 +57,7 @@ class DocumentSearchRequest(BaseModel):
     collection_name: str = Field("documents", description="ChromaDB collection to search")
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "query": "machine learning algorithms",
                 "limit": 5,
