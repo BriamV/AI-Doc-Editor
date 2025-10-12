@@ -1,9 +1,14 @@
 /**
  * Documents API client
  * T-49: Document Library UI - Knowledge Base Management
+ * T-04: RAG Pipeline - Document search integration
  */
 
 import { getEnvVar } from '@utils/env';
+import type {
+  DocumentSearchRequest,
+  DocumentSearchResponse,
+} from '@type/documents';
 
 const API_BASE_URL = getEnvVar('VITE_API_BASE_URL') || 'http://localhost:8000/api';
 
@@ -88,6 +93,35 @@ class DocumentsAPI {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.detail || 'Failed to fetch document');
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Search documents using semantic similarity (RAG)
+   * T-04: RAG Pipeline - Semantic search endpoint
+   */
+  async searchDocuments(
+    token: string,
+    request: DocumentSearchRequest
+  ): Promise<DocumentSearchResponse> {
+    const response = await fetch(`${this.baseURL}/search`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        query: request.query,
+        limit: request.limit || 5,
+        collection_name: request.collection_name || 'documents',
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to search documents');
     }
 
     return response.json();

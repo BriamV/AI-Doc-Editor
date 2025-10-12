@@ -10,11 +10,22 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from uuid import UUID
+import logging
 
 from app.db.session import get_db
 from app.models.document import Document, DocumentStatus
-from app.models.document_schemas import DocumentListResponse, DocumentResponse
-from app.services.auth import AuthService
+from app.models.document_schemas import (
+    DocumentListResponse,
+    DocumentResponse,
+    DocumentSearchRequest,
+    DocumentSearchResponse,
+    SearchResultChunk,
+)
+from app.services.auth import AuthService, get_current_user, User
+from app.services.rag_processing_service import RAGProcessingService
+from app.routers.credentials import get_user_openai_key
+
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter(prefix="/api", tags=["documents"])
@@ -173,3 +184,86 @@ async def get_document(
         )
 
     return DocumentResponse.from_orm(document)
+
+
+@router.post("/documents/search", response_model=DocumentSearchResponse)
+async def search_documents(
+    request: DocumentSearchRequest,
+    current_user: User = Depends(get_current_user),
+) -> DocumentSearchResponse:
+    """
+    Search user's documents using semantic similarity (RAG).
+
+    **Request Body**:
+    - `query`: Text to search for (3-1000 characters)
+    - `limit`: Max results (1-20, default 5)
+    - `collection_name`: ChromaDB collection (default "documents")
+
+    **Returns**:
+    - Ranked document chunks with similarity scores
+    - Metadata for each result (document_id, chunk_index, etc.)
+
+    **Authorization**: Requires valid JWT token
+    **Filtering**: Results automatically filtered by user_id
+
+    **Errors**:
+    - 402: User API key not configured and no global fallback
+    - 500: Search service unavailable or query failed
+    """
+    try:
+        # Get user API key (T-41 integration)
+        try:
+            api_key = get_user_openai_key(current_user.id)
+        except HTTPException as e:
+            # Re-raise 402 errors (user needs to configure API key)
+            if e.status_code == 402:
+                raise
+            # For other auth errors, log and raise 500
+            logger.error(f"Failed to get API key for user {current_user.id}: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail="Failed to retrieve API key for search operation"
+            )
+
+        # Initialize RAG service with user API key
+        rag_service = RAGProcessingService(api_key=api_key)
+
+        # Check service availability
+        if not rag_service.is_ready()["embedding_service"]:
+            raise HTTPException(
+                status_code=402,
+                detail="API key not configured. Please add your OpenAI API key in settings.",
+            )
+
+        # Execute search with user_id filter
+        results = await rag_service.query_similar_documents(
+            query_text=request.query,
+            collection_name=request.collection_name,
+            n_results=request.limit,
+            user_id=str(current_user.id),
+        )
+
+        # Transform results to response schema
+        search_chunks = [
+            SearchResultChunk(
+                id=chunk["id"],
+                text=chunk["text"],
+                distance=chunk["distance"],
+                metadata=chunk["metadata"],
+                document_id=chunk["metadata"].get("document_id", ""),
+                chunk_index=chunk["metadata"].get("chunk_index", 0),
+            )
+            for chunk in results["chunks"]
+        ]
+
+        return DocumentSearchResponse(
+            query=results["query"],
+            results_count=results["results_count"],
+            chunks=search_chunks,
+            collection=request.collection_name,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Search failed for user {current_user.id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
