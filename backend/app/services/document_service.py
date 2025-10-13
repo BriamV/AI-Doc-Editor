@@ -208,7 +208,10 @@ class DocumentService:
     async def create_document_record(
         self,
         db: AsyncSession,
-        file: UploadFile,
+        filename: str,
+        file_type: str,
+        mime_type: str,
+        file_size: int,
         file_path: str,
         user_id: str,
         user_email: str,
@@ -218,7 +221,10 @@ class DocumentService:
 
         Args:
             db: Database session
-            file: Uploaded file object
+            filename: Original filename
+            file_type: File extension (pdf, docx, md)
+            mime_type: MIME type
+            file_size: File size in bytes
             file_path: Relative file path from uploads directory
             user_id: UUID of uploading user
             user_email: Email of uploading user
@@ -230,17 +236,12 @@ class DocumentService:
             HTTPException: If database operation fails
         """
         try:
-            # Get file info
-            content = await file.read()
-            file_size = len(content)
-            file_type = self._validate_file_type(file.filename, file.content_type)
-
             # Create document record
             document = Document(
                 id=uuid.uuid4(),
-                original_filename=file.filename,
+                original_filename=filename,
                 file_type=file_type,
-                mime_type=file.content_type,
+                mime_type=mime_type,
                 file_size_bytes=file_size,
                 status=DocumentStatus.PROCESSING,
                 user_id=uuid.UUID(user_id),
@@ -260,10 +261,10 @@ class DocumentService:
             raise
         except Exception as e:
             await db.rollback()
-            logger.error(f"Failed to create document record: {str(e)}")
+            logger.error(f"Failed to create document record: {str(e)}", exc_info=True)
             raise HTTPException(
                 status_code=500,
-                detail="Failed to create document record. Please try again.",
+                detail=f"Failed to create document record: {str(e)}",
             )
 
     async def upload_document(
@@ -289,14 +290,41 @@ class DocumentService:
             HTTPException: If upload or database operation fails
         """
         try:
-            # Save file to disk
-            file_path = await self.save_file(file, user_id, user_email)
+            # Read file content once
+            content = await file.read()
+            file_size = len(content)
 
-            # Reset file position for database record creation
-            await file.seek(0)
+            # Validate file size and type before saving
+            self._validate_file_size(file_size)
+            file_type = self._validate_file_type(file.filename, file.content_type)
 
-            # Create database record
-            document = await self.create_document_record(db, file, file_path, user_id, user_email)
+            # Sanitize and generate unique filename
+            safe_filename = self._sanitize_filename(file.filename)
+            unique_filename = self._generate_unique_filename(safe_filename, file_type)
+
+            # Create user-specific subdirectory and save file
+            user_dir = self.upload_dir / user_id[:8]
+            user_dir.mkdir(parents=True, exist_ok=True)
+            file_path = user_dir / unique_filename
+
+            with open(file_path, "wb") as f:
+                f.write(content)
+
+            # Get relative path
+            relative_path = str(file_path.relative_to(self.upload_dir))
+            logger.info(f"Saved file for user {user_id}: {unique_filename} ({file_size} bytes)")
+
+            # Create database record with file metadata
+            document = await self.create_document_record(
+                db=db,
+                filename=file.filename,
+                file_type=file_type,
+                mime_type=file.content_type,
+                file_size=file_size,
+                file_path=relative_path,
+                user_id=user_id,
+                user_email=user_email,
+            )
 
             # Return document metadata
             return {
@@ -311,10 +339,10 @@ class DocumentService:
         except HTTPException:
             raise
         except Exception as e:
-            logger.error(f"Document upload failed: {str(e)}")
+            logger.error(f"Document upload failed: {str(e)}", exc_info=True)
             raise HTTPException(
                 status_code=500,
-                detail="Document upload failed. Please try again.",
+                detail=f"Document upload failed: {str(e)}",
             )
 
     async def get_document_by_id(
@@ -433,7 +461,7 @@ class DocumentService:
             # Map string status to enum
             status_map = {
                 "processing": DocumentStatus.PROCESSING,
-                "processed": DocumentStatus.PROCESSED,
+                "processed": DocumentStatus.COMPLETED,  # Fixed: PROCESSED -> COMPLETED
                 "failed": DocumentStatus.FAILED,
             }
 

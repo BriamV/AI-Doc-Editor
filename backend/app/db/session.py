@@ -20,3 +20,19 @@ async def get_session() -> AsyncSession:
 
 # Alias for backward compatibility
 get_db = get_session
+
+
+async def get_async_session():
+    """
+    Provide an async session generator for background tasks.
+
+    This is used by background tasks that need database access
+    without dependency injection from FastAPI.
+
+    Usage:
+        async for db in get_async_session():
+            # Use db session
+            break
+    """
+    async with AsyncSessionLocal() as session:
+        yield session

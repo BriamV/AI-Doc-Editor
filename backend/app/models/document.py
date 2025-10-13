@@ -7,11 +7,49 @@ to the RAG (Retrieval-Augmented Generation) pipeline.
 
 from datetime import datetime
 from sqlalchemy import Column, String, Integer, DateTime, Text, Enum
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.types import TypeDecorator, CHAR
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 import uuid
 import enum
 
 from app.db.session import Base
+
+
+class UUID(TypeDecorator):
+    """
+    Platform-independent UUID type.
+
+    Uses PostgreSQL's UUID type when available, otherwise uses CHAR(36)
+    for SQLite compatibility.
+    """
+    impl = CHAR
+    cache_ok = True
+
+    def load_dialect_impl(self, dialect):
+        if dialect.name == 'postgresql':
+            return dialect.type_descriptor(PG_UUID(as_uuid=True))
+        else:
+            return dialect.type_descriptor(CHAR(36))
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+        elif dialect.name == 'postgresql':
+            return value
+        else:
+            if isinstance(value, uuid.UUID):
+                return str(value)
+            else:
+                return str(uuid.UUID(value))
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return value
+        else:
+            if isinstance(value, uuid.UUID):
+                return value
+            else:
+                return uuid.UUID(value)
 
 
 class DocumentStatus(str, enum.Enum):
@@ -33,7 +71,7 @@ class Document(Base):
     __tablename__ = "documents"
 
     # Primary key
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    id = Column(UUID(), primary_key=True, default=uuid.uuid4, index=True)
 
     # File metadata
     original_filename = Column(String(255), nullable=False)
@@ -54,7 +92,7 @@ class Document(Base):
     )
 
     # Ownership
-    user_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    user_id = Column(UUID(), nullable=False, index=True)
     user_email = Column(String(255), nullable=False)
 
     # Timestamps
