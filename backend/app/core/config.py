@@ -64,9 +64,9 @@ class Settings(BaseSettings):
         default="", description="Microsoft OAuth 2.0 Client Secret - SENSITIVE: Never log or expose"
     )
 
-    # OAuth client ID validation patterns
-    GOOGLE_CLIENT_ID_PATTERN: str = r"^[0-9]+-[a-zA-Z0-9_-]+\.apps\.googleusercontent\.com$"
-    MICROSOFT_CLIENT_ID_PATTERN: str = (
+    # OAuth client ID validation patterns (as class constants for validator access)
+    _GOOGLE_CLIENT_ID_PATTERN: str = r"^[0-9]+-[a-zA-Z0-9_-]+\.apps\.googleusercontent\.com$"
+    _MICROSOFT_CLIENT_ID_PATTERN: str = (
         r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
     )
 
@@ -218,7 +218,12 @@ class Settings(BaseSettings):
     @validator("GOOGLE_CLIENT_ID")
     def validate_google_client_id(cls, v: str) -> str:
         """Validate Google OAuth Client ID format"""
-        if v and not re.match(cls.GOOGLE_CLIENT_ID_PATTERN, v):
+        # Skip validation for empty or placeholder values
+        if not v or "your_" in v.lower() or "_here" in v.lower():
+            return v
+
+        pattern = r"^[0-9]+-[a-zA-Z0-9_-]+\.apps\.googleusercontent\.com$"
+        if not re.match(pattern, v):
             raise ValueError(
                 "Invalid Google Client ID format. Expected format: numbers-string.apps.googleusercontent.com"
             )
@@ -227,7 +232,12 @@ class Settings(BaseSettings):
     @validator("MICROSOFT_CLIENT_ID")
     def validate_microsoft_client_id(cls, v: str) -> str:
         """Validate Microsoft OAuth Client ID format (UUID)"""
-        if v and not re.match(cls.MICROSOFT_CLIENT_ID_PATTERN, v.lower()):
+        # Skip validation for empty or placeholder values
+        if not v or "your_" in v.lower() or "_here" in v.lower():
+            return v
+
+        pattern = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        if not re.match(pattern, v.lower()):
             raise ValueError(
                 "Invalid Microsoft Client ID format. Expected UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
             )
@@ -403,11 +413,14 @@ class Settings(BaseSettings):
 
     def _validate_client_id_formats(self) -> bool:
         """Validate OAuth client ID formats"""
+        google_pattern = r"^[0-9]+-[a-zA-Z0-9_-]+\.apps\.googleusercontent\.com$"
+        microsoft_pattern = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+
         google_valid = not self.GOOGLE_CLIENT_ID or re.match(
-            self.GOOGLE_CLIENT_ID_PATTERN, self.GOOGLE_CLIENT_ID
+            google_pattern, self.GOOGLE_CLIENT_ID
         )
         microsoft_valid = not self.MICROSOFT_CLIENT_ID or re.match(
-            self.MICROSOFT_CLIENT_ID_PATTERN, self.MICROSOFT_CLIENT_ID.lower()
+            microsoft_pattern, self.MICROSOFT_CLIENT_ID.lower()
         )
         return google_valid and microsoft_valid
 
