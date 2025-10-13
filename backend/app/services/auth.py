@@ -61,10 +61,17 @@ class AuthService:
         encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
         return encoded_jwt
 
-    def create_tokens(self, user_data: Dict[str, Any]) -> Dict[str, str]:
+    def create_tokens(
+        self, user_data: Dict[str, Any], access_expires_minutes: int = None
+    ) -> Dict[str, str]:
         """
         Create both access and refresh tokens
         T-02-ST2: Complete token generation
+
+        Args:
+            user_data: User information to encode in tokens
+            access_expires_minutes: Optional custom expiration for access token in minutes.
+                                   If None, uses settings.ACCESS_TOKEN_EXPIRE_MINUTES
         """
         token_data = {
             "sub": user_data["email"],
@@ -77,7 +84,7 @@ class AuthService:
             "provider": user_data["provider"],
         }
 
-        access_token = self.create_access_token(token_data)
+        access_token = self.create_access_token(token_data, expires_minutes=access_expires_minutes)
         refresh_token = self.create_refresh_token({"sub": user_data["email"]})
 
         return {"access_token": access_token, "refresh_token": refresh_token}

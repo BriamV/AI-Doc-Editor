@@ -21,8 +21,8 @@ python backend/tests/performance/fixtures/create_simple_fixtures.py
 cd backend
 uvicorn app.main:app --reload
 
-# 4. Set authentication token
-export TEST_AUTH_TOKEN="your-jwt-token-here"
+# 4. Generate and set authentication token
+export TEST_AUTH_TOKEN=$(python backend/tests/performance/get_test_token.py --expires 4 --quiet)
 
 # 5. Populate database (for search tests)
 python backend/tests/performance/setup_perf_test.py --count 100
@@ -38,14 +38,15 @@ locust -f backend/tests/performance/locust_search.py --host=http://localhost:800
 
 1. [Overview](#overview)
 2. [Prerequisites](#prerequisites)
-3. [Installation](#installation)
-4. [Test Fixtures](#test-fixtures)
-5. [Database Setup](#database-setup)
-6. [Running Benchmarks](#running-benchmarks)
-7. [Interpreting Results](#interpreting-results)
-8. [Troubleshooting](#troubleshooting)
-9. [CI/CD Integration](#cicd-integration)
-10. [Architecture](#architecture)
+3. [Test Token Generator](#test-token-generator)
+4. [Installation](#installation)
+5. [Test Fixtures](#test-fixtures)
+6. [Database Setup](#database-setup)
+7. [Running Benchmarks](#running-benchmarks)
+8. [Interpreting Results](#interpreting-results)
+9. [Troubleshooting](#troubleshooting)
+10. [CI/CD Integration](#cicd-integration)
+11. [Architecture](#architecture)
 
 ---
 
@@ -101,6 +102,120 @@ python-docx    # DOCX file generation (for fixtures)
 **Authentication**:
 - Valid JWT token required for all endpoints
 - Token must be set in `TEST_AUTH_TOKEN` environment variable
+- Use `get_test_token.py` to generate long-lived tokens for extended tests
+
+---
+
+## Test Token Generator
+
+### Overview
+
+The `get_test_token.py` script generates JWT tokens with custom expiration times, specifically designed for performance testing scenarios where standard 30-minute tokens would expire.
+
+### Features
+
+- **Custom Expiration**: Set token lifetime in hours (default: 2 hours)
+- **No OAuth Flow**: Bypasses interactive OAuth login
+- **Quiet Mode**: Output only the token for scripting
+- **Persistent User**: Creates or reuses test user in database
+
+### Usage
+
+**Generate Token with Default 2-Hour Expiration**:
+```bash
+python backend/tests/performance/get_test_token.py
+```
+
+**Generate Token for Long-Running Tests**:
+```bash
+# 24-hour token for extended load tests
+python backend/tests/performance/get_test_token.py --expires 24
+
+# 4-hour token for medium-duration tests
+python backend/tests/performance/get_test_token.py --expires 4
+```
+
+**Quiet Mode for Scripting (PowerShell)**:
+```bash
+$env:TEST_AUTH_TOKEN=$(python backend/tests/performance/get_test_token.py --expires 2 --quiet)
+```
+
+**Quiet Mode for Scripting (Linux/Mac)**:
+```bash
+export TEST_AUTH_TOKEN=$(python backend/tests/performance/get_test_token.py --expires 2 --quiet)
+```
+
+**Custom User**:
+```bash
+python backend/tests/performance/get_test_token.py \
+  --email custom-test@example.com \
+  --name "Custom Test User" \
+  --expires 8
+```
+
+### Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `--expires` | int | 2 | Token expiration time in hours |
+| `--email` | string | test-performance@example.com | Test user email |
+| `--name` | string | Performance Test User | Test user name |
+| `--quiet` | flag | false | Output only the token (for scripting) |
+
+### Example Output (Full Mode)
+
+```
+======================================================================
+JWT TOKEN GENERATED SUCCESSFULLY
+======================================================================
+
+User Email: test-performance@example.com
+User ID: c1c7400a-5875-48e6-b234-9f6dccd3143b
+User Role: editor
+
+Token Expiration: 4 hours (240 minutes)
+
+Access Token:
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+Refresh Token:
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+======================================================================
+USAGE INSTRUCTIONS
+======================================================================
+
+Windows PowerShell:
+$env:TEST_AUTH_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+Linux/Mac:
+export TEST_AUTH_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+Or add to .env file:
+TEST_AUTH_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+======================================================================
+```
+
+### Verification
+
+To verify token expiration time:
+```bash
+# Generate token and save to file
+python backend/tests/performance/get_test_token.py --expires 4 --quiet > token.txt
+
+# Verify expiration using verification script
+python backend/tests/performance/verify_token_expiration.py "$(cat token.txt)"
+```
+
+Expected output:
+```
+Token Expiration Details:
+  Expires at: 2025-10-13 11:23:04
+  Current time: 2025-10-13 07:23:05
+  Time until expiry: 3:59:58
+  Hours until expiry: 4.00
+```
 
 ---
 
@@ -182,17 +297,27 @@ The search benchmark requires a populated database with multiple documents to te
 
 **1. Get Authentication Token**:
 ```bash
-# Option A: OAuth login (production-like)
-# Login via frontend and copy JWT token from browser developer tools
+# Option A: Test token generator with custom expiration (recommended for performance tests)
+# Generate a long-lived token that won't expire during extended test runs
+python backend/tests/performance/get_test_token.py --expires 24 --quiet
 
-# Option B: Test token endpoint (development only)
-# Create a test user and get token via API
+# Option B: OAuth login (production-like)
+# Login via frontend and copy JWT token from browser developer tools
 ```
 
 **2. Export Token**:
 ```bash
+# For long-running tests (e.g., 24-hour load tests)
+export TEST_AUTH_TOKEN=$(python backend/tests/performance/get_test_token.py --expires 24 --quiet)
+
+# For shorter tests (default 2-hour expiration)
+export TEST_AUTH_TOKEN=$(python backend/tests/performance/get_test_token.py --quiet)
+
+# Or manually set if you have a token
 export TEST_AUTH_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
+
+**Note**: The `--expires` parameter accepts hours. For performance tests, use a value that exceeds your expected test duration to avoid token expiration during the test.
 
 **3. Run Setup Script**:
 ```bash
@@ -473,12 +598,19 @@ print(f"p95 latency: {stats['95%'].iloc[0]} ms")
 # Verify token is set
 echo $TEST_AUTH_TOKEN
 
-# If empty, export token
-export TEST_AUTH_TOKEN="your-jwt-token-here"
+# If empty, generate and export token (recommended)
+export TEST_AUTH_TOKEN=$(python backend/tests/performance/get_test_token.py --expires 4 --quiet)
 
 # Verify token is valid
 curl -H "Authorization: Bearer $TEST_AUTH_TOKEN" \
      http://localhost:8000/api/documents
+```
+
+**Token Expired?**
+If you see `401 Unauthorized` during a long test run, your token may have expired. Generate a new token with longer expiration:
+```bash
+# Generate 24-hour token for extended tests
+export TEST_AUTH_TOKEN=$(python backend/tests/performance/get_test_token.py --expires 24 --quiet)
 ```
 
 #### 2. Backend Server Not Running
