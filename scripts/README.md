@@ -80,6 +80,21 @@ yarn all:dev                     # Uses this for orchestration
 - Environment variable coordination
 - Process lifecycle management
 
+### **stop-servers.cjs** - Server Termination Utility
+
+```bash
+# Gracefully stops development servers on specific ports
+yarn all:stop                    # Stops frontend (5173) and backend (8000)
+```
+
+**Features:**
+
+- Cross-platform process termination (Windows/Linux/macOS)
+- Graceful shutdown with SIGTERM and SIGKILL fallback
+- IPv4 and IPv6 port detection support
+- Clear console output with success/error messages
+- Proper exit codes for automation
+
 ### **python-cc-gate.cjs** - Python Quality Validation
 
 ```bash
@@ -101,6 +116,7 @@ yarn be:quality                  # Includes complexity validation
 ```bash
 # Core development commands that use these infrastructure scripts
 yarn all:dev                     # Uses dev-runner.cjs for orchestration
+yarn all:stop                    # Uses stop-servers.cjs for graceful shutdown
 yarn fe:build|fe:test|sec:all    # Cross-platform via multiplatform.cjs
 yarn repo:merge:validate         # Uses merge-protection.cjs for validation
 yarn be:quality                  # Includes python-cc-gate.cjs validation
@@ -176,6 +192,7 @@ scripts/
 ├── merge-protection.cjs         # Merge safety validation system
 ├── install-merge-hooks.cjs     # Git protection installer
 ├── dev-runner.cjs              # Development server orchestrator
+├── stop-servers.cjs            # Server termination utility
 └── python-cc-gate.cjs          # Python complexity validation
 ```
 

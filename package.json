@@ -160,6 +160,7 @@
     "all:build": "yarn fe:build && yarn desk:make",
     "all:check": "yarn qa:gate && yarn repo:licenses && yarn repo:integrity",
     "all:clean": "yarn repo:clean",
+    "all:stop": "node scripts/stop-servers.cjs",
     "//-- ⚠️ DEPRECATED ALIASES (30-60 DAY TRANSITION) --//": "",
     "e2e:install:old": "echo \"[DEPRECATED] Use: yarn e2e:install (now covers both FE+BE)\" && yarn e2e:install",
     "install:frozen": "echo \"[DEPRECATED] Use: yarn repo:install\" && yarn repo:install",
