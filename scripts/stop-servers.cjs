@@ -87,7 +87,13 @@ class ServerStopper {
       const pids = new Set();
 
       // Parse netstat output to find PIDs (support both IPv4 and IPv6)
+      // ONLY capture LISTENING state to avoid stale/duplicate PIDs
       for (const line of lines) {
+        // Must contain LISTENING state to be a valid server process
+        if (!line.includes('LISTENING') && !line.includes('ESCUCHANDO')) {
+          continue;
+        }
+
         // Check for IPv4 (0.0.0.0:port, 127.0.0.1:port) and IPv6 ([::]:port, [::1]:port)
         if (
           line.includes(`0.0.0.0:${port}`) ||
@@ -98,16 +104,44 @@ class ServerStopper {
           const parts = line.trim().split(/\s+/);
           const pid = parts[parts.length - 1];
           if (pid && /^\d+$/.test(pid)) {
-            pids.add(pid);
+            // Verify PID is valid and process exists before adding
+            if (this.verifyWindowsProcessExists(pid)) {
+              pids.add(pid);
+            } else {
+              this.log('debug', `Skipping stale PID ${pid} (process doesn't exist)`);
+            }
           }
         }
       }
 
-      this.log('debug', `Found ${pids.size} process(es) on port ${port}: ${[...pids].join(', ')}`);
+      this.log('debug', `Found ${pids.size} LISTENING process(es) on port ${port}: ${[...pids].join(', ')}`);
       return [...pids];
     } catch (error) {
       this.log('error', `Failed to find processes on Windows: ${error.message}`);
       return [];
+    }
+  }
+
+  /**
+   * Verify a Windows process exists by PID
+   */
+  verifyWindowsProcessExists(pid) {
+    try {
+      const result = spawnSync('tasklist', ['/FI', `PID eq ${pid}`, '/NH'], {
+        encoding: 'utf8',
+        stdio: 'pipe',
+      });
+
+      if (result.status !== 0) {
+        return false;
+      }
+
+      const output = result.stdout.trim();
+      // Check if output contains the PID (process exists)
+      return output.includes(pid) && !output.includes('No tasks');
+    } catch (error) {
+      this.log('debug', `Error verifying process ${pid}: ${error.message}`);
+      return false;
     }
   }
 
@@ -146,22 +180,55 @@ class ServerStopper {
    */
   killWindowsProcess(pid) {
     try {
+      // First verify the process actually exists
+      if (!this.verifyWindowsProcessExists(pid)) {
+        this.log('debug', `Process ${pid} does not exist (stale PID)`);
+        return false; // Don't count stale PIDs as success
+      }
+
+      // Execute taskkill command
       const result = spawnSync('taskkill', ['/PID', pid, '/F'], {
         encoding: 'utf8',
         stdio: 'pipe',
       });
 
-      if (result.status === 0) {
-        this.log('debug', `Successfully killed process ${pid}`);
-        return true;
-      } else {
-        // Check if error is due to process not existing (already terminated)
-        const stderr = result.stderr || '';
-        if (stderr.includes('not found') || stderr.includes('no se encontr')) {
-          this.log('debug', `Process ${pid} already terminated`);
-          return true; // Consider it a success if already gone
+      // Log detailed output for debugging
+      if (this.verbose) {
+        if (result.stdout) {
+          this.log('debug', `taskkill stdout: ${result.stdout.trim()}`);
         }
-        this.log('warn', `Failed to kill process ${pid}: ${stderr || 'Unknown error'}`);
+        if (result.stderr) {
+          this.log('debug', `taskkill stderr: ${result.stderr.trim()}`);
+        }
+      }
+
+      if (result.status === 0) {
+        // Verify the process was actually terminated
+        // Wait a moment for Windows to update process table
+        const startTime = Date.now();
+        let verified = false;
+
+        // Poll for up to 1 second to verify termination
+        while (Date.now() - startTime < 1000) {
+          if (!this.verifyWindowsProcessExists(pid)) {
+            verified = true;
+            break;
+          }
+          // Short sleep (10ms) using synchronous delay
+          const endTime = Date.now() + 10;
+          while (Date.now() < endTime) { /* busy wait */ }
+        }
+
+        if (verified) {
+          this.log('debug', `Successfully killed and verified process ${pid}`);
+          return true;
+        } else {
+          this.log('warn', `taskkill reported success for PID ${pid}, but process still running`);
+          return false;
+        }
+      } else {
+        const stderr = result.stderr || result.stdout || '';
+        this.log('warn', `Failed to kill process ${pid}: ${stderr.trim() || 'Unknown error'}`);
         return false;
       }
     } catch (error) {
