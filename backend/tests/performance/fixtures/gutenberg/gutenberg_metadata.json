@@ -1,0 +1,120 @@
+{
+  "dataset": "Project Gutenberg Classic Books",
+  "purpose": "RAG pipeline performance testing (PERF-004)",
+  "download_date": "2025-10-16 17:16:51",
+  "total_books": 10,
+  "total_size_kb": 4567.2666015625,
+  "total_words": 809700,
+  "books": [
+    {
+      "book_id": 1342,
+      "title": "Pride and Prejudice",
+      "author": "Jane Austen",
+      "genre": "Romance",
+      "year": 1813,
+      "file_path": "D:\\Projects\\DEV\\AI-Doc-Editor\\backend\\tests\\performance\\fixtures\\gutenberg\\01342_Pride_and_Prejudice.txt",
+      "size_kb": 734.8056640625,
+      "word_count": 127359,
+      "status": "downloaded"
+    },
+    {
+      "book_id": 11,
+      "title": "Alice's Adventures in Wonderland",
+      "author": "Lewis Carroll",
+      "genre": "Fantasy",
+      "year": 1865,
+      "file_path": "D:\\Projects\\DEV\\AI-Doc-Editor\\backend\\tests\\performance\\fixtures\\gutenberg\\00011_Alice's_Adventures_in_Wonderland.txt",
+      "size_kb": 147.484375,
+      "word_count": 26525,
+      "status": "downloaded"
+    },
+    {
+      "book_id": 1661,
+      "title": "The Adventures of Sherlock Holmes",
+      "author": "Arthur Conan Doyle",
+      "genre": "Mystery",
+      "year": 1892,
+      "file_path": "D:\\Projects\\DEV\\AI-Doc-Editor\\backend\\tests\\performance\\fixtures\\gutenberg\\01661_The_Adventures_of_Sherlock_Holmes.txt",
+      "size_kb": 573.939453125,
+      "word_count": 104506,
+      "status": "downloaded"
+    },
+    {
+      "book_id": 84,
+      "title": "Frankenstein",
+      "author": "Mary Shelley",
+      "genre": "Gothic/Sci-Fi",
+      "year": 1818,
+      "file_path": "D:\\Projects\\DEV\\AI-Doc-Editor\\backend\\tests\\performance\\fixtures\\gutenberg\\00084_Frankenstein.txt",
+      "size_kb": 411.5166015625,
+      "word_count": 75042,
+      "status": "downloaded"
+    },
+    {
+      "book_id": 98,
+      "title": "A Tale of Two Cities",
+      "author": "Charles Dickens",
+      "genre": "Historical",
+      "year": 1859,
+      "file_path": "D:\\Projects\\DEV\\AI-Doc-Editor\\backend\\tests\\performance\\fixtures\\gutenberg\\00098_A_Tale_of_Two_Cities.txt",
+      "size_kb": 768.9462890625,
+      "word_count": 135886,
+      "status": "downloaded"
+    },
+    {
+      "book_id": 2701,
+      "title": "Moby Dick",
+      "author": "Herman Melville",
+      "genre": "Adventure",
+      "year": 1851,
+      "file_path": "D:\\Projects\\DEV\\AI-Doc-Editor\\backend\\tests\\performance\\fixtures\\gutenberg\\02701_Moby_Dick.txt",
+      "size_kb": 1226.9833984375,
+      "word_count": 212796,
+      "status": "downloaded"
+    },
+    {
+      "book_id": 16,
+      "title": "Peter Pan",
+      "author": "J.M. Barrie",
+      "genre": "Children's",
+      "year": 1911,
+      "file_path": "D:\\Projects\\DEV\\AI-Doc-Editor\\backend\\tests\\performance\\fixtures\\gutenberg\\00016_Peter_Pan.txt",
+      "size_kb": 256.51953125,
+      "word_count": 47268,
+      "status": "downloaded"
+    },
+    {
+      "book_id": 74,
+      "title": "The Adventures of Tom Sawyer",
+      "author": "Mark Twain",
+      "genre": "Adventure",
+      "year": 1876,
+      "file_path": "D:\\Projects\\DEV\\AI-Doc-Editor\\backend\\tests\\performance\\fixtures\\gutenberg\\00074_The_Adventures_of_Tom_Sawyer.txt",
+      "size_kb": 396.044921875,
+      "word_count": 70813,
+      "status": "downloaded"
+    },
+    {
+      "book_id": 1952,
+      "title": "The Yellow Wallpaper",
+      "author": "Charlotte Perkins Gilman",
+      "genre": "Short Story",
+      "year": 1892,
+      "file_path": "D:\\Projects\\DEV\\AI-Doc-Editor\\backend\\tests\\performance\\fixtures\\gutenberg\\01952_The_Yellow_Wallpaper.txt",
+      "size_kb": 31.9755859375,
+      "word_count": 6085,
+      "status": "downloaded"
+    },
+    {
+      "book_id": 1080,
+      "title": "A Modest Proposal",
+      "author": "Jonathan Swift",
+      "genre": "Satire",
+      "year": 1729,
+      "file_path": "D:\\Projects\\DEV\\AI-Doc-Editor\\backend\\tests\\performance\\fixtures\\gutenberg\\01080_A_Modest_Proposal.txt",
+      "size_kb": 19.05078125,
+      "word_count": 3420,
+      "status": "downloaded"
+    }
+  ]
+}

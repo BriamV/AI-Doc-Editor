@@ -10,6 +10,8 @@
 
 ## Quick Start
 
+### Simple Fixtures Mode (Quick Testing)
+
 ```bash
 # 1. Install dependencies
 pip install locust httpx python-docx
@@ -24,11 +26,34 @@ uvicorn app.main:app --reload
 # 4. Generate and set authentication token
 export TEST_AUTH_TOKEN=$(python backend/tests/performance/get_test_token.py --expires 4 --quiet)
 
-# 5. Populate database (for search tests)
+# 5. Populate database with simple fixtures
 python backend/tests/performance/setup_perf_test.py --count 100
 
 # 6. Run benchmarks
 locust -f backend/tests/performance/locust_ingestion.py --host=http://localhost:8000
+locust -f backend/tests/performance/locust_search.py --host=http://localhost:8000
+```
+
+### Gutenberg Dataset Mode (Realistic RAG Testing)
+
+```bash
+# 1. Install dependencies (same as above)
+pip install locust httpx python-docx
+
+# 2. Download Gutenberg books (one-time setup, ~45 seconds)
+python backend/tests/performance/download_gutenberg_dataset.py
+
+# 3. Start backend server
+cd backend
+uvicorn app.main:app --reload
+
+# 4. Generate and set authentication token
+export TEST_AUTH_TOKEN=$(python backend/tests/performance/get_test_token.py --expires 4 --quiet)
+
+# 5. Chunk and upload Gutenberg dataset
+python backend/tests/performance/setup_perf_test.py --gutenberg --target-chunks 100
+
+# 6. Run search benchmark (with realistic diverse content)
 locust -f backend/tests/performance/locust_search.py --host=http://localhost:8000
 ```
 
@@ -251,9 +276,14 @@ curl http://localhost:8000/health
 
 ## Test Fixtures
 
-### Generating Fixtures
+### Two Fixture Modes
 
-Test fixtures are sample documents used for load testing.
+The performance testing framework supports two fixture modes:
+
+1. **Simple Fixtures**: Small generated documents for quick testing
+2. **Gutenberg Dataset**: Chunked classic books for realistic RAG testing
+
+### Mode 1: Simple Fixtures (Quick Testing)
 
 **Generate All Fixtures**:
 ```bash
@@ -273,7 +303,7 @@ Existing: sample.md (5.12 KB)
 All fixtures generated successfully!
 ```
 
-### Fixture Details
+**Fixture Details**:
 
 | File | Type | Size | Content | Usage |
 |------|------|------|---------|-------|
@@ -283,7 +313,115 @@ All fixtures generated successfully!
 | `sample.docx` | DOCX | ~15KB | Structured AI content | 5% of ingestion tests |
 | `sample.md` | Markdown | ~5KB | AI technical docs | 5% of ingestion tests |
 
-**Note**: Fixtures contain realistic AI/ML technical content for semantic search testing.
+### Mode 2: Gutenberg Dataset (Realistic RAG Testing)
+
+**Purpose**: Provides diverse, realistic content from classic literature for comprehensive semantic search testing.
+
+**Features**:
+- 10-15 classic books from Project Gutenberg (public domain, zero cost)
+- Books chunked into ~100 documents (1000-2000 words each)
+- Genre diversity: Romance, Fantasy, Mystery, Historical, Adventure, Satire
+- Realistic document sizes matching production use cases
+- Preserved book/chapter metadata for testing
+
+**Download Dataset**:
+```bash
+python backend/tests/performance/download_gutenberg_dataset.py
+```
+
+**Expected Output**:
+```
+================================================================================
+Project Gutenberg Dataset Downloader
+================================================================================
+Output directory: backend/tests/performance/fixtures/gutenberg
+Books to download: 10
+Skip existing: False
+================================================================================
+
+[1/10]
+  ⬇ Downloading: Pride and Prejudice (ID: 1342)...
+  ✓ Downloaded: 01342_Pride_and_Prejudice.txt (700.2 KB) [Romance]
+
+[2/10]
+  ⬇ Downloading: Alice's Adventures in Wonderland (ID: 11)...
+  ✓ Downloaded: 00011_Alice's_Adventures_in_Wonderland.txt (167.8 KB) [Fantasy]
+
+...
+
+================================================================================
+Download Summary
+================================================================================
+  Total books: 10
+  Downloaded: 10
+  Skipped: 0
+  Failed: 0
+  Total size: 4530.5 KB
+  Total words: 756,234
+  Duration: 45.23 seconds
+
+  Metadata: backend/tests/performance/fixtures/gutenberg/gutenberg_metadata.json
+================================================================================
+
+✓ All books downloaded successfully!
+```
+
+**Book Catalog**:
+
+| ID | Title | Author | Genre | Words | Size |
+|----|-------|--------|-------|-------|------|
+| 1342 | Pride and Prejudice | Jane Austen | Romance | ~125,000 | ~700KB |
+| 11 | Alice's Adventures in Wonderland | Lewis Carroll | Fantasy | ~27,000 | ~170KB |
+| 1661 | Sherlock Holmes | Arthur Conan Doyle | Mystery | ~105,000 | ~580KB |
+| 84 | Frankenstein | Mary Shelley | Gothic/Sci-Fi | ~78,000 | ~440KB |
+| 98 | A Tale of Two Cities | Charles Dickens | Historical | ~138,000 | ~780KB |
+| 2701 | Moby Dick | Herman Melville | Adventure | ~215,000 | ~1200KB |
+| 16 | Peter Pan | J.M. Barrie | Children's | ~57,000 | ~320KB |
+| 74 | Tom Sawyer | Mark Twain | Adventure | ~72,000 | ~410KB |
+| 1952 | The Yellow Wallpaper | Charlotte Perkins Gilman | Short Story | ~6,000 | ~30KB |
+| 1080 | A Modest Proposal | Jonathan Swift | Satire | ~5,000 | ~30KB |
+
+**Total**: ~828,000 words across 10 books, providing rich semantic diversity
+
+**Dataset Features**:
+- **Zero Cost**: Public domain content, no API charges
+- **Diverse Genres**: Tests search across different writing styles
+- **Realistic Length**: Books range from 5K to 215K words
+- **Cleaned Text**: Gutenberg headers/footers automatically removed
+- **Metadata**: JSON file with book info, word counts, genres
+
+**Chunking Configuration**:
+```bash
+# Default: ~100 chunks at 1500 words each
+python backend/tests/performance/setup_perf_test.py --gutenberg
+
+# Custom chunk size (more chunks)
+python backend/tests/performance/setup_perf_test.py --gutenberg --chunk-size 1000 --target-chunks 150
+
+# Larger chunks (fewer documents)
+python backend/tests/performance/setup_perf_test.py --gutenberg --chunk-size 2500 --target-chunks 80
+```
+
+**Chunk Format** (Markdown):
+```markdown
+# Pride and Prejudice
+
+**Author**: Jane Austen
+**Part**: 1 of 83
+**Section**: Chapter I
+
+---
+
+It is a truth universally acknowledged, that a single man in possession
+of a good fortune, must be in want of a wife...
+```
+
+**Why Gutenberg for PERF-004?**
+- Real-world content complexity (not synthetic test data)
+- Semantic diversity across genres and authors
+- Historical context provides challenging search queries
+- Public domain = reproducible benchmarks
+- Industry-standard dataset for NLP testing
 
 ---
 
@@ -297,12 +435,9 @@ The search benchmark requires a populated database with multiple documents to te
 
 **1. Get Authentication Token**:
 ```bash
-# Option A: Test token generator with custom expiration (recommended for performance tests)
+# Recommended: Test token generator with custom expiration
 # Generate a long-lived token that won't expire during extended test runs
 python backend/tests/performance/get_test_token.py --expires 24 --quiet
-
-# Option B: OAuth login (production-like)
-# Login via frontend and copy JWT token from browser developer tools
 ```
 
 **2. Export Token**:
@@ -312,25 +447,95 @@ export TEST_AUTH_TOKEN=$(python backend/tests/performance/get_test_token.py --ex
 
 # For shorter tests (default 2-hour expiration)
 export TEST_AUTH_TOKEN=$(python backend/tests/performance/get_test_token.py --quiet)
-
-# Or manually set if you have a token
-export TEST_AUTH_TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
-**Note**: The `--expires` parameter accepts hours. For performance tests, use a value that exceeds your expected test duration to avoid token expiration during the test.
+**Note**: The `--expires` parameter accepts hours. For performance tests, use a value that exceeds your expected test duration.
 
-**3. Run Setup Script**:
+**3. Choose Your Mode**:
+
+### Mode 1: Simple Fixtures (Quick Testing)
+
+Best for: Quick validation, CI/CD pipelines, development testing
+
 ```bash
-# Default: populate with 100 documents
-python backend/tests/performance/setup_perf_test.py
+# Generate fixtures
+python backend/tests/performance/fixtures/create_simple_fixtures.py
+
+# Populate database with 100 documents (repeating 5 fixture files)
+python backend/tests/performance/setup_perf_test.py --count 100
 
 # Custom count
 python backend/tests/performance/setup_perf_test.py --count 200
 
 # Clean existing documents first
 python backend/tests/performance/setup_perf_test.py --clean --count 100
+```
 
-# Custom backend URL
+### Mode 2: Gutenberg Dataset (Realistic RAG Testing)
+
+Best for: Production-like testing, semantic search validation, realistic benchmarks
+
+```bash
+# Step 1: Download Gutenberg books (one-time setup)
+python backend/tests/performance/download_gutenberg_dataset.py
+
+# Step 2: Chunk and upload books to database
+python backend/tests/performance/setup_perf_test.py --gutenberg --target-chunks 100
+
+# Custom chunk size (smaller chunks = more documents)
+python backend/tests/performance/setup_perf_test.py --gutenberg --chunk-size 1000 --target-chunks 150
+
+# Clean and reload with Gutenberg dataset
+python backend/tests/performance/setup_perf_test.py --gutenberg --clean --target-chunks 100
+```
+
+**Gutenberg Mode Output**:
+```
+================================================================================
+T-04 Performance Testing Setup
+================================================================================
+Mode: Gutenberg Dataset (Chunked Books)
+Target: 100 documents
+Chunk size: 1500 words
+Backend: http://localhost:8000
+================================================================================
+✓ Authentication token loaded (length: 245)
+✓ Backend server is healthy: http://localhost:8000
+
+✓ Found 10 Gutenberg books:
+  - Pride and Prejudice by Jane Austen (125,234 words, 700.2 KB)
+  - Alice's Adventures in Wonderland by Lewis Carroll (26,987 words, 167.8 KB)
+  ...
+
+📚 Chunking books into ~1500 word documents...
+Target: 100 chunks
+================================================================================
+  Pride and Prejudice: 83 chunks (125,234 words → ~1508 words/chunk)
+  Alice's Adventures in Wonderland: 18 chunks (26,987 words → ~1499 words/chunk)
+  ...
+
+✓ Created 120 chunks from 10 books
+  Limiting to first 100 chunks (you can adjust --chunk-size to create more)
+
+📤 Uploading 100 document chunks...
+================================================================================
+  Progress: 10/100 (10.0%) - Rate: 2.34 docs/sec
+  Progress: 20/100 (20.0%) - Rate: 2.45 docs/sec
+  ...
+  Progress: 100/100 (100.0%) - Rate: 2.52 docs/sec
+================================================================================
+
+✓ Gutenberg chunk upload complete!
+  - Total uploaded: 100
+  - Failed: 0
+  - Duration: 39.68 seconds
+  - Rate: 2.52 docs/sec
+
+✓ Final document count: 100
+```
+
+**Custom backend URL** (both modes):
+```bash
 python backend/tests/performance/setup_perf_test.py --base-url http://localhost:8080
 ```
 
