@@ -52,3 +52,4 @@ PyPDF2==3.0.1                # PDF text extraction
 python-docx==1.1.0           # DOCX text extraction
 openai==1.54.3               # OpenAI API client for embeddings
 chromadb==0.5.11             # Vector database for RAG (Linux CI compatible, Windows may require Build Tools)
+urllib3>=2.5.0               # Security fix: chromadb brings 2.3.0 with GHSA-48p4-8xcf-vxj5, GHSA-pq67-6m6q-mj2v
