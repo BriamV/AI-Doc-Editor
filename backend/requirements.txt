@@ -53,3 +53,4 @@ python-docx==1.1.0           # DOCX text extraction
 openai==1.54.3               # OpenAI API client for embeddings
 chromadb==0.5.11             # Vector database for RAG (Linux CI compatible, Windows may require Build Tools)
 urllib3>=2.5.0               # Security fix: chromadb brings 2.3.0 with GHSA-48p4-8xcf-vxj5, GHSA-pq67-6m6q-mj2v
+authlib>=1.6.5               # Override: Force 1.6.5+ to prevent chromadb downgrade to 1.6.4 (GHSA-pq5p-34cr-23v9, GHSA-g7f3-828f-7h7m)
