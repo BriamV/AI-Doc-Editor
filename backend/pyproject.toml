@@ -40,7 +40,9 @@ markers = [
     "performance: performance tests",
     "enterprise: enterprise features tests",
     "parallel: tests that can run in parallel",
-    "serial: tests that must run serially"
+    "serial: tests that must run serially",
+    "asyncio: asyncio tests",
+    "anyio: anyio tests"
 ]
 
 [tool.coverage.run]

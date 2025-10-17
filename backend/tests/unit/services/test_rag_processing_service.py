@@ -14,7 +14,6 @@ Coverage areas:
 
 import pytest
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
-from pathlib import Path
 
 from app.services.rag_processing_service import RAGProcessingService
 
@@ -34,7 +33,7 @@ class TestRAGProcessingServiceInitialization:
         mock_text_extractor,
     ):
         """Test initialization with user API key."""
-        service = RAGProcessingService(api_key="test-key")
+        RAGProcessingService(api_key="test-key")
 
         # Verify all services were initialized
         mock_text_extractor.assert_called_once()
@@ -54,7 +53,7 @@ class TestRAGProcessingServiceInitialization:
         mock_text_extractor,
     ):
         """Test initialization without API key (uses global key)."""
-        service = RAGProcessingService()
+        RAGProcessingService()
 
         mock_embedding_service.assert_called_once_with(api_key=None)
 
@@ -344,6 +343,7 @@ class TestQuerySimilarDocuments:
         # Verify user filter was passed to vector store
         call_args = mock_vector_store.query_similar.call_args
         assert call_args.kwargs["where"] == {"user_id": "user-123"}
+        assert results["chunks"][0]["text"] == "User doc"
 
     @pytest.mark.asyncio
     @patch("app.services.rag_processing_service.TextExtractionService")
