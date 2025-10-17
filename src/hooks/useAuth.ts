@@ -1,10 +1,12 @@
 /**
  * Authentication hook
  * T-02: OAuth 2.0 + JWT integration
+ * Updated: Includes API key migration from localStorage to backend
  */
 import { useCallback, useEffect, useState } from 'react';
 import useStore from '@store/store';
 import { authAPI } from '@api/auth-api';
+import { migrateApiKeyToBackend } from '@utils/api-key-migration';
 
 export const useAuth = () => {
   const { isAuthenticated, accessToken, refreshToken, user, setTokens, setUser, logout } =
@@ -14,7 +16,9 @@ export const useAuth = () => {
   const [backendAvailable, setBackendAvailable] = useState(false);
 
   const checkBackend = useCallback(async () => {
+    console.log('🏥 Checking backend health...');
     const available = await authAPI.healthCheck();
+    console.log('🏥 Backend available:', available);
     setBackendAvailable(available);
   }, []);
 
@@ -35,33 +39,38 @@ export const useAuth = () => {
     }
   }, [refreshToken, logout, setTokens]);
 
-  const setupTokenRefresh = useCallback(() => {
-    // Set up automatic token refresh before expiry
-    // JWT tokens typically expire in 30 minutes, refresh at 25 minutes
-    const refreshInterval = 25 * 60 * 1000; // 25 minutes
-
-    const interval = setInterval(() => {
-      if (isAuthenticated && refreshToken) {
-        refreshAccessToken();
-      } else {
-        clearInterval(interval);
-      }
-    }, refreshInterval);
-
-    return () => clearInterval(interval);
-  }, [isAuthenticated, refreshToken, refreshAccessToken]);
-
   // Check backend availability on mount
   useEffect(() => {
     checkBackend();
   }, [checkBackend]);
 
-  // Auto-refresh tokens
+  // Auto-refresh tokens - Stable interval that only depends on auth state
   useEffect(() => {
-    if (accessToken && refreshToken) {
-      setupTokenRefresh();
+    if (!isAuthenticated || !refreshToken) {
+      return;
     }
-  }, [accessToken, refreshToken, setupTokenRefresh]);
+
+    // Set up automatic token refresh before expiry
+    // JWT tokens expire in 30 minutes, refresh at 25 minutes
+    const refreshInterval = 25 * 60 * 1000; // 25 minutes
+
+    console.log('🔄 Setting up auto-refresh interval (25 minutes)');
+
+    const interval = setInterval(async () => {
+      console.log('⏰ Auto-refresh triggered');
+      try {
+        await refreshAccessToken();
+        console.log('✅ Auto-refresh successful');
+      } catch (error) {
+        console.error('❌ Auto-refresh failed:', error);
+      }
+    }, refreshInterval);
+
+    return () => {
+      console.log('🛑 Clearing auto-refresh interval');
+      clearInterval(interval);
+    };
+  }, [isAuthenticated, refreshToken, refreshAccessToken]);
 
   const login = useCallback(
     async (provider: 'google' | 'microsoft') => {
@@ -94,6 +103,11 @@ export const useAuth = () => {
         // Store tokens and user data
         setTokens(tokenData.access_token, tokenData.refresh_token);
         setUser(tokenData.user);
+
+        // Migrate API key from localStorage to backend (non-blocking)
+        migrateApiKeyToBackend(tokenData.access_token).catch(error => {
+          console.warn('API key migration failed (non-critical):', error);
+        });
 
         return tokenData;
       } catch (error) {
@@ -165,6 +179,8 @@ export const useAuth = () => {
     handleCallback,
     refreshAccessToken,
     getCurrentUser,
+    setTokens, // Dual-mode: expose for test authentication
+    setUser, // Dual-mode: expose for test authentication
 
     // Utilities
     hasRole,

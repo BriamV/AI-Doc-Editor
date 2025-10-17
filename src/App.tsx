@@ -6,8 +6,10 @@ import DocumentMenu from '@components/Menu/DocumentMenu';
 import AIMenu from '@components/Menu/AIMenu/AIMenu';
 import Settings from './pages/Settings';
 import AuditLogs from './pages/AuditLogs';
+import Documents from './pages/Documents';
 import AuthLogin from '@components/Auth/AuthLogin';
 import AuthCallback from '@components/Auth/AuthCallback';
+import UserBanner from '@components/Auth/UserBanner';
 import { useAuth } from '@hooks/useAuth';
 
 import useInitialiseNewDocument from '@hooks/useInitialiseNewDocument';
@@ -157,8 +159,7 @@ function RequireAuth({ children }: { children: JSX.Element }) {
   const hasValidTestToken = isValidTestToken(authToken);
 
   if (!isAuthenticated && !hasValidTestToken) {
-    const target = location.pathname === '/' ? '/login' : '/';
-    return <Navigate to={target} state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return children;
@@ -167,6 +168,7 @@ function RequireAuth({ children }: { children: JSX.Element }) {
 const Home: React.FC = () => {
   return (
     <>
+      <UserBanner />
       <DocumentMenu />
       <Document />
       <AIMenu />
@@ -211,6 +213,14 @@ const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <AuditLogs />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: '/documents',
+    element: (
+      <RequireAuth>
+        <Documents />
       </RequireAuth>
     ),
   },

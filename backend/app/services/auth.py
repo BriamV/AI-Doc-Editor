@@ -31,13 +31,19 @@ class AuthService:
     def __init__(self):
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-    def create_access_token(self, data: Dict[str, Any]) -> str:
+    def create_access_token(self, data: Dict[str, Any], expires_minutes: int = None) -> str:
         """
         Create JWT access token
         T-02-ST2: JWT generation with roles
+
+        Args:
+            data: Token payload data
+            expires_minutes: Optional custom expiration time in minutes.
+                           If None, uses settings.ACCESS_TOKEN_EXPIRE_MINUTES
         """
         to_encode = data.copy()
-        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expiry_minutes = expires_minutes or settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        expire = datetime.utcnow() + timedelta(minutes=expiry_minutes)
         to_encode.update({"exp": expire, "type": "access"})
 
         encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
@@ -55,20 +61,30 @@ class AuthService:
         encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
         return encoded_jwt
 
-    def create_tokens(self, user_data: Dict[str, Any]) -> Dict[str, str]:
+    def create_tokens(
+        self, user_data: Dict[str, Any], access_expires_minutes: int = None
+    ) -> Dict[str, str]:
         """
         Create both access and refresh tokens
         T-02-ST2: Complete token generation
+
+        Args:
+            user_data: User information to encode in tokens
+            access_expires_minutes: Optional custom expiration for access token in minutes.
+                                   If None, uses settings.ACCESS_TOKEN_EXPIRE_MINUTES
         """
         token_data = {
             "sub": user_data["email"],
+            "user_id": user_data.get(
+                "id", user_data.get("user_id", "")
+            ),  # Support both id and user_id keys
             "email": user_data["email"],
             "name": user_data["name"],
             "role": user_data["role"],
             "provider": user_data["provider"],
         }
 
-        access_token = self.create_access_token(token_data)
+        access_token = self.create_access_token(token_data, expires_minutes=access_expires_minutes)
         refresh_token = self.create_refresh_token({"sub": user_data["email"]})
 
         return {"access_token": access_token, "refresh_token": refresh_token}
@@ -78,16 +94,32 @@ class AuthService:
         Verify and decode JWT token
         T-02-ST2: Token validation
         """
+        import logging
+
         try:
+            # Debug logging
+            logging.info(f"[verify_token] Token length: {len(token)}")
+            logging.info(
+                f"[verify_token] Token prefix: {token[:20]}..."
+                if len(token) > 20
+                else f"[verify_token] Token: {token}"
+            )
+            logging.info(f"[verify_token] SECRET_KEY length: {len(settings.SECRET_KEY)}")
+            logging.info(f"[verify_token] ALGORITHM: {settings.ALGORITHM}")
+
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
 
             email: str = payload.get("sub")
             if email is None:
+                logging.error("[verify_token] Token missing 'sub' field")
                 raise JWTError("Invalid token")
 
+            logging.info(f"[verify_token] Successfully decoded token for: {email}")
+            logging.info(f"[verify_token] Token fields: {list(payload.keys())}")
             return payload
 
-        except JWTError:
+        except JWTError as e:
+            logging.error(f"[verify_token] JWTError: {type(e).__name__} - {str(e)}")
             raise ValueError("Invalid token")
 
     def refresh_tokens(self, refresh_token: str) -> Dict[str, str]:

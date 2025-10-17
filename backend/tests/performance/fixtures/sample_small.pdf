@@ -1,0 +1,77 @@
+%PDF-1.4
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R]
+/Count 1
+>>
+endobj
+3 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/MediaBox [0 0 612 792]
+/Contents 4 0 R
+/Resources <<
+/Font <<
+/F1 <<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+>>
+>>
+>>
+endobj
+4 0 obj
+<<
+/Length 9790
+>>
+stream
+BT
+/F1 12 Tf
+50 700 Td
+(
+Artificial Intelligence and Machine Learning
+
+Introduction to AI: Artificial Intelligence (AI) is the simulation of human intelligence
+processes by machines, especially computer systems. These processes include learning,
+reasoning, and self-correction. Machine learning is a subset of AI that focuses on the
+development of algorithms that can learn from and make predictions based on data.
+
+Key Concepts: Supervised Learning, Unsupervised Learning, Reinforcement Learning,
+Neural Networks, Deep Learning, Natural Language Processing, Computer Vision.
+
+Applications: Healthcare diagnosis, financial fraud detection, autonomous vehicles,
+manufacturing quality control, customer service chatbots, recommendation systems.
+
+Neural Networks: Computing systems inspired by biological neural networks. They consist
+of interconnected nodes organized in layers that process information through weighted
+connections.
+
+Deep Learning: Neural networks with multiple layers that can learn hierarchical
+representati                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ) Tj
+ET
+endstream
+endobj
+xref
+0 5
+0000000000 65535 f
+0000000009 00000 n
+0000000058 00000 n
+0000000115 00000 n
+0000000317 00000 n
+trailer
+<<
+/Size 5
+/Root 1 0 R
+>>
+startxref
+10140
+%%EOF

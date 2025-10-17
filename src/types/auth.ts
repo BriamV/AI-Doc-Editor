@@ -14,6 +14,7 @@ export interface User {
   provider: AuthProvider;
   createdAt?: string;
   updatedAt?: string;
+  test_mode?: boolean; // Dual-mode: flag for test authentication
 }
 
 export interface AuthTokens {

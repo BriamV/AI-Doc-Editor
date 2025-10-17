@@ -253,10 +253,18 @@ jobs:
             exit 0
           }
 
+      - name: Install gitleaks
+        run: |
+          echo "📦 Installing gitleaks binary..."
+          wget -q https://github.com/gitleaks/gitleaks/releases/download/v8.22.1/gitleaks_8.22.1_linux_x64.tar.gz
+          tar -xzf gitleaks_8.22.1_linux_x64.tar.gz
+          sudo mv gitleaks /usr/local/bin/
+          gitleaks version
+
       - name: Secret scanning
         run: |
           echo "🔍 Running secret detection scan..."
-          yarn sec:secrets || {
+          gitleaks detect --no-banner --redact --verbose || {
             echo "❌ Secret scanning found potential issues"
             exit 1
           }
@@ -359,7 +367,7 @@ jobs:
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          yarn repo:install
+          yarn install --immutable
           yarn be:bootstrap
 
       - name: Fast quality gate validation

@@ -1,12 +1,14 @@
 /**
  * Enhanced authentication component
  * T-02: OAuth 2.0 + JWT with multiple providers
+ * Dual-mode: Production OAuth + Development Test Authentication
  */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { User } from '../../types/auth';
 import { useAuth } from '@hooks/useAuth';
 import { getEnvVar } from '@utils/env';
+import TestLogin from './TestLogin';
 
 interface AuthLoginProps {
   onSuccess?: () => void;
@@ -88,12 +90,14 @@ const LoginButton = ({
 // Backend fallback component
 const BackendFallback = () => (
   <div className="auth-fallback p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-    <h3 className="text-lg font-semibold text-yellow-800 mb-2">T-02 Backend Unavailable</h3>
+    <h3 className="text-lg font-semibold text-yellow-800 mb-2">Backend Connection Failed</h3>
     <p className="text-yellow-700 mb-3">
-      OAuth + JWT backend is not running. Using existing Google OAuth.
+      Cannot connect to authentication backend. Please check that the backend is running on{' '}
+      <code className="bg-yellow-100 px-1 rounded">http://localhost:8000</code>
     </p>
     <p className="text-sm text-yellow-600">
-      To enable full T-02 features, start backend: <code>make docker-backend</code>
+      Start backend: <code className="bg-yellow-100 px-1 rounded">yarn be:dev</code> or check
+      network configuration
     </p>
   </div>
 );
@@ -156,7 +160,19 @@ const BackendStatus = ({ backendAvailable }: { backendAvailable: boolean }) => (
 const AuthLogin: React.FC<AuthLoginProps> = ({ onSuccess, onError }) => {
   const { login, isLoading, backendAvailable } = useAuth();
   const [selectedProvider, setSelectedProvider] = useState<'google' | 'microsoft'>('google');
+  const [useTestAuth, setUseTestAuth] = useState(false);
   const navigate = useNavigate();
+
+  // Check if we're in development mode
+  const isDevelopment = getEnvVar('DEV') || getEnvVar('VITE_ENABLE_TESTING') === 'true';
+
+  // DEBUG: Log environment variables and conditions
+  console.log('🔍 AuthLogin Debug:');
+  console.log('  VITE_ENABLE_TESTING:', getEnvVar('VITE_ENABLE_TESTING'));
+  console.log('  DEV:', getEnvVar('DEV'));
+  console.log('  isDevelopment:', isDevelopment);
+  console.log('  backendAvailable:', backendAvailable);
+  console.log('  Toggle should show:', isDevelopment && backendAvailable);
 
   const handleLogin = async (provider: 'google' | 'microsoft') => {
     try {
@@ -248,34 +264,49 @@ const AuthLogin: React.FC<AuthLoginProps> = ({ onSuccess, onError }) => {
   return (
     <div className="auth-login space-y-4">
       <AuthHeader />
-      <ProviderButtons
-        selectedProvider={selectedProvider}
-        isLoading={isLoading}
-        onProviderClick={handleLogin}
-        onProviderHover={setSelectedProvider}
-      />
-      <TermsNotice />
-      <BackendStatus backendAvailable={backendAvailable} />
-      {(getEnvVar('DEV') || getEnvVar('VITE_ENABLE_TESTING') === 'true') && (
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
-          <h4 className="font-semibold text-blue-800">Test Login (Dev/Test Only)</h4>
-          <div className="flex gap-2">
+
+      {/* Dual-mode toggle - only in development */}
+      {isDevelopment && backendAvailable && (
+        <div className="flex justify-center">
+          <div className="inline-flex rounded-lg border border-gray-300 p-1 bg-gray-100">
             <button
-              className="px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-              onClick={() => handleTestLogin('admin')}
-              data-testid="test-login-admin"
+              onClick={() => setUseTestAuth(false)}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                !useTestAuth
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
             >
-              Sign in as Admin
+              OAuth 2.0
             </button>
             <button
-              className="px-3 py-2 rounded bg-gray-600 text-white hover:bg-gray-700"
-              onClick={() => handleTestLogin('editor')}
-              data-testid="test-login-editor"
+              onClick={() => setUseTestAuth(true)}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                useTestAuth
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
             >
-              Sign in as Editor
+              Test Mode
             </button>
           </div>
         </div>
+      )}
+
+      {/* Show test authentication or OAuth based on mode */}
+      {isDevelopment && backendAvailable && useTestAuth ? (
+        <TestLogin onSuccess={onSuccess} onError={onError} />
+      ) : (
+        <>
+          <ProviderButtons
+            selectedProvider={selectedProvider}
+            isLoading={isLoading}
+            onProviderClick={handleLogin}
+            onProviderHover={setSelectedProvider}
+          />
+          <TermsNotice />
+          <BackendStatus backendAvailable={backendAvailable} />
+        </>
       )}
     </div>
   );

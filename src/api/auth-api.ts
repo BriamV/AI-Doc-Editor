@@ -126,9 +126,13 @@ class AuthAPI {
    */
   async healthCheck(): Promise<boolean> {
     try {
-      const response = await fetch(`${API_BASE_URL}/healthz`);
+      const url = `${API_BASE_URL}/healthz`;
+      console.log('🏥 Health check URL:', url);
+      const response = await fetch(url);
+      console.log('🏥 Health check response:', response.ok, response.status);
       return response.ok;
-    } catch {
+    } catch (error) {
+      console.log('🏥 Health check failed:', error);
       return false;
     }
   }

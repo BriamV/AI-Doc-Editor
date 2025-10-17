@@ -1,0 +1,5 @@
+# Ignore all uploaded files (sensitive user data)
+*
+
+# But keep this directory in git
+!.gitignore

@@ -118,3 +118,13 @@ comprehensive-validation-report.md
 final-fixes-report.json
 .claude/hooks.json.backup-*
 .claude/session-context.json
+
+# ChromaDB vector database (T-04 RAG pipeline)
+backend/chroma_db/
+chroma_db/
+
+# Temporary database migration/debugging scripts
+backend/check_db.py
+backend/test_worm.py
+backend/run_migrations.py
+backend/simple_migrate.py

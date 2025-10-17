@@ -9,10 +9,10 @@ python-multipart==0.0.18
 # Authentication & JWT
 python-jose[cryptography]==3.4.0
 passlib[bcrypt]==1.7.4
-authlib==1.6.4
+authlib>=1.6.5  # Updated to resolve CVE-2025-23813, CVE-2025-23814, GHSA-pq5p-34cr-23v9, GHSA-g7f3-828f-7h7m
 
 # HTTP Requests
-httpx==0.27.0
+httpx==0.27.2               # Pin to 0.27.2: openai-python requires 'proxies' arg removed in httpx 0.28.0+
 requests==2.32.4
 
 # Database
@@ -37,6 +37,7 @@ email-validator==2.2.0
 # Development & Testing
 pytest==8.3.2
 pytest-asyncio==0.23.8
+locust==2.32.4              # Load testing framework for performance benchmarks (T-04 PERF-003, PERF-004)
 
 # Week 4 Additional Dependencies
 pytz==2024.1                # Timezone handling for rotation scheduling
@@ -45,3 +46,11 @@ aiohttp==3.12.14            # HTTP client for HSM integration
 # CORS
 # NOTE: fastapi-cors is unmaintained. Consider migrating to FastAPI's built-in CORSMiddleware.
 fastapi-cors==0.0.6
+
+# RAG Processing (T-04 ST2-ST4)
+PyPDF2==3.0.1                # PDF text extraction
+python-docx==1.1.0           # DOCX text extraction
+openai==1.54.3               # OpenAI API client for embeddings
+chromadb==0.5.11             # Vector database for RAG (Linux CI compatible, Windows may require Build Tools)
+urllib3>=2.5.0               # Security fix: chromadb brings 2.3.0 with GHSA-48p4-8xcf-vxj5, GHSA-pq67-6m6q-mj2v
+authlib>=1.6.5               # Override: Force 1.6.5+ to prevent chromadb downgrade to 1.6.4 (GHSA-pq5p-34cr-23v9, GHSA-g7f3-828f-7h7m)

@@ -69,44 +69,155 @@ try {
 }
 ```
 
-### 2. OpenAI API Client (`api.ts`)
+### 2. Backend Chat Proxy Client
 
-**Purpose**: Handles OpenAI API communication for chat completions.
+### Overview
+
+The frontend uses a backend proxy for all OpenAI API calls. API keys are never exposed to the frontend.
+
+### Chat Completions via Backend Proxy
 
 ```typescript
-interface ChatCompletionParams {
-  endpoint: string;
-  messages: MessageInterface[];
-  config: ConfigInterface;
-  apiKey?: string;
-  customHeaders?: Record<string, string>;
+// src/api/chat-api.ts
+export const sendChatCompletion = async (
+  messages: ChatMessage[],
+  token: string,
+  options: ChatOptions = {}
+): Promise<ChatCompletionResponse> => {
+  const response = await fetch('/api/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      messages,
+      model: options.model || 'gpt-4o-mini',
+      temperature: options.temperature || 0.7,
+      stream: options.stream || false
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new ChatAPIError(error.detail || error.message);
+  }
+
+  return response.json();
+};
+```
+
+### Streaming Support
+
+```typescript
+export const sendChatCompletionStream = async (
+  messages: ChatMessage[],
+  token: string,
+  onChunk: (content: string) => void,
+  options: ChatOptions = {}
+): Promise<void> => {
+  const response = await fetch('/api/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      ...options,
+      messages,
+      stream: true
+    })
+  });
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    const chunk = decoder.decode(value);
+    const lines = chunk.split('\n');
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const data = line.slice(6);
+        if (data === '[DONE]') return;
+
+        try {
+          const parsed = JSON.parse(data);
+          const content = parsed.choices[0]?.delta?.content;
+          if (content) onChunk(content);
+        } catch (e) {
+          // Skip invalid JSON
+        }
+      }
+    }
+  }
+};
+```
+
+### Error Handling
+
+```typescript
+class ChatAPIError extends Error {
+  constructor(
+    message: string,
+    public statusCode?: number,
+    public errorCode?: string
+  ) {
+    super(message);
+    this.name = 'ChatAPIError';
+  }
 }
 
-// Non-streaming chat completion
-export const getChatCompletion = async (params: ChatCompletionParams) => {
-  // Handles Azure endpoint detection
-  // Manages authentication headers
-  // Processes response and error handling
-}
-
-// Streaming chat completion
-export const getChatCompletionStream = async (params: ChatCompletionParams) => {
-  // Returns ReadableStream for real-time processing
-  // Handles model_not_found errors
-  // Manages rate limiting and quota errors
+// Usage
+try {
+  const response = await sendChatCompletion(messages, token);
+} catch (error) {
+  if (error instanceof ChatAPIError) {
+    if (error.statusCode === 402) {
+      // Show "Configure API Key" prompt
+    } else if (error.statusCode === 401) {
+      // Redirect to login
+    } else {
+      // Show error message
+    }
+  }
 }
 ```
 
-**Azure Integration**:
-- Automatic Azure endpoint detection using `isAzureEndpoint()`
-- Model name transformation for Azure (gpt-3.5-turbo → gpt-35-turbo)
-- API version management for Azure endpoints
+### Authentication-Required Pattern
 
-**Error Handling**:
-- Model availability validation
-- Rate limiting detection and user-friendly messages
-- Quota exhaustion handling
-- Network timeout management
+**All OpenAI operations require authentication**:
+```typescript
+function getAuthToken(): string {
+  const token = useStore.getState().accessToken;
+  if (!token) {
+    throw new Error('Authentication required. Please log in to use chat features.');
+  }
+  return token;
+}
+```
+
+### Migration from Direct API Calls
+
+**Old Pattern** (REMOVED):
+```typescript
+// ❌ OLD - Direct OpenAI API calls
+const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  headers: {
+    'Authorization': `Bearer ${apiKey}`, // API key in frontend
+  }
+});
+```
+
+**New Pattern**:
+```typescript
+// ✅ NEW - Backend proxy
+const response = await sendChatCompletion(messages, jwtToken);
+// API key managed securely in backend
+```
 
 ### 3. Health Check API Client (`health-check.ts`)
 
