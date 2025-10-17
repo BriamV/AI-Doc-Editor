@@ -51,5 +51,4 @@ fastapi-cors==0.0.6
 PyPDF2==3.0.1                # PDF text extraction
 python-docx==1.1.0           # DOCX text extraction
 openai==1.54.3               # OpenAI API client for embeddings
-# chromadb==0.5.11           # Vector database for RAG (requires Visual Studio Build Tools on Windows)
-                              # Install manually if needed: pip install chromadb==0.5.11
+chromadb==0.5.11             # Vector database for RAG (Linux CI compatible, Windows may require Build Tools)
