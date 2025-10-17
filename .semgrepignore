@@ -17,6 +17,14 @@ cypress/fixtures/
 tests/integration/
 **/integration/**/
 
+# Performance test files (contain test-only JWT tokens and mock data)
+backend/tests/performance/
+**/performance/**/*.bat
+**/performance/**/*.sh
+
+# Frontend utility files with legitimate logging (false positives)
+src/utils/env.ts
+
 # Node modules and dependencies
 node_modules/
 .yarn/
