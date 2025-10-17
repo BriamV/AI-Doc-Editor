@@ -30,7 +30,6 @@ Usage:
 
 import argparse
 import asyncio
-import io
 import json
 import os
 import re
@@ -204,7 +203,7 @@ async def populate_database(auth_token: str, target_count: int):
     final_count = await get_document_count(auth_token)
 
     print("=" * 70)
-    print(f"\n[OK] Upload complete!")
+    print("\n[OK] Upload complete!")
     print(f"  - Total uploaded: {uploaded}")
     print(f"  - Failed: {failed}")
     print(f"  - Duration: {elapsed:.2f} seconds")
@@ -212,9 +211,7 @@ async def populate_database(auth_token: str, target_count: int):
     print(f"  - Final document count: {final_count}")
 
 
-def chunk_text_by_words(
-    text: str, chunk_size: int = 1500, overlap: int = 150
-) -> List[str]:
+def chunk_text_by_words(text: str, chunk_size: int = 1500, overlap: int = 150) -> List[str]:
     """
     Chunk text into approximately equal-sized pieces by word count.
 
@@ -268,9 +265,7 @@ def extract_chapter_info(text: str, chunk_idx: int) -> Tuple[Optional[str], int]
 
     if chapter_match:
         # Try to extract chapter title (usually on next line or after colon)
-        title_match = re.search(
-            r"(?:CHAPTER|Chapter)[^\n]*\n\s*([A-Z][^\n]{5,50})", header
-        )
+        title_match = re.search(r"(?:CHAPTER|Chapter)[^\n]*\n\s*([A-Z][^\n]{5,50})", header)
         if title_match:
             return title_match.group(1).strip(), chunk_idx + 1
 
@@ -311,7 +306,7 @@ def create_markdown_chunk(
     # Build Markdown document
     lines = [
         f"# {book_title}",
-        f"",
+        "",
         f"**Author**: {author}",
         f"**Part**: {chunk_idx + 1} of {total_chunks}",
     ]
@@ -493,7 +488,7 @@ async def chunk_gutenberg_books(
     elapsed = time.time() - start_time
 
     print("=" * 70)
-    print(f"\n[OK] Gutenberg chunk upload complete!")
+    print("\n[OK] Gutenberg chunk upload complete!")
     print(f"  - Total uploaded: {uploaded}")
     print(f"  - Failed: {failed}")
     print(f"  - Duration: {elapsed:.2f} seconds")
@@ -515,16 +510,13 @@ async def clean_database(auth_token: str):
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         # Get all documents
-        response = await client.get(
-            f"{BASE_URL}/api/documents?limit=100", headers=headers
-        )
+        response = await client.get(f"{BASE_URL}/api/documents?limit=100", headers=headers)
 
         if response.status_code != 200:
             print(f"[ERROR] Failed to list documents: {response.status_code}")
             return
 
         data = response.json()
-        documents = data.get("documents", [])
         total = data.get("total", 0)
 
         if total == 0:
@@ -627,10 +619,11 @@ def main():
 
         # Populate database based on mode
         if args.gutenberg:
-            uploaded = await chunk_gutenberg_books(
+            uploaded_chunks = await chunk_gutenberg_books(
                 auth_token, args.target_chunks, args.chunk_size
             )
             final_count = await get_document_count(auth_token)
+            print(f"[OK] Uploaded {uploaded_chunks} Gutenberg chunks")
             print(f"\n[OK] Final document count: {final_count}")
         else:
             await populate_database(auth_token, args.count)

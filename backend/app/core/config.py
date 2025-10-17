@@ -416,9 +416,7 @@ class Settings(BaseSettings):
         google_pattern = r"^[0-9]+-[a-zA-Z0-9_-]+\.apps\.googleusercontent\.com$"
         microsoft_pattern = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
 
-        google_valid = not self.GOOGLE_CLIENT_ID or re.match(
-            google_pattern, self.GOOGLE_CLIENT_ID
-        )
+        google_valid = not self.GOOGLE_CLIENT_ID or re.match(google_pattern, self.GOOGLE_CLIENT_ID)
         microsoft_valid = not self.MICROSOFT_CLIENT_ID or re.match(
             microsoft_pattern, self.MICROSOFT_CLIENT_ID.lower()
         )

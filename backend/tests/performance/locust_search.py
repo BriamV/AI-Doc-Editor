@@ -30,7 +30,7 @@ KPI Validation:
 import os
 import random
 import time
-from typing import Dict, List, Optional
+from typing import Optional
 
 from locust import HttpUser, task, between, events
 from locust.env import Environment
@@ -153,12 +153,16 @@ class DocumentSearchUser(HttpUser):
 
         # Search with catch_response for custom success/failure handling
         with self.client.post(
-            "/api/documents/search", headers=headers, json=payload, catch_response=True, name=task_name
+            "/api/documents/search",
+            headers=headers,
+            json=payload,
+            catch_response=True,
+            name=task_name,
         ) as response:
             if response.status_code == 200:
                 self.search_count += 1
                 data = response.json()
-                results_count = data.get("results_count", 0)
+                _ = data.get("results_count", 0)
                 # Success even if no results (valid empty response)
                 response.success()
             elif response.status_code == 401:
@@ -206,8 +210,8 @@ def on_test_start(environment: Environment, **kwargs):
     print("\n" + "=" * 70)
     print("PERF-004: Document Search Load Test")
     print("=" * 70)
-    print(f"Target KPI: p95 latency < 500ms")
-    print(f"Test Configuration: 20 users, 5 minutes")
+    print("Target KPI: p95 latency < 500ms")
+    print("Test Configuration: 20 users, 5 minutes")
     print(f"Host: {environment.host}")
     print("=" * 70 + "\n")
 
@@ -269,7 +273,7 @@ def on_test_stop(environment: Environment, **kwargs):
     print(f"Failed Requests: {stats.num_failures}")
     print(f"Error Rate: {error_rate:.2f}%")
     print(f"\nThroughput: {throughput_per_second:.2f} queries/second")
-    print(f"\nLatency Metrics:")
+    print("\nLatency Metrics:")
     print(f"  - Average: {stats.avg_response_time:.2f}ms")
     print(f"  - p50 (median): {p50:.2f}ms")
     print(f"  - p95: {p95:.2f}ms")

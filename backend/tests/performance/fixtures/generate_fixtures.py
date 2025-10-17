@@ -187,13 +187,16 @@ def generate_docx(output_path: Path):
 
 def generate_markdown(output_path: Path):
     """Generate Markdown document (~5KB)."""
-    content = """# AI Document - Markdown Sample
+    content = (
+        """# AI Document - Markdown Sample
 
 ## Introduction
 
 This is a sample Markdown document for RAG pipeline testing.
 
-""" + generate_sample_text("small") + """
+"""
+        + generate_sample_text("small")
+        + """
 
 ## Technical Details
 
@@ -220,6 +223,7 @@ of the RAG pipeline ingestion and search capabilities.
 ---
 *Generated for T-04 Performance Testing*
 """
+    )
 
     output_path.write_text(content, encoding="utf-8")
     print(f"Created: {output_path} ({output_path.stat().st_size / 1024:.2f} KB)")

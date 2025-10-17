@@ -5,10 +5,7 @@
  */
 
 import { getEnvVar } from '@utils/env';
-import type {
-  DocumentSearchRequest,
-  DocumentSearchResponse,
-} from '@type/documents';
+import type { DocumentSearchRequest, DocumentSearchResponse } from '@type/documents';
 
 const API_BASE_URL = getEnvVar('VITE_API_BASE_URL') || 'http://localhost:8000/api';
 

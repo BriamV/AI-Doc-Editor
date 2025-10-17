@@ -24,10 +24,9 @@ KPI Validation:
 """
 
 import os
-import random
 import time
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 from locust import HttpUser, task, between, events
 from locust.env import Environment
@@ -175,8 +174,8 @@ def on_test_start(environment: Environment, **kwargs):
     print("\n" + "=" * 70)
     print("PERF-003: Document Ingestion Load Test")
     print("=" * 70)
-    print(f"Target KPI: >= 100 documents/hour")
-    print(f"Test Configuration: 10 users, 5 minutes")
+    print("Target KPI: >= 100 documents/hour")
+    print("Test Configuration: 10 users, 5 minutes")
     print(f"Host: {environment.host}")
     print("=" * 70 + "\n")
 
@@ -234,7 +233,7 @@ def on_test_stop(environment: Environment, **kwargs):
     print(f"Failed Requests: {stats.num_failures}")
     print(f"\nThroughput: {throughput_per_hour:.2f} documents/hour")
     print(f"Target KPI: >= {kpi_target} documents/hour")
-    print(f"\nLatency Metrics:")
+    print("\nLatency Metrics:")
     print(f"  - Average: {stats.avg_response_time:.2f}ms")
     print(f"  - p50: {p50:.2f}ms")
     print(f"  - p95: {p95:.2f}ms")

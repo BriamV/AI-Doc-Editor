@@ -144,13 +144,13 @@ class StopServersTestSuite {
 
     this.assert(
       code.includes('if (!this.verifyWindowsProcessExists(pid))') &&
-      code.includes('killWindowsProcess'),
+        code.includes('killWindowsProcess'),
       'killWindowsProcess verifies process exists BEFORE attempting kill',
       'Pre-kill verification not found'
     );
 
     this.assert(
-      code.includes('return false; // Don\'t count stale PIDs as success'),
+      code.includes("return false; // Don't count stale PIDs as success"),
       'killWindowsProcess returns false for stale PIDs (not true)',
       'Stale PID false return not found - BUG NOT FIXED'
     );

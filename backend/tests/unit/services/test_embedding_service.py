@@ -13,7 +13,7 @@ Coverage areas:
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from openai import APIError, RateLimitError, APIConnectionError
 
 from app.services.embedding_service import EmbeddingService
@@ -188,7 +188,9 @@ class TestBatchEmbeddingGeneration:
             assert result["model"] == "text-embedding-3-small"
 
     @patch("app.services.embedding_service.OpenAI")
-    def test_generate_embeddings_with_metadata(self, mock_openai_class, sample_chunks, sample_metadata):
+    def test_generate_embeddings_with_metadata(
+        self, mock_openai_class, sample_chunks, sample_metadata
+    ):
         """Test batch embedding generation with custom metadata."""
         mock_client = Mock()
 
@@ -269,7 +271,7 @@ class TestErrorHandling:
         return RateLimitError(
             "Rate limit exceeded",
             response=mock_response,
-            body={"error": {"message": "Rate limit exceeded"}}
+            body={"error": {"message": "Rate limit exceeded"}},
         )
 
     def _create_mock_connection_error(self):

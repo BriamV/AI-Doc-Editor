@@ -12,8 +12,7 @@ Coverage areas:
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from typing import List, Dict, Any
+from unittest.mock import Mock, patch
 
 from app.services.vector_store_service import VectorStoreService
 
@@ -107,7 +106,7 @@ class TestCollectionManagement:
         mock_persistent_client.return_value = mock_client
 
         service = VectorStoreService()
-        collection = service.get_or_create_collection("test_collection", embedding_dimension=768)
+        service.get_or_create_collection("test_collection", embedding_dimension=768)
 
         mock_client.create_collection.assert_called_once_with(
             name="test_collection", metadata={"dimension": 768, "hnsw:space": "cosine"}
@@ -233,7 +232,7 @@ class TestDocumentOperations:
         mock_persistent_client.return_value = mock_client
 
         service = VectorStoreService()
-        result = service.add_documents(
+        service.add_documents(
             collection_name="test_collection",
             texts=sample_chunks,
             embeddings=sample_embeddings,
@@ -253,9 +252,7 @@ class TestDocumentOperations:
         service = VectorStoreService()
 
         with pytest.raises(ValueError, match="cannot be empty"):
-            service.add_documents(
-                collection_name="test", texts=[], embeddings=[], metadatas=[]
-            )
+            service.add_documents(collection_name="test", texts=[], embeddings=[], metadatas=[])
 
     @patch("app.services.vector_store_service.chromadb.PersistentClient")
     def test_add_documents_mismatched_lengths(
@@ -398,9 +395,7 @@ class TestSimilarityQuery:
         query_embedding = [0.3] * 1536
 
         with pytest.raises(ValueError, match="Collection .* not found"):
-            service.query_similar(
-                collection_name="nonexistent", query_embedding=query_embedding
-            )
+            service.query_similar(collection_name="nonexistent", query_embedding=query_embedding)
 
     @patch("app.services.vector_store_service.chromadb.PersistentClient")
     def test_query_similar_empty_results(self, mock_persistent_client):

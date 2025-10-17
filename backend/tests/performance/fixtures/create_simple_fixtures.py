@@ -9,7 +9,6 @@ Usage:
 """
 
 from pathlib import Path
-import struct
 
 
 def create_minimal_pdf(output_path: Path, content: str, size_target: int):

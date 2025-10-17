@@ -84,10 +84,7 @@ const SearchModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
 
       {/* Modal */}
       <div className="relative min-h-screen flex items-center justify-center p-4">
@@ -119,9 +116,7 @@ const MyComponent = () => {
 
   return (
     <>
-      <button onClick={() => setShowSearch(true)}>
-        Search Documents
-      </button>
+      <button onClick={() => setShowSearch(true)}>Search Documents</button>
       <SearchModal isOpen={showSearch} onClose={() => setShowSearch(false)} />
     </>
   );
@@ -294,21 +289,25 @@ Before deploying:
 ## Troubleshooting
 
 ### "API key not configured" error
+
 - Check user has API key in credentials table
 - Or verify global fallback API key exists
 - See `backend/app/routers/credentials.py` for key resolution logic
 
 ### No results found
+
 - Verify documents are uploaded and processed (`status = 'completed'`)
 - Check ChromaDB collection name matches ('documents')
 - Ensure user_id filter is working correctly
 
 ### Network errors
+
 - Verify backend is running (`http://localhost:8000`)
 - Check CORS configuration
 - Verify JWT token is valid and not expired
 
 ### Type errors
+
 - Run `yarn fe:typecheck` to check TypeScript
 - Ensure `@type/documents` import path is correct
 - Verify tsconfig.json paths are configured

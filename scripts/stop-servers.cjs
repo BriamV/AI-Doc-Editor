@@ -114,7 +114,10 @@ class ServerStopper {
         }
       }
 
-      this.log('debug', `Found ${pids.size} LISTENING process(es) on port ${port}: ${[...pids].join(', ')}`);
+      this.log(
+        'debug',
+        `Found ${pids.size} LISTENING process(es) on port ${port}: ${[...pids].join(', ')}`
+      );
       return [...pids];
     } catch (error) {
       this.log('error', `Failed to find processes on Windows: ${error.message}`);
@@ -157,7 +160,10 @@ class ServerStopper {
       });
 
       if (lsofResult.status !== 0) {
-        this.log('debug', `lsof command returned status ${lsofResult.status} (may mean no processes)`);
+        this.log(
+          'debug',
+          `lsof command returned status ${lsofResult.status} (may mean no processes)`
+        );
         return [];
       }
 
@@ -216,7 +222,9 @@ class ServerStopper {
           }
           // Short sleep (10ms) using synchronous delay
           const endTime = Date.now() + 10;
-          while (Date.now() < endTime) { /* busy wait */ }
+          while (Date.now() < endTime) {
+            /* busy wait */
+          }
         }
 
         if (verified) {

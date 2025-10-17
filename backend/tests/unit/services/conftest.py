@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import List, Dict, Any
 from unittest.mock import Mock, MagicMock
 import tempfile
-import io
 
 
 @pytest.fixture
@@ -229,12 +228,14 @@ def mock_chroma_client():
 
     # Mock collection methods
     mock_collection.add = Mock(return_value=None)
-    mock_collection.query = Mock(return_value={
-        "documents": [["Sample document text"]],
-        "distances": [[0.1]],
-        "metadatas": [[{"document_id": "doc-1", "user_id": "user-1"}]],
-        "ids": [["chunk_0"]],
-    })
+    mock_collection.query = Mock(
+        return_value={
+            "documents": [["Sample document text"]],
+            "distances": [[0.1]],
+            "metadatas": [[{"document_id": "doc-1", "user_id": "user-1"}]],
+            "ids": [["chunk_0"]],
+        }
+    )
     mock_collection.delete = Mock(return_value=None)
     mock_collection.count = Mock(return_value=10)
     mock_collection.update = Mock(return_value=None)

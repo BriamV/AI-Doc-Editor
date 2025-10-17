@@ -37,7 +37,8 @@ const SearchResultCard: React.FC<SearchResultCardProps> = ({ chunk }) => {
    */
   const getRelevanceBadgeColor = (score: number): string => {
     if (score >= 80) return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300';
-    if (score >= 60) return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300';
+    if (score >= 60)
+      return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300';
     return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300';
   };
 

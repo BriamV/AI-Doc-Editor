@@ -13,12 +13,9 @@ Coverage areas:
 
 import pytest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-import tempfile
 
 from app.services.text_extraction_service import (
     TextExtractionService,
-    TextExtractionError,
     UnsupportedFileTypeError,
     FileNotFoundError,
     EmptyFileError,

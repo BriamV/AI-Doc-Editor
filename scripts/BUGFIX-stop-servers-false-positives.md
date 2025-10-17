@@ -22,6 +22,7 @@ This indicates processes weren't actually being killed, or PIDs were stale/inval
 ## Root Cause Analysis
 
 ### Bug 1: Premature Success Return (Line 162)
+
 **Location**: `killWindowsProcess()` function
 
 ```javascript
@@ -35,6 +36,7 @@ if (stderr.includes('not found') || stderr.includes('no se encontr')) {
 **Issue**: The function returned `true` when taskkill reported "process not found", but this happened BEFORE attempting to kill. The PID might have been stale/invalid from the beginning.
 
 ### Bug 2: No LISTENING State Filter (Lines 90-103)
+
 **Location**: `findWindowsProcesses()` function
 
 ```javascript
@@ -57,11 +59,13 @@ for (const line of lines) {
 ```
 
 **Issue**: Captured all connection states, including:
+
 - ESTABLISHED connections (client PIDs, not the server)
 - TIME_WAIT connections (stale PIDs from closed connections)
 - Multiple PIDs that don't own the listening socket
 
 ### Bug 3: No Post-Kill Verification
+
 **Location**: `killWindowsProcess()` function
 
 ```javascript
@@ -77,6 +81,7 @@ if (result.status === 0) {
 ## Solution Implemented
 
 ### Fix 1: Added Process Existence Verification
+
 **New Method**: `verifyWindowsProcessExists(pid)`
 
 ```javascript
@@ -103,6 +108,7 @@ verifyWindowsProcessExists(pid) {
 **Impact**: Can now verify if a PID actually exists before attempting to kill it.
 
 ### Fix 2: Filter for LISTENING State Only
+
 **Modified**: `findWindowsProcesses()` function
 
 ```javascript
@@ -136,6 +142,7 @@ for (const line of lines) {
 **Impact**: Only captures actual server processes in LISTENING state, skips stale PIDs.
 
 ### Fix 3: Pre-Kill Validation
+
 **Modified**: `killWindowsProcess()` function
 
 ```javascript
@@ -162,6 +169,7 @@ killWindowsProcess(pid) {
 **Impact**: Rejects stale PIDs immediately, doesn't count them as successful kills.
 
 ### Fix 4: Post-Kill Verification with Polling
+
 **Modified**: `killWindowsProcess()` function
 
 ```javascript
@@ -179,7 +187,9 @@ if (result.status === 0) {
     }
     // Short sleep (10ms) using synchronous delay
     const endTime = Date.now() + 10;
-    while (Date.now() < endTime) { /* busy wait */ }
+    while (Date.now() < endTime) {
+      /* busy wait */
+    }
   }
 
   if (verified) {
@@ -197,6 +207,7 @@ if (result.status === 0) {
 ## Expected Behavior After Fix
 
 ### Scenario 1: Processes Running
+
 ```bash
 $ yarn all:stop
 
@@ -213,6 +224,7 @@ Platform: Windows
 ```
 
 ### Scenario 2: No Processes Running (Second Execution)
+
 ```bash
 $ yarn all:stop
 
@@ -231,6 +243,7 @@ Platform: Windows
 ```
 
 ### Scenario 3: Stale PIDs Detected
+
 ```bash
 $ yarn all:stop --verbose
 
@@ -242,6 +255,7 @@ $ yarn all:stop --verbose
 ## Testing
 
 ### Automated Tests
+
 Run the test suite to verify the fix:
 
 ```bash
@@ -249,6 +263,7 @@ node scripts/test-stop-servers.cjs
 ```
 
 All 15 tests should pass, verifying:
+
 1. ✅ LISTENING state filter implementation
 2. ✅ Process existence verification
 3. ✅ Pre-kill validation
@@ -256,18 +271,22 @@ All 15 tests should pass, verifying:
 5. ✅ Stale PID rejection
 
 ### Manual Testing
+
 1. Start a development server:
+
    ```bash
    yarn be:dev
    ```
 
 2. Stop it once:
+
    ```bash
    yarn all:stop
    # Should report: "Stopped 1 process(es)"
    ```
 
 3. Stop it again immediately:
+
    ```bash
    yarn all:stop
    # Should report: "No processes found" (not false positive)
@@ -282,11 +301,13 @@ All 15 tests should pass, verifying:
 ## Impact Assessment
 
 ### Before Fix
+
 - **False Positives**: High (reported success for non-existent processes)
 - **Reliability**: Low (couldn't trust script output)
 - **Debugging**: Difficult (no visibility into actual kill results)
 
 ### After Fix
+
 - **False Positives**: None (only reports actual kills)
 - **Reliability**: High (verifies termination)
 - **Debugging**: Easy (verbose mode shows detailed process states)
