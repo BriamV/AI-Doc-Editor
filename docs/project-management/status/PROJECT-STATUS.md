@@ -1,31 +1,31 @@
 # Project Status - AI Document Editor
 
 ## Summary Dashboard
-- **Status**: ✅ R0 Complete | 🟢 R1 Planning Active
-- **Overall Progress**: [██░░░░░░░░] 16% (1/6 releases complete)
-- **Current Release**: R0 Complete → R1 Backend Transition Planning
+- **Status**: ✅ R0 Complete | 🟡 R1 In Progress (40%)
+- **Overall Progress**: [██░░░░░░░░] 20% (1 complete + 0.4 in progress)
+- **Current Release**: R1 Backend Architecture Evolution - Week 4 of 2 planned
 - **Last Updated**: 2025-10-17
 - **Next Update**: 2025-10-24
-- **Responsible**: Tech Lead / Architecture Team
+- **Responsible**: Tech Lead
 
 ## Key Metrics Dashboard
 
 ### Progress Metrics
 | Metric | Target | Current | Trend | Status |
 |--------|--------|---------|-------|--------|
-| Releases Complete | 6 | 1 | ↑ | 🟢 |
-| Total Tasks | 47 | 9 | ↑ | 🟢 |
-| Work Packages | 18 | 3 | ↑ | 🟢 |
+| Releases Complete | 6 | 1 | → | 🟢 |
+| Total Tasks | 47 | 10 | ↑ | 🟢 |
+| Work Packages | 18 | 3.4 | ↑ | 🟢 |
 | Critical Issues | 0 | 0 | → | 🟢 |
-| Security Score | 95/100 | 85/100 | ↑ | 🟢 |
+| Security Score | 95/100 | 85/100 | → | 🟢 |
 
 ### Timeline Metrics
 | Phase | Planned | Actual | Variance | Status |
 |-------|---------|--------|----------|--------|
 | R0 (Foundation) | 4 weeks | 4 weeks | On Time | ✅ |
-| R1 (Backend Evolution) | 3 weeks | Planning | TBD | 🟡 |
-| R2 (AI Integration) | 3 weeks | Planning | TBD | 🟡 |
-| R3 (Productivity) | 2 weeks | Planning | TBD | 🟡 |
+| R1 (Backend Evolution) | 2 weeks | 4+ weeks (ongoing) | +100% | 🟡 |
+| R2 (AI Integration) | 2 weeks | Pending | TBD | ⏳ |
+| R3 (Productivity) | 2 weeks | Pending | TBD | ⏳ |
 
 ### Quality Metrics
 | Area | Score | Target | Status |
@@ -37,16 +37,16 @@
 
 ## Current Focus
 
-### Active Release: R1 Planning - Backend Architecture Evolution
-- **Objective**: Transition from frontend-centric to backend-powered architecture
-- **Duration**: 3 semanas (Planning phase)
-- **Completion**: [░░░░░░░░░░] 0% (Planning phase)
-- **Key Deliverables**: Python/FastAPI backend, Database integration, API migration
+### Active Release: R1 - Backend Architecture Evolution (40% Complete)
+- **Objective**: Complete document ingestion pipeline and generation capabilities
+- **Duration**: Week 4 of 2 planned (+100% schedule variance)
+- **Completion**: [████░░░░░░] 40% (1/5 planned tasks + 1 emergent task)
+- **Key Deliverables**: RAG pipeline ✅, Usage limits, Consent, Planner Service, Section Generation
 
 ### Priority Areas
-1. **Backend Architecture Design** - 🟡 Planning Phase
-2. **Database Schema & Migration** - 🟡 Dependencies pending
-3. **API Evolution Strategy** - 🟡 Architecture review needed
+1. **Complete T-49 ST2** - 🟡 UploadForm with drag & drop (34% remaining)
+2. **Start T-05 Planner Service** - 🔴 Document outline generation (next priority)
+3. **Complete R1.WP2** - 🔴 Generation pipeline (T-05 → T-06)
 
 ## Completed Work
 
@@ -142,83 +142,87 @@
 
 ## In Progress Work
 
-### Pre-R1 Planning Phase
-- **Progress**: [███░░░░░░░] 30%
-- **Tasks**:
-  - **Architecture Planning**: 🟡 Backend design sessions in progress
-  - **Technology Assessment**: 🟡 Python/FastAPI vs alternatives
-  - **Migration Strategy**: 🟡 Frontend → Backend API transition plan
+### R1: Backend Architecture Evolution - Active (40% Complete)
+- **Status**: 🟡 Week 4 of 2 planned (+100% schedule variance)
+- **Progress**: [████░░░░░░] 40% (1/5 planned tasks complete + 1 emergent 66%)
+- **Completed in R1**:
+  - ✅ **T-04 RAG Pipeline**: Complete document ingestion (Issues #31-34, PR #35)
+  - ✅ **Backend Foundation**: 11 routers, 13 services, 6 migrations operational
+  - ✅ **API Key Unification**: Single backend-only storage (Issues #29-30)
+  - 🟡 **T-49 Document Library UI**: Visual management (66% - ST1+ST3 done, ST2 pending)
+- **In Progress** (This Week):
+  - 🟡 **T-49 ST2**: UploadForm with drag & drop (34% remaining)
+- **Next Up**:
+  - 🔴 **T-05**: Planner Service (/plan endpoint) - HIGH PRIORITY
+  - 🔴 **T-06**: Section Generation WebSocket - Blocked by T-05
+  - 🔴 **T-03**: Usage Limits & Rate Limiting - Depends on T-44
+  - 🔴 **T-24**: Consent Management - Depends on T-04
 
-### Infrastructure Readiness
-- **Progress**: [█████████░] 90%
-- **Status**: R0 foundation provides strong base for R1
-- **Ready Components**:
-  - ✅ **Security Infrastructure**: OAuth, credentials, audit system
-  - ✅ **Quality Pipeline**: Multi-tech validation (TypeScript + Python)
-  - ✅ **Documentation Foundation**: Conway's Law architecture
-  - ✅ **CI/CD Pipeline**: Docker, health monitoring, dependency scanning
-  - ✅ **AI Tooling Infrastructure**: Optimized CLAUDE.md (3,913 tokens), deterministic validation
+**See**: [R1-RELEASE-STATUS.md](status/R1-RELEASE-STATUS.md) for detailed progress
 
 ## Planned Work
 
-### Release 1: Backend Architecture Evolution
-- **Start Date**: 2025-10-15 (Estimated)
-- **Duration**: 3 semanas
-- **Focus Areas**:
-  - Python/FastAPI backend foundation
-  - Database integration & persistence layer
-  - User & document management APIs
-  - Frontend → Backend API migration
-
-### Release 2: AI Integration & Intelligence
-- **Start Date**: 2025-11-05 (Estimated)
-- **Duration**: 3 semanas
-- **Focus Areas**:
-  - OpenAI integration architecture
-  - Document processing & generation
-  - AI-powered features integration
-  - Performance optimization
-
-### Release 3: Advanced User Experience
-- **Start Date**: 2025-11-26 (Estimated)
+### Release 2: Editor Funcional y Calidad (NEXT)
+- **Start Date**: TBD (After R1 completion, estimated 2025-11-01)
 - **Duration**: 2 semanas
+- **Objective**: Entregar una experiencia de edición interactiva y validar la calidad del contenido generado
 - **Focus Areas**:
-  - Advanced editor features
-  - Collaboration capabilities
-  - User productivity enhancements
+  - **R2.WP1**: Editor Interactivo (T-07, T-08, T-31) - 36 complexity points
+  - **R2.WP2**: Calidad del Contenido Core (T-11, T-33) - 28 complexity points
+  - **R2.WP3**: Calidad del Contenido Tooling (T-45, T-46) - 20 complexity points
 
-### Releases 4-6: Production & Scale
+### Release 3: Productividad y Navegación
+- **Start Date**: TBD (estimated 2025-11-15)
+- **Duration**: 2 semanas
+- **Objective**: Mejorar la productividad del usuario con funcionalidades avanzadas de navegación y gestión de contexto
+- **Focus Areas**:
+  - **R3.WP1**: Experiencia de Usuario Avanzada (T-21, T-19, T-39) - 31 complexity points
+  - **R3.WP2**: Gestión de Contexto y Plantillas (T-32, T-18, T-28) - 29 complexity points
+
+### Release 4: Ciclo de Vida del Documento y Admin
+- **Start Date**: TBD (estimated 2025-12-01)
+- **Duration**: 2 semanas
+- **Objective**: Implementar la gestión completa del ciclo de vida del documento y las capacidades de administración del sistema
+- **Focus Areas**:
+  - **R4.WP1**: Gestión del Documento (T-09, T-10, T-22) - 31 complexity points
+  - **R4.WP2**: Panel de Administración (T-37, T-47) - 17 complexity points
+  - **R4.WP3**: Validación de Escalabilidad (T-16) - 12 complexity points
+
+### Releases 5-6: Operaciones, Compliance & Validación
 - **Timeline**: Q1 2026
-- **Focus**: Production deployment, scaling, compliance, validation
+- **Focus**: Observability, cost control, GDPR compliance, scalability, E2E testing
 
 ## Issues & Blockers
 
 ### Current Blockers
 | Issue | Priority | Impact | ETA Resolution | Owner |
 |-------|----------|--------|----------------|-------|
-| R1 Architecture decisions pending | High | R1 planning delays | 2025-09-30 | Architecture Team |
-| Backend technology stack finalization | Medium | Implementation start | 2025-10-01 | Tech Lead |
+| T-49 ST2 UploadForm incomplete | Medium | Document upload UX | 2025-10-20 | Frontend Team |
+| R1.WP2 not started (T-05, T-06) | High | R1 completion | 2025-10-27 | Backend Team |
+| R1 schedule overrun (+100%) | Medium | R1 delivery timeline | 2025-11-03 (est.) | Tech Lead |
 
 ### Risk Register
 | Risk | Probability | Impact | Mitigation | Status |
 |------|-------------|--------|------------|--------|
-| Backend complexity underestimation | Medium | High | Incremental delivery, PoCs | 🟡 Monitored |
-| Team capacity constraints | Low | Medium | Resource planning, priorities | 🟢 Controlled |
-| Security compliance gaps in new backend | Low | Critical | Early security reviews | 🟢 Mitigated |
+| R1 extending to 4-5 weeks | High | Medium | Prioritize T-05/T-06, defer T-03/T-24 to R2 if needed | 🟡 Active |
+| T-05 complexity underestimation | Medium | High | Allocate 1 week, incremental delivery | 🟢 Monitored |
+| WebSocket streaming issues (T-06) | Medium | Medium | Thorough testing, fallback to polling | 🟢 Monitored |
+| Team capacity constraints | Low | Medium | Focus on critical path (T-05 → T-06) | 🟢 Controlled |
 
 ## Strategic Objectives Status
 
 ### Business Value Delivery
 - **Foundation Complete**: 🟢 R0 delivered enterprise-grade security infrastructure
+- **Backend Evolution In Progress**: 🟡 R1 at 40% - RAG pipeline operational, generation pending
 - **Security Compliance**: 🟢 Exceeded baseline (85/100 delivered vs 80/100 minimum)
-- **Development Velocity**: 🟢 54% performance optimization maintained
-- **Documentation Excellence**: 🟢 92.5% template compliance achieved
+- **Development Velocity**: 🟡 R1 schedule variance (+100%) under management
+- **Documentation Excellence**: 🟢 92.5% template compliance maintained
 
 ### Technical Excellence
-- **Architecture Quality**: 🟢 Conway's Law compliant, enterprise standards
+- **Architecture Quality**: 🟢 Conway's Law compliant, backend-powered architecture operational
 - **Code Maintainability**: 🟢 95% quality score across all components
-- **Test Coverage**: 🟢 88% vs 85% target exceeded
-- **Security Infrastructure**: 🟢 HSM integration, WORM audit, OWASP compliance
+- **Test Coverage**: 🟢 90.04% (T-04 RAG pipeline) exceeds 85% target
+- **Security Infrastructure**: 🟢 HSM integration, WORM audit, API key unification complete
 
 ## Cross-References
 
@@ -229,6 +233,7 @@
 - **Requirements**: [PRD v2.md](PRD%20v2.md)
 
 ### Active Release Status
+- **Current Release**: [status/R1-RELEASE-STATUS.md](status/R1-RELEASE-STATUS.md)
 - **Completed Release**: [status/R0-RELEASE-STATUS.md](status/R0-RELEASE-STATUS.md)
 - **Work Packages**: [progress/R0-WP1-progress.md](progress/R0-WP1-progress.md)
 - **Emergent Work**: [emergent/DOCUMENTATION-IMPROVEMENTS.md](emergent/DOCUMENTATION-IMPROVEMENTS.md)
@@ -241,22 +246,23 @@
 ## Next Actions
 
 ### Immediate Priorities (This Week)
-1. **Finalize R1 backend architecture** - Architecture design sessions
-2. **Technology stack confirmation** - Python/FastAPI validation
-3. **Database design kickoff** - Schema planning and migration strategy
-4. **R1 work package breakdown** - Detailed task planning
+1. **Complete T-49 ST2** - UploadForm with drag & drop (34% remaining)
+2. **Start T-05 implementation** - Planner Service (/plan endpoint) for document outline generation
+3. **Performance monitoring** - Monitor RAG pipeline performance in production scenarios
+4. **R1 schedule management** - Manage +100% variance, prioritize critical path
 
-### Strategic Priorities (Next 2 Weeks)
-1. **R1 detailed planning** - Complete work breakdown structure
-2. **Team capacity planning** - Resource allocation for backend work
-3. **Security architecture review** - Backend security integration
-4. **Performance baseline establishment** - R0 → R1 transition metrics
+### Strategic Priorities (Next 2-3 Weeks)
+1. **Complete R1.WP2** - T-05 Planner Service + T-06 Section Generation WebSocket
+2. **Finalize R1 scope** - Decide if T-03/T-24 defer to R2 based on schedule
+3. **R2 preparation** - Editor UI architecture planning (T-07) after generation pipeline complete
+4. **Team velocity analysis** - Assess R1 learnings for R2-R6 planning adjustments
 
 ## Update History
 
 | Date | Author | Changes | Impact |
 |------|--------|---------|--------|
-| 2025-10-17 | Tech Lead | T-04 RAG pipeline completion (100%) + PR #35 merged to develop | Release 1 milestone |
+| 2025-10-17 | Tech Lead | R1-RELEASE-STATUS.md creation + PROJECT-STATUS.md correction to reflect R1 at 40% | Critical status accuracy |
+| 2025-10-17 | Tech Lead | T-04 RAG pipeline completion (100%) + T-49 (66%) + PR #35 merged to develop | Release 1 milestone |
 | 2025-10-11 | Tech Lead | T-04 RAG pipeline audit (85% complete) + GitHub issues #31-34 created | Task transparency |
 | 2025-10-11 | Tech Lead | API key unification completion (Issue #29, #30) | Security & Architecture |
 | 2025-09-30 | Tech Lead | CLAUDE.md optimization & .claude/docs reorganization | AI tooling infrastructure |
@@ -271,14 +277,22 @@
 
 ### Success Indicators
 - **R0 Foundation**: Complete enterprise-grade security and documentation foundation
-- **Quality Excellence**: All metrics exceed targets (95% code quality, 88% test coverage)
-- **Performance Optimization**: 54% CI/CD improvement maintained
-- **Professional Documentation**: 92.5% template compliance, Conway's Law alignment
+- **R1 Progress**: 40% complete with RAG pipeline operational, backend foundation established
+- **Quality Excellence**: All metrics exceed targets (95% code quality, 90.04% test coverage on T-04)
+- **Performance Validation**: Ingestion 51x target, Search 98% under target (PERF-003/004 certified)
+- **Professional Documentation**: 92.5% template compliance maintained, Conway's Law alignment
 
-### R0 → R1 Transition Readiness
-- **Infrastructure**: Docker, CI/CD, quality gates operational
-- **Security**: OAuth, credentials, audit systems production-ready
-- **Documentation**: Conway's Law architecture supports backend evolution
-- **Team Velocity**: Proven delivery capability with consistent quality
+### R1 Progress & Lessons Learned
+- **Backend Foundation**: 11 routers, 13 services, 6 migrations fully operational
+- **RAG Pipeline Success**: T-04 delivered in 6 days with comprehensive testing (92 unit tests)
+- **Schedule Variance**: +100% on R1 timeline - complexity scoring accurate, need better velocity estimates
+- **Emergent Work Impact**: T-49 added 8 points not in original plan, demonstrates adaptive planning value
+- **Integration Benefits**: Combining T-04 + T-49 in single PR enabled faster validation
 
-*This project status provides executive-level visibility into the AI Document Editor development progress, with R0 foundation complete and R1 backend evolution in planning phase.*
+### R1 → R2 Transition Planning
+- **Critical Path**: T-05 → T-06 must complete before R2 Editor UI work (T-07)
+- **Scope Flexibility**: T-03, T-24 are defer candidates if schedule pressure increases
+- **Documentation Readiness**: All R1 work has comprehensive docs for team handoff
+- **Team Velocity**: R1 learnings inform R2-R6 planning adjustments
+
+*This project status provides executive-level visibility into the AI Document Editor development progress, with R0 complete, R1 at 40% (RAG pipeline operational, generation pending), and clear path to R2 Editor features.*
