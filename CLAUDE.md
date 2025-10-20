@@ -228,9 +228,29 @@ bash tools/sync-project-status.sh T-XX --dry-run  # Direct bash invocation
 
 **See**: @docs/development/STATUS-TRACKING-UPDATE-WORKFLOW.md for complete workflow
 
-### Roadmap (Phases 3-4)
-- **Phase 3**: Pre-commit hooks (validate on git commit)
-- **Phase 4**: CI/CD integration (block PRs with inconsistencies)
+### Phase 3: ✅ Pre-commit Hooks (IMPLEMENTED)
+```bash
+# One-time installation
+yarn repo:status:hooks:install
+
+# Automatic behavior after installation:
+git commit   # Validates T-XX-STATUS.md changes automatically
+             # Blocks commit if hierarchy inconsistent
+             # Suggests: /sync-project-status T-XX to fix
+```
+
+**Implementation**: Git pre-commit hook validates hierarchy consistency
+- Detects T-XX-STATUS.md changes in staged files
+- Runs `sync-project-status.sh --validate` for each changed task
+- Blocks commit if Task → WP → Release → Project inconsistent
+- Clear fix instructions provided (use /sync-project-status or manual update)
+
+**Installation**: Run `yarn repo:status:hooks:install` once per repo clone
+
+### Phase 4: 🔴 CI/CD Integration (PLANNED)
+- GitHub Actions workflow to validate PRs
+- Block merge if status hierarchy inconsistent
+- Automated PR comments with fix instructions
 
 ## Current Context
 

@@ -20,6 +20,7 @@
     "repo:merge:precheck": "node scripts/merge-protection.cjs pre-merge-check",
     "repo:merge:validate": "node scripts/merge-protection.cjs validate-merge --source HEAD --target main",
     "repo:merge:hooks:install": "node scripts/install-merge-hooks.cjs install",
+    "repo:status:hooks:install": "bash scripts/install-status-hooks.sh",
     "repo:licenses": "node -e \"console.log('License summary:'); console.log('Production packages:'); require('fs').readFileSync('yarn.lock', 'utf8').match(/^[^\\s]/gm).filter(p => !p.includes('@')).slice(0,10).forEach(p => console.log('  ', p.split('@')[0])); console.log('\\nFor detailed license info, check package.json dependencies.');\"",
     "repo:integrity": "yarn dedupe --check",
     "//-- 🎨 FRONTEND (VITE/REACT/TS) --//": "",
