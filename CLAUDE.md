@@ -204,6 +204,29 @@ tools/validate-dod.sh T-XX               # Definition of Done validation
 tools/qa-workflow.sh T-XX dev-complete   # Mark development complete
 ```
 
+## 📊 Project Status Tracking Workflow
+
+**Deterministic Bottom-Up System**: Task (source) → WP/Release/Project (derived)
+
+### Current: Manual Update (Establishing Pattern)
+```bash
+# Update only source files, then aggregate up the hierarchy
+1. Update task: docs/tasks/T-XX-STATUS.md              # Source of truth
+2. Aggregate to WP: docs/project-management/progress/R#-WP#-progress.md
+3. Aggregate to Release: docs/project-management/status/R#-RELEASE-STATUS.md
+4. Summarize in Project: docs/project-management/status/PROJECT-STATUS.md
+```
+
+### Future: Automated Sync (Post-Pattern Established)
+```bash
+# ONE command updates entire hierarchy deterministically
+/sync-project-status T-XX           # Auto-propagate from task to project
+/sync-project-status T-XX --dry-run # Preview changes before applying
+/update-claude-md "<section>"       # Update CLAUDE.md with validation
+```
+
+**See**: @docs/development/STATUS-TRACKING-UPDATE-WORKFLOW.md for complete workflow
+
 ## Current Context
 
 **Current Status**: @docs/project-management/status/PROJECT-STATUS.md
@@ -317,7 +340,9 @@ bash tools/audit-claude-md.sh --report  # Generate markdown report
 # 5. Commit with descriptive message
 ```
 
-**Note**: Previous `/update-claude-md` and `/audit-claude-md` slash commands moved to archive (were specification-only, not implemented)
+**Note**: `/update-claude-md` and `/sync-project-status` slash commands are implemented in
+`.claude/commands/governance/` and `.claude/commands/workflow/` respectively.
+Bash validation scripts remain available for CI/CD integration.
 
 ## 📋 Documentation Standards
 

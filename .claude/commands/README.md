@@ -36,6 +36,7 @@ This directory contains slash commands for the AI-Doc-Editor project. Commands a
   - `merge-safety.md` - Merge protection system
   - `pr-flow.md` - Pull request automation
   - `release-prep.md` - Release preparation
+  - `sync-project-status.md` - Status hierarchy synchronization
   - `task-dev.md` - Task development workflow
 
 ### Archive
@@ -64,6 +65,7 @@ Most frequently used commands for daily development:
 - `/commit-smart` - Intelligent commits
 - `/pr-flow` - Pull request automation
 - `/merge-safety` - MANDATORY merge protection
+- `/sync-project-status` - Status hierarchy synchronization
 - `/health-check` - System diagnostics
 
 ### Tier 2 - Specialized Commands

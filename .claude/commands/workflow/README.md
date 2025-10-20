@@ -1,5 +1,16 @@
 # Workflow Commands - Integration-First Architecture
 
+## Available Commands
+
+### Development Workflow
+- **`task-dev.md`**: Complete task development with planner validation and sub-agent delegation
+- **`pr-flow.md`**: Pull request automation with comprehensive review workflow
+- **`release-prep.md`**: Release preparation and validation workflow
+
+### Project Management
+- **`sync-project-status.md`**: Deterministic status hierarchy propagation (Task → WP → Release → Project)
+- **`merge-safety.md`**: Critical merge protection system
+
 ## Architecture Overview
 
 The workflow commands have been refactored to use the **Integration-First with Pre/Post Sub-Agent Hooks** architecture. This design achieves:

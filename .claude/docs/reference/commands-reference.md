@@ -103,12 +103,14 @@ yarn repo:merge:hooks:install  # Install git-level protection
 /explain-codebase              # Codebase explanation
 ```
 
-## CLAUDE.md Management (NEW)
+## CLAUDE.md Management
 
 ```bash
-/update-claude-md "<content>"        # Systematic CLAUDE.md updates with validation
-/audit-claude-md [--scope <type>]    # Quality audit + consolidation recommendations
+/update-claude-md "<content>"        # Systematic CLAUDE.md updates with validation (Tier 2)
+/sync-project-status T-XX            # Status tracking propagation (Tier 1)
 ```
+
+**Note**: These commands are now implemented in `.claude/commands/governance/` and `.claude/commands/workflow/`. Audit functionality provided by `tools/audit-claude-md.sh` bash script.
 
 ## Quick Reference
 

@@ -8,7 +8,7 @@ Implementation-specific documentation for the Claude Code integration system, or
 .claude/docs/
 ├── reference/          # Files imported by CLAUDE.md (@import system)
 ├── guides/             # Q&A knowledge base and how-to guides
-├── specs/              # Specification-only documents (not implemented)
+├── specs/              # System specifications and workflow guides
 ├── archive/            # Historical reports, migrations, and audits
 │   ├── reports/        # Historical optimization and implementation reports
 │   ├── migrations/     # Migration deliverables and completion summaries
@@ -52,13 +52,13 @@ Implementation-specific documentation for the Claude Code integration system, or
 
 ## 📋 Specifications (1 file)
 
-**Status**: Specification-only documents describing desired functionality (not yet implemented).
+**Status**: System specifications and implementation guides.
 
 | File | Purpose | Status | Notes |
 |------|---------|--------|-------|
-| [claude-md-self-management-spec.md](specs/claude-md-self-management-spec.md) | CLAUDE.md self-management specification | SPEC ONLY | Replaced by deterministic shell scripts |
+| [claude-md-self-management-spec.md](specs/claude-md-self-management-spec.md) | CLAUDE.md self-management guide | ✅ IMPLEMENTED | Slash commands in .claude/commands/governance/, bash scripts in tools/ |
 
-**Navigation**: `specs/` contains specification documents for features not yet implemented.
+**Navigation**: `specs/` contains system specifications and comprehensive workflow documentation.
 
 ---
 
@@ -136,7 +136,7 @@ This directory serves as the **technical documentation hub** for internal Claude
 |----------|-------|------------|---------|
 | **reference/** | 4 | ~212 lines | CLAUDE.md @imports (CRITICAL) |
 | **guides/** | 4 | 203+ KB | Q&A knowledge base |
-| **specs/** | 1 | ~743 lines | Specifications (not implemented) |
+| **specs/** | 1 | ~743 lines | System specifications & guides |
 | **archive/** | 10 | Historical | Reports/migrations/audits (read-only) |
 | **Total** | **19** | **~1 MB** | Complete system documentation |
 
