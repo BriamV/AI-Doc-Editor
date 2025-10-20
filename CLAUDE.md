@@ -247,10 +247,29 @@ git commit   # Validates T-XX-STATUS.md changes automatically
 
 **Installation**: Run `yarn repo:status:hooks:install` once per repo clone
 
-### Phase 4: 🔴 CI/CD Integration (PLANNED)
-- GitHub Actions workflow to validate PRs
-- Block merge if status hierarchy inconsistent
-- Automated PR comments with fix instructions
+### Phase 4: ✅ CI/CD Integration (IMPLEMENTED)
+
+**Integrated into PR Validation Workflow**: `.github/workflows/pr-validation.yml`
+
+```yaml
+# Part of docs-validation job
+- name: Status tracking hierarchy validation
+  run: |
+    # Detects changed T-XX-STATUS.md files
+    # Validates each task with sync-project-status.sh --validate
+    # Blocks PR merge if inconsistent
+```
+
+**Architecture Decision**:
+- ✅ **Consolidated**: Integrated into existing `pr-validation.yml` (docs-validation job)
+- ✅ **No Redundancy**: Removed standalone workflows (status-validation.yml, document-validation.yml)
+- ✅ **Single Pipeline**: Status validation alongside docs:validate:strict and docs:api:lint
+
+**Validation Behavior**:
+- Detects T-XX-STATUS.md changes in PR diff
+- Runs `sync-project-status.sh --validate` for each task
+- Blocks merge if hierarchy inconsistent (required check)
+- Clear error messages with fix instructions in logs
 
 ## Current Context
 
