@@ -2,7 +2,7 @@
 
 ## Summary Dashboard
 - **Work Package**: R1.WP2 - Pipeline de Generación
-- **Status**: 🔴 Not Started
+- **Status**: 🟡 In Progress
 - **Progress**: [█████░░░░░] 50% (0/2 tasks complete)
 - **Complexity**: 0/28 points completed
 - **Last Updated**: 2025-10-17
@@ -34,24 +34,12 @@
 
 ## Task Execution Status
 
-### Task Summary
-| Task ID | Title | Complexity | Status | Progress | Assignee | Target Start | Notes |
-|---------|-------|------------|--------|----------|----------|--------------|-------|
-| **T-05** | ✅ Complete | 100% | 14/14 (100%) |
-| **T-06** | Section Generation WebSocket | 14 | 🔴 Not Started | 0% | Backend Team | 2025-10-27 | Blocked by T-05 |
 
-### Complexity Progress Visualization
-```
-Overall Progress: [░░░░░░░░░░] 0% (0/28 complexity points)
+## Completed Work Details
 
-T-05 (14 pts):    [░░░░░░░░░░]   0% ⏳ (Next priority)
-T-06 (14 pts):    [░░░░░░░░░░]   0% ⏳ (Blocked by T-05)
-```
 
-## Planned Work Details
-
-### T-05: Planner Service (/plan endpoint) 🔴
-- **Status**: Not Started
+### T-05: Planner Service (/plan endpoint) ✅ Complete ✅ Complete ✅ Complete
+- **Status**: Complete
 - **Priority**: HIGH - Next immediate priority after T-49 ST2
 - **Target Start**: 2025-10-20
 - **Target Completion**: 2025-10-27
@@ -85,6 +73,22 @@ T-06 (14 pts):    [░░░░░░░░░░]   0% ⏳ (Blocked by T-05)
   - [ ] Unit tests with 80%+ coverage
   - [ ] Performance: < 10s for typical outline generation
   - [ ] Documentation: Architecture + API spec + flow diagrams
+
+### Task Summary
+| Task ID | Title | Complexity | Status | Progress | Assignee | Target Start | Notes |
+|---------|-------|------------|--------|----------|----------|--------------|-------|
+| **T-05** | ✅ Complete | 100% | 14/14 (100%) |
+| **T-06** | Section Generation WebSocket | 14 | 🔴 Not Started | 0% | Backend Team | 2025-10-27 | Blocked by T-05 |
+
+### Complexity Progress Visualization
+```
+Overall Progress: [░░░░░░░░░░] 0% (0/28 complexity points)
+
+T-05 (14 pts):    [░░░░░░░░░░]   0% ⏳ (Next priority)
+T-06 (14 pts):    [░░░░░░░░░░]   0% ⏳ (Blocked by T-05)
+```
+
+## Planned Work Details
 
 ### T-06: Section Generation WebSocket 🔴
 - **Status**: Not Started

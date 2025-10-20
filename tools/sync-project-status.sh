@@ -358,6 +358,43 @@ update_wp_task_matrix() {
     sed -i.bak "s#| \*\*$task_id\*\* | .* | .* | .* |#| **$task_id** | $status_emoji | $progress% | $completed_points |#g" "$wp_file"
 
     log_success "Updated task row in WP: $task_id → $status_emoji ($progress%)"
+
+    # Update narrative sections (Planned/In Progress/Completed Work Details)
+    update_wp_narrative_sections "$wp_file" "$task_id" "$status_emoji" "$progress"
+}
+
+update_wp_narrative_sections() {
+    local wp_file="$1"
+    local task_id="$2"
+    local status_emoji="$3"
+    local progress="$4"
+
+    # Use Python helper for cross-platform narrative section updates
+    # This is more robust than complex sed/awk patterns
+    local python_script="$SCRIPT_DIR/update-wp-narrative.py"
+
+    if [[ ! -f "$python_script" ]]; then
+        log_warning "Python helper not found: $python_script (skipping narrative update)"
+        return 0
+    fi
+
+    # Check if Python is available (try python3 first, then python)
+    local python_cmd=""
+    if command -v python3 >/dev/null 2>&1; then
+        python_cmd="python3"
+    elif command -v python >/dev/null 2>&1; then
+        python_cmd="python"
+    else
+        log_warning "Python not available (skipping narrative update)"
+        return 0
+    fi
+
+    # Run Python helper to update narrative sections
+    if $python_cmd "$python_script" "$wp_file" "$task_id" "$status_emoji" "$progress" 2>&1; then
+        log_debug "Python helper executed successfully"
+    else
+        log_warning "Python helper failed for $task_id (continuing anyway)"
+    fi
 }
 
 update_wp_progress_bar() {
@@ -379,6 +416,14 @@ update_wp_progress_bar() {
     sed -i.bak "s#\*\*Progress\*\*: \[.*\] [0-9]\+%#**Progress**: [$progress_bar] $wp_progress%#g" "$wp_file"
 
     log_success "Updated WP progress bar: $wp_progress% [$progress_bar]"
+
+    # Update WP-level status if 100% complete
+    if [[ "$wp_progress" -eq 100 ]]; then
+        # Update status line in Summary Dashboard
+        sed -i.bak 's/- \*\*Status\*\*: 🟡 In Progress/- **Status**: ✅ Complete/' "$wp_file"
+        sed -i.bak 's/- \*\*Status\*\*: 🔴 Not Started/- **Status**: ✅ Complete/' "$wp_file"
+        log_success "Updated WP status: → Complete (100% reached)"
+    fi
 }
 
 update_release_wp_summary() {

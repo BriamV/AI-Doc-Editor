@@ -61,6 +61,32 @@ Emergent Work:     [██████░░░░] 66% (5.3/8 points)
 
 ## Completed Work Details
 
+
+### T-49: Document Library UI (Emergent) ✅ Complete ✅ Complete
+- **Status**: Complete
+- **Started**: 2025-10-11
+- **Complexity Points**: 8 (5.3/8 completed)
+- **Branch**: feature/T-49-document-library-ui
+- **Pull Request**: #35 (Merged to develop with T-04)
+- **Implemented** (ST1 + ST3 = 5/8 points):
+  - ✅ Document Library page with responsive grid (Documents.tsx)
+  - ✅ DocumentCard component with metadata and status badges
+  - ✅ Filters by file type (PDF, DOCX, MD) and processing status
+  - ✅ Pagination with page size selector (10/25/50/100 items)
+  - ✅ Loading, empty, and error states with user feedback
+  - ✅ Backend GET /api/documents endpoint with pagination and filters
+  - ✅ Multi-tenancy isolation (JWT user_id filtering)
+  - ✅ File type icons and formatted metadata (size in KB/MB, dates)
+- **Pending** (ST2 = 3/8 points):
+  - ⏳ UploadForm component with drag & drop
+  - ⏳ File validation and upload progress feedback
+  - ⏳ Integration with backend /upload endpoint
+- **Artifacts**:
+  - [src/pages/Documents.tsx](../../../src/pages/Documents.tsx)
+  - [src/components/Documents/DocumentCard.tsx](../../../src/components/Documents/DocumentCard.tsx)
+  - [backend/app/routers/documents.py](../../../backend/app/routers/documents.py) (GET endpoint)
+- **Impact**: Users can view, filter, and paginate documents in professional UI
+
 ### T-04: RAG Pipeline Implementation ✅
 - **Completed**: 2025-10-17
 - **Duration**: 6 days (2025-10-11 to 2025-10-17)
@@ -89,31 +115,6 @@ Emergent Work:     [██████░░░░] 66% (5.3/8 points)
 - **Impact**: Users can upload, search, and manage documents with AI-powered semantic search
 
 ## In Progress Work Details
-
-### T-49: Document Library UI (Emergent) 🟡
-- **Status**: 66% Complete (ST1 + ST3 implemented, ST2 pending)
-- **Started**: 2025-10-11
-- **Complexity Points**: 8 (5.3/8 completed)
-- **Branch**: feature/T-49-document-library-ui
-- **Pull Request**: #35 (Merged to develop with T-04)
-- **Implemented** (ST1 + ST3 = 5/8 points):
-  - ✅ Document Library page with responsive grid (Documents.tsx)
-  - ✅ DocumentCard component with metadata and status badges
-  - ✅ Filters by file type (PDF, DOCX, MD) and processing status
-  - ✅ Pagination with page size selector (10/25/50/100 items)
-  - ✅ Loading, empty, and error states with user feedback
-  - ✅ Backend GET /api/documents endpoint with pagination and filters
-  - ✅ Multi-tenancy isolation (JWT user_id filtering)
-  - ✅ File type icons and formatted metadata (size in KB/MB, dates)
-- **Pending** (ST2 = 3/8 points):
-  - ⏳ UploadForm component with drag & drop
-  - ⏳ File validation and upload progress feedback
-  - ⏳ Integration with backend /upload endpoint
-- **Artifacts**:
-  - [src/pages/Documents.tsx](../../../src/pages/Documents.tsx)
-  - [src/components/Documents/DocumentCard.tsx](../../../src/components/Documents/DocumentCard.tsx)
-  - [backend/app/routers/documents.py](../../../backend/app/routers/documents.py) (GET endpoint)
-- **Impact**: Users can view, filter, and paginate documents in professional UI
 
 ## Planned Work Details
 
