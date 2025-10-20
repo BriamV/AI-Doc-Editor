@@ -13,7 +13,18 @@ import os
 import time
 
 from app.core.config import settings
-from app.routers import auth, health, config, credentials, audit, documents, auth_test, upload, chat
+from app.routers import (
+    auth,
+    health,
+    config,
+    credentials,
+    audit,
+    documents,
+    auth_test,
+    upload,
+    chat,
+    planner,
+)
 from app.middleware.audit_middleware import AuditMiddleware
 from app.services.audit import AuditService
 from app.security.rate_limiter import RateLimitMiddleware, SecurityHeadersMiddleware
@@ -135,6 +146,7 @@ app.include_router(audit.router, prefix="/api", tags=["audit"])
 app.include_router(documents.router, tags=["documents"])  # T-49: Document listing
 app.include_router(upload.router, tags=["upload"])  # T-04 ST1: Document upload
 app.include_router(chat.router, tags=["chat"])  # Issue #29: Chat proxy endpoint
+app.include_router(planner.router, tags=["planner"])  # T-05: Planner service (/plan endpoint)
 
 
 # Global exception handler for security

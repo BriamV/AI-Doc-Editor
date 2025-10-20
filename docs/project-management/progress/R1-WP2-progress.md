@@ -3,7 +3,7 @@
 ## Summary Dashboard
 - **Work Package**: R1.WP2 - Pipeline de Generación
 - **Status**: 🔴 Not Started
-- **Progress**: [░░░░░░░░░░] 0% (0/2 tasks complete)
+- **Progress**: [█████░░░░░] 50% (0/2 tasks complete)
 - **Complexity**: 0/28 points completed
 - **Last Updated**: 2025-10-17
 - **Next Update**: 2025-10-24
@@ -37,7 +37,7 @@
 ### Task Summary
 | Task ID | Title | Complexity | Status | Progress | Assignee | Target Start | Notes |
 |---------|-------|------------|--------|----------|----------|--------------|-------|
-| **T-05** | Planner Service (/plan) | 14 | 🔴 Not Started | 0% | Backend Team | 2025-10-20 | HIGH PRIORITY - Next immediate task |
+| **T-05** | ✅ Complete | 100% | 14/14 (100%) |
 | **T-06** | Section Generation WebSocket | 14 | 🔴 Not Started | 0% | Backend Team | 2025-10-27 | Blocked by T-05 |
 
 ### Complexity Progress Visualization
