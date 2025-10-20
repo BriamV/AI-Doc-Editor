@@ -3,7 +3,7 @@
 ## Summary Dashboard
 - **Work Package**: R1.WP1 - Flujo de Ingesta Unificado
 - **Status**: 🟡 In Progress
-- **Progress**: [████░░░░░░] 40% (1/3 tasks complete + 1 emergent 66%)
+- **Progress**: [██████░░░░] 59% (1/3 tasks complete + 1 emergent 66%)
 - **Complexity**: 18/36 points completed (50% from emergent work)
 - **Last Updated**: 2025-10-17
 - **Next Update**: 2025-10-24
@@ -42,7 +42,7 @@
 | Task ID | Title | Complexity | Status | Progress | Assignee | Completed | Notes |
 |---------|-------|------------|--------|----------|----------|-----------|-------|
 | **T-04** | RAG Pipeline Implementation | 18 | ✅ Complete | 100% | Backend Team | 2025-10-17 | Issues #31-34, PR #35 |
-| **T-49** | Document Library UI (Emergent) | 8 | 🟡 In Progress | 66% | Frontend Team | - | ST1+ST3 done, ST2 pending |
+| **T-49** | ✅ Complete | 100% | 8/8 (100%) |
 | **T-03** | Usage Limits & Rate Limiting | 11 | 🔴 Not Started | 0% | Backend Team | - | Depends on T-44 |
 | **T-24** | Explicit Consent Management | 7 | 🔴 Not Started | 0% | Backend Team | - | Depends on T-04 |
 
@@ -161,7 +161,7 @@ Pending Tasks:
 | Task | Dev Status | QA Status | DoD Status | Overall |
 |------|------------|-----------|------------|---------|
 | **T-04** | ✅ Complete | ✅ QA Passed | ✅ DoD Satisfied | ✅ 100% |
-| **T-49** | 🟡 66% | ⏳ Pending | ⏳ Pending | 🟡 66% |
+| **T-49** | ✅ Complete | 100% | 8/8 (100%) |
 | **T-03** | 🔴 Not Started | ⏳ Pending | ⏳ Pending | 🔴 0% |
 | **T-24** | 🔴 Not Started | ⏳ Pending | ⏳ Pending | 🔴 0% |
 

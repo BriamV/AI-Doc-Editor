@@ -123,6 +123,53 @@ class DocumentsAPI {
 
     return response.json();
   }
+
+  /**
+   * Upload a document for RAG processing
+   * T-49-ST2: Document upload endpoint integration
+   */
+  async uploadDocument(
+    token: string,
+    file: File,
+    onProgress?: (progress: number) => void
+  ): Promise<DocumentResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE_URL}/upload`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to upload document');
+    }
+
+    const data = await response.json();
+
+    // Simulate progress completion
+    if (onProgress) {
+      onProgress(100);
+    }
+
+    return {
+      id: data.document_id,
+      original_filename: data.filename,
+      file_type: data.file_type,
+      mime_type: `application/${data.file_type}`,
+      file_size_bytes: data.file_size,
+      title: null,
+      description: null,
+      status: data.status,
+      user_id: '',
+      user_email: '',
+      uploaded_at: data.created_at,
+    };
+  }
 }
 
 export default new DocumentsAPI();
