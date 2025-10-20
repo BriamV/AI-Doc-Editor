@@ -2,6 +2,8 @@
 task_id: "T-49"
 titulo: "Document Library UI - Knowledge Base Management"
 estado: "En Progreso"
+progreso: "66%"
+completado: "5.3/8 (66%)"
 dependencias: "T-04"
 prioridad: "Alta"
 release_target: "Release 1 (Post-T-04)"

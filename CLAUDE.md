@@ -208,24 +208,29 @@ tools/qa-workflow.sh T-XX dev-complete   # Mark development complete
 
 **Deterministic Bottom-Up System**: Task (source) → WP/Release/Project (derived)
 
-### Current: Manual Update (Establishing Pattern)
-```bash
-# Update only source files, then aggregate up the hierarchy
-1. Update task: docs/tasks/T-XX-STATUS.md              # Source of truth
-2. Aggregate to WP: docs/project-management/progress/R#-WP#-progress.md
-3. Aggregate to Release: docs/project-management/status/R#-RELEASE-STATUS.md
-4. Summarize in Project: docs/project-management/status/PROJECT-STATUS.md
-```
-
-### Future: Automated Sync (Post-Pattern Established)
+### Phase 2: ✅ Automated Sync (IMPLEMENTED)
 ```bash
 # ONE command updates entire hierarchy deterministically
 /sync-project-status T-XX           # Auto-propagate from task to project
 /sync-project-status T-XX --dry-run # Preview changes before applying
-/update-claude-md "<section>"       # Update CLAUDE.md with validation
+bash tools/sync-project-status.sh T-XX --dry-run  # Direct bash invocation
+
+# Validation & fix modes
+/sync-project-status --validate     # Check hierarchy consistency
+/sync-project-status T-XX --fix     # Auto-correct inconsistencies
 ```
 
+**Implementation**: `tools/sync-project-status.sh` (450+ lines)
+- Parses YAML frontmatter from T-XX-STATUS.md
+- Calculates WP/Release progress using complexity points
+- Updates markdown files deterministically (sed-based)
+- Detects milestones (25%, 50%, 75%, 100%) for cascading updates
+
 **See**: @docs/development/STATUS-TRACKING-UPDATE-WORKFLOW.md for complete workflow
+
+### Roadmap (Phases 3-4)
+- **Phase 3**: Pre-commit hooks (validate on git commit)
+- **Phase 4**: CI/CD integration (block PRs with inconsistencies)
 
 ## Current Context
 
