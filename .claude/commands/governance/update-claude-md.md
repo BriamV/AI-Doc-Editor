@@ -1,5 +1,16 @@
 ---
 description: "Update CLAUDE.md with integrated validation and quality checks"
+argument-hint: "[section] [changes] [--validate|--audit|--fix|--force]"
+allowed-tools:
+  - Read
+  - Edit
+  - Write
+  - Bash(bash tools/validate-claude-md.sh)
+  - Bash(bash tools/audit-claude-md.sh)
+  - Bash(git add:*)
+  - Bash(git commit:*)
+  - Bash(git diff:*)
+model: claude-3-5-sonnet-20241022
 tags: ["claude-md", "documentation", "maintenance", "automation", "governance"]
 tier: 2
 ---

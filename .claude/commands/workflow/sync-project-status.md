@@ -5,6 +5,7 @@ description: Synchronize project status tracking hierarchy from task to project 
 argument-hint: "[task-id] [--dry-run] [--validate] [--fix]"
 allowed-tools: Read, Edit, Bash(bash tools/*), Bash(powershell -ExecutionPolicy Bypass tools/*), Grep, Glob
 model: claude-3-5-sonnet-20241022
+tags: ["status-tracking", "project-management", "automation", "workflow", "documentation"]
 tier: 1
 ---
 
