@@ -100,6 +100,10 @@ class Document(Base):
     uploaded_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
     processed_at = Column(DateTime, nullable=True)
 
+    # Summary fields (T-06 ST3)
+    global_summary = Column(Text, nullable=True)
+    summary_updated_at = Column(DateTime, nullable=True)
+
     # Soft delete
     deleted_at = Column(DateTime, nullable=True, index=True)
 

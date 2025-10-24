@@ -24,6 +24,7 @@ from app.routers import (
     upload,
     chat,
     planner,
+    websocket_router,
 )
 from app.middleware.audit_middleware import AuditMiddleware
 from app.services.audit import AuditService
@@ -147,6 +148,9 @@ app.include_router(documents.router, tags=["documents"])  # T-49: Document listi
 app.include_router(upload.router, tags=["upload"])  # T-04 ST1: Document upload
 app.include_router(chat.router, tags=["chat"])  # Issue #29: Chat proxy endpoint
 app.include_router(planner.router, tags=["planner"])  # T-05: Planner service (/plan endpoint)
+app.include_router(
+    websocket_router.router, tags=["websocket"]
+)  # T-06 ST1: WebSocket section streaming
 
 
 # Global exception handler for security

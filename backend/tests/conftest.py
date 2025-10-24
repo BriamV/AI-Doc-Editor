@@ -33,8 +33,15 @@ def event_loop():
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def setup_test_database():
+async def setup_test_database(request):
     """Setup test database tables before running tests"""
+    # Skip database setup for websocket tests (they don't need it)
+    if "websocket" in request.node.name or any(
+        "websocket" in item.name for item in request.node.items if hasattr(request.node, "items")
+    ):
+        yield
+        return
+
     async with engine.begin() as conn:
         # Create all tables
         await conn.run_sync(Base.metadata.create_all)
