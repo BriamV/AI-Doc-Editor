@@ -56,3 +56,7 @@ urllib3>=2.5.0               # Security fix: chromadb brings 2.3.0 with GHSA-48p
 authlib>=1.6.5               # Override: Force 1.6.5+ to prevent chromadb downgrade to 1.6.4 (GHSA-pq5p-34cr-23v9, GHSA-g7f3-828f-7h7m)
 tiktoken==0.8.0              # Token estimation for OpenAI models (T-05 Planner Service)
 tenacity==9.0.0              # Retry logic with exponential backoff (T-06 Section Generation)
+
+# Rate Limiting with Redis (T-03 ST1)
+redis>=5.0.0,<6.0.0          # Redis client for distributed rate limiting
+hiredis>=2.3.0,<3.0.0        # C parser for improved Redis performance

@@ -37,3 +37,20 @@ class ConfigService:
             await self.session.execute(insert(SystemConfiguration).values(key=key, value=value))
         await self.session.commit()
         return ConfigEntry(key=key, value=value)
+
+    async def get_config_value(self, key: str, default: str = None) -> str:
+        """
+        Get a single configuration value by key.
+
+        Args:
+            key: Configuration key to retrieve
+            default: Default value if key not found
+
+        Returns:
+            Configuration value or default if not found
+        """
+        result = await self.session.execute(
+            select(SystemConfiguration).where(SystemConfiguration.key == key)
+        )
+        config = result.scalar_one_or_none()
+        return config.value if config else default

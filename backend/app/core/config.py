@@ -123,6 +123,23 @@ class Settings(BaseSettings):
     RATE_LIMIT_BURST: int = 10
     RATE_LIMIT_AUDIT_PER_MINUTE: int = 30  # Stricter for audit endpoints
 
+    # Redis configuration for distributed rate limiting (T-03 ST1)
+    REDIS_URL: str = Field(
+        default="redis://localhost:6379/0",
+        description="Redis connection URL for distributed rate limiting"
+    )
+    REDIS_PASSWORD: Optional[str] = Field(
+        default=None,
+        description="Redis password (optional, for secured Redis instances)"
+    )
+    REDIS_USE_DISTRIBUTED_RATE_LIMITING: bool = Field(
+        default=False,
+        description="Enable Redis-based rate limiting (disable for local dev without Redis)"
+    )
+    REDIS_RATE_LIMIT_KEY_PREFIX: str = "rate_limit"
+    REDIS_CONNECTION_TIMEOUT: int = 5  # seconds
+    REDIS_MAX_CONNECTIONS: int = 10
+
     # Security settings
     SESSION_TIMEOUT_MINUTES: int = 30
     MAX_LOGIN_ATTEMPTS: int = 5
