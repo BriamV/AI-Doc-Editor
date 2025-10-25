@@ -16,10 +16,11 @@ from typing import Optional, Dict, Any
 import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from fastapi import UploadFile, HTTPException
 
 from app.models.document import Document, DocumentStatus
+from app.services.config import ConfigService
 
 logger = logging.getLogger(__name__)
 
@@ -36,13 +37,14 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 class DocumentService:
     """Service for managing document uploads and storage."""
 
-    def __init__(self, upload_dir: Optional[Path] = None):
+    def __init__(self, upload_dir: Optional[Path] = None, config_service: Optional[ConfigService] = None):
         """
         Initialize document service.
 
         Args:
             upload_dir: Directory for storing uploaded files.
                        Defaults to backend/uploads/
+            config_service: Configuration service for quota limits (T-03 ST2)
         """
         if upload_dir is None:
             # Default to backend/uploads directory
@@ -50,11 +52,97 @@ class DocumentService:
             upload_dir = backend_dir / "uploads"
 
         self.upload_dir = upload_dir
+        self.config_service = config_service
         self._ensure_upload_dir()
 
     def _ensure_upload_dir(self) -> None:
         """Ensure upload directory exists."""
         self.upload_dir.mkdir(parents=True, exist_ok=True)
+
+    async def check_user_quota(
+        self,
+        db: AsyncSession,
+        user_id: str,
+        additional_file_size: int = 0
+    ) -> tuple[bool, str]:
+        """
+        Check if user has exceeded document/storage quotas (T-03 ST2).
+
+        Args:
+            db: Database session
+            user_id: UUID of user to check
+            additional_file_size: Size of file being uploaded (in bytes)
+
+        Returns:
+            (is_within_quota, error_message)
+            - is_within_quota: True if user can upload, False if quota exceeded
+            - error_message: Human-readable error message (empty if within quota)
+
+        Raises:
+            HTTPException: If config service unavailable or database error
+        """
+        try:
+            # Get limits from ConfigService (T-44 integration)
+            if not self.config_service:
+                # No config service = no quota enforcement
+                logger.warning("ConfigService not available, skipping quota check")
+                return (True, "")
+
+            # Read quota limits from system configuration
+            max_docs_str = await self.config_service.get_config(db, "max_documents_per_user")
+            max_mb_str = await self.config_service.get_config(db, "max_mb_per_user")
+
+            # Default values if not configured
+            max_docs = int(max_docs_str) if max_docs_str else 100
+            max_mb = float(max_mb_str) if max_mb_str else 1000.0
+
+            # Query current user usage (document count)
+            stmt_count = select(func.count(Document.id)).where(
+                Document.user_id == uuid.UUID(user_id)
+            )
+            result_count = await db.execute(stmt_count)
+            current_docs = result_count.scalar() or 0
+
+            # Query current user usage (total MB)
+            stmt_size = select(func.sum(Document.file_size_bytes)).where(
+                Document.user_id == uuid.UUID(user_id)
+            )
+            result_size = await db.execute(stmt_size)
+            current_bytes = result_size.scalar() or 0
+            current_mb = current_bytes / (1024 * 1024)
+
+            # Calculate projected usage with new file
+            projected_mb = (current_bytes + additional_file_size) / (1024 * 1024)
+
+            # Check document count limit
+            if current_docs >= max_docs:
+                error_msg = (
+                    f"Document quota exceeded: {current_docs}/{max_docs} documents. "
+                    f"Please delete old documents or contact support."
+                )
+                logger.warning(f"User {user_id} quota violation: {error_msg}")
+                return (False, error_msg)
+
+            # Check storage size limit
+            if projected_mb > max_mb:
+                error_msg = (
+                    f"Storage quota exceeded: {projected_mb:.2f}/{max_mb} MB. "
+                    f"Please delete old documents or contact support."
+                )
+                logger.warning(f"User {user_id} quota violation: {error_msg}")
+                return (False, error_msg)
+
+            # Within quota
+            logger.info(
+                f"User {user_id} quota check passed: "
+                f"{current_docs}/{max_docs} docs, {current_mb:.2f}/{max_mb} MB"
+            )
+            return (True, "")
+
+        except Exception as e:
+            logger.error(f"Quota check error for user {user_id}: {str(e)}")
+            # Fail-safe: Allow upload if quota check fails (don't block users)
+            return (True, "")
 
     def _sanitize_filename(self, filename: str) -> str:
         """
@@ -395,6 +483,85 @@ class DocumentService:
             raise HTTPException(
                 status_code=500,
                 detail="Failed to retrieve document. Please try again.",
+            )
+
+    async def check_user_quota(
+        self, db: AsyncSession, user_id: str, file_size: int
+    ) -> tuple[bool, str]:
+        """
+        Check if user has exceeded document count and storage size quotas.
+
+        Args:
+            db: Database session
+            user_id: UUID of user to check
+            file_size: Size of file to be uploaded (in bytes)
+
+        Returns:
+            (is_within_quota, error_message)
+            - is_within_quota: True if user can upload, False if quota exceeded
+            - error_message: Empty string if within quota, error description otherwise
+        """
+        try:
+            user_uuid = uuid.UUID(user_id)
+
+            # Get quota limits from config store (with sensible defaults)
+            config_service = ConfigService(db)
+            max_docs_str = await config_service.get_config_value(
+                "max_documents_per_user", "100"
+            )
+            max_mb_str = await config_service.get_config_value("max_mb_per_user", "1000.0")
+
+            max_docs = int(max_docs_str)
+            max_mb = float(max_mb_str)
+
+            # Query current document count for user (exclude soft-deleted)
+            count_result = await db.execute(
+                select(func.count(Document.id)).where(
+                    Document.user_id == user_uuid, Document.deleted_at.is_(None)
+                )
+            )
+            current_docs = count_result.scalar() or 0
+
+            # Query current storage usage in bytes (exclude soft-deleted)
+            size_result = await db.execute(
+                select(func.sum(Document.file_size_bytes)).where(
+                    Document.user_id == user_uuid, Document.deleted_at.is_(None)
+                )
+            )
+            current_bytes = size_result.scalar() or 0
+            current_mb = current_bytes / (1024 * 1024)
+
+            # Project what storage would be after this upload
+            projected_mb = (current_bytes + file_size) / (1024 * 1024)
+
+            # Check document count limit
+            if current_docs >= max_docs:
+                return (
+                    False,
+                    f"Document quota exceeded: {current_docs}/{max_docs} documents. "
+                    f"Please delete some documents before uploading.",
+                )
+
+            # Check storage limit (including the new file)
+            if projected_mb > max_mb:
+                return (
+                    False,
+                    f"Storage quota exceeded: {projected_mb:.2f} MB would exceed {max_mb:.2f} MB limit "
+                    f"(current: {current_mb:.2f} MB, uploading: {file_size / (1024 * 1024):.2f} MB). "
+                    f"Please delete some documents before uploading.",
+                )
+
+            # Within quota
+            return (True, "")
+
+        except ValueError as e:
+            logger.error(f"Invalid user_id format in quota check: {str(e)}")
+            raise HTTPException(status_code=400, detail="Invalid user ID format")
+        except Exception as e:
+            logger.error(f"Quota check failed for user {user_id}: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to check quota. Please try again.",
             )
 
     async def delete_document(self, db: AsyncSession, document_id: str, user_id: str) -> bool:

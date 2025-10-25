@@ -17,6 +17,7 @@ from app.db.session import get_db
 from app.services.auth import AuthService
 from app.services.document_service import DocumentService
 from app.services.rag_processing_service import RAGProcessingService
+from app.services.config import ConfigService
 from app.routers.credentials import get_user_openai_key
 
 logger = logging.getLogger(__name__)
@@ -208,8 +209,27 @@ async def upload_document(
         # Log upload attempt
         logger.info(f"Upload attempt by user {user_id}: {file.filename} ({file.content_type})")
 
-        # Create document service
-        document_service = DocumentService()
+        # Create services (T-03 ST2: Quota validation integration)
+        config_service = ConfigService()
+        document_service = DocumentService(config_service=config_service)
+
+        # T-03 ST2: Check user quota BEFORE processing file
+        file_content = await file.read()
+        file_size = len(file_content)
+        await file.seek(0)  # Reset file pointer for later reading
+
+        is_within_quota, quota_error = await document_service.check_user_quota(
+            db=db,
+            user_id=user_id,
+            additional_file_size=file_size
+        )
+
+        if not is_within_quota:
+            logger.warning(f"Quota violation for user {user_id}: {quota_error}")
+            raise HTTPException(
+                status_code=400,
+                detail=quota_error
+            )
 
         # Upload document (save file + create DB record)
         document_metadata = await document_service.upload_document(

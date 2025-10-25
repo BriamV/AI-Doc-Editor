@@ -397,6 +397,41 @@ update_wp_narrative_sections() {
     fi
 }
 
+update_wp_comprehensive_sections() {
+    local wp_file="$1"
+    local task_id="$2"
+    local status_emoji="$3"
+    local progress="$4"
+    local complexity="$5"
+
+    # Use NEW comprehensive Python helper (update-wp-complete.py)
+    local python_script="$SCRIPT_DIR/update-wp-complete.py"
+
+    if [[ ! -f "$python_script" ]]; then
+        log_warning "Comprehensive helper not found: $python_script (skipping)"
+        return 0
+    fi
+
+    # Check if Python is available
+    local python_cmd=""
+    if command -v python3 >/dev/null 2>&1; then
+        python_cmd="python3"
+    elif command -v python >/dev/null 2>&1; then
+        python_cmd="python"
+    else
+        log_warning "Python not available (skipping comprehensive update)"
+        return 0
+    fi
+
+    # Run comprehensive helper (NEW: only needs wp_file and task_id)
+    log_info "Updating comprehensive WP sections (ALL metrics)..."
+    if $python_cmd "$python_script" "$wp_file" "$task_id" 2>&1; then
+        log_debug "Comprehensive WP update successful"
+    else
+        log_warning "Comprehensive WP update failed for $task_id (continuing)"
+    fi
+}
+
 update_wp_progress_bar() {
     local wp_file="$1"
     local wp_progress="$2"
@@ -518,7 +553,7 @@ propagate_status_update() {
     fi
 
     # Extract fields (parse line by line to avoid eval issues)
-    local estado complejidad completado progreso
+    local estado complejidad completado progreso progreso_num status_emoji
     while IFS='=' read -r key value; do
         case "$key" in
             estado) estado="$value" ;;
@@ -527,6 +562,18 @@ propagate_status_update() {
             progreso) progreso="$value" ;;
         esac
     done <<< "$task_data"
+
+    # Extract numeric progress (remove % if present)
+    progreso_num=$(echo "$progreso" | sed 's/%//g')
+
+    # Map estado to status emoji
+    if [[ "$estado" == *"COMPLETADO"* ]] || [[ "$progreso_num" == "100" ]]; then
+        status_emoji="✅ Complete"
+    elif [[ "$estado" == *"En Progreso"* ]] || [[ "$progreso_num" -gt 0 && "$progreso_num" -lt 100 ]]; then
+        status_emoji="🟡 In Progress"
+    else
+        status_emoji="🔴 Not Started"
+    fi
 
     log_metric "Task Status: $estado | Complexity: $complejidad | Progress: $progreso%"
 
@@ -547,6 +594,9 @@ propagate_status_update() {
     log_info "Step 3: Updating WP task matrix..."
     local wp_file="$PROGRESS_DIR/${wp_id}-progress.md"
     update_wp_task_matrix "$wp_file" "$task_id" "$estado" "$progreso" "$completado"
+
+    # Step 3.5: Update comprehensive WP sections (NEW)
+    update_wp_comprehensive_sections "$wp_file" "$task_id" "$status_emoji" "$progreso_num" "$complejidad"
 
     # Step 4: Calculate WP progress
     log_info "Step 4: Calculating WP progress..."

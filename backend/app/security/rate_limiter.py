@@ -1,11 +1,17 @@
 """
 Rate limiting middleware for FastAPI application
 Security hardening for audit endpoints and general API protection
+
+Architecture: Hexagonal Architecture (Ports & Adapters)
+- RateLimitBackend (port): Abstract interface for rate limiting storage
+- InMemoryRateLimitBackend (adapter): In-memory implementation
+- RedisRateLimitBackend (adapter): Redis-based distributed implementation
 """
 
 import asyncio
 import time
-from typing import Dict, Optional, Set
+from typing import Dict, Optional, Set, Protocol
+from abc import ABC, abstractmethod
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -14,6 +20,193 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Optional Redis import (graceful degradation if not installed)
+try:
+    from redis.asyncio import Redis, ConnectionPool
+    REDIS_AVAILABLE = True
+except ImportError:
+    REDIS_AVAILABLE = False
+    logger.warning("redis package not installed. Redis rate limiting unavailable.")
+
+
+# ============================================================================
+# Hexagonal Architecture: Port (Abstract Interface)
+# ============================================================================
+
+class RateLimitBackend(ABC):
+    """
+    Abstract interface for rate limiting storage (Port).
+
+    Implementations (Adapters):
+    - InMemoryRateLimitBackend: Local development, single-server
+    - RedisRateLimitBackend: Production, distributed multi-server
+    """
+
+    @abstractmethod
+    async def get(self, key: str, window: int) -> int:
+        """Get current request count for a key within the time window."""
+        pass
+
+    @abstractmethod
+    async def increment(self, key: str, window: int) -> int:
+        """Increment request count and return new count."""
+        pass
+
+    @abstractmethod
+    async def reset(self, key: str) -> None:
+        """Reset rate limit for a key."""
+        pass
+
+    @abstractmethod
+    async def close(self) -> None:
+        """Close connections and cleanup resources."""
+        pass
+
+
+# ============================================================================
+# Adapter 1: In-Memory Implementation
+# ============================================================================
+
+class InMemoryRateLimitBackend(RateLimitBackend):
+    """
+    In-memory rate limit backend for local development.
+
+    Limitations:
+    - Not distributed (single server only)
+    - Lost on server restart
+    - No synchronization across processes
+
+    Use for: Development, testing, single-server deployments
+    """
+
+    def __init__(self):
+        self._store: Dict[str, Dict[str, int]] = {}
+        self._expiry: Dict[str, float] = {}
+        self._lock = asyncio.Lock()
+
+    async def get(self, key: str, window: int) -> int:
+        """Get current request count for a key within the time window."""
+        async with self._lock:
+            current_time = time.time()
+
+            # Clean expired entries
+            if key in self._expiry and current_time > self._expiry[key]:
+                self._store.pop(key, None)
+                self._expiry.pop(key, None)
+
+            return self._store.get(key, {}).get("count", 0)
+
+    async def increment(self, key: str, window: int) -> int:
+        """Increment request count and return new count."""
+        async with self._lock:
+            current_time = time.time()
+
+            # Clean expired entries
+            if key in self._expiry and current_time > self._expiry[key]:
+                self._store.pop(key, None)
+                self._expiry.pop(key, None)
+
+            # Initialize or increment
+            if key not in self._store:
+                self._store[key] = {"count": 1, "start_time": current_time}
+                self._expiry[key] = current_time + window
+            else:
+                self._store[key]["count"] += 1
+
+            return self._store[key]["count"]
+
+    async def reset(self, key: str) -> None:
+        """Reset rate limit for a key."""
+        async with self._lock:
+            self._store.pop(key, None)
+            self._expiry.pop(key, None)
+
+    async def close(self) -> None:
+        """No-op for in-memory backend."""
+        pass
+
+
+# ============================================================================
+# Adapter 2: Redis Implementation (Distributed)
+# ============================================================================
+
+class RedisRateLimitBackend(RateLimitBackend):
+    """
+    Redis-based distributed rate limit backend.
+
+    Features:
+    - Distributed across multiple servers
+    - Persistent across server restarts
+    - Atomic operations (thread-safe, process-safe)
+    - Sliding window counter algorithm
+    - Auto-expiry via Redis TTL
+
+    Use for: Production, multi-server deployments
+    """
+
+    def __init__(self, redis_client: Redis):
+        self.redis = redis_client
+        self.key_prefix = settings.REDIS_RATE_LIMIT_KEY_PREFIX
+
+    def _make_key(self, key: str) -> str:
+        """Create prefixed Redis key."""
+        return f"{self.key_prefix}:{key}"
+
+    async def get(self, key: str, window: int) -> int:
+        """Get current request count for a key within the time window."""
+        try:
+            redis_key = self._make_key(key)
+            count = await self.redis.get(redis_key)
+            return int(count) if count else 0
+        except Exception as e:
+            logger.error(f"Redis get error for key {key}: {e}")
+            # Fail-safe: Return high count to trigger rate limit on Redis failure
+            raise
+
+    async def increment(self, key: str, window: int) -> int:
+        """
+        Increment request count using atomic Redis operations.
+
+        Algorithm: Sliding window counter
+        - INCR: Atomic increment (thread-safe)
+        - EXPIRE: Set TTL if new key (auto-cleanup)
+        """
+        try:
+            redis_key = self._make_key(key)
+
+            # Use Redis pipeline for atomic operations
+            pipe = self.redis.pipeline()
+            pipe.incr(redis_key)
+            pipe.expire(redis_key, window)
+            results = await pipe.execute()
+
+            count = results[0]
+            return count
+        except Exception as e:
+            logger.error(f"Redis increment error for key {key}: {e}")
+            # Fail-safe: Raise to trigger 503 response
+            raise
+
+    async def reset(self, key: str) -> None:
+        """Reset rate limit for a key."""
+        try:
+            redis_key = self._make_key(key)
+            await self.redis.delete(redis_key)
+        except Exception as e:
+            logger.error(f"Redis reset error for key {key}: {e}")
+            raise
+
+    async def close(self) -> None:
+        """Close Redis connection."""
+        try:
+            await self.redis.aclose()
+        except Exception as e:
+            logger.error(f"Redis close error: {e}")
+
+
+# ============================================================================
+# Legacy In-Memory Store (Deprecated, use InMemoryRateLimitBackend)
+# ============================================================================
 
 class RateLimitStore:
     """In-memory rate limit store with expiry management"""
@@ -62,10 +255,38 @@ class RateLimitStore:
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
-    """Rate limiting middleware with different limits for different endpoints"""
+    """
+    Rate limiting middleware with different limits for different endpoints.
 
-    # Rate limit configurations
+    Architecture: Hexagonal Architecture
+    - Uses RateLimitBackend interface (port)
+    - Supports both InMemoryRateLimitBackend and RedisRateLimitBackend (adapters)
+
+    Configuration:
+    - REDIS_USE_DISTRIBUTED_RATE_LIMITING=True: Use Redis backend
+    - REDIS_USE_DISTRIBUTED_RATE_LIMITING=False: Use in-memory backend
+    """
+
+    # Rate limit configurations (T-03 ST1: Endpoint-specific limits)
     RATE_LIMITS = {
+        # Document upload - high resource cost
+        "/api/documents/upload": {
+            "per_ip": {"requests": 10, "window": 60},  # 10 requests per minute per IP
+            "per_user": {"requests": 10, "window": 60},  # 10 requests per minute per user
+        },
+        # AI endpoints - OpenAI API rate limits apply
+        "/api/plan": {
+            "per_ip": {"requests": 30, "window": 60},  # 30 requests per minute per IP
+            "per_user": {"requests": 30, "window": 60},  # 30 requests per minute per user
+        },
+        "/api/rewrite": {
+            "per_ip": {"requests": 20, "window": 60},  # 20 requests per minute per IP
+            "per_user": {"requests": 20, "window": 60},  # 20 requests per minute per user
+        },
+        "/api/draft_section": {
+            "per_ip": {"requests": 15, "window": 60},  # 15 requests per minute per IP
+            "per_user": {"requests": 15, "window": 60},  # 15 requests per minute per user
+        },
         # Audit endpoints - stricter limits due to sensitive data
         "/api/audit": {
             "per_ip": {"requests": 30, "window": 60},  # 30 requests per minute per IP
@@ -92,9 +313,67 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         "/api/health",
     }
 
-    def __init__(self, app):
+    def __init__(self, app, backend: Optional[RateLimitBackend] = None):
+        """
+        Initialize rate limiting middleware.
+
+        Args:
+            app: FastAPI application
+            backend: RateLimitBackend implementation (optional, auto-configured)
+        """
         super().__init__(app)
+
+        if backend:
+            # Use provided backend (for testing)
+            self.backend = backend
+        else:
+            # Auto-configure based on settings
+            self.backend = self._create_backend()
+
+        # Legacy store for backwards compatibility (deprecated)
         self.store = RateLimitStore()
+
+    def _create_backend(self) -> RateLimitBackend:
+        """
+        Create appropriate rate limit backend based on configuration.
+
+        Returns:
+            RateLimitBackend: InMemoryRateLimitBackend or RedisRateLimitBackend
+        """
+        if settings.REDIS_USE_DISTRIBUTED_RATE_LIMITING:
+            if not REDIS_AVAILABLE:
+                logger.error(
+                    "Redis rate limiting enabled but redis package not installed. "
+                    "Falling back to in-memory backend."
+                )
+                return InMemoryRateLimitBackend()
+
+            try:
+                # Create Redis connection pool
+                pool = ConnectionPool.from_url(
+                    settings.REDIS_URL,
+                    password=settings.REDIS_PASSWORD,
+                    max_connections=settings.REDIS_MAX_CONNECTIONS,
+                    decode_responses=True,
+                    socket_connect_timeout=settings.REDIS_CONNECTION_TIMEOUT,
+                )
+                redis_client = Redis(connection_pool=pool)
+
+                logger.info(
+                    f"Redis rate limiting initialized: {settings.REDIS_URL} "
+                    f"(prefix: {settings.REDIS_RATE_LIMIT_KEY_PREFIX})"
+                )
+                return RedisRateLimitBackend(redis_client)
+
+            except Exception as e:
+                logger.error(
+                    f"Failed to initialize Redis rate limiting: {e}. "
+                    f"Falling back to in-memory backend."
+                )
+                return InMemoryRateLimitBackend()
+        else:
+            logger.info("Using in-memory rate limiting (development mode)")
+            return InMemoryRateLimitBackend()
 
     def get_client_ip(self, request: Request) -> str:
         """Extract client IP address from request"""
@@ -172,12 +451,16 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             # Check IP-based rate limit
             ip_limit = config["per_ip"]
             ip_key = f"ip:{client_ip}:{path}"
-            ip_count = await self.store.increment(ip_key, ip_limit["window"])
+            ip_count = await self.backend.increment(ip_key, ip_limit["window"])
 
             if ip_count > ip_limit["requests"]:
                 logger.warning(
                     f"Rate limit exceeded for IP {client_ip} on path {path}: "
                     f"{ip_count}/{ip_limit['requests']} in {ip_limit['window']}s"
+                )
+                # Log security event for rate limit violation
+                SecurityLogger.log_rate_limit_violation(
+                    ip=client_ip, path=path, count=ip_count, limit=ip_limit["requests"]
                 )
                 return self._rate_limited(
                     message=(
@@ -193,12 +476,16 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             if user_id:
                 user_limit = config["per_user"]
                 user_key = f"user:{user_id}:{path}"
-                user_count = await self.store.increment(user_key, user_limit["window"])
+                user_count = await self.backend.increment(user_key, user_limit["window"])
 
                 if user_count > user_limit["requests"]:
                     logger.warning(
                         f"Rate limit exceeded for user {user_id} on path {path}: "
                         f"{user_count}/{user_limit['requests']} in {user_limit['window']}s"
+                    )
+                    # Log security event for rate limit violation
+                    SecurityLogger.log_rate_limit_violation(
+                        ip=client_ip, path=path, count=user_count, limit=user_limit["requests"]
                     )
                     return self._rate_limited(
                         message=(
