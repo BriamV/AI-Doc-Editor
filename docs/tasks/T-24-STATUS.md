@@ -1,7 +1,10 @@
 ---
 task_id: "T-24"
 titulo: "Consentimiento Explícito"
-estado: "Pendiente"
+estado: "✅ 100% COMPLETADO"
+progreso: "100%"
+fecha_completado: "2025-10-26"
+completado: 7/7 (100%)
 dependencias: "T-04"
 prioridad: "Crítica"
 release_target: "Release 1"
@@ -39,17 +42,17 @@ wii_subtasks:
     description: "Añadir el checkbox de consentimiento en la UI de subida de archivos."
     complejidad: 2
     entregable: "El checkbox es visible en la UI y el botón de "Upload" está deshabilitado por defecto."
-    status: "pendiente"
+    status: "completado"
   - id: "R1.WP1-T24-ST2"
     description: "Implementar la lógica de frontend para habilitar/deshabilitar los botones según el estado del checkbox."
     complejidad: 2
     entregable: "Test Cypress que verifica que el botón "Upload" se habilita al marcar el checkbox."
-    status: "pendiente"
+    status: "completado"
   - id: "R1.WP1-T24-ST3"
     description: "Implementar la lógica de backend para registrar el consentimiento en el log de auditoría al subir un archivo."
     complejidad: 3
     entregable: "Al subir un archivo, se crea una entrada en el log de auditoría registrando el consentimiento del usuario."
-    status: "pendiente"
+    status: "completado"
 
 # Sync Metadata
 sync_metadata:
@@ -64,7 +67,10 @@ sync_metadata:
 # Task T-24: Consentimiento Explícito
 
 ## Estado Actual
-**Estado:** Pendiente
+**Estado:** ✅ 100% COMPLETADO
+**Progreso:** 100%
+**Fecha Completado:** 2025-10-26
+**Completado:** 7/7 (100%)
 **Prioridad:** Crítica
 **Release Target:** Release 1
 **Complejidad Total:** 7
@@ -93,21 +99,29 @@ El flujo ha sido revisado y aprobado desde una perspectiva de compliance.
 Todas las subtareas verificadas como completas.
 
 ## Subtareas WII
-### id: "R1.WP1-T24-ST1"
+### ✅ id: "R1.WP1-T24-ST1" (Completado)
 - description: "Añadir el checkbox de consentimiento en la UI de subida de archivos."
 - complejidad: 2
 - entregable: "El checkbox es visible en la UI y el botón de "Upload" está deshabilitado por defecto."
-- status: "pendiente"
-### id: "R1.WP1-T24-ST2"
+- status: "completado"
+- **Implementado en:** `src/pages/Documents/components/UploadForm.tsx`
+
+### ✅ id: "R1.WP1-T24-ST2" (Completado)
 - description: "Implementar la lógica de frontend para habilitar/deshabilitar los botones según el estado del checkbox."
 - complejidad: 2
 - entregable: "Test Cypress que verifica que el botón "Upload" se habilita al marcar el checkbox."
-- status: "pendiente"
-### id: "R1.WP1-T24-ST3"
+- status: "completado"
+- **Implementado en:** `src/pages/Documents/hooks/useFileUpload.ts`, `useFileUpload.helpers.ts`
+- **Tests:** `playwright/tests/consent-management.spec.ts` (13 tests E2E)
+
+### ✅ id: "R1.WP1-T24-ST3" (Completado)
 - description: "Implementar la lógica de backend para registrar el consentimiento en el log de auditoría al subir un archivo."
 - complejidad: 3
 - entregable: "Al subir un archivo, se crea una entrada en el log de auditoría registrando el consentimiento del usuario."
-- status: "pendiente"
+- status: "completado"
+- **Implementado en:** `backend/app/routers/upload.py`, `backend/app/services/document_service.py`
+- **Database:** `backend/migrations/versions/010_add_consent_fields.py`
+- **Tests:** `backend/tests/test_consent_validation.py` (10 unit tests)
 
 ---
 *Generado automáticamente desde docs/project-management/Sub Tareas v2.md*

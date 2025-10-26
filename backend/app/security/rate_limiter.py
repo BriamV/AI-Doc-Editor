@@ -10,7 +10,7 @@ Architecture: Hexagonal Architecture (Ports & Adapters)
 
 import asyncio
 import time
-from typing import Dict, Optional, Set, Protocol
+from typing import Dict, Optional, Set, TYPE_CHECKING
 from abc import ABC, abstractmethod
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -21,17 +21,25 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Optional Redis import (graceful degradation if not installed)
+if TYPE_CHECKING:
+    # Type hints only - import regardless for type checking
+    from redis.asyncio import Redis, ConnectionPool
+
 try:
     from redis.asyncio import Redis, ConnectionPool
+
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
+    Redis = None  # type: ignore
+    ConnectionPool = None  # type: ignore
     logger.warning("redis package not installed. Redis rate limiting unavailable.")
 
 
 # ============================================================================
 # Hexagonal Architecture: Port (Abstract Interface)
 # ============================================================================
+
 
 class RateLimitBackend(ABC):
     """
@@ -66,6 +74,7 @@ class RateLimitBackend(ABC):
 # ============================================================================
 # Adapter 1: In-Memory Implementation
 # ============================================================================
+
 
 class InMemoryRateLimitBackend(RateLimitBackend):
     """
@@ -129,6 +138,7 @@ class InMemoryRateLimitBackend(RateLimitBackend):
 # ============================================================================
 # Adapter 2: Redis Implementation (Distributed)
 # ============================================================================
+
 
 class RedisRateLimitBackend(RateLimitBackend):
     """
@@ -207,6 +217,7 @@ class RedisRateLimitBackend(RateLimitBackend):
 # ============================================================================
 # Legacy In-Memory Store (Deprecated, use InMemoryRateLimitBackend)
 # ============================================================================
+
 
 class RateLimitStore:
     """In-memory rate limit store with expiry management"""

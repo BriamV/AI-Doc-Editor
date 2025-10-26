@@ -37,7 +37,9 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 class DocumentService:
     """Service for managing document uploads and storage."""
 
-    def __init__(self, upload_dir: Optional[Path] = None, config_service: Optional[ConfigService] = None):
+    def __init__(
+        self, upload_dir: Optional[Path] = None, config_service: Optional[ConfigService] = None
+    ):
         """
         Initialize document service.
 
@@ -60,10 +62,7 @@ class DocumentService:
         self.upload_dir.mkdir(parents=True, exist_ok=True)
 
     async def check_user_quota(
-        self,
-        db: AsyncSession,
-        user_id: str,
-        additional_file_size: int = 0
+        self, db: AsyncSession, user_id: str, additional_file_size: int = 0
     ) -> tuple[bool, str]:
         """
         Check if user has exceeded document/storage quotas (T-03 ST2).
@@ -303,6 +302,8 @@ class DocumentService:
         file_path: str,
         user_id: str,
         user_email: str,
+        consent_given: bool = False,
+        consent_ip_address: Optional[str] = None,
     ) -> Document:
         """
         Create document metadata record in database.
@@ -316,6 +317,8 @@ class DocumentService:
             file_path: Relative file path from uploads directory
             user_id: UUID of uploading user
             user_email: Email of uploading user
+            consent_given: User consent for AI processing (T-24 ST3)
+            consent_ip_address: IP address at time of consent (T-24 ST3)
 
         Returns:
             Created Document model instance
@@ -335,6 +338,11 @@ class DocumentService:
                 user_id=uuid.UUID(user_id),
                 user_email=user_email,
                 uploaded_at=datetime.utcnow(),
+                # Consent tracking (T-24 ST3)
+                consent_given=consent_given,
+                consent_timestamp=datetime.utcnow() if consent_given else None,
+                consent_version="1.0" if consent_given else None,
+                consent_ip_address=consent_ip_address,
             )
 
             db.add(document)
@@ -361,6 +369,8 @@ class DocumentService:
         file: UploadFile,
         user_id: str,
         user_email: str,
+        consent_given: bool = False,
+        consent_ip_address: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Complete document upload workflow: save file + create database record.
@@ -370,14 +380,23 @@ class DocumentService:
             file: Uploaded file object
             user_id: UUID of uploading user
             user_email: Email of uploading user
+            consent_given: User consent for AI processing (T-24 ST3)
+            consent_ip_address: IP address at time of consent (T-24 ST3)
 
         Returns:
             Document metadata dictionary
 
         Raises:
-            HTTPException: If upload or database operation fails
+            HTTPException: If upload or database operation fails or consent not given
         """
         try:
+            # T-24 ST3: Validate consent BEFORE processing file
+            if not consent_given:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Document upload requires explicit user consent. "
+                    "Please accept the consent agreement to process documents with AI.",
+                )
             # Read file content once
             content = await file.read()
             file_size = len(content)
@@ -402,7 +421,7 @@ class DocumentService:
             relative_path = str(file_path.relative_to(self.upload_dir))
             logger.info(f"Saved file for user {user_id}: {unique_filename} ({file_size} bytes)")
 
-            # Create database record with file metadata
+            # Create database record with file metadata and consent tracking
             document = await self.create_document_record(
                 db=db,
                 filename=file.filename,
@@ -412,6 +431,8 @@ class DocumentService:
                 file_path=relative_path,
                 user_id=user_id,
                 user_email=user_email,
+                consent_given=consent_given,
+                consent_ip_address=consent_ip_address,
             )
 
             # Return document metadata
@@ -483,85 +504,6 @@ class DocumentService:
             raise HTTPException(
                 status_code=500,
                 detail="Failed to retrieve document. Please try again.",
-            )
-
-    async def check_user_quota(
-        self, db: AsyncSession, user_id: str, file_size: int
-    ) -> tuple[bool, str]:
-        """
-        Check if user has exceeded document count and storage size quotas.
-
-        Args:
-            db: Database session
-            user_id: UUID of user to check
-            file_size: Size of file to be uploaded (in bytes)
-
-        Returns:
-            (is_within_quota, error_message)
-            - is_within_quota: True if user can upload, False if quota exceeded
-            - error_message: Empty string if within quota, error description otherwise
-        """
-        try:
-            user_uuid = uuid.UUID(user_id)
-
-            # Get quota limits from config store (with sensible defaults)
-            config_service = ConfigService(db)
-            max_docs_str = await config_service.get_config_value(
-                "max_documents_per_user", "100"
-            )
-            max_mb_str = await config_service.get_config_value("max_mb_per_user", "1000.0")
-
-            max_docs = int(max_docs_str)
-            max_mb = float(max_mb_str)
-
-            # Query current document count for user (exclude soft-deleted)
-            count_result = await db.execute(
-                select(func.count(Document.id)).where(
-                    Document.user_id == user_uuid, Document.deleted_at.is_(None)
-                )
-            )
-            current_docs = count_result.scalar() or 0
-
-            # Query current storage usage in bytes (exclude soft-deleted)
-            size_result = await db.execute(
-                select(func.sum(Document.file_size_bytes)).where(
-                    Document.user_id == user_uuid, Document.deleted_at.is_(None)
-                )
-            )
-            current_bytes = size_result.scalar() or 0
-            current_mb = current_bytes / (1024 * 1024)
-
-            # Project what storage would be after this upload
-            projected_mb = (current_bytes + file_size) / (1024 * 1024)
-
-            # Check document count limit
-            if current_docs >= max_docs:
-                return (
-                    False,
-                    f"Document quota exceeded: {current_docs}/{max_docs} documents. "
-                    f"Please delete some documents before uploading.",
-                )
-
-            # Check storage limit (including the new file)
-            if projected_mb > max_mb:
-                return (
-                    False,
-                    f"Storage quota exceeded: {projected_mb:.2f} MB would exceed {max_mb:.2f} MB limit "
-                    f"(current: {current_mb:.2f} MB, uploading: {file_size / (1024 * 1024):.2f} MB). "
-                    f"Please delete some documents before uploading.",
-                )
-
-            # Within quota
-            return (True, "")
-
-        except ValueError as e:
-            logger.error(f"Invalid user_id format in quota check: {str(e)}")
-            raise HTTPException(status_code=400, detail="Invalid user ID format")
-        except Exception as e:
-            logger.error(f"Quota check failed for user {user_id}: {str(e)}")
-            raise HTTPException(
-                status_code=500,
-                detail="Failed to check quota. Please try again.",
             )
 
     async def delete_document(self, db: AsyncSession, document_id: str, user_id: str) -> bool:

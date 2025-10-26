@@ -6,7 +6,7 @@ to the RAG (Retrieval-Augmented Generation) pipeline.
 """
 
 from datetime import datetime
-from sqlalchemy import Column, String, Integer, DateTime, Text, Enum
+from sqlalchemy import Column, String, Integer, DateTime, Text, Enum, Boolean
 from sqlalchemy.types import TypeDecorator, CHAR
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 import uuid
@@ -103,6 +103,12 @@ class Document(Base):
     # Summary fields (T-06 ST3)
     global_summary = Column(Text, nullable=True)
     summary_updated_at = Column(DateTime, nullable=True)
+
+    # Consent tracking (T-24 ST3)
+    consent_given = Column(Boolean, nullable=False, default=False, index=True)
+    consent_timestamp = Column(DateTime, nullable=True)
+    consent_version = Column(String(20), nullable=True, default="1.0")
+    consent_ip_address = Column(String(45), nullable=True)
 
     # Soft delete
     deleted_at = Column(DateTime, nullable=True, index=True)

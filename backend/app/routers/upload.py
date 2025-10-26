@@ -8,16 +8,29 @@ T-04 ST1: Upload Endpoint for Document RAG Processing
 """
 
 from typing import Dict, Any
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status, BackgroundTasks
+from fastapi import (
+    APIRouter,
+    Depends,
+    UploadFile,
+    File,
+    HTTPException,
+    status,
+    BackgroundTasks,
+    Form,
+    Request,
+)
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
+from datetime import datetime
 
 from app.db.session import get_db
 from app.services.auth import AuthService
 from app.services.document_service import DocumentService
 from app.services.rag_processing_service import RAGProcessingService
 from app.services.config import ConfigService
+from app.services.audit import AuditService
+from app.models.audit import AuditActionType
 from app.routers.credentials import get_user_openai_key
 
 logger = logging.getLogger(__name__)
@@ -166,7 +179,9 @@ def get_current_user_email(
 @router.post("/upload")
 async def upload_document(
     background_tasks: BackgroundTasks,
+    request: Request,
     file: UploadFile = File(..., description="Document file to upload (.pdf, .docx, .md)"),
+    consent_given: str = Form(..., description="User consent for AI processing (true/false)"),
     db: AsyncSession = Depends(get_db),
     user_id: str = Depends(get_current_user_id),
     user_email: str = Depends(get_current_user_email),
@@ -176,6 +191,7 @@ async def upload_document(
 
     **Request:**
     - `file`: Multipart form-data file upload
+    - `consent_given`: User consent for AI processing (string "true" or "false")
     - Supported formats: PDF (.pdf), Word (.docx), Markdown (.md)
     - Maximum file size: 10MB
 
@@ -194,7 +210,7 @@ async def upload_document(
     **Authorization:** Requires valid JWT token (Bearer token in Authorization header)
 
     **Errors:**
-    - 400: Invalid file type or format
+    - 400: Invalid file type, format, or consent not given
     - 401: Unauthorized (missing or invalid JWT token)
     - 413: File too large (exceeds 10MB)
     - 500: Server error during upload
@@ -209,9 +225,16 @@ async def upload_document(
         # Log upload attempt
         logger.info(f"Upload attempt by user {user_id}: {file.filename} ({file.content_type})")
 
+        # T-24 ST3: Convert consent string to boolean
+        consent_bool = consent_given.lower() == "true"
+
+        # Get IP address from request
+        ip_address = request.client.host if request.client else None
+
         # Create services (T-03 ST2: Quota validation integration)
         config_service = ConfigService()
         document_service = DocumentService(config_service=config_service)
+        audit_service = AuditService()
 
         # T-03 ST2: Check user quota BEFORE processing file
         file_content = await file.read()
@@ -219,27 +242,58 @@ async def upload_document(
         await file.seek(0)  # Reset file pointer for later reading
 
         is_within_quota, quota_error = await document_service.check_user_quota(
-            db=db,
-            user_id=user_id,
-            additional_file_size=file_size
+            db=db, user_id=user_id, additional_file_size=file_size
         )
 
         if not is_within_quota:
             logger.warning(f"Quota violation for user {user_id}: {quota_error}")
-            raise HTTPException(
-                status_code=400,
-                detail=quota_error
-            )
+            raise HTTPException(status_code=400, detail=quota_error)
 
-        # Upload document (save file + create DB record)
+        # T-24 ST3: Upload document with consent tracking
         document_metadata = await document_service.upload_document(
             db=db,
             file=file,
             user_id=user_id,
             user_email=user_email,
+            consent_given=consent_bool,
+            consent_ip_address=ip_address,
         )
 
-        logger.info(f"Upload successful: {document_metadata['document_id']} by user {user_id}")
+        logger.info(
+            f"Upload successful: {document_metadata['document_id']} by user {user_id} "
+            f"(consent: {consent_bool})"
+        )
+
+        # T-24 ST3: Log consent event to audit system (WORM)
+        consent_action = (
+            AuditActionType.DOCUMENT_CONSENT_GIVEN
+            if consent_bool
+            else AuditActionType.DOCUMENT_CONSENT_REJECTED
+        )
+
+        await audit_service.log_event(
+            action_type=consent_action,
+            resource_type="document",
+            resource_id=document_metadata["document_id"],
+            user_id=user_id,
+            user_email=user_email,
+            ip_address=ip_address,
+            user_agent=request.headers.get("user-agent"),
+            description=f"User {'consented to' if consent_bool else 'rejected'} AI processing for document: {file.filename}",
+            details={
+                "document_id": document_metadata["document_id"],
+                "filename": file.filename,
+                "file_type": document_metadata["file_type"],
+                "consent_version": "1.0",
+                "consent_timestamp": datetime.utcnow().isoformat(),
+                "consent_given": consent_bool,
+            },
+            status="success",
+        )
+
+        logger.info(
+            f"Consent audit logged: {consent_action.value} for document {document_metadata['document_id']}"
+        )
 
         # Retrieve user's OpenAI API key (prioritize user key, fallback to global)
         user_api_key = None

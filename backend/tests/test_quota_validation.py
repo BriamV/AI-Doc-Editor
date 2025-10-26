@@ -5,10 +5,14 @@ Tests the document/storage quota enforcement in DocumentService.
 """
 
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
+import uuid
+from unittest.mock import AsyncMock, Mock
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.document_service import DocumentService
 from app.services.config import ConfigService
+
+# Test fixture - valid UUID for testing
+TEST_USER_UUID = str(uuid.uuid4())
 
 
 @pytest.mark.asyncio
@@ -19,10 +23,12 @@ async def test_quota_validation_within_limits():
     mock_config_service = AsyncMock(spec=ConfigService)
 
     # Mock config values
-    mock_config_service.get_config = AsyncMock(side_effect=lambda db, key: {
-        "max_documents_per_user": "100",
-        "max_mb_per_user": "1000.0"
-    }.get(key))
+    mock_config_service.get_config = AsyncMock(
+        side_effect=lambda db, key: {
+            "max_documents_per_user": "100",
+            "max_mb_per_user": "1000.0",
+        }.get(key)
+    )
 
     # Mock database queries
     mock_result_count = Mock()
@@ -37,9 +43,7 @@ async def test_quota_validation_within_limits():
 
     # Act
     is_within_quota, error_msg = await document_service.check_user_quota(
-        db=mock_db,
-        user_id="test-user-uuid",
-        additional_file_size=10 * 1024 * 1024  # 10 MB upload
+        db=mock_db, user_id=TEST_USER_UUID, additional_file_size=10 * 1024 * 1024  # 10 MB upload
     )
 
     # Assert
@@ -55,10 +59,12 @@ async def test_quota_validation_documents_exceeded():
     mock_config_service = AsyncMock(spec=ConfigService)
 
     # Mock config values
-    mock_config_service.get_config = AsyncMock(side_effect=lambda db, key: {
-        "max_documents_per_user": "100",
-        "max_mb_per_user": "1000.0"
-    }.get(key))
+    mock_config_service.get_config = AsyncMock(
+        side_effect=lambda db, key: {
+            "max_documents_per_user": "100",
+            "max_mb_per_user": "1000.0",
+        }.get(key)
+    )
 
     # Mock database queries
     mock_result_count = Mock()
@@ -73,9 +79,7 @@ async def test_quota_validation_documents_exceeded():
 
     # Act
     is_within_quota, error_msg = await document_service.check_user_quota(
-        db=mock_db,
-        user_id="test-user-uuid",
-        additional_file_size=1024  # 1 KB upload
+        db=mock_db, user_id=TEST_USER_UUID, additional_file_size=1024  # 1 KB upload
     )
 
     # Assert
@@ -92,10 +96,12 @@ async def test_quota_validation_storage_exceeded():
     mock_config_service = AsyncMock(spec=ConfigService)
 
     # Mock config values
-    mock_config_service.get_config = AsyncMock(side_effect=lambda db, key: {
-        "max_documents_per_user": "100",
-        "max_mb_per_user": "1000.0"
-    }.get(key))
+    mock_config_service.get_config = AsyncMock(
+        side_effect=lambda db, key: {
+            "max_documents_per_user": "100",
+            "max_mb_per_user": "1000.0",
+        }.get(key)
+    )
 
     # Mock database queries
     mock_result_count = Mock()
@@ -111,8 +117,8 @@ async def test_quota_validation_storage_exceeded():
     # Act
     is_within_quota, error_msg = await document_service.check_user_quota(
         db=mock_db,
-        user_id="test-user-uuid",
-        additional_file_size=20 * 1024 * 1024  # 20 MB upload (would exceed 1000 MB)
+        user_id=TEST_USER_UUID,
+        additional_file_size=20 * 1024 * 1024,  # 20 MB upload (would exceed 1000 MB)
     )
 
     # Assert
@@ -130,9 +136,7 @@ async def test_quota_validation_no_config_service():
 
     # Act
     is_within_quota, error_msg = await document_service.check_user_quota(
-        db=mock_db,
-        user_id="test-user-uuid",
-        additional_file_size=10 * 1024 * 1024
+        db=mock_db, user_id=TEST_USER_UUID, additional_file_size=10 * 1024 * 1024
     )
 
     # Assert
@@ -148,10 +152,12 @@ async def test_quota_validation_edge_case_exact_limit():
     mock_config_service = AsyncMock(spec=ConfigService)
 
     # Mock config values
-    mock_config_service.get_config = AsyncMock(side_effect=lambda db, key: {
-        "max_documents_per_user": "100",
-        "max_mb_per_user": "1000.0"
-    }.get(key))
+    mock_config_service.get_config = AsyncMock(
+        side_effect=lambda db, key: {
+            "max_documents_per_user": "100",
+            "max_mb_per_user": "1000.0",
+        }.get(key)
+    )
 
     # Mock database queries
     mock_result_count = Mock()
@@ -166,9 +172,7 @@ async def test_quota_validation_edge_case_exact_limit():
 
     # Act
     is_within_quota, error_msg = await document_service.check_user_quota(
-        db=mock_db,
-        user_id="test-user-uuid",
-        additional_file_size=1024  # Try to add 1 KB
+        db=mock_db, user_id=TEST_USER_UUID, additional_file_size=1024  # Try to add 1 KB
     )
 
     # Assert

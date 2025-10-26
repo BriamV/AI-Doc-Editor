@@ -18,9 +18,9 @@ interface UsageLimitsConfigProps {
 }
 
 export default function UsageLimitsConfig({ onSave }: UsageLimitsConfigProps) {
-  const { getToken } = useAuth();
+  const { token: authToken } = useAuth();
   const [limits, setLimits] = useState<UsageLimits>({
-    max_documents_per_user: 100,  // Default values
+    max_documents_per_user: 100, // Default values
     max_mb_per_user: 1000,
   });
   const [loading, setLoading] = useState(false);
@@ -35,8 +35,7 @@ export default function UsageLimitsConfig({ onSave }: UsageLimitsConfigProps) {
         setLoading(true);
         setError(null);
 
-        const token = getToken();
-        if (!token) {
+        if (!authToken) {
           setError('Authentication required');
           return;
         }
@@ -45,12 +44,12 @@ export default function UsageLimitsConfig({ onSave }: UsageLimitsConfigProps) {
         const [docsResponse, mbResponse] = await Promise.all([
           fetch('/api/config?key=max_documents_per_user', {
             headers: {
-              'Authorization': `Bearer ${token}`,
+              Authorization: `Bearer ${authToken}`,
             },
           }),
           fetch('/api/config?key=max_mb_per_user', {
             headers: {
-              'Authorization': `Bearer ${token}`,
+              Authorization: `Bearer ${authToken}`,
             },
           }),
         ]);
@@ -75,7 +74,7 @@ export default function UsageLimitsConfig({ onSave }: UsageLimitsConfigProps) {
     };
 
     fetchLimits();
-  }, [getToken]);
+  }, [authToken]);
 
   const handleSave = async () => {
     try {
@@ -83,8 +82,7 @@ export default function UsageLimitsConfig({ onSave }: UsageLimitsConfigProps) {
       setError(null);
       setSuccessMessage(null);
 
-      const token = getToken();
-      if (!token) {
+      if (!authToken) {
         setError('Authentication required');
         return;
       }
@@ -94,7 +92,7 @@ export default function UsageLimitsConfig({ onSave }: UsageLimitsConfigProps) {
         fetch('/api/config', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${authToken}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -105,7 +103,7 @@ export default function UsageLimitsConfig({ onSave }: UsageLimitsConfigProps) {
         fetch('/api/config', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${authToken}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -180,7 +178,7 @@ export default function UsageLimitsConfig({ onSave }: UsageLimitsConfigProps) {
               min={1}
               max={10000}
               value={limits.max_documents_per_user}
-              onChange={(e) =>
+              onChange={e =>
                 setLimits({ ...limits, max_documents_per_user: parseInt(e.target.value) || 1 })
               }
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -204,7 +202,7 @@ export default function UsageLimitsConfig({ onSave }: UsageLimitsConfigProps) {
               min={1}
               max={100000}
               value={limits.max_mb_per_user}
-              onChange={(e) =>
+              onChange={e =>
                 setLimits({ ...limits, max_mb_per_user: parseFloat(e.target.value) || 1 })
               }
               className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
