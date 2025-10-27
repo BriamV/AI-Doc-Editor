@@ -243,7 +243,7 @@ calculate_release_progress() {
     case "$release_id" in
         R1)
             wp_ids=(R1-WP1 R1-WP2)
-            wp_complexities=(36 28)  # From WORK-PLAN v5.md
+            wp_complexities=(44 28)  # Updated: R1-WP1=44 (T-04:18 + T-49:8 + T-03:11 + T-24:7), R1-WP2=28
             ;;
         *)
             log_error "Unknown release: $release_id"
