@@ -1,9 +1,9 @@
 # Project Status - AI Document Editor
 
 ## Summary Dashboard
-- **Status**: ✅ R1 Complete (100%) | R2 Ready to Start
-- **Overall Progress**: [████░░░░░░] 33% (2.0 releases of 6)
-- **Current Release**: R1 Complete → R2 AI Integration Starting
+- **Status**: ✅ R1 Complete (33%) | R2 Ready to Start
+- **Overall Progress**: [███░░░░░░░] 33% (2.0 releases of 6)
+- **Current Release**: R1 Complete → R2 Ready to Start
 - **Last Updated**: 2025-10-26
 - **Next Update**: 2025-11-02
 - **Responsible**: Tech Lead
@@ -14,7 +14,7 @@
 | Metric | Target | Current | Trend | Status |
 |--------|--------|---------|-------|--------|
 | Releases Complete | 6 | 2 | ↑ | 🟢 |
-| Total Tasks | 47 | 20 | ↑ | 🟢 |
+| Total Tasks | 47 | 15 | ↑ | 🟢 |
 | Work Packages | 18 | 6 | ↑ | 🟢 |
 | Critical Issues | 0 | 0 | → | 🟢 |
 | Security Score | 95/100 | 85/100 | → | 🟢 |
@@ -37,7 +37,7 @@
 
 ## Current Focus
 
-### Next Release: R2 - AI Integration & Document Intelligence
+### Next Release: R2 - Editor Funcional y Calidad (NEXT)
 - **Start Date**: 2025-10-28 (estimated)
 - **Duration**: 2 semanas
 - **Objective**: Entregar una experiencia de edición interactiva y validar la calidad del contenido generado

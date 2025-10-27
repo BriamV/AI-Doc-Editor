@@ -1057,18 +1057,36 @@ fecha_completado: "" # Empty if in progress
 ```
 
 **Deliverables**:
-- [x] Bash script: `tools/sync-project-status.sh` (450+ lines)
-- [x] Usage guide: `tools/sync-project-status-USAGE.md` (650+ lines)
+- [x] Bash orchestrator: `tools/sync-project-status.sh` (450+ lines)
+- [x] Python comprehensive updaters (stdlib-only, no dependencies):
+  - `tools/update-wp-complete.py` (825 lines) - WP file comprehensive updates
+  - `tools/update-release-complete.py` (825 lines) - Release file comprehensive updates
+  - `tools/update-project-complete.py` (875 lines) - Project file comprehensive updates
+- [x] Usage guides: `tools/sync-project-status-USAGE.md` (650+ lines), per-script USAGE.md files
 - [x] Slash command: `.claude/commands/workflow/sync-project-status.md`
-- [x] Cross-platform support (Windows Git Bash + Linux/WSL2)
-- [x] Deterministic calculations (awk-based arithmetic)
+- [x] Cross-platform support (Windows Git Bash + Linux/WSL2, python3/python detection)
+- [x] Deterministic calculations (awk + Python-based arithmetic)
 - [x] Progress bar generation (█░ 10-character)
 - [x] Milestone detection (±2% tolerance)
+- [x] Section boundary checks (prevents global status overwriting)
+- [x] Highest completed release tracking (fixed R1→R2 instead of count-based R2→R3 bug)
 
 **Testing**:
 - ✅ T-04 (100%): 18/18 → R1-WP1 at 41%
 - ✅ T-49 (66%): 5.3/8 → R1-WP1 at 53% (23.28/44)
+- ✅ T-24 (100%): R1-WP1 → R1-RELEASE-STATUS.md → PROJECT-STATUS.md (full propagation)
 - ✅ Calculations match PROJECT-STATUS.md exactly
+- ✅ R1 completion correctly shows "R1 Complete | R2 Ready to Start" (not R2→R3)
+- ✅ Individual completed work items preserve their own status (no global overwriting)
+
+**Bug Fixes** (2025-10-26):
+1. **Release Number Bug**: Fixed use of `completed_releases` (count) instead of `highest_completed_release_num` (actual release number) in status messages
+   - **Before**: "R2 Complete (33%) | R3 Ready to Start" (wrong - uses count of 2)
+   - **After**: "R1 Complete (33%) | R2 Ready to Start" (correct - uses highest R1)
+2. **Global Status Overwrite Bug**: Fixed `update_summary_dashboard()` updating ALL "Status:" fields in file
+   - **Before**: Replaced status in all Completed Work items with project-level status
+   - **After**: Only updates Summary Dashboard section (section boundary checking)
+3. **Current Focus & Planned Work**: Fixed to use `highest_completed_release_num` for next release calculation
 
 **Outcome**: Developers can update entire hierarchy in <30 seconds with single command
 

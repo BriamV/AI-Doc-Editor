@@ -472,17 +472,42 @@ update_release_wp_summary() {
         return 0
     fi
 
-    local progress_bar
-    progress_bar=$(generate_progress_bar "$wp_progress")
+    # Use comprehensive Python helper (update-release-complete.py)
+    local python_script="$SCRIPT_DIR/update-release-complete.py"
 
-    # Backup file
-    cp "$release_file" "$release_file.backup"
+    if [[ ! -f "$python_script" ]]; then
+        log_warning "Comprehensive Release helper not found: $python_script"
+        log_warning "Falling back to basic sed update"
+        # Fallback to basic update
+        local progress_bar
+        progress_bar=$(generate_progress_bar "$wp_progress")
+        cp "$release_file" "$release_file.backup"
+        sed -i.bak "s#| $wp_id | .* | \[.*\] [0-9]\+% | #| $wp_id | ... | [$progress_bar] $wp_progress% | #g" "$release_file"
+        return 0
+    fi
 
-    # Update WP row in Work Package Summary table
-    # Pattern: | R1.WP1 | XX points | [████░░░░░░] XX% | ... |
-    sed -i.bak "s#| $wp_id | .* | \[.*\] [0-9]\+% | #| $wp_id | ... | [$progress_bar] $wp_progress% | #g" "$release_file"
+    # Check if Python is available
+    local python_cmd=""
+    if command -v python3 >/dev/null 2>&1; then
+        python_cmd="python3"
+    elif command -v python >/dev/null 2>&1; then
+        python_cmd="python"
+    else
+        log_warning "Python not available (falling back to basic sed update)"
+        local progress_bar
+        progress_bar=$(generate_progress_bar "$wp_progress")
+        cp "$release_file" "$release_file.backup"
+        sed -i.bak "s#| $wp_id | .* | \[.*\] [0-9]\+% | #| $wp_id | ... | [$progress_bar] $wp_progress% | #g" "$release_file"
+        return 0
+    fi
 
-    log_success "Updated Release WP summary: $wp_id → $wp_progress%"
+    # Run comprehensive Release update helper
+    log_info "Running comprehensive Release update (update-release-complete.py)..."
+    if $python_cmd "$python_script" "$release_file" "$wp_id" 2>&1; then
+        log_success "Comprehensive Release update complete: $wp_id → $wp_progress%"
+    else
+        log_warning "Comprehensive Release update failed (continuing)"
+    fi
 }
 
 update_project_summary() {
@@ -496,17 +521,42 @@ update_project_summary() {
         return 0
     fi
 
-    local progress_bar
-    progress_bar=$(generate_progress_bar "$release_progress")
+    # Use comprehensive Python helper (update-project-complete.py)
+    local python_script="$SCRIPT_DIR/update-project-complete.py"
 
-    # Backup file
-    cp "$project_file" "$project_file.backup"
+    if [[ ! -f "$python_script" ]]; then
+        log_warning "Comprehensive Project helper not found: $python_script"
+        log_warning "Falling back to basic sed update"
+        # Fallback to basic update
+        local progress_bar
+        progress_bar=$(generate_progress_bar "$release_progress")
+        cp "$project_file" "$project_file.backup"
+        sed -i.bak "s#\*\*Completion\*\*: \[.*\] [0-9]\+%#**Completion**: [$progress_bar] $release_progress%#g" "$project_file"
+        return 0
+    fi
 
-    # Update release summary line in "Active Release" section
-    # Pattern: **Completion**: [████░░░░░░] XX%
-    sed -i.bak "s#\*\*Completion\*\*: \[.*\] [0-9]\+%#**Completion**: [$progress_bar] $release_progress%#g" "$project_file"
+    # Check if Python is available
+    local python_cmd=""
+    if command -v python3 >/dev/null 2>&1; then
+        python_cmd="python3"
+    elif command -v python >/dev/null 2>&1; then
+        python_cmd="python"
+    else
+        log_warning "Python not available (falling back to basic sed update)"
+        local progress_bar
+        progress_bar=$(generate_progress_bar "$release_progress")
+        cp "$project_file" "$project_file.backup"
+        sed -i.bak "s#\*\*Completion\*\*: \[.*\] [0-9]\+%#**Completion**: [$progress_bar] $release_progress%#g" "$project_file"
+        return 0
+    fi
 
-    log_success "Updated Project summary: $release_id → $release_progress%"
+    # Run comprehensive Project update helper
+    log_info "Running comprehensive Project update (update-project-complete.py)..."
+    if $python_cmd "$python_script" "$project_file" "$release_id" 2>&1; then
+        log_success "Comprehensive Project update complete: $release_id → $release_progress%"
+    else
+        log_warning "Comprehensive Project update failed (continuing)"
+    fi
 }
 
 # ============================================================================
