@@ -83,6 +83,9 @@ jobs:
           echo "🗑️ Limpiando caché de Yarn para eliminar referencias previas..."
           yarn cache clean
 
+      - name: Install Socket Firewall
+        run: npm install -g sfw
+
       - name: Install dependencies (Yarn 4)
         env:
           # Variables de entorno críticas para la instalación
@@ -91,7 +94,7 @@ jobs:
         run: |
           echo "📦 Installing dependencies..."
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          yarn install --immutable
+          sfw yarn install --immutable
 
       - name: Type check
         run: yarn fe:typecheck
@@ -212,13 +215,16 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Install Socket Firewall
+        run: npm install -g sfw
+
       - name: Install Node dependencies for namespaced commands
         env:
           GIT_TERMINAL_PROMPT: "0"
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          yarn install --immutable
+          sfw yarn install --immutable
 
       - name: Setup Python environment
         run: |
@@ -307,13 +313,16 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install Socket Firewall
+        run: npm install -g sfw
+
       - name: Install dependencies
         env:
           GIT_TERMINAL_PROMPT: "0"
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          yarn install --immutable
+          sfw yarn install --immutable
           yarn be:bootstrap
 
       - name: Unified coverage reports

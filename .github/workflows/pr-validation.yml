@@ -50,13 +50,16 @@ jobs:
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
 
+      - name: Install Socket Firewall
+        run: npm install -g sfw
+
       - name: Install dependencies
         env:
           GIT_TERMINAL_PROMPT: "0"
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          yarn install --immutable
+          sfw yarn install --immutable
 
       - name: Frontend type checking
         run: |
@@ -111,13 +114,16 @@ jobs:
           git config --global url."https://github.com/".insteadOf "git@github.com:"
           git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
 
+      - name: Install Socket Firewall
+        run: npm install -g sfw
+
       - name: Install dependencies
         env:
           GIT_TERMINAL_PROMPT: "0"
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          yarn install --immutable
+          sfw yarn install --immutable
           yarn be:bootstrap
 
       - name: Backend formatting validation
@@ -180,13 +186,16 @@ jobs:
           corepack enable
           corepack prepare yarn@4.5.1 --activate
 
+      - name: Install Socket Firewall
+        run: npm install -g sfw
+
       - name: Install dependencies
         env:
           GIT_TERMINAL_PROMPT: "0"
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          yarn install --immutable
+          sfw yarn install --immutable
 
       - name: Document placement validation
         run: |
@@ -293,6 +302,9 @@ jobs:
           strict-ssl=true
           EOL
 
+      - name: Install Socket Firewall
+        run: npm install -g sfw
+
       - name: Install dependencies with security focus
         env:
           GIT_TERMINAL_PROMPT: "0"
@@ -300,7 +312,7 @@ jobs:
         run: |
           echo "📦 Installing dependencies for comprehensive security scan..."
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          yarn install --immutable
+          sfw yarn install --immutable
           yarn be:bootstrap
 
       - name: Comprehensive security audit
@@ -420,13 +432,16 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install Socket Firewall
+        run: npm install -g sfw
+
       - name: Install dependencies
         env:
           GIT_TERMINAL_PROMPT: "0"
           npm_config_registry: "https://registry.npmjs.org/"
         run: |
           git config --global url."https://github.com/".insteadOf "git@github.com:"
-          yarn install --immutable
+          sfw yarn install --immutable
           yarn be:bootstrap
 
       - name: Fast quality gate validation
